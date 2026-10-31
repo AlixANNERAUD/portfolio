@@ -5,6 +5,8 @@ export const site = {
   url: "https://alix.anneraud.fr",
   name: "Alix ANNERAUD",
   email: "alix@anneraud.fr",
+  /** Default social preview image, relative to `url`. */
+  image: "/images/alix.webp",
   social: {
     github: "https://github.com/AlixANNERAUD",
     linkedin: "https://www.linkedin.com/in/alix-anneraud/",

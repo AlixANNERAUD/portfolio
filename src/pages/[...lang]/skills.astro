@@ -1,0 +1,23 @@
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import SkillsShowcase from "../../components/SkillsShowcase.vue";
+import { localeStaticPaths } from "../../i18n/locales.ts";
+import { useTranslations } from "../../i18n/ui.ts";
+
+export const getStaticPaths = (() =>
+  localeStaticPaths()) satisfies GetStaticPaths;
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { lang } = Astro.props as Props;
+const t = useTranslations(lang);
+---
+
+<BaseLayout
+  lang={lang}
+  path="/skills"
+  title={t("nav.skills")}
+  description={t("skills.description")}
+>
+  <SkillsShowcase lang={lang} />
+</BaseLayout>

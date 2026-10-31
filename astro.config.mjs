@@ -8,6 +8,13 @@ export default defineConfig({
   output: "static",
   trailingSlash: "ignore",
   build: { format: "preserve" },
+  // English is served unprefixed (`/`), French under `/fr/`; pages live once
+  // in src/pages/[...lang]/ and get their locale from getStaticPaths props.
+  i18n: {
+    locales: ["en", "fr"],
+    defaultLocale: "en",
+    routing: { prefixDefaultLocale: false },
+  },
   integrations: [vue(), mdx(), sitemap()],
   // Fontsource serves Newsreader as one variable file per style, so the
   // emitted @font-face declares the file's full 200-800 weight axis. Astro

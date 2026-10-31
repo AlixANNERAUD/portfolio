@@ -1,0 +1,36 @@
+---
+import { site } from "../../data/site.ts";
+import { localizePath, type Locale } from "../../i18n/locales.ts";
+import { useTranslations } from "../../i18n/ui.ts";
+
+export interface Props {
+  lang: Locale;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const social = [
+  { label: "GitHub", href: site.social.github },
+  { label: "LinkedIn", href: site.social.linkedin },
+  { label: "Matrix", href: site.social.matrix },
+];
+---
+
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <span>
+      © {site.name} · <a href="https://opensource.org/licenses/MIT">MIT</a> ·
+      Astro
+    </span>
+    <nav aria-label={t("footer.nav")}>
+      <a href={localizePath("/legal-notice", lang)}>
+        {t("footer.legalNotice")}
+      </a>
+      {social.map((link) => (
+        <a href={link.href} target="_blank" rel="noopener noreferrer">
+          {link.label}
+        </a>
+      ))}
+      <a href={`mailto:${site.email}`}>{t("footer.email")}</a>
+    </nav>
+  </div>
+</footer>

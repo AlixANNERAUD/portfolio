@@ -1,12 +1,15 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { useTranslations } from "../i18n/ui.ts";
+
+const t = useTranslations("en");
 ---
 
 <BaseLayout
   lang="en"
   path="/404"
-  title="Page not found"
-  description="The requested portfolio page could not be found."
+  title={t("notFound.title")}
+  description={t("notFound.description")}
 >
   <section class="prose">
     <h1>Page not found / Page introuvable</h1>
