@@ -1,7 +1,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { parse } from "node-html-parser";
-import { portfolioProjects } from "../src/data/portfolioProjects.ts";
+import { featuredProjects, projects } from "../src/data/projects.ts";
 
 /**
  * Build-output smoke tests for the bilingual Astro site.
@@ -26,7 +26,7 @@ const cases = [
 ];
 
 // Test EVERY static detail route, including alternate locale metadata.
-const projectIds = portfolioProjects.map((project) => project.id);
+const projectIds = projects.map((project) => project.id);
 for (const id of projectIds) {
   {
     cases.push([
@@ -323,7 +323,7 @@ for (const [file, experienceUrl] of [
       failed.push(file + ": missing professional milestone link for " + id);
     }
   }
-  for (const project of ["xila", "infrastructure", "mini-train-store"]) {
+  for (const { id: project } of featuredProjects) {
     const prefix = file.startsWith("fr/") ? "/fr/projects/" : "/projects/";
     if (!html.includes(prefix + project)) {
       failed.push(file + ": missing selected project " + project);

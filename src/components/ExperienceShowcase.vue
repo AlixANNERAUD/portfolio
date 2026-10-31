@@ -5,13 +5,10 @@ import EditorialSectionHeading from "./EditorialSectionHeading.vue";
 import EditorialNext from "./EditorialNext.vue";
 import ExperienceTimeline from "./ExperienceTimeline.vue";
 import { BriefcaseBusiness, ChevronDown, GraduationCap } from "lucide-vue-next";
-import {
-  experiences,
-  type ExperienceGroup,
-  type ExperienceLanguage,
-} from "../data/experiences";
+import { experiences, type ExperienceGroup } from "../data/experiences";
+import type { Locale } from "../i18n/locales";
 
-const props = withDefaults(defineProps<{ lang?: ExperienceLanguage }>(), {
+const props = withDefaults(defineProps<{ lang?: Locale }>(), {
   lang: "fr",
 });
 

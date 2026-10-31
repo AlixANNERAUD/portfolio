@@ -1,25 +1,26 @@
 /** Public, bilingual technical skills grounded in actual portfolio projects. */
-export type SkillLanguage = "fr" | "en";
-export type SkillTranslation = Record<SkillLanguage, string>;
+import type { ProjectId } from "./projects.ts";
+import type { Localized } from "./types.ts";
 
-export interface SkillEvidence {
-  /** Links to a dedicated FR/EN project page, or to an explicit external resource. */
-  projectId?: string;
-  href?: string;
-  label?: SkillTranslation;
-  detail: SkillTranslation;
-}
+/**
+ * Links to a dedicated EN/FR project page, or to an explicit resource
+ * (`href` is an English site path, localized when rendered, or an absolute URL).
+ */
+export type SkillEvidence = (
+  | { kind: "project"; projectId: ProjectId }
+  | { kind: "link"; href: string; label: Localized }
+) & { detail: Localized };
 
 export interface SkillDomain {
   id: string;
   icon: "cpu" | "database" | "code" | "server" | "shield" | "bot";
-  title: SkillTranslation;
-  description: SkillTranslation;
-  technologies: string[];
-  examples: SkillEvidence[];
+  title: Localized;
+  description: Localized;
+  technologies: readonly string[];
+  examples: readonly SkillEvidence[];
 }
 
-export const skillDomains: SkillDomain[] = [
+export const skillDomains = [
   {
     id: "systems",
     icon: "cpu",
@@ -31,6 +32,7 @@ export const skillDomains: SkillDomain[] = [
     technologies: ["Rust", "C / C++", "WebAssembly", "ESP32", "LVGL", "Linux"],
     examples: [
       {
+        kind: "project",
         projectId: "xila",
         detail: {
           fr: "Noyau, pilotes, VFS et runtime WebAssembly.",
@@ -38,6 +40,7 @@ export const skillDomains: SkillDomain[] = [
         },
       },
       {
+        kind: "project",
         projectId: "nanoexpr",
         detail: {
           fr: "Parseur mathématique sans allocation.",
@@ -45,6 +48,7 @@ export const skillDomains: SkillDomain[] = [
         },
       },
       {
+        kind: "project",
         projectId: "nanoaudio",
         detail: {
           fr: "Traitement audio et codecs no_std.",
@@ -75,6 +79,7 @@ export const skillDomains: SkillDomain[] = [
     ],
     examples: [
       {
+        kind: "project",
         projectId: "deez-nalyzer",
         detail: {
           fr: "API musicale, analyse audio et ML.",
@@ -82,6 +87,7 @@ export const skillDomains: SkillDomain[] = [
         },
       },
       {
+        kind: "project",
         projectId: "dera",
         detail: {
           fr: "Plateforme étudiante en Rust.",
@@ -112,6 +118,7 @@ export const skillDomains: SkillDomain[] = [
     ],
     examples: [
       {
+        kind: "project",
         projectId: "mini-train-store",
         detail: {
           fr: "Boutique en ligne et extension WXT.",
@@ -119,6 +126,7 @@ export const skillDomains: SkillDomain[] = [
         },
       },
       {
+        kind: "project",
         projectId: "deez-nalyzer",
         detail: {
           fr: "Exploration et visualisation de données musicales.",
@@ -149,6 +157,7 @@ export const skillDomains: SkillDomain[] = [
     ],
     examples: [
       {
+        kind: "project",
         projectId: "infrastructure",
         detail: {
           fr: "Services, déploiements Ansible et supervision.",
@@ -156,6 +165,7 @@ export const skillDomains: SkillDomain[] = [
         },
       },
       {
+        kind: "project",
         projectId: "mini-train-store",
         detail: {
           fr: "Odoo auto-hébergé pour un usage réel.",
@@ -186,6 +196,7 @@ export const skillDomains: SkillDomain[] = [
     ],
     examples: [
       {
+        kind: "project",
         projectId: "jeanne-hack-2026",
         detail: {
           fr: "Première place ex æquo en équipe.",
@@ -193,6 +204,7 @@ export const skillDomains: SkillDomain[] = [
         },
       },
       {
+        kind: "link",
         href: "/experiences#professional",
         label: { fr: "Expérience chez Linkt", en: "Linkt experience" },
         detail: {
@@ -223,6 +235,7 @@ export const skillDomains: SkillDomain[] = [
     ],
     examples: [
       {
+        kind: "link",
         href: "https://github.com/AlixANNERAUD/Web_site/blob/main/AGENTS.md",
         label: {
           fr: "Instructions multi-agents",
@@ -234,6 +247,7 @@ export const skillDomains: SkillDomain[] = [
         },
       },
       {
+        kind: "project",
         projectId: "xila",
         detail: {
           fr: "Projet Rust avec tests et intégration continue.",
@@ -242,16 +256,16 @@ export const skillDomains: SkillDomain[] = [
       },
     ],
   },
-];
+] as const satisfies readonly SkillDomain[];
 
 export interface SpokenLanguage {
   id: string;
-  name: SkillTranslation;
-  proficiency: SkillTranslation;
-  detail?: SkillTranslation;
+  name: Localized;
+  proficiency: Localized;
+  detail?: Localized;
 }
 
-export const spokenLanguages: SpokenLanguage[] = [
+export const spokenLanguages = [
   {
     id: "french",
     name: { fr: "Français", en: "French" },
@@ -275,4 +289,4 @@ export const spokenLanguages: SpokenLanguage[] = [
     proficiency: { fr: "Notions", en: "Basic" },
     detail: { fr: "A2", en: "A2" },
   },
-];
+] as const satisfies readonly SpokenLanguage[];

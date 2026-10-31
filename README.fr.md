@@ -47,7 +47,7 @@ scripts/                      Vérification des données et du HTML généré
 
 **Page d’accueil :** le parcours professionnel (Memo Bank, Linkt, Amazon et NYU) précède les projets sélectionnés. Le schéma WebGL apparaît plus bas, clairement identifié comme une présentation de l’architecture de Xila, et non de l’ensemble du parcours. Les cartes d’expérience sont générées statiquement depuis les données partagées.
 
-Pour ajouter un projet, modifier les données dans [`portfolioProjects.ts`](./src/data/portfolioProjects.ts), puis ajouter une fiche dans **les deux langues**. Réserver MDX aux composants nécessaires ; pour les cartes et en-têtes, réutiliser les composants partagés `EditorialHero`, `EditorialSectionHeading`, `EditorialCard`, `TechnologyTags` et `EditorialNext`.
+Pour ajouter un projet, modifier les données dans [`projects.ts`](./src/data/projects.ts), puis ajouter une fiche dans **les deux langues**. Réserver MDX aux composants nécessaires ; pour les cartes et en-têtes, réutiliser les composants partagés `EditorialHero`, `EditorialSectionHeading`, `EditorialCard`, `TechnologyTags` et `EditorialNext`.
 
 Les URL existantes (dont `/fr/projects/xila` et les fichiers `.html`) restent conservées. Les anciennes archives de projets ne sont pas recréées.
 

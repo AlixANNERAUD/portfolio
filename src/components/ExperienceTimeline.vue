@@ -3,14 +3,12 @@ import { reactive } from "vue";
 import { ArrowUpRight, MapPin } from "lucide-vue-next";
 import EditorialCard from "./EditorialCard.vue";
 import TechnologyTags from "./TechnologyTags.vue";
-import type {
-  ExperienceLanguage,
-  PortfolioExperience,
-} from "../data/experiences";
+import type { Experience } from "../data/experiences";
+import type { Locale } from "../i18n/locales";
 
 defineProps<{
-  entries: PortfolioExperience[];
-  lang: ExperienceLanguage;
+  entries: readonly Experience[];
+  lang: Locale;
   currentLabel: string;
   technologiesLabel: string;
 }>();

@@ -15,19 +15,16 @@ import {
   Server,
   Shield,
 } from "lucide-vue-next";
-import {
-  portfolioProjects,
-  projectDetailUrl,
-  type PortfolioProject,
-} from "../data/portfolioProjects";
+import { projects, projectUrl, type Project } from "../data/projects";
 import {
   skillDomains,
   spokenLanguages,
   type SkillEvidence,
-  type SkillLanguage,
 } from "../data/skills";
+import { localize } from "../data/types";
+import { localizePath, type Locale } from "../i18n/locales";
 
-const props = withDefaults(defineProps<{ lang?: SkillLanguage }>(), {
+const props = withDefaults(defineProps<{ lang?: Locale }>(), {
   lang: "fr",
 });
 
@@ -40,8 +37,8 @@ const icons = {
   bot: Bot,
 };
 
-const projectIndex = new Map<string, PortfolioProject>(
-  portfolioProjects.map((project) => [project.id, project]),
+const projectIndex = new Map<string, Project>(
+  projects.map((project) => [project.id, project]),
 );
 
 const copy = computed(() =>
@@ -99,29 +96,29 @@ const copy = computed(() =>
 );
 
 function evidenceTitle(evidence: SkillEvidence): string {
-  if (evidence.projectId) {
-    return (
-      projectIndex.get(evidence.projectId)?.title[props.lang] ??
-      evidence.projectId
-    );
+  if (evidence.kind === "project") {
+    const project = projectIndex.get(evidence.projectId);
+    return project ? localize(project.title, props.lang) : evidence.projectId;
   }
-  return evidence.label?.[props.lang] ?? "";
+  return evidence.label[props.lang];
 }
 
 function evidenceHref(evidence: SkillEvidence): string {
-  if (evidence.projectId) {
-    const project = projectIndex.get(evidence.projectId);
-    return project ? projectDetailUrl(project, props.lang) : "#domains";
+  if (evidence.kind === "project") {
+    return projectUrl(evidence.projectId, props.lang);
   }
-  if (!evidence.href) return "#domains";
   if (evidence.href.startsWith("/")) {
-    return props.lang === "fr" ? "/fr" + evidence.href : evidence.href;
+    return localizePath(evidence.href, props.lang);
   }
   return evidence.href;
 }
 
+function evidenceKey(evidence: SkillEvidence): string {
+  return evidence.kind === "project" ? evidence.projectId : evidence.href;
+}
+
 function isExternal(evidence: SkillEvidence): boolean {
-  return !!evidence.href && /^https?:\/\//.test(evidence.href);
+  return evidence.kind === "link" && /^https?:\/\//.test(evidence.href);
 }
 
 const projectsHref = computed(() =>
@@ -200,8 +197,8 @@ const navigation = computed(() => [
             <h4>{{ copy.evidence }}</h4>
             <ul>
               <li
-                v-for="(evidence, evidenceIndex) in domain.examples"
-                :key="evidence.projectId || evidence.href || evidenceIndex"
+                v-for="evidence in domain.examples"
+                :key="evidenceKey(evidence)"
               >
                 <a
                   :href="evidenceHref(evidence)"

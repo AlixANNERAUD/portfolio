@@ -1,5 +1,5 @@
 ---
-import { experiences } from "../data/experiences";
+import { homepageExperiences as featured } from "../data/experiences";
 
 interface Props {
   lang: "en" | "fr";
@@ -7,12 +7,6 @@ interface Props {
 const { lang } = Astro.props;
 const fr = lang === "fr";
 
-const featuredIds = ["memo-bank", "linkt", "amazon", "nyu"] as const;
-const featured = featuredIds.map((id) => {
-  const experience = experiences.find((entry) => entry.id === id);
-  if (!experience) throw new Error("Missing homepage experience: " + id);
-  return experience;
-});
 const experiencePath = fr ? "/fr/experiences" : "/experiences";
 const copy = fr
   ? {

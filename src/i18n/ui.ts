@@ -43,6 +43,19 @@ const en = {
   "notFound.description": "The requested portfolio page could not be found.",
   "notFound.body": "The page you requested does not exist.",
   "notFound.back": "Back to homepage",
+  "period.ongoing": "{start}–present",
+  "period.range": "{start}–{end}",
+  "count.project.one": "{count} project",
+  "count.project.other": "{count} projects",
+  "count.role.one": "{count} role",
+  "count.role.other": "{count} roles",
+  "category.systems": "Systems",
+  "category.software": "Software",
+  "category.web": "Web",
+  "category.infrastructure": "Infrastructure",
+  "category.embedded": "Embedded",
+  "category.security": "Security",
+  "category.data": "Data / ML",
 } as const;
 
 export type UIKey = keyof typeof en;
@@ -82,6 +95,19 @@ const fr: Record<UIKey, string> = {
   "notFound.description": "La page demandée est introuvable.",
   "notFound.body": "Cette page n’existe pas.",
   "notFound.back": "Retour à l’accueil",
+  "period.ongoing": "Depuis {start}",
+  "period.range": "{start}–{end}",
+  "count.project.one": "{count} projet",
+  "count.project.other": "{count} projets",
+  "count.role.one": "{count} poste",
+  "count.role.other": "{count} postes",
+  "category.systems": "Systèmes",
+  "category.software": "Logiciel",
+  "category.web": "Web",
+  "category.infrastructure": "Infrastructure",
+  "category.embedded": "Embarqué",
+  "category.security": "Sécurité",
+  "category.data": "Data / ML",
 };
 
 export const ui = { en, fr } satisfies Record<Locale, Record<UIKey, string>>;

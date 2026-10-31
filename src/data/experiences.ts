@@ -1,9 +1,9 @@
 /** Bilingual, public-safe experience highlights for the portfolio timeline. */
-export type ExperienceLanguage = "fr" | "en";
-export type ExperienceTranslation = Record<ExperienceLanguage, string>;
+import type { Localized } from "./types.ts";
+
 export type ExperienceGroup = "professional" | "education";
 
-export interface PortfolioExperience {
+export interface Experience {
   id: string;
   group: ExperienceGroup;
   company: string;
@@ -13,20 +13,23 @@ export interface PortfolioExperience {
   logo?: string;
   /** Logo whose artwork is intentionally white (on a dark card). */
   logoOnDark?: boolean;
-  role: ExperienceTranslation;
-  period: ExperienceTranslation;
-  location: ExperienceTranslation;
-  summary: ExperienceTranslation;
-  highlights: ExperienceTranslation[];
-  technologies: string[];
+  role: Localized;
+  period: Localized;
+  location: Localized;
+  summary: Localized;
+  highlights: readonly Localized[];
+  technologies: readonly string[];
   ongoing?: boolean;
+  /** Shown on the homepage, in data order. */
+  homepage?: true;
   /** Earlier milestone: hide its complete card until the section is expanded. */
   earlier?: boolean;
 }
 
-export const experiences: PortfolioExperience[] = [
+export const experiences = [
   {
     id: "memo-bank",
+    homepage: true,
     logo: "https://memo.bank/logo-footer.svg",
     logoOnDark: true,
     group: "professional",
@@ -46,6 +49,7 @@ export const experiences: PortfolioExperience[] = [
   },
   {
     id: "linkt",
+    homepage: true,
     logo: "https://www.linkt.fr/wp-content/uploads/2026/05/logo-linkt-bleu-marine.svg",
     group: "professional",
     company: "Linkt",
@@ -82,6 +86,7 @@ export const experiences: PortfolioExperience[] = [
   },
   {
     id: "amazon",
+    homepage: true,
     logo: "https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg",
     group: "professional",
     company: "Amazon",
@@ -111,6 +116,7 @@ export const experiences: PortfolioExperience[] = [
   },
   {
     id: "nyu",
+    homepage: true,
     logo: "https://upload.wikimedia.org/wikipedia/commons/6/6a/Nyu_short_color.svg",
     group: "professional",
     company: "New York University",
@@ -319,4 +325,9 @@ export const experiences: PortfolioExperience[] = [
     ],
     technologies: ["English · B1"],
   },
-];
+] as const satisfies readonly Experience[];
+
+/** Roles flagged `homepage`, in data order. */
+export const homepageExperiences: readonly Experience[] = (
+  experiences as readonly Experience[]
+).filter((entry) => entry.homepage);

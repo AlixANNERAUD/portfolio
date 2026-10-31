@@ -39,7 +39,7 @@ src/
     projects/fr/          26 French Markdown / MDX case studies
     legal/                Bilingual legal notice + third-party logo credits
   data/
-    portfolioProjects.ts  Project metadata, rankings, filters
+    projects.ts           Project metadata, rankings, filters
     experiences.ts        Work and education timeline
     skills.ts             Evidence-backed skills and languages
   layouts/BaseLayout.astro  HTML shell, navigation, theme, SEO and language alternates
@@ -53,7 +53,7 @@ scripts/                 Content and generated-HTML validation
 
 **Homepage:** lead with a professional overview (Memo Bank, Linkt, Amazon, NYU), then the selected Xila / Infrastructure / Mini Train Store projects; keep the Xila architecture diagram as an explicitly labelled technical deep dive below the portfolio cards. This section is intentionally statically rendered via Astro, while the animated diagram hydrates only when visible.
 
-**Content editing:** Add metadata to [`portfolioProjects.ts`](./src/data/portfolioProjects.ts) and one file per locale under `src/content/projects/{en,fr}/`. Use `.mdx` only when a component is needed; `ArchitectureFlow` is static, while `XilaBrowserDemo` has `client:load`. Links and project ranking remain data-driven.
+**Content editing:** Add metadata to [`projects.ts`](./src/data/projects.ts) and one file per locale under `src/content/projects/{en,fr}/`. Use `.mdx` only when a component is needed; `ArchitectureFlow` is static, while `XilaBrowserDemo` has `client:load`. Links and project ranking remain data-driven.
 
 **UI editing:** Reuse `EditorialHero`, `EditorialSectionHeading`, `EditorialCard`, `TechnologyTags` and `EditorialNext` rather than duplicating their styles. Astro layouts own the global shell; business logic stays in the Vue showcases.
 

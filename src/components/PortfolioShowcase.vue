@@ -4,17 +4,23 @@ import EditorialHero from "./EditorialHero.vue";
 import EditorialCard from "./EditorialCard.vue";
 import TechnologyTags from "./TechnologyTags.vue";
 import {
-  portfolioProjects,
-  projectDetailUrl,
-  projectScore,
-  type PortfolioLanguage,
+  byScore,
+  featuredProjects,
+  projects,
+  projectUrl,
+  type Project,
   type ProjectCategory,
   type ProjectGroup,
-} from "../data/portfolioProjects";
+  type ProjectId,
+} from "../data/projects";
+import { localize } from "../data/types";
+import type { Locale } from "../i18n/locales";
+import { formatCount, formatPeriod } from "../lib/format";
+import { ui } from "../i18n/ui";
 
 const props = withDefaults(
   defineProps<{
-    lang?: PortfolioLanguage;
+    lang?: Locale;
     mode?: "featured" | "catalogue";
   }>(),
   { lang: "fr", mode: "featured" },
@@ -25,14 +31,22 @@ const category = ref<ProjectCategory | "all">("all");
 const group = ref<ProjectGroup | "all">("all");
 const sortMode = ref<"recommended" | "alphabetical">("recommended");
 
+const categoryIds: ProjectCategory[] = [
+  "systems",
+  "software",
+  "web",
+  "infrastructure",
+  "embedded",
+  "security",
+  "data",
+];
 const categories: { id: ProjectCategory | "all"; fr: string; en: string }[] = [
   { id: "all", fr: "Tous les domaines", en: "All areas" },
-  { id: "systems", fr: "Systèmes", en: "Systems" },
-  { id: "web", fr: "Web", en: "Web" },
-  { id: "infrastructure", fr: "Infrastructure", en: "Infrastructure" },
-  { id: "embedded", fr: "Embarqué", en: "Embedded" },
-  { id: "security", fr: "Sécurité", en: "Security" },
-  { id: "data", fr: "Data / ML", en: "Data / ML" },
+  ...categoryIds.map((id) => ({
+    id,
+    en: ui.en[`category.${id}`],
+    fr: ui.fr[`category.${id}`],
+  })),
 ];
 
 const groups: { id: ProjectGroup | "all"; fr: string; en: string }[] = [
@@ -64,7 +78,6 @@ const copy = computed(() =>
         viewAll: "Explorer tous mes projets",
         details: "Lire la fiche",
         external: "Lien externe",
-        count: "projet(s)",
         empty: "Aucun projet ne correspond à cette recherche.",
       }
     : {
@@ -86,31 +99,28 @@ const copy = computed(() =>
         viewAll: "Explore all projects",
         details: "Read details",
         external: "External link",
-        count: "project(s)",
         empty: "No projects match your search.",
       },
 );
 
-const visibleProjects = computed(() => {
-  if (props.mode === "featured") {
-    return portfolioProjects
-      .filter((item) => item.featured)
-      .sort(
-        (a, b) => projectScore(b) - projectScore(a) || a.id.localeCompare(b.id),
-      );
-  }
+const title = (project: Project) => localize(project.title, props.lang);
+const detailUrl = (project: Project) =>
+  projectUrl(project.id as ProjectId, props.lang);
+
+const visibleProjects = computed((): Project[] => {
+  if (props.mode === "featured") return [...featuredProjects];
 
   const term = search.value.trim().toLocaleLowerCase(props.lang);
-  const filtered = portfolioProjects.filter((project) => {
+  const filtered = projects.filter((project: Project) => {
     if (category.value !== "all" && project.category !== category.value)
       return false;
     if (group.value !== "all" && project.group !== group.value) return false;
     if (!term) return true;
 
     const searchable = [
-      project.title[props.lang],
+      title(project),
       project.description[props.lang],
-      project.period[props.lang],
+      formatPeriod(project.period, props.lang),
       ...project.tags,
     ]
       .join(" ")
@@ -120,8 +130,8 @@ const visibleProjects = computed(() => {
 
   return filtered.sort((a, b) =>
     sortMode.value === "alphabetical"
-      ? a.title[props.lang].localeCompare(b.title[props.lang], props.lang)
-      : projectScore(b) - projectScore(a) || a.id.localeCompare(b.id),
+      ? title(a).localeCompare(title(b), props.lang)
+      : byScore(a, b),
   );
 });
 
@@ -204,7 +214,7 @@ const catalogueUrl = computed(() =>
     </div>
 
     <p v-if="mode === 'catalogue'" class="showcase-count" role="status">
-      {{ visibleProjects.length }} {{ copy.count }}
+      {{ formatCount(visibleProjects.length, "project", lang) }}
     </p>
 
     <div class="showcase-grid">
@@ -222,7 +232,7 @@ const catalogueUrl = computed(() =>
           <span class="showcase-art-symbol">{{ project.symbol }}</span>
           <span class="showcase-art-index">
             {{ String(index + 1).padStart(2, "0") }} /
-            {{ project.period[lang] }}
+            {{ formatPeriod(project.period, lang) }}
           </span>
         </div>
         <div class="showcase-card-body">
@@ -231,7 +241,7 @@ const catalogueUrl = computed(() =>
               categories.find((item) => item.id === project.category)?.[lang]
             }}
           </p>
-          <h3>{{ project.title[lang] }}</h3>
+          <h3>{{ title(project) }}</h3>
           <p class="showcase-card-description">
             {{ project.description[lang] }}
           </p>
@@ -244,7 +254,7 @@ const catalogueUrl = computed(() =>
             density="project"
           />
           <div class="showcase-card-actions">
-            <a :href="projectDetailUrl(project, lang)">
+            <a :href="detailUrl(project)">
               {{ copy.details }} <span aria-hidden="true">→</span>
             </a>
             <a
@@ -431,7 +441,8 @@ const catalogueUrl = computed(() =>
 .showcase-art--systems {
   background-color: #233b40;
 }
-.showcase-art--web {
+.showcase-art--web,
+.showcase-art--software {
   background-color: #473b53;
 }
 .showcase-art--infrastructure {
