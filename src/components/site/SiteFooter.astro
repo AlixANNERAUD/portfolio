@@ -8,29 +8,127 @@ export interface Props {
 }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
-const social = [
-  { label: "GitHub", href: site.social.github },
-  { label: "LinkedIn", href: site.social.linkedin },
-  { label: "Matrix", href: site.social.matrix },
-];
+const year = new Date().getFullYear();
 ---
 
 <footer class="site-footer">
   <div class="site-footer-inner">
-    <span>
-      © {site.name} · <a href="https://opensource.org/licenses/MIT">MIT</a> ·
-      Astro
-    </span>
-    <nav aria-label={t("footer.nav")}>
-      <a href={localizePath("/legal-notice", lang)}>
-        {t("footer.legalNotice")}
+    <p class="site-footer-credits">
+      <span class="site-footer-name">
+        © {year} {site.name}
+      </span>
+      <a href={site.source} target="_blank" rel="noopener noreferrer">
+        {t("footer.source")}
+        <span class="site-footer-external" aria-hidden="true">
+          ↗
+        </span>
+        <span class="visually-hidden"> {t("a11y.newTab")}</span>
       </a>
-      {social.map((link) => (
-        <a href={link.href} target="_blank" rel="noopener noreferrer">
-          {link.label}
-        </a>
-      ))}
-      <a href={`mailto:${site.email}`}>{t("footer.email")}</a>
+      <span>{t("footer.builtWith")}</span>
+    </p>
+    <nav class="site-footer-nav" aria-label={t("footer.nav")}>
+      <ul>
+        <li>
+          <a href={localizePath("/legal-notice", lang)}>
+            {t("footer.legalNotice")}
+          </a>
+        </li>
+        {site.profiles.map((link) => (
+          <li>
+            <a href={link.href} target="_blank" rel="noopener noreferrer">
+              {link.label}
+              <span class="site-footer-external" aria-hidden="true">
+                ↗
+              </span>
+              <span class="visually-hidden">{t("a11y.newTab")}</span>
+            </a>
+          </li>
+        ))}
+        <li>
+          <a href={`mailto:${site.email}`}>{t("footer.email")}</a>
+        </li>
+      </ul>
     </nav>
   </div>
 </footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text-subtle);
+    font-size: var(--step--1);
+  }
+
+  .site-footer-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2xs) var(--space-l);
+    max-width: var(--container);
+    margin: 0 auto;
+    padding: var(--space-m);
+  }
+
+  .site-footer-credits {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin: 0;
+  }
+
+  /* Middle-dot separators between credits. */
+  .site-footer-credits > * + *::before {
+    content: "·";
+    margin-inline: var(--space-2xs);
+    color: var(--color-border-strong);
+  }
+
+  .site-footer-name {
+    color: var(--color-text-muted);
+  }
+
+  .site-footer-nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-s);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .site-footer a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-size);
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  .site-footer a:hover {
+    color: var(--color-accent);
+  }
+
+  .site-footer-external {
+    margin-left: 0.2em;
+    font-size: 0.85em;
+  }
+
+  @media (max-width: 720px) {
+    .site-footer-inner {
+      flex-direction: column;
+      align-items: flex-start;
+      padding: var(--space-s) var(--space-s) var(--space-m);
+    }
+
+    /* Credits wrap here, so plain gaps replace the separators. */
+    .site-footer-credits {
+      gap: 0 var(--space-s);
+    }
+
+    .site-footer-credits > * + *::before {
+      content: none;
+    }
+  }
+</style>

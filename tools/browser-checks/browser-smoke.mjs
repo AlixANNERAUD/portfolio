@@ -719,6 +719,89 @@ for (const [engineName, engine] of [
       }
       await staticContext.close();
     }
+
+    // Mobile header: one row with a menu button that opens and closes with
+    // the keyboard, returns focus on Escape and exposes 44px nav targets.
+    // The theme toggle reports its state with aria-pressed.
+    const mobileContext = await browser.newContext({
+      viewport: { width: 390, height: 844 },
+    });
+    const mobilePage = await mobileContext.newPage();
+    for (const path of ["/", "/fr/projects", "/projects/xila"]) {
+      try {
+        await mobilePage.goto(base + path, {
+          waitUntil: "load",
+          timeout: 10000,
+        });
+        const menuButton = mobilePage.locator(".site-menu-button");
+        await menuButton.waitFor({ state: "visible", timeout: 5000 });
+        const controls = await menuButton.getAttribute("aria-controls");
+        assert.ok(controls, path + " menu button needs aria-controls");
+        const nav = mobilePage.locator("#" + controls);
+        const navLinks = nav.locator("a[href]");
+        assert.equal(await menuButton.getAttribute("aria-expanded"), "false");
+        assert.equal(
+          await navLinks.first().isVisible(),
+          false,
+          path + " nav links must be hidden while the menu is closed",
+        );
+        const header = await mobilePage.locator(".site-header").boundingBox();
+        const button = await menuButton.boundingBox();
+        assert.ok(
+          header && button && button.y + button.height <= header.y + 80,
+          path + " brand, locale, theme and menu must share one row",
+        );
+
+        await menuButton.focus();
+        await mobilePage.keyboard.press("Enter");
+        assert.equal(await menuButton.getAttribute("aria-expanded"), "true");
+        assert.ok((await navLinks.count()) >= 4, path + " nav links missing");
+        for (const link of await navLinks.all()) {
+          assert.equal(await link.isVisible(), true, path + " nav link hidden");
+          const box = await link.boundingBox();
+          assert.ok(
+            box && Math.round(box.height) >= 44,
+            path + " nav link target is " + box?.height + "px high",
+          );
+        }
+        await mobilePage.keyboard.press("Escape");
+        assert.equal(await menuButton.getAttribute("aria-expanded"), "false");
+        assert.equal(
+          await menuButton.evaluate((node) => node === document.activeElement),
+          true,
+          path + " Escape must return focus to the menu button",
+        );
+        assert.equal(await navLinks.first().isVisible(), false);
+        await mobilePage.keyboard.press("Space");
+        assert.equal(await menuButton.getAttribute("aria-expanded"), "true");
+        await mobilePage.keyboard.press("Space");
+        assert.equal(await menuButton.getAttribute("aria-expanded"), "false");
+
+        const toggle = mobilePage.locator("[data-theme-toggle]");
+        await toggle.waitFor({ state: "visible", timeout: 5000 });
+        const wasDark = await mobilePage.evaluate(() =>
+          document.documentElement.classList.contains("dark"),
+        );
+        assert.equal(
+          await toggle.getAttribute("aria-pressed"),
+          String(wasDark),
+        );
+        await toggle.click();
+        assert.equal(
+          await toggle.getAttribute("aria-pressed"),
+          String(!wasDark),
+          path + " theme toggle must update aria-pressed",
+        );
+        await toggle.click();
+        await mobilePage.evaluate(() => localStorage.clear());
+        checked++;
+      } catch (error) {
+        failures.push(
+          engineName + " " + path + " at 390px mobile header: " + error,
+        );
+      }
+    }
+    await mobileContext.close();
   } finally {
     await browser.close();
   }

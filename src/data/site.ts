@@ -1,5 +1,11 @@
 import type { Locale } from "../i18n/locales.ts";
 
+const social = {
+  github: "https://github.com/AlixANNERAUD",
+  linkedin: "https://www.linkedin.com/in/alix-anneraud/",
+  matrix: "https://matrix.to/#/@alix:anneraud.fr",
+} as const;
+
 /** Public identity and external endpoints shared by the layout, footer and SEO. */
 export const site = {
   url: "https://alix.anneraud.fr",
@@ -7,11 +13,17 @@ export const site = {
   email: "alix@anneraud.fr",
   /** Default social preview image, relative to `url`. */
   image: "/images/alix.webp",
-  social: {
-    github: "https://github.com/AlixANNERAUD",
-    linkedin: "https://www.linkedin.com/in/alix-anneraud/",
-    matrix: "https://matrix.to/#/@alix:anneraud.fr",
-  },
+  /** Browser chrome colors: hex equivalents of the --color-bg token. */
+  themeColor: { light: "#fdfdff", dark: "#1a1a1e" },
+  social,
+  /** Profiles listed in the footer, in display order (brand names). */
+  profiles: [
+    { label: "GitHub", href: social.github },
+    { label: "LinkedIn", href: social.linkedin },
+    { label: "Matrix", href: social.matrix },
+  ],
+  /** Public repository of this website, released under the MIT license. */
+  source: "https://github.com/AlixANNERAUD/portfolio",
   resumePdf: {
     en: "https://resume.alix.anneraud.fr/Resume.english.pdf",
     fr: "https://resume.alix.anneraud.fr/Resume.français.pdf",

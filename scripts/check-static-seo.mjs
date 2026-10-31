@@ -118,6 +118,28 @@ function checkLocaleSwitch(file, root) {
   }
 }
 
+/**
+ * Header shell: a menu button bound to the main navigation (collapsed in the
+ * HTML, so the no-JS fallback is the CSS), and light/dark theme-color metas.
+ */
+function checkHeader(file, root) {
+  const button = root.querySelector("button.site-menu-button");
+  const controls = button?.getAttribute("aria-controls");
+  if (!button || button.getAttribute("aria-expanded") !== "false") {
+    failed.push(file + ': expected a menu button with aria-expanded="false"');
+  } else if (!controls || !root.querySelector("nav#" + controls)) {
+    failed.push(file + ": menu button aria-controls must name the main nav");
+  }
+  const themeColors = root
+    .querySelectorAll('head meta[name="theme-color"]')
+    .map((tag) => tag.getAttribute("media") ?? "");
+  for (const scheme of ["light", "dark"]) {
+    if (!themeColors.includes("(prefers-color-scheme: " + scheme + ")")) {
+      failed.push(file + ": missing a " + scheme + " theme-color meta");
+    }
+  }
+}
+
 // Head metadata is parsed, not matched as text: navigation links to the
 // other locale must not satisfy a canonical or hreflang assertion.
 const site = "https://alix.anneraud.fr";
@@ -142,6 +164,7 @@ for (const [file, canonicalPath, translationPath] of cases) {
   checkFontPreload(file, html);
   const root = parse(html);
   checkLocaleSwitch(file, root);
+  checkHeader(file, root);
   const head = root.querySelector("head");
   if (!head) {
     failed.push(file + ": missing <head>");
@@ -215,6 +238,7 @@ for (const [file, canonicalPath, translationPath] of cases) {
   checkFontPreload("404.html", html);
   const root = parse(html);
   checkLocaleSwitch("404.html", root);
+  checkHeader("404.html", root);
   const head = root.querySelector("head");
   const robots = head?.querySelectorAll('meta[name="robots"]') ?? [];
   if (robots.length !== 1 || robots[0].getAttribute("content") !== "noindex") {

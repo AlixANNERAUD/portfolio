@@ -45,6 +45,17 @@ const ogLocale: Record<Locale, string> = { en: "en_US", fr: "fr_FR" };
 
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="color-scheme" content="light dark" />
+<meta
+  name="theme-color"
+  media="(prefers-color-scheme: light)"
+  content={site.themeColor.light}
+/>
+<meta
+  name="theme-color"
+  media="(prefers-color-scheme: dark)"
+  content={site.themeColor.dark}
+/>
 <Font
   cssVariable="--font-display"
   preload={[{ style: "normal", subset: "latin" }]}
