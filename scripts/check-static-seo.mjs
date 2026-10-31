@@ -395,6 +395,41 @@ for (const [file, language, careerLink] of [
   ) {
     failed.push(file + ": professional, projects or contact CTAs missing");
   }
+  // The name belongs to the single H1 so the page heading identifies its owner.
+  const h1 = hero.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/);
+  const h1Text = h1
+    ? h1[1]
+        .replace(/<[^>]+>/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+    : "";
+  if (!h1Text.includes("Alix ANNERAUD")) {
+    failed.push(file + ": homepage H1 must contain Alix ANNERAUD");
+  }
+  if (!/<em\b[^>]*>[^<]+<\/em>/.test(h1 ? h1[1] : "")) {
+    failed.push(file + ": hero accent line must be set in italic <em>");
+  }
+  if (language === "fr" && /&amp;|&(?!\w+;)/.test(h1 ? h1[1] : "")) {
+    failed.push(file + ": French hero accent line must not use an ampersand");
+  }
+  // WCAG 2.5.3 Label in Name: the scroll link's accessible name must contain
+  // its visible text.
+  const scroll = hero.match(
+    /<a\b(?=[^>]*class="home-hero-scroll")([^>]*)>([\s\S]*?)<\/a>/,
+  );
+  if (scroll) {
+    const visible = scroll[2]
+      .replace(/<span[^>]*aria-hidden="true"[^>]*>[\s\S]*?<\/span>/g, "")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    const label = scroll[1].match(/aria-label="([^"]*)"/);
+    if (!visible || (label && !label[1].includes(visible))) {
+      failed.push(
+        file + ": scroll link aria-label must contain its visible text",
+      );
+    }
+  }
   if (/<img(?:\s|>)/.test(hero) || hero.includes("home-hero-portrait")) {
     failed.push(file + ": homepage hero must not embed the old pixel portrait");
   }

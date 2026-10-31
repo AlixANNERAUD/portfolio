@@ -241,6 +241,40 @@ for (const [engineName, engine] of [
             path + " should not load the removed pixel portrait",
           );
           assert.equal(await intro.locator(".home-hero-title-mask").count(), 2);
+          assert.match(
+            await title.innerText(),
+            /Alix ANNERAUD/,
+            path + " H1 should name its owner",
+          );
+          const accent = await title
+            .locator("em")
+            .evaluate((node) => getComputedStyle(node).fontStyle);
+          assert.equal(accent, "italic", path + " accent line is italic");
+          const scrollLink = intro.locator(".home-hero-scroll");
+          const scrollLabel = await scrollLink.getAttribute("aria-label");
+          if (scrollLabel) {
+            const visible = (
+              await scrollLink.locator("span:not([aria-hidden])").innerText()
+            ).trim();
+            assert.ok(
+              scrollLabel.includes(visible),
+              path + " scroll aria-label should contain its visible text",
+            );
+          }
+          // The hero fills exactly what the sticky header leaves.
+          const fill = await page.evaluate(() => {
+            const header = document.querySelector(".site-header");
+            const hero = document.querySelector(".home-hero");
+            return (
+              (header?.getBoundingClientRect().height ?? 0) +
+              (hero?.getBoundingClientRect().height ?? 0) -
+              window.innerHeight
+            );
+          });
+          assert.ok(
+            fill >= -2,
+            path + " header + hero should fill the viewport (gap " + fill + ")",
+          );
           assert.equal(
             await intro.locator(".home-hero-scroll").getAttribute("href"),
             "#career-highlights",
