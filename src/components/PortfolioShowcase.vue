@@ -564,10 +564,4 @@ const catalogueUrl = computed(() =>
     width: 100%;
   }
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .showcase-filters button {
-    transition: none;
-  }
-}
 </style>

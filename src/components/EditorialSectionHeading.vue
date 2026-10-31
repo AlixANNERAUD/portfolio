@@ -77,7 +77,7 @@ defineProps<{
   font-family: var(--font-display);
   font-size: clamp(2rem, 3.6vw, 3.2rem);
   font-weight: 400;
-  letter-spacing: -0.04em;
+  letter-spacing: var(--tracking-display);
   line-height: 1.15;
 }
 .editorial-section-heading__description {

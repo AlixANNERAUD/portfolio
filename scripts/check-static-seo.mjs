@@ -55,6 +55,40 @@ const required = [
 ];
 
 const failed = [];
+
+/**
+ * Every page preloads exactly one font file, and it must be a Newsreader face
+ * declared in the same document; other families load on demand.
+ */
+function checkFontPreload(file, html) {
+  const headEnd = html.indexOf("</head>");
+  if (headEnd < 0) {
+    failed.push(file + ": missing </head>");
+    return;
+  }
+  const head = html.slice(0, headEnd);
+  const fontPreloads = [...head.matchAll(/<link\b[^>]*>/g)]
+    .map(([tag]) => tag)
+    .filter((tag) => /\brel="preload"/.test(tag) && /\bas="font"/.test(tag));
+  if (fontPreloads.length !== 1) {
+    failed.push(
+      file +
+        ": expected exactly one font preload, found " +
+        fontPreloads.length,
+    );
+    return;
+  }
+  const href = fontPreloads[0].match(/\bhref="([^"]+)"/)?.[1];
+  const face = [...html.matchAll(/@font-face\s*\{([^}]*)\}/g)]
+    .map(([, body]) => body)
+    .find((body) => href && body.includes('url("' + href + '")'));
+  const family = face?.match(/font-family:\s*"?([^;"]+)/)?.[1] ?? "";
+  if (!family.startsWith("Newsreader")) {
+    failed.push(
+      file + ": preloaded font " + href + " is not a Newsreader face",
+    );
+  }
+}
 for (const [file, canonicalPath, translationPath] of cases) {
   const filename = resolve(dist, file);
   if (!existsSync(filename)) {
@@ -87,19 +121,9 @@ for (const [file, canonicalPath, translationPath] of cases) {
   if (!html.includes('hreflang="fr"') || !html.includes('hreflang="en"')) {
     failed.push(file + ": incomplete language alternates");
   }
-  // Only the display face is preloaded; other families load on demand.
-  const head = html.slice(0, html.indexOf("</head>"));
-  const fontPreloads = [...head.matchAll(/<link\b[^>]*>/g)].filter(
-    ([tag]) => /\brel="preload"/.test(tag) && /\bas="font"/.test(tag),
-  );
-  if (fontPreloads.length !== 1) {
-    failed.push(
-      file +
-        ": expected exactly one font preload, found " +
-        fontPreloads.length,
-    );
-  }
+  checkFontPreload(file, html);
 }
+checkFontPreload("404.html", readFileSync(resolve(dist, "404.html"), "utf8"));
 for (const file of ["index.html", "fr/index.html"]) {
   const html = readFileSync(resolve(dist, file), "utf8");
   if (!html.includes("application/ld+json") || !html.includes("schema.org")) {

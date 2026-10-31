@@ -70,9 +70,6 @@ withDefaults(
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .editorial-card {
-    transition: none;
-  }
   .editorial-card:hover {
     transform: none;
   }

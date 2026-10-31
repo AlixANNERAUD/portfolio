@@ -25,15 +25,15 @@
   }
 
   .site-home .portfolio-showcase .showcase-card:nth-child(1) {
-    animation-delay: 260ms;
+    animation-delay: var(--dur-base);
   }
 
   .site-home .portfolio-showcase .showcase-card:nth-child(2) {
-    animation-delay: 330ms;
+    animation-delay: calc(var(--dur-base) + 70ms);
   }
 
   .site-home .portfolio-showcase .showcase-card:nth-child(3) {
-    animation-delay: 400ms;
+    animation-delay: calc(var(--dur-base) + 140ms);
   }
 
   /* Scroll-driven motion is progressive: other browsers see static cards. */
@@ -47,7 +47,7 @@
 
   @media (hover: hover) and (pointer: fine) {
     .portfolio-showcase .showcase-art-symbol {
-      transition: transform 260ms var(--ease-out);
+      transition: transform var(--dur-base) var(--ease-out);
     }
 
     .portfolio-showcase .showcase-card:hover .showcase-art-symbol {
@@ -57,7 +57,7 @@
     .portfolio-showcase .showcase-card-actions a > span,
     .portfolio-showcase .showcase-all-link > span {
       display: inline-block;
-      transition: transform 180ms var(--ease-out);
+      transition: transform var(--dur-fast) var(--ease-out);
     }
 
     .portfolio-showcase .showcase-card-actions a:hover > span,

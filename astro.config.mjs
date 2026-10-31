@@ -9,6 +9,10 @@ export default defineConfig({
   trailingSlash: "ignore",
   build: { format: "preserve" },
   integrations: [vue(), mdx(), sitemap()],
+  // Fontsource serves Newsreader as one variable file per style, so the
+  // emitted @font-face declares the file's full 200-800 weight axis. Astro
+  // only has fallback metrics for generic families: the metric-adjusted
+  // fallback is "Times New Roman" (from `serif`); Georgia stays unadjusted.
   fonts: [
     {
       provider: fontProviders.fontsource(),

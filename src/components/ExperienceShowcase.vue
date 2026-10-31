@@ -264,11 +264,6 @@ function earlierButtonLabel(group: ExperienceGroup): string {
     white-space: normal;
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .career-earlier-toggle svg {
-    transition: none;
-  }
-}
 .career-logo-credits {
   margin: 0;
   color: var(--vp-c-text-3);

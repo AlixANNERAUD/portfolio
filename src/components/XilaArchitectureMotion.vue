@@ -245,8 +245,8 @@ onBeforeUnmount(() => {
   margin: 0;
   padding: 0;
   border: 0;
-  font: normal clamp(2rem, 4vw, 3.5rem)/1.14 var(--font-display);
-  letter-spacing: -0.04em;
+  font: normal clamp(2rem, 3.6vw, 3.2rem)/1.14 var(--font-display);
+  letter-spacing: var(--tracking-display);
 }
 .xila-topology-intro {
   flex: 0 1 22rem;
