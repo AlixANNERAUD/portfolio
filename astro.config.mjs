@@ -1,5 +1,4 @@
 import { defineConfig, fontProviders } from "astro/config";
-import vue from "@astrojs/vue";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 
@@ -24,7 +23,6 @@ export default defineConfig({
     routing: { prefixDefaultLocale: false },
   },
   integrations: [
-    vue(),
     mdx(),
     sitemap({
       i18n: { defaultLocale: "en", locales: { en: "en", fr: "fr" } },

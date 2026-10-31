@@ -35,7 +35,7 @@ button {
   font: inherit;
 }
 
-/* Align Lucide icons across static Astro content and Vue islands. */
+/* Align inline Lucide icons with the surrounding text. */
 svg {
   display: inline;
   vertical-align: middle;

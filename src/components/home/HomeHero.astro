@@ -103,8 +103,8 @@ const actions = [
     min-height: calc(100svh - 3.75rem);
     isolation: isolate;
     overflow: clip;
-    border-bottom: 1px solid var(--vp-c-divider);
-    color: var(--vp-c-text-1);
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text);
   }
 
   /* A restrained wash replaces the previous image's halo without reading as artwork. */
@@ -116,7 +116,7 @@ const actions = [
     pointer-events: none;
     background: radial-gradient(
       ellipse 56% 60% at 82% 47%,
-      color-mix(in srgb, var(--vp-c-brand-1) 7%, transparent) 0%,
+      color-mix(in srgb, var(--color-accent) 7%, transparent) 0%,
       transparent 78%
     );
   }
@@ -137,7 +137,7 @@ const actions = [
     gap: 1rem 2rem;
     padding-bottom: 0.95rem;
     position: relative;
-    color: var(--vp-c-text-2);
+    color: var(--color-text-muted);
     font-size: 0.67rem;
     font-weight: 650;
     letter-spacing: 0.145em;
@@ -150,7 +150,7 @@ const actions = [
     position: absolute;
     inset: auto 0 0;
     height: 1px;
-    background: var(--vp-c-divider);
+    background: var(--color-border);
     transform-origin: left;
   }
 
@@ -168,7 +168,7 @@ const actions = [
     flex-wrap: wrap;
     gap: 0.5rem 0.9rem;
     margin: 0 0 clamp(1.15rem, 2.5vh, 2rem);
-    color: var(--vp-c-text-2);
+    color: var(--color-text-muted);
     font-size: clamp(0.73rem, 1.4vw, 0.89rem);
     font-weight: 600;
     letter-spacing: 0.04em;
@@ -178,7 +178,7 @@ const actions = [
     display: inline-block;
     width: 1.25rem;
     height: 1px;
-    background: var(--vp-c-brand-1);
+    background: var(--color-accent);
   }
 
   .home-hero-title {
@@ -206,7 +206,7 @@ const actions = [
     overflow-wrap: normal;
   }
   .home-hero-title-line em {
-    color: var(--vp-c-brand-1);
+    color: var(--color-accent);
     font-weight: 400;
     font-style: italic;
   }
@@ -225,7 +225,7 @@ const actions = [
     max-width: 39rem;
     min-width: 0;
     margin: 0;
-    color: var(--vp-c-text-2);
+    color: var(--color-text-muted);
     font-size: clamp(0.9rem, 1.25vw, 1.02rem);
     line-height: 1.75;
   }
@@ -243,10 +243,10 @@ const actions = [
     gap: 0.5rem;
     min-height: 2.65rem;
     padding: 0.65rem 0.95rem;
-    border: 1px solid var(--vp-c-divider);
+    border: 1px solid var(--color-border);
     border-radius: 0.45rem;
-    background: var(--vp-c-bg-soft);
-    color: var(--vp-c-text-1);
+    background: var(--color-surface);
+    color: var(--color-text);
     font-size: 0.84rem;
     font-weight: 620;
     text-decoration: none;
@@ -257,12 +257,12 @@ const actions = [
       color 170ms ease;
   }
   .home-action--primary {
-    border-color: var(--vp-c-brand-1);
-    background: var(--vp-c-brand-1);
-    color: var(--vp-c-bg);
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-bg);
   }
   .home-action:hover {
-    border-color: var(--vp-c-brand-1);
+    border-color: var(--color-accent);
   }
   .home-action-icon {
     display: inline-block;
@@ -279,8 +279,8 @@ const actions = [
     flex-wrap: wrap;
     gap: 1rem 2rem;
     padding-top: 1.05rem;
-    border-top: 1px solid var(--vp-c-divider);
-    color: var(--vp-c-text-2);
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text-muted);
     font-size: 0.71rem;
     font-weight: 600;
     letter-spacing: 0.055em;
@@ -289,20 +289,20 @@ const actions = [
     display: inline-flex;
     align-items: center;
     gap: 0.7rem;
-    color: var(--vp-c-text-2);
+    color: var(--color-text-muted);
     text-decoration: none;
   }
   .home-hero-scroll:hover {
-    color: var(--vp-c-brand-1);
+    color: var(--color-accent);
   }
   .home-hero-scroll-icon {
     display: grid;
     place-items: center;
     width: 2rem;
     height: 2rem;
-    border: 1px solid var(--vp-c-divider);
+    border: 1px solid var(--color-border);
     border-radius: 50%;
-    color: var(--vp-c-brand-1);
+    color: var(--color-accent);
     font-size: 1rem;
     line-height: 1;
   }

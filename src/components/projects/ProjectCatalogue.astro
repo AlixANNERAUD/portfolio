@@ -233,7 +233,7 @@ const searchText = (project: Project) =>
     max-width: 1160px;
     margin: 4.25rem auto 5rem;
     padding: 0 1.5rem;
-    color: var(--vp-c-text-1);
+    color: var(--color-text);
   }
   .showcase-toolbar {
     display: flex;
@@ -257,7 +257,7 @@ const searchText = (project: Project) =>
     display: block;
     margin: 0 0 0.35rem;
     font-size: 0.73rem;
-    color: var(--vp-c-text-2);
+    color: var(--color-text-muted);
   }
   .showcase-filters {
     display: flex;
@@ -266,10 +266,10 @@ const searchText = (project: Project) =>
   }
   .showcase-filters button {
     padding: 0.52rem 0.82rem;
-    border: 1px solid var(--vp-c-divider);
+    border: 1px solid var(--color-border);
     border-radius: 2rem;
-    background: var(--vp-c-bg);
-    color: var(--vp-c-text-2);
+    background: var(--color-bg);
+    color: var(--color-text-muted);
     font-size: 0.8rem;
     cursor: pointer;
     transition:
@@ -278,9 +278,9 @@ const searchText = (project: Project) =>
   }
   .showcase-filters button:hover,
   .showcase-filters button[aria-pressed="true"] {
-    background: var(--vp-c-bg-soft);
-    border-color: var(--vp-c-brand-1);
-    color: var(--vp-c-text-1);
+    background: var(--color-surface);
+    border-color: var(--color-accent);
+    color: var(--color-text);
   }
   .showcase-toolbar-actions {
     display: flex;
@@ -294,16 +294,16 @@ const searchText = (project: Project) =>
     gap: 0.35rem;
   }
   .showcase-sort > span {
-    color: var(--vp-c-text-2);
+    color: var(--color-text-muted);
     font-size: 0.73rem;
   }
   .showcase-sort select {
     min-height: 2.35rem;
     padding: 0.49rem 1.5rem 0.49rem 0.6rem;
-    border: 1px solid var(--vp-c-divider);
+    border: 1px solid var(--color-border);
     border-radius: 0.5rem;
-    background: var(--vp-c-bg);
-    color: var(--vp-c-text-1);
+    background: var(--color-bg);
+    color: var(--color-text);
     font: inherit;
     font-size: 0.82rem;
     cursor: pointer;
@@ -312,16 +312,16 @@ const searchText = (project: Project) =>
     box-sizing: border-box;
     width: min(100%, 15rem);
     padding: 0.62rem 0.85rem;
-    border: 1px solid var(--vp-c-divider);
+    border: 1px solid var(--color-border);
     border-radius: 0.5rem;
-    background: var(--vp-c-bg);
-    color: var(--vp-c-text-1);
+    background: var(--color-bg);
+    color: var(--color-text);
     font: inherit;
     font-size: 0.82rem;
   }
   .showcase-count {
     margin: 0.1rem 0 1rem;
-    color: var(--vp-c-text-2);
+    color: var(--color-text-muted);
     font-size: 0.85rem;
   }
   .showcase-grid {
@@ -332,7 +332,7 @@ const searchText = (project: Project) =>
   .showcase-empty {
     padding: 2rem;
     text-align: center;
-    color: var(--vp-c-text-2);
+    color: var(--color-text-muted);
   }
   .sr-only {
     position: absolute;

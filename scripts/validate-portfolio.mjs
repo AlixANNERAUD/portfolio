@@ -218,13 +218,9 @@ console.log(
     " dedicated FR/EN pages and six case studies.",
 );
 
-// Markdown pages and Vue islands are referenced from typed content, not VitePress config.
+// MDX pages are rendered by the Astro integration with preserved .html routes.
 const config = readFileSync(join(root, "astro.config.mjs"), "utf8");
-if (
-  !config.includes("vue()") ||
-  !config.includes("mdx()") ||
-  !config.includes('format: "preserve"')
-) {
+if (!config.includes("mdx()") || !config.includes('format: "preserve"')) {
   throw new Error(
     "Astro integrations and preserved .html route format are required.",
   );

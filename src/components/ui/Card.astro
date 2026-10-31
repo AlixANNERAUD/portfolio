@@ -31,15 +31,15 @@ const {
 <style>
   .editorial-card {
     min-width: 0;
-    border: 1px solid var(--vp-c-divider);
+    border: 1px solid var(--color-border);
     border-radius: 0.85rem;
-    background: var(--vp-c-bg);
+    background: var(--color-bg);
     transition:
       border-color 180ms ease,
       transform 180ms ease;
   }
   .editorial-card:hover {
-    border-color: var(--vp-c-brand-1);
+    border-color: var(--color-accent);
     transform: translateY(-2px);
   }
   .editorial-card--project {
@@ -60,10 +60,14 @@ const {
   .editorial-card--highlighted {
     border-color: color-mix(
       in srgb,
-      var(--vp-c-brand-1) 45%,
-      var(--vp-c-divider)
+      var(--color-accent) 45%,
+      var(--color-border)
     );
-    background: color-mix(in srgb, var(--vp-c-brand-soft) 22%, var(--vp-c-bg));
+    background: color-mix(
+      in srgb,
+      var(--color-accent-soft) 22%,
+      var(--color-bg)
+    );
   }
   @media (max-width: 680px) {
     .editorial-card--timeline {
