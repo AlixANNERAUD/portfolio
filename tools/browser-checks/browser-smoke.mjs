@@ -133,7 +133,7 @@ for (const [engineName, engine] of [
         const library = page.getByRole("button", { name, exact: true });
         await library.waitFor({ timeout: 10000 });
         await library.click();
-        const cards = page.locator(".showcase-card");
+        const cards = page.locator(".showcase-card:visible");
         await page.waitForTimeout(100);
         assert.equal(
           await cards.count(),

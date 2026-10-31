@@ -1,6 +1,7 @@
 import type { Locale } from "../i18n/locales.ts";
 import { useTranslations } from "../i18n/ui.ts";
 import type { Period } from "../data/types.ts";
+import { formatPlural } from "./plural.ts";
 
 /** `2019–present` / `Depuis 2019`, `2022–2023`, or a single `2023`. */
 export function formatPeriod(period: Period, lang: Locale): string {
@@ -17,8 +18,9 @@ export type CountKey = "project" | "role" | "milestone";
 /** `1 projet`, `12 projets`: the noun follows the locale's plural rules. */
 export function formatCount(n: number, key: CountKey, lang: Locale): string {
   const t = useTranslations(lang);
-  const form = new Intl.PluralRules(lang).select(n) === "one" ? "one" : "other";
-  return t(`count.${key}.${form}`, {
-    count: new Intl.NumberFormat(lang).format(n),
-  });
+  return formatPlural(
+    n,
+    { one: t(`count.${key}.one`), other: t(`count.${key}.other`) },
+    lang,
+  );
 }

@@ -1,4 +1,5 @@
 ---
+import type { HTMLAttributes } from "astro/types";
 import Card from "../ui/Card.astro";
 import Tags from "../ui/Tags.astro";
 import {
@@ -11,25 +12,28 @@ import type { Locale } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
 import { formatPeriod } from "../../lib/format.ts";
 
-interface Props {
+type Props = HTMLAttributes<"article"> & {
   project: Project;
   lang: Locale;
   /** Position in the list, from 1, shown on the artwork. */
   position: number;
-}
+};
 
-const { project, lang, position } = Astro.props;
+const { project, lang, position, class: className, ...rest } = Astro.props;
 const t = useTranslations(lang);
 ---
 
-<Card class="showcase-card" variant="project">
+<Card class:list={["showcase-card", className]} variant="project" {...rest}>
   <div
     class:list={["showcase-art", `showcase-art--${project.category}`]}
     aria-hidden="true"
   >
     <span class="showcase-art-symbol">{project.symbol}</span>
     <span class="showcase-art-index">
-      {String(position).padStart(2, "0")} / {formatPeriod(project.period, lang)}
+      <span class="showcase-art-position">
+        {String(position).padStart(2, "0")}
+      </span>{" "}
+      / {formatPeriod(project.period, lang)}
     </span>
   </div>
   <div class="showcase-card-body">
