@@ -90,6 +90,30 @@ const en = {
   "home.experience.intro":
     "Security, software engineering, networking and research: different environments with the same focus on understanding systems and building useful tools.",
   "home.experience.more": "Explore my experience",
+  "home.hero.index": "01 / Introduction",
+  "home.hero.discipline": "Software engineering · Systems · Security",
+  "home.hero.job": "Software engineer",
+  "home.hero.lineOne": "Software, systems",
+  "home.hero.lineTwo": "& security.",
+  "home.hero.summary":
+    "I build Rust systems and web tools, from prototypes to production. My experience across security, software engineering, networking and research informs the open-source projects I work on.",
+  "home.hero.actionsLabel": "Primary links",
+  "home.hero.experience": "My experience",
+  "home.hero.projects": "My projects",
+  "home.hero.contact": "Get in touch",
+  "home.hero.scroll": "Scroll to discover my experience",
+  "home.hero.scrollLabel": "Explore further",
+  "home.hero.footnote": "Design · Build · Operate",
+  "home.projects.label": "Selected projects",
+  "home.projects.eyebrow": "Selected projects / 02",
+  "home.projects.title": "From ideas to",
+  "home.projects.accent": "systems.",
+  "home.projects.intro":
+    "From a Rust kernel to practical business software: selected projects I design, build and maintain.",
+  "home.projects.viewAll": "Explore all projects",
+  "project.details": "Read details",
+  "project.external": "External link",
+  "project.technologies": "Technologies used",
 } as const;
 
 export type UIKey = keyof typeof en;
@@ -177,6 +201,30 @@ const fr: Record<UIKey, string> = {
   "home.experience.intro":
     "Sécurité, développement logiciel, exploitation réseau et recherche : des environnements différents, avec un même souci de comprendre et de construire.",
   "home.experience.more": "Voir tout mon parcours",
+  "home.hero.index": "01 / Introduction",
+  "home.hero.discipline": "Ingénierie logicielle · Systèmes · Sécurité",
+  "home.hero.job": "Ingénieur logiciel",
+  "home.hero.lineOne": "Logiciel, systèmes",
+  "home.hero.lineTwo": "& sécurité.",
+  "home.hero.summary":
+    "Je développe des systèmes Rust et des outils web, du prototype à la production. Mes expériences en sécurité, développement logiciel, réseaux et recherche nourrissent mes projets open source.",
+  "home.hero.actionsLabel": "Liens principaux",
+  "home.hero.experience": "Mon parcours",
+  "home.hero.projects": "Mes projets",
+  "home.hero.contact": "Me contacter",
+  "home.hero.scroll": "Défiler pour découvrir mon parcours",
+  "home.hero.scrollLabel": "Découvrir la suite",
+  "home.hero.footnote": "Concevoir · Construire · Exploiter",
+  "home.projects.label": "Projets sélectionnés",
+  "home.projects.eyebrow": "Projets / 02",
+  "home.projects.title": "Des idées aux",
+  "home.projects.accent": "systèmes.",
+  "home.projects.intro":
+    "Du noyau Rust aux outils métiers : quelques projets que je conçois, développe et maintiens.",
+  "home.projects.viewAll": "Explorer tous mes projets",
+  "project.details": "Lire la fiche",
+  "project.external": "Lien externe",
+  "project.technologies": "Technologies utilisées",
 };
 
 export const ui = { en, fr } satisfies Record<Locale, Record<UIKey, string>>;

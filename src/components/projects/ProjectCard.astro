@@ -1,0 +1,174 @@
+---
+import Card from "../ui/Card.astro";
+import Tags from "../ui/Tags.astro";
+import {
+  projectUrl,
+  type Project,
+  type ProjectId,
+} from "../../data/projects.ts";
+import { localize } from "../../data/types.ts";
+import type { Locale } from "../../i18n/locales.ts";
+import { useTranslations } from "../../i18n/ui.ts";
+import { formatPeriod } from "../../lib/format.ts";
+
+interface Props {
+  project: Project;
+  lang: Locale;
+  /** Position in the list, from 1, shown on the artwork. */
+  position: number;
+}
+
+const { project, lang, position } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<Card class="showcase-card" variant="project">
+  <div
+    class:list={["showcase-art", `showcase-art--${project.category}`]}
+    aria-hidden="true"
+  >
+    <span class="showcase-art-symbol">{project.symbol}</span>
+    <span class="showcase-art-index">
+      {String(position).padStart(2, "0")} / {formatPeriod(project.period, lang)}
+    </span>
+  </div>
+  <div class="showcase-card-body">
+    <p class="showcase-card-category">{t(`category.${project.category}`)}</p>
+    <h3>{localize(project.title, lang)}</h3>
+    <p class="showcase-card-description">{project.description[lang]}</p>
+    {project.tags.length > 0 && (
+      <Tags
+        tags={project.tags}
+        label={t("project.technologies")}
+        density="project"
+      />
+    )}
+    <div class="showcase-card-actions">
+      <a href={projectUrl(project.id as ProjectId, lang)}>
+        {t("project.details")} <span aria-hidden="true">→</span>
+      </a>
+      {project.externalUrl && (
+        <a
+          class="showcase-external-link"
+          href={project.externalUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {t("project.external")} <span aria-hidden="true">↗</span>
+        </a>
+      )}
+    </div>
+  </div>
+</Card>
+
+<style>
+  .showcase-art {
+    position: relative;
+    display: flex;
+    min-height: 11rem;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background-color: #16212d;
+    background-image:
+      linear-gradient(115deg, transparent 48%, #ffffff0a 49%, transparent 50%),
+      radial-gradient(circle at 68% 30%, #ffffff22, transparent 45%);
+    color: #f7f8fa;
+  }
+  .showcase-art::before {
+    position: absolute;
+    inset: 0;
+    content: "";
+    background-image:
+      linear-gradient(#ffffff16 1px, transparent 1px),
+      linear-gradient(90deg, #ffffff16 1px, transparent 1px);
+    background-size: 28px 28px;
+    mask-image: linear-gradient(to bottom, #000, transparent 90%);
+  }
+  .showcase-art--systems {
+    background-color: #233b40;
+  }
+  .showcase-art--web,
+  .showcase-art--software {
+    background-color: #473b53;
+  }
+  .showcase-art--infrastructure {
+    background-color: #304354;
+  }
+  .showcase-art--embedded {
+    background-color: #574832;
+  }
+  .showcase-art-symbol {
+    position: relative;
+    font-family: var(--font-display);
+    font-size: clamp(4rem, 7vw, 6rem);
+    font-weight: 400;
+    letter-spacing: -0.07em;
+    line-height: 1;
+  }
+  .showcase-art-index {
+    position: absolute;
+    right: 1.15rem;
+    bottom: 0.9rem;
+    font-family: ui-monospace, monospace;
+    font-size: 0.7rem;
+    opacity: 0.78;
+  }
+  .showcase-card-body {
+    display: flex;
+    flex-direction: column;
+    min-height: 17rem;
+    padding: 1.4rem;
+  }
+  .showcase-card-category {
+    margin: 0 0 0.45rem;
+    color: var(--vp-c-text-2);
+    font-size: 0.73rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .showcase-card h3 {
+    margin: 0 0 0.7rem;
+    border: 0;
+    padding: 0;
+    font-size: clamp(1.25rem, 1.8vw, 1.6rem);
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+  }
+  .showcase-card-description {
+    flex-grow: 1;
+    margin: 0 0 1.25rem;
+    color: var(--vp-c-text-2);
+    font-size: 0.88rem;
+    line-height: 1.65;
+  }
+  .showcase-card-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.7rem 1rem;
+  }
+  .showcase-card-actions > a {
+    align-self: flex-start;
+    color: var(--vp-c-brand-1);
+    font-size: 0.86rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .showcase-card-actions > a:hover {
+    text-decoration: underline;
+  }
+  .showcase-card-actions .showcase-external-link {
+    color: var(--vp-c-text-2);
+    font-size: 0.79rem;
+  }
+  @media (max-width: 600px) {
+    .showcase-art {
+      min-height: 9.5rem;
+    }
+    .showcase-card-body {
+      min-height: 0;
+    }
+  }
+</style>

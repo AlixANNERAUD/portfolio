@@ -1,91 +1,64 @@
 ---
+import { site } from "../../data/site.ts";
+import { localizePath, type Locale } from "../../i18n/locales.ts";
+import { useTranslations } from "../../i18n/ui.ts";
+
 interface Props {
-  lang: "en" | "fr";
+  lang: Locale;
 }
 
 const { lang } = Astro.props;
-const fr = lang === "fr";
-
-const copy = fr
-  ? {
-      index: "01 / Introduction",
-      discipline: "Ingénierie logicielle · Systèmes · Sécurité",
-      name: "Alix ANNERAUD",
-      job: "Ingénieur logiciel",
-      lineOne: "Logiciel, systèmes",
-      lineTwo: "& sécurité.",
-      summary:
-        "Je développe des systèmes Rust et des outils web, du prototype à la production. Mes expériences en sécurité, développement logiciel, réseaux et recherche nourrissent mes projets open source.",
-      explore: "Mon parcours",
-      projects: "Mes projets",
-      contact: "Me contacter",
-      scroll: "Défiler pour découvrir mon parcours",
-      scrollLabel: "Découvrir la suite",
-      footnote: "Concevoir · Construire · Exploiter",
-    }
-  : {
-      index: "01 / Introduction",
-      discipline: "Software engineering · Systems · Security",
-      name: "Alix ANNERAUD",
-      job: "Software engineer",
-      lineOne: "Software, systems",
-      lineTwo: "& security.",
-      summary:
-        "I build Rust systems and web tools, from prototypes to production. My experience across security, software engineering, networking and research informs the open-source projects I work on.",
-      explore: "My experience",
-      projects: "My projects",
-      contact: "Get in touch",
-      scroll: "Scroll to discover my experience",
-      scrollLabel: "Explore further",
-      footnote: "Design · Build · Operate",
-    };
+const t = useTranslations(lang);
 
 const actions = [
   {
-    label: copy.explore,
-    href: fr ? "/fr/experiences" : "/experiences",
+    label: t("home.hero.experience"),
+    href: localizePath("/experiences", lang),
     primary: true,
   },
   {
-    label: copy.projects,
-    href: fr ? "/fr/projects" : "/projects",
+    label: t("home.hero.projects"),
+    href: localizePath("/projects", lang),
     primary: false,
   },
-  { label: copy.contact, href: "mailto:alix@anneraud.fr", primary: false },
+  {
+    label: t("home.hero.contact"),
+    href: `mailto:${site.email}`,
+    primary: false,
+  },
 ];
 ---
 
 <section class="home-hero" aria-labelledby="home-hero-title">
   <div class="home-hero-inner">
     <div class="home-hero-overline" aria-hidden="true">
-      <span class="home-hero-overline-index">{copy.index}</span>
-      <span class="home-hero-overline-discipline">{copy.discipline}</span>
+      <span class="home-hero-overline-index">{t("home.hero.index")}</span>
+      <span class="home-hero-overline-discipline">
+        {t("home.hero.discipline")}
+      </span>
     </div>
 
     <div class="home-hero-content">
       <p class="home-hero-name">
-        <span>{copy.name}</span>
+        <span>{site.name}</span>
         <span class="home-hero-name-divider" aria-hidden="true"></span>
-        <span>{copy.job}</span>
+        <span>{t("home.hero.job")}</span>
       </p>
 
       <h1 id="home-hero-title" class="home-hero-title">
         <span class="home-hero-title-mask">
-          <span class="home-hero-title-line">{copy.lineOne}</span>
+          <span class="home-hero-title-line">{t("home.hero.lineOne")}</span>
         </span>
         <span class="home-hero-title-mask">
           <span class="home-hero-title-line home-hero-title-line--accent">
-            <em>{copy.lineTwo}</em>
+            <em>{t("home.hero.lineTwo")}</em>
           </span>
         </span>
       </h1>
 
       <div class="home-hero-bottom-row">
-        <p class="home-hero-tagline">{copy.summary}</p>
-        <nav
-          class="home-hero-actions"
-          aria-label={fr ? "Liens principaux" : "Primary links"}
-        >
+        <p class="home-hero-tagline">{t("home.hero.summary")}</p>
+        <nav class="home-hero-actions" aria-label={t("home.hero.actionsLabel")}>
           {actions.map((action) => (
             <a
               href={action.href}
@@ -108,15 +81,15 @@ const actions = [
       <a
         class="home-hero-scroll"
         href="#career-highlights"
-        aria-label={copy.scroll}
+        aria-label={t("home.hero.scroll")}
       >
         <span class="home-hero-scroll-icon" aria-hidden="true">
           ↓
         </span>
-        <span>{copy.scrollLabel}</span>
+        <span>{t("home.hero.scrollLabel")}</span>
       </a>
       <span class="home-hero-footer-note" aria-hidden="true">
-        {copy.footnote}
+        {t("home.hero.footnote")}
       </span>
     </div>
   </div>
