@@ -1,5 +1,6 @@
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
+import { parse } from "node-html-parser";
 import { portfolioProjects } from "../src/data/portfolioProjects.ts";
 
 /**
@@ -110,20 +111,166 @@ for (const [file, canonicalPath, translationPath] of cases) {
   for (const pattern of required) {
     if (!pattern.test(html)) failed.push(file + ": missing " + pattern);
   }
-  for (const [kind, path] of [
-    ["canonical", canonicalPath],
-    ["translation", translationPath],
-  ]) {
-    const url = "https://alix.anneraud.fr" + path;
-    if (!html.includes(url))
-      failed.push(file + ": missing " + kind + " URL " + url);
-  }
-  if (!html.includes('hreflang="fr"') || !html.includes('hreflang="en"')) {
-    failed.push(file + ": incomplete language alternates");
-  }
   checkFontPreload(file, html);
 }
-checkFontPreload("404.html", readFileSync(resolve(dist, "404.html"), "utf8"));
+checkFontPreload("404.html", read("404.html"));
+
+/** File contents, or "" after recording the missing file as a failure. */
+function read(file) {
+  const filename = resolve(dist, file);
+  if (!existsSync(filename)) {
+    failed.push("Missing output: " + file);
+    return "";
+  }
+  return readFileSync(filename, "utf8");
+}
+
+// Head metadata is parsed, not matched as text: navigation links to the
+// other locale must not satisfy a canonical or hreflang assertion.
+const site = "https://alix.anneraud.fr";
+const pagesByCanonical = new Map();
+for (const [file, canonicalPath, translationPath] of cases) {
+  const html = read(file);
+  if (!html) continue;
+  const head = parse(html).querySelector("head");
+  if (!head) {
+    failed.push(file + ": missing <head>");
+    continue;
+  }
+  const french = file.startsWith("fr/");
+  const canonical = site + canonicalPath;
+  const expected = {
+    en: site + (french ? translationPath : canonicalPath),
+    fr: site + (french ? canonicalPath : translationPath),
+  };
+  expected["x-default"] = expected.en;
+  pagesByCanonical.set(canonical, expected);
+
+  const canonicals = head
+    .querySelectorAll('link[rel="canonical"]')
+    .map((link) => link.getAttribute("href"));
+  if (canonicals.length !== 1 || canonicals[0] !== canonical) {
+    failed.push(
+      file + ": expected one canonical " + canonical + ", found " + canonicals,
+    );
+  }
+  for (const [code, href] of Object.entries(expected)) {
+    const found = head
+      .querySelectorAll('link[rel="alternate"]')
+      .filter((link) => link.getAttribute("hreflang") === code)
+      .map((link) => link.getAttribute("href"));
+    if (found.length !== 1 || found[0] !== href) {
+      failed.push(
+        file + ": expected hreflang " + code + " " + href + ", found " + found,
+      );
+    }
+  }
+  const meta = (property) =>
+    head
+      .querySelectorAll('meta[property="' + property + '"]')
+      .map((tag) => tag.getAttribute("content"));
+  if (head.querySelector('meta[name="robots"]')) {
+    failed.push(file + ": indexable page declares a robots meta");
+  }
+  if (meta("og:url")[0] !== canonical) {
+    failed.push(file + ": og:url differs from the canonical URL");
+  }
+  const locale = french ? "fr_FR" : "en_US";
+  const otherLocale = french ? "en_US" : "fr_FR";
+  if (meta("og:locale").join() !== locale) {
+    failed.push(file + ": expected og:locale " + locale);
+  }
+  if (meta("og:locale:alternate").join() !== otherLocale) {
+    failed.push(file + ": expected og:locale:alternate " + otherLocale);
+  }
+  const isProject = /^(fr\/)?projects\/.+\.html$/.test(file);
+  const ogType = isProject ? "article" : "website";
+  if (meta("og:type").join() !== ogType) {
+    failed.push(file + ": expected og:type " + ogType);
+  }
+  const title = head.querySelector("title")?.text ?? "";
+  const homeTitle = {
+    "index.html": "Alix ANNERAUD | Software, Rust and embedded systems",
+    "fr/index.html": "Alix ANNERAUD | Logiciel, Rust et systèmes embarqués",
+  }[file];
+  if (homeTitle ? title !== homeTitle : !title.endsWith(" | Alix ANNERAUD")) {
+    failed.push(file + ": unexpected title format: " + title);
+  }
+}
+
+// The bilingual 404 page is served for every unknown path, so it must not
+// be indexed nor claim a canonical URL or locale alternates.
+{
+  const root = parse(read("404.html"));
+  const head = root.querySelector("head");
+  const robots = head?.querySelectorAll('meta[name="robots"]') ?? [];
+  if (robots.length !== 1 || robots[0].getAttribute("content") !== "noindex") {
+    failed.push(
+      '404.html: expected one <meta name="robots" content="noindex">',
+    );
+  }
+  if (head?.querySelector('link[rel="canonical"]')) {
+    failed.push("404.html: must not declare a canonical URL");
+  }
+  if (head?.querySelector("link[hreflang]")) {
+    failed.push("404.html: must not declare hreflang alternates");
+  }
+  for (const lang of ["en", "fr"]) {
+    if (!root.querySelector('main [lang="' + lang + '"]')) {
+      failed.push("404.html: missing a lang=" + lang + " content section");
+    }
+  }
+}
+
+// Every sitemap URL is a page canonical with en/fr alternates equal to the
+// page hreflang links, and every indexable page is listed exactly once.
+{
+  const index = parse(read("sitemap-index.xml"));
+  const sitemapFiles = index
+    .getElementsByTagName("loc")
+    .map((loc) => loc.text.trim().replace(site + "/", ""));
+  if (!sitemapFiles.length) failed.push("sitemap-index.xml: no sitemap listed");
+  const listed = new Set();
+  for (const sitemapFile of sitemapFiles) {
+    for (const url of parse(read(sitemapFile)).getElementsByTagName("url")) {
+      const loc = url.getElementsByTagName("loc")[0]?.text.trim() ?? "";
+      if (listed.has(loc)) failed.push("sitemap: duplicate " + loc);
+      listed.add(loc);
+      const expected = pagesByCanonical.get(loc);
+      if (!expected) {
+        failed.push("sitemap: " + loc + " is not a page canonical URL");
+        continue;
+      }
+      const links = url.getElementsByTagName("xhtml:link");
+      for (const code of ["en", "fr"]) {
+        const found = links
+          .filter((link) => link.getAttribute("hreflang") === code)
+          .map((link) => link.getAttribute("href"));
+        if (found.length !== 1 || found[0] !== expected[code]) {
+          failed.push(
+            "sitemap: " +
+              loc +
+              " expected " +
+              code +
+              " alternate " +
+              expected[code] +
+              ", found " +
+              found,
+          );
+        }
+      }
+    }
+  }
+  for (const canonical of pagesByCanonical.keys()) {
+    if (!listed.has(canonical)) failed.push("sitemap: missing " + canonical);
+  }
+  if (!listed.has(site + "/fr/"))
+    failed.push("sitemap: missing " + site + "/fr/");
+  if (listed.has(site + "/fr")) failed.push("sitemap: lists " + site + "/fr");
+  for (const loc of listed) {
+    if (loc.includes("/404")) failed.push("sitemap: lists the 404 page " + loc);
+  }
+}
 for (const file of ["index.html", "fr/index.html"]) {
   const html = readFileSync(resolve(dist, file), "utf8");
   if (!html.includes("application/ld+json") || !html.includes("schema.org")) {

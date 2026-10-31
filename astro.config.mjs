@@ -3,11 +3,16 @@ import vue from "@astrojs/vue";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 
+const site = "https://alix.anneraud.fr";
+// The French home page is canonically `/fr/` (its indexed URL), but the
+// sitemap integration emits `/fr`; align the location and its alternates.
+const frenchHome = (url) => (url === `${site}/fr` ? `${site}/fr/` : url);
+
 export default defineConfig({
-  site: "https://alix.anneraud.fr",
+  site,
   output: "static",
   trailingSlash: "ignore",
-  build: { format: "preserve" },
+  build: { format: "preserve", inlineStylesheets: "auto" },
   // English is served unprefixed (`/`), French under `/fr/`; pages live once
   // in src/pages/[...lang]/ and get their locale from getStaticPaths props.
   i18n: {
@@ -15,7 +20,22 @@ export default defineConfig({
     defaultLocale: "en",
     routing: { prefixDefaultLocale: false },
   },
-  integrations: [vue(), mdx(), sitemap()],
+  integrations: [
+    vue(),
+    mdx(),
+    sitemap({
+      i18n: { defaultLocale: "en", locales: { en: "en", fr: "fr" } },
+      filter: (page) => !page.includes("/404"),
+      serialize: (item) => ({
+        ...item,
+        url: frenchHome(item.url),
+        links: item.links?.map((link) => ({
+          ...link,
+          url: frenchHome(link.url),
+        })),
+      }),
+    }),
+  ],
   // Fontsource serves Newsreader as one variable file per style, so the
   // emitted @font-face declares the file's full 200-800 weight axis. Astro
   // only has fallback metrics for generic families: the metric-adjusted

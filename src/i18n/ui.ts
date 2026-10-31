@@ -7,7 +7,7 @@ import type { Locale } from "./locales.ts";
  * space) before : and inside « ». `{name}` placeholders are filled by `vars`.
  */
 const en = {
-  "meta.homeTitle": "Alix ANNERAUD - Software, Rust and embedded systems",
+  "meta.homeTitle": "Alix ANNERAUD | Software, Rust and embedded systems",
   "meta.pageTitle": "{title} | Alix ANNERAUD",
   "meta.ogImageAlt": "Portrait of Alix ANNERAUD",
   "a11y.skipToContent": "Skip to content",
@@ -48,7 +48,7 @@ const en = {
 export type UIKey = keyof typeof en;
 
 const fr: Record<UIKey, string> = {
-  "meta.homeTitle": "Alix ANNERAUD - Logiciel, Rust et systèmes embarqués",
+  "meta.homeTitle": "Alix ANNERAUD | Logiciel, Rust et systèmes embarqués",
   "meta.pageTitle": "{title} | Alix ANNERAUD",
   "meta.ogImageAlt": "Portrait d’Alix ANNERAUD",
   "a11y.skipToContent": "Aller au contenu",
