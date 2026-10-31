@@ -1,0 +1,23 @@
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ExperienceShowcase from "../../components/ExperienceShowcase.vue";
+import { localeStaticPaths } from "../../i18n/locales.ts";
+import { useTranslations } from "../../i18n/ui.ts";
+
+export const getStaticPaths = (() =>
+  localeStaticPaths()) satisfies GetStaticPaths;
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<BaseLayout
+  lang={lang}
+  path="/experiences"
+  title={t("nav.experiences")}
+  description={t("experiences.description")}
+>
+  <ExperienceShowcase lang={lang} client:load />
+</BaseLayout>

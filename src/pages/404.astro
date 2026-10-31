@@ -1,16 +1,42 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { locales, localizePath } from "../i18n/locales.ts";
+import { useTranslations } from "../i18n/ui.ts";
+
+// GitHub Pages serves this single file for unknown paths in both locales,
+// so it speaks both languages and stays out of the index.
+const t = useTranslations("en");
+const sections = locales.map((lang) => ({
+  lang,
+  t: useTranslations(lang),
+  home: localizePath("/", lang),
+}));
 ---
 
 <BaseLayout
   lang="en"
   path="/404"
-  title="Page not found"
-  description="The requested portfolio page could not be found."
+  localeHref={localizePath("/", "fr")}
+  title={t("notFound.title")}
+  description={t("notFound.description")}
+  noindex
 >
-  <section class="prose">
-    <h1>Page not found / Page introuvable</h1>
-    <p>The page you requested does not exist. Cette page n'existe pas.</p>
-    <a href="/">Back to homepage</a> · <a href="/fr/">Retour à l'accueil</a>
-  </section>
+  <div class="prose">
+    <h1>
+      {sections.map(({ lang, t }, index) => (
+        <>
+          {index > 0 && " / "}
+          <span lang={lang}>{t("notFound.title")}</span>
+        </>
+      ))}
+    </h1>
+    {sections.map(({ lang, t, home }) => (
+      <section lang={lang}>
+        <p>{t("notFound.body")}</p>
+        <p>
+          <a href={home}>{t("notFound.back")}</a>
+        </p>
+      </section>
+    ))}
+  </div>
 </BaseLayout>

@@ -1,0 +1,102 @@
+---
+import { Font } from "astro:assets";
+import JsonLd from "./JsonLd.astro";
+import { site } from "../../data/site.ts";
+import {
+  alternates,
+  localizePath,
+  locales,
+  type Locale,
+} from "../../i18n/locales.ts";
+import { useTranslations } from "../../i18n/ui.ts";
+
+export interface Props {
+  lang: Locale;
+  /** Page title; the home page (`home`) uses its own localized title. */
+  title?: string;
+  description: string;
+  /** English path of the page; every locale URL derives from it. */
+  path: string;
+  home?: boolean;
+  noindex?: boolean;
+  ogType?: "website" | "article";
+  jsonLd?: object[];
+}
+const {
+  lang,
+  title,
+  description,
+  path,
+  home = false,
+  noindex = false,
+  ogType = "website",
+  jsonLd = [],
+} = Astro.props;
+const t = useTranslations(lang);
+if (!home && !title) throw new Error(`Missing page title for ${path}`);
+const titleText = home
+  ? t("meta.homeTitle")
+  : t("meta.pageTitle", { title: title! });
+const canonical = site.url + localizePath(path, lang);
+const image = site.url + site.image;
+const hreflang = Object.entries(alternates(path));
+const ogLocale: Record<Locale, string> = { en: "en_US", fr: "fr_FR" };
+---
+
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<Font
+  cssVariable="--font-display"
+  preload={[{ style: "normal", subset: "latin" }]}
+/>
+<Font cssVariable="--font-mono" />
+<title>{titleText}</title>
+<meta name="description" content={description} />
+{noindex && <meta name="robots" content="noindex" />}
+<meta property="og:type" content={ogType} />
+<meta property="og:site_name" content={site.name} />
+<meta property="og:locale" content={ogLocale[lang]} />
+{!noindex &&
+  locales
+    .filter((code) => code !== lang)
+    .map((code) => (
+      <meta property="og:locale:alternate" content={ogLocale[code]} />
+    ))}
+<meta property="og:title" content={titleText} />
+<meta property="og:description" content={description} />
+{!noindex && <meta property="og:url" content={canonical} />}
+<meta property="og:image" content={image} />
+<meta property="og:image:alt" content={t("meta.ogImageAlt")} />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content={titleText} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={image} />
+{!noindex && (
+  <>
+    <link rel="canonical" href={canonical} />
+    {hreflang.map(([code, href]) => (
+      <link rel="alternate" hreflang={code} href={href} />
+    ))}
+  </>
+)}
+<link rel="icon" href="/images/icon.png" type="image/png" />
+<link rel="sitemap" href="/sitemap-index.xml" />
+{jsonLd.map((data) => (
+  <JsonLd data={data} />
+))}
+<script is:inline>
+  try {
+    const stored = localStorage.getItem("portfolio-theme");
+    if (
+      stored === "dark" ||
+      (stored !== "light" && matchMedia("(prefers-color-scheme: dark)").matches)
+    ) {
+      document.documentElement.classList.add("dark");
+    }
+  } catch {}
+</script>
+<script
+  defer
+  src={site.analytics.src}
+  data-website-id={site.analytics.websiteId}
+></script>

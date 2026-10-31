@@ -1,0 +1,29 @@
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PdfEmbed from "../../components/PdfEmbed.vue";
+import { site } from "../../data/site.ts";
+import { localeStaticPaths } from "../../i18n/locales.ts";
+import { useTranslations } from "../../i18n/ui.ts";
+
+export const getStaticPaths = (() =>
+  localeStaticPaths()) satisfies GetStaticPaths;
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<BaseLayout
+  lang={lang}
+  path="/resume"
+  title={t("nav.resume")}
+  description={t("resume.description")}
+  noFooter
+>
+  <PdfEmbed
+    src={site.resumePdf[lang]}
+    title={t("resume.pdfTitle")}
+    openLabel={t("resume.openPdf")}
+  />
+</BaseLayout>

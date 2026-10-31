@@ -1,0 +1,38 @@
+---
+import type {
+  GetStaticPaths,
+  InferGetStaticPropsType,
+  MarkdownInstance,
+} from "astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { localeStaticPaths } from "../../i18n/locales.ts";
+import { useTranslations } from "../../i18n/ui.ts";
+
+export const getStaticPaths = (() =>
+  localeStaticPaths()) satisfies GetStaticPaths;
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+// One Markdown file per locale: src/content/legal/{lang}.md.
+const notices = import.meta.glob<MarkdownInstance<Record<string, unknown>>>(
+  "../../content/legal/*.md",
+  { eager: true },
+);
+const notice = notices[`../../content/legal/${lang}.md`];
+if (!notice)
+  throw new Error(`Missing legal notice: src/content/legal/${lang}.md`);
+const { Content } = notice;
+---
+
+<BaseLayout
+  lang={lang}
+  path="/legal-notice"
+  title={t("footer.legalNotice")}
+  description={t("legal.description")}
+>
+  <article class="prose">
+    <Content />
+  </article>
+</BaseLayout>

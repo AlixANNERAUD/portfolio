@@ -1,0 +1,31 @@
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import HomeHero from "../../components/HomeHero.astro";
+import HomeExperience from "../../components/HomeExperience.astro";
+import PortfolioShowcase from "../../components/PortfolioShowcase.vue";
+import XilaArchitectureMotion from "../../components/XilaArchitectureMotion.vue";
+import { personJsonLd } from "../../data/jsonLd.ts";
+import { localeStaticPaths } from "../../i18n/locales.ts";
+import { useTranslations } from "../../i18n/ui.ts";
+
+export const getStaticPaths = (() =>
+  localeStaticPaths()) satisfies GetStaticPaths;
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<BaseLayout
+  lang={lang}
+  path="/"
+  description={t("home.description")}
+  home
+  jsonLd={[personJsonLd]}
+>
+  <HomeHero lang={lang} />
+  <HomeExperience lang={lang} />
+  <PortfolioShowcase lang={lang} mode="featured" />
+  <XilaArchitectureMotion lang={lang} client:visible />
+</BaseLayout>
