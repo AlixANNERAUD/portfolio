@@ -112,6 +112,10 @@ test("useTranslations translates and interpolates variables", () => {
     "Compétences | Alix ANNERAUD",
   );
   assert.equal(en("meta.pageTitle"), "{title} | Alix ANNERAUD");
+  assert.equal(
+    fr("experience.compactLinkLabel", { role: "Stagiaire", company: "ACME" }),
+    "Stagiaire \u2013 ACME. Voir cette expérience",
+  );
 });
 
 test("French UI strings use French typographic spaces", () => {

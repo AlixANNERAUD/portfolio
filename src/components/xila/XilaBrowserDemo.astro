@@ -54,9 +54,12 @@ const DEMO_URL = "https://documentation.xila.dev/demonstrations/wasm/en/";
   <p class="xila-demo-privacy">{t("xila.demo.privacy")}</p>
 
   <div id="xila-embedded-demo" class="xila-demo-panel" hidden>
-    <p class="xila-demo-loading" role="status">
-      {t("xila.demo.loading")}
-    </p>
+    {/* Filled after the panel is shown, so screen readers announce it. */}
+    <p
+      class="xila-demo-loading"
+      role="status"
+      data-message={t("xila.demo.loading")}
+    ></p>
     <iframe
       data-src={DEMO_URL}
       title={t("xila.demo.frame")}
@@ -79,8 +82,11 @@ const DEMO_URL = "https://documentation.xila.dev/demonstrations/wasm/en/";
     const loading = panel?.querySelector<HTMLElement>(".xila-demo-loading");
     if (!panel || !frame || !loading) continue;
 
+    let loaded = false;
     frame.addEventListener("load", () => {
-      if (frame.hasAttribute("src")) loading.hidden = true;
+      if (!frame.hasAttribute("src")) return;
+      loaded = true;
+      loading.textContent = "";
     });
 
     button.addEventListener("click", () => {
@@ -89,7 +95,13 @@ const DEMO_URL = "https://documentation.xila.dev/demonstrations/wasm/en/";
       button.textContent =
         (open ? button.dataset.labelClose : button.dataset.labelOpen) ?? "";
       panel.hidden = !open;
-      loading.hidden = false;
+      loading.textContent = "";
+      loaded = false;
+      if (open) {
+        requestAnimationFrame(() => {
+          if (!loaded) loading.textContent = loading.dataset.message ?? "";
+        });
+      }
       // Closing unloads the demo; reopening starts it afresh.
       if (open) frame.src = frame.dataset.src ?? "";
       else frame.removeAttribute("src");
@@ -180,7 +192,7 @@ const DEMO_URL = "https://documentation.xila.dev/demonstrations/wasm/en/";
   }
   .xila-demo-actions > button[hidden],
   .xila-demo-panel[hidden],
-  .xila-demo-loading[hidden] {
+  .xila-demo-loading:empty {
     display: none;
   }
   .xila-demo-privacy,

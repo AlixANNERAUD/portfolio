@@ -16,8 +16,8 @@ type Props = HTMLAttributes<"header"> & {
   intro: string;
   headingLevel?: "h1" | "h2";
   variant?: "wide" | "compact";
-  navLabel?: string;
-  navItems?: readonly HeroNavItem[];
+  /** In-page navigation; the label names the landmark and is its caption. */
+  nav?: { label: string; items: readonly HeroNavItem[] };
 };
 
 const {
@@ -27,8 +27,7 @@ const {
   intro,
   headingLevel: Heading = "h1",
   variant = "wide",
-  navLabel,
-  navItems = [],
+  nav,
   class: className,
   ...rest
 } = Astro.props;
@@ -47,10 +46,10 @@ const {
     </Heading>
     <p class="editorial-hero__intro">{intro}</p>
   </div>
-  {navItems.length > 0 && (
-    <nav class="editorial-hero__nav" aria-label={navLabel}>
-      <Eyebrow class="editorial-hero__nav-caption">{navLabel}</Eyebrow>
-      {navItems.map((item) => (
+  {nav && nav.items.length > 0 && (
+    <nav class="editorial-hero__nav" aria-label={nav.label}>
+      <Eyebrow class="editorial-hero__nav-caption">{nav.label}</Eyebrow>
+      {nav.items.map((item) => (
         <a href={item.href}>
           <span>{item.label}</span>
           <ArrowDownRight size={17} aria-hidden="true" />

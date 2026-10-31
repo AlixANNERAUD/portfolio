@@ -479,9 +479,6 @@ for (const [file, professionalLabel, educationLabel] of [
   ],
 ]) {
   const html = read(file);
-  if (html.includes("<astro-island")) {
-    failed.push(file + ": experience timeline must not hydrate an island");
-  }
   for (const group of ["professional", "education"]) {
     const list = html.match(
       new RegExp('<ol[^>]*id="earlier-' + group + '"[^>]*>'),

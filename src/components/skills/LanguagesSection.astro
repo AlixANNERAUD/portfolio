@@ -1,7 +1,7 @@
 ---
 import { Languages } from "@lucide/astro";
 import SectionHeading from "../ui/SectionHeading.astro";
-import { spokenLanguages, type SpokenLanguage } from "../../data/skills.ts";
+import { spokenLanguages } from "../../data/skills.ts";
 import type { Locale } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
 
@@ -12,7 +12,7 @@ interface Props {
 
 const { lang } = Astro.props;
 const t = useTranslations(lang);
-const languages: readonly SpokenLanguage[] = spokenLanguages;
+const languages = spokenLanguages;
 ---
 
 <section
@@ -35,7 +35,9 @@ const languages: readonly SpokenLanguage[] = spokenLanguages;
     {languages.map((language) => (
       <li>
         <strong>{language.name[lang]}</strong>
-        <span>{language.proficiency[lang]}</span>
+        <span class="skills-language-proficiency">
+          {language.proficiency[lang]}
+        </span>
         {language.detail && (
           <span class="skills-language-detail">{language.detail[lang]}</span>
         )}
@@ -82,11 +84,11 @@ const languages: readonly SpokenLanguage[] = spokenLanguages;
     color: var(--color-text);
     font-size: 1.03rem;
   }
-  .skills-language-grid li > span {
+  .skills-language-proficiency {
     color: var(--color-text-muted);
     font-size: 0.85rem;
   }
-  .skills-language-grid .skills-language-detail {
+  .skills-language-detail {
     margin-top: auto;
     color: var(--color-accent);
     font-size: 0.74rem;

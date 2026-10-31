@@ -26,7 +26,7 @@ export interface Experience {
   earlier?: boolean;
 }
 
-export const experiences = [
+export const experiences: readonly Experience[] = [
   {
     id: "memo-bank",
     homepage: true,
@@ -325,9 +325,9 @@ export const experiences = [
     ],
     technologies: ["English · B1"],
   },
-] as const satisfies readonly Experience[];
+];
 
 /** Roles flagged `homepage`, in data order. */
-export const homepageExperiences: readonly Experience[] = (
-  experiences as readonly Experience[]
-).filter((entry) => entry.homepage);
+export const homepageExperiences = experiences.filter(
+  (entry) => entry.homepage,
+);

@@ -38,7 +38,10 @@ const location = entry.location[lang];
     <h3 id={`home-experience-${entry.id}`}>
       <a
         href={`${localizePath("/experiences", lang)}#${titleId}`}
-        aria-label={`${role} - ${entry.company}. ${t("experience.viewDetail")}`}
+        aria-label={t("experience.compactLinkLabel", {
+          role,
+          company: entry.company,
+        })}
       >
         {role} <span aria-hidden="true">↗</span>
       </a>
@@ -136,15 +139,21 @@ const location = entry.location[lang];
 
 <script>
   // Progressive enhancement: hide a logo that failed to load so the monogram
-  // underneath shows (Chromium already does this in CSS, see ::after below).
-  function reveal(img: HTMLImageElement) {
+  // underneath shows. The logo has an opaque background (transparent logos
+  // must not reveal the monogram), and Chromium draws a broken-image icon
+  // even with alt="", so the stacked monogram alone is not enough. Without
+  // JavaScript, the ::after rule below covers Chromium.
+  function hideBrokenLogo(img: HTMLImageElement) {
     img.hidden = true;
   }
   for (const img of document.querySelectorAll<HTMLImageElement>(
     ".career-company-logo",
   )) {
-    if (img.complete && img.naturalWidth === 0) reveal(img);
-    else img.addEventListener("error", () => reveal(img), { once: true });
+    if (img.complete && img.naturalWidth === 0) hideBrokenLogo(img);
+    else
+      img.addEventListener("error", () => hideBrokenLogo(img), {
+        once: true,
+      });
   }
 </script>
 
@@ -334,9 +343,15 @@ const location = entry.location[lang];
     color: var(--color-text-muted);
     font-size: 0.8rem;
   }
-  /* The period is in the timeline rail, except on narrow screens. */
+  /* The period is shown in the timeline rail, which is aria-hidden, except on
+     narrow screens: keep it in the accessibility tree at every width. */
   .career-period {
-    display: none;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
     font-weight: 600;
   }
   .career-location {
@@ -366,7 +381,12 @@ const location = entry.location[lang];
   }
   @media (max-width: 680px) {
     .career-period {
-      display: inline;
+      position: static;
+      width: auto;
+      height: auto;
+      overflow: visible;
+      clip: auto;
+      white-space: normal;
     }
     .career-company-mark {
       flex-basis: 4.25rem;

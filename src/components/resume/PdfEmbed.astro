@@ -18,7 +18,7 @@ const { src, title, openLabel } = Astro.props;
     style="border: none"
   ></iframe>
   <a class="pdf-open-link" href={src} target="_blank" rel="noopener noreferrer">
-    {openLabel} ↗
+    {openLabel} <span aria-hidden="true">↗</span>
   </a>
 </div>
 

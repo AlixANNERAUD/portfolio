@@ -2,18 +2,14 @@
 import type { HTMLAttributes } from "astro/types";
 import Card from "../ui/Card.astro";
 import Tags from "../ui/Tags.astro";
-import {
-  projectUrl,
-  type Project,
-  type ProjectId,
-} from "../../data/projects.ts";
+import { projectUrl, type CatalogueProject } from "../../data/projects.ts";
 import { localize } from "../../data/types.ts";
 import type { Locale } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
 import { formatPeriod } from "../../lib/format.ts";
 
 type Props = HTMLAttributes<"article"> & {
-  project: Project;
+  project: CatalogueProject;
   lang: Locale;
   /** Position in the list, from 1, shown on the artwork. */
   position: number;
@@ -48,7 +44,7 @@ const t = useTranslations(lang);
       />
     )}
     <div class="showcase-card-actions">
-      <a href={projectUrl(project.id as ProjectId, lang)}>
+      <a href={projectUrl(project.id, lang)}>
         {t("project.details")} <span aria-hidden="true">→</span>
       </a>
       {project.externalUrl && (

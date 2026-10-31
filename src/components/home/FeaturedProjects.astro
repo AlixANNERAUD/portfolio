@@ -37,10 +37,7 @@ const t = useTranslations(lang);
 
 <style>
   .portfolio-showcase {
-    max-width: 1160px;
-    margin: 2.5rem auto 5rem;
-    padding: 0 1.5rem;
-    color: var(--color-text);
+    margin-block: 2.5rem 5rem;
   }
   .showcase-grid {
     display: grid;
@@ -64,8 +61,7 @@ const t = useTranslations(lang);
   }
   @media (max-width: 600px) {
     .portfolio-showcase {
-      margin: 2rem auto 3rem;
-      padding: 0 1rem;
+      margin-block: 2rem 3rem;
     }
     .showcase-grid {
       grid-template-columns: minmax(0, 1fr);

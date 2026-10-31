@@ -225,3 +225,27 @@ svg {
     padding: var(--space-l) var(--space-s) var(--space-2xl);
   }
 }
+
+/* Screen-reader-only text that stays in the accessibility tree. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+/* Shared container for the featured projects and the project catalogue. */
+.portfolio-showcase {
+  max-width: 1160px;
+  margin-inline: auto;
+  padding: 0 1.5rem;
+  color: var(--color-text);
+}
+
+@media (max-width: 600px) {
+  .portfolio-showcase {
+    padding: 0 1rem;
+  }
+}

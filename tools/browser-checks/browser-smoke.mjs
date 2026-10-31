@@ -646,63 +646,79 @@ for (const [engineName, engine] of [
 
     // Without JavaScript every card stays visible and the navigation works:
     // filters and the earlier-roles toggle are progressive enhancements.
-    const staticContext = await browser.newContext({
-      viewport: { width: 1440, height: 900 },
-      javaScriptEnabled: false,
-    });
-    const staticPage = await staticContext.newPage();
-    for (const [path, cardSelector, minimum] of [
-      ["/", ".showcase-card", 3],
-      ["/", ".home-experience-card", 4],
-      ["/projects", ".showcase-card", 26],
-      ["/fr/projects", ".showcase-card", 26],
-      ["/experiences", ".career-card", 11],
-      ["/fr/experiences", ".career-card", 11],
+    // Mobile (390px) checks that the main navigation needs no menu script.
+    for (const [width, height] of [
+      [1440, 900],
+      [390, 844],
     ]) {
-      try {
-        // Wait for the load event so styles apply before checking visibility.
-        // A revisited page may be revalidated with 304 Not Modified.
-        const response = await staticPage.goto(base + path, {
-          waitUntil: "load",
-          timeout: 10000,
-        });
-        assert.ok(
-          [200, 304].includes(response?.status() ?? 0),
-          path + " should resolve",
-        );
-        const cards = staticPage.locator(cardSelector);
-        const total = await cards.count();
-        assert.ok(
-          total >= minimum,
-          path +
-            " without JS: expected at least " +
-            minimum +
-            " " +
-            cardSelector +
-            ", found " +
+      const staticContext = await browser.newContext({
+        viewport: { width, height },
+        javaScriptEnabled: false,
+      });
+      const staticPage = await staticContext.newPage();
+      for (const [path, cardSelector, minimum] of [
+        ["/", ".showcase-card", 3],
+        ["/", ".home-experience-card", 4],
+        ["/projects", ".showcase-card", 26],
+        ["/fr/projects", ".showcase-card", 26],
+        ["/experiences", ".career-card", 11],
+        ["/fr/experiences", ".career-card", 11],
+      ]) {
+        try {
+          // Wait for the load event so styles apply before checking visibility.
+          // A revisited page may be revalidated with 304 Not Modified.
+          const response = await staticPage.goto(base + path, {
+            waitUntil: "load",
+            timeout: 10000,
+          });
+          assert.ok(
+            [200, 304].includes(response?.status() ?? 0),
+            path + " should resolve",
+          );
+          const cards = staticPage.locator(cardSelector);
+          const total = await cards.count();
+          assert.ok(
+            total >= minimum,
+            path +
+              " without JS: expected at least " +
+              minimum +
+              " " +
+              cardSelector +
+              ", found " +
+              total,
+          );
+          assert.equal(
+            await staticPage.locator(cardSelector + ":visible").count(),
             total,
-        );
-        assert.equal(
-          await staticPage.locator(cardSelector + ":visible").count(),
-          total,
-          path + " without JS: every " + cardSelector + " must be visible",
-        );
-        const navLinks = staticPage.locator(".site-main-nav a[href]");
-        assert.ok(
-          (await navLinks.count()) >= 4,
-          path + " without JS: main navigation links missing",
-        );
-        for (const link of await navLinks.all()) {
-          assert.equal(await link.isVisible(), true, path + " nav link hidden");
+            path + " without JS: every " + cardSelector + " must be visible",
+          );
+          const navLinks = staticPage.locator(".site-main-nav a[href]");
+          assert.ok(
+            (await navLinks.count()) >= 4,
+            path + " without JS: main navigation links missing",
+          );
+          for (const link of await navLinks.all()) {
+            assert.equal(
+              await link.isVisible(),
+              true,
+              path + " nav link hidden",
+            );
+          }
+          checked++;
+        } catch (error) {
+          failures.push(
+            engineName +
+              " " +
+              path +
+              " at " +
+              width +
+              "px without JavaScript: " +
+              error,
+          );
         }
-        checked++;
-      } catch (error) {
-        failures.push(
-          engineName + " " + path + " without JavaScript: " + error,
-        );
       }
+      await staticContext.close();
     }
-    await staticContext.close();
   } finally {
     await browser.close();
   }

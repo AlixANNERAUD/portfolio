@@ -582,7 +582,16 @@ export const projects = [
   },
 ] as const satisfies readonly Project[];
 
-export type ProjectId = (typeof projects)[number]["id"];
+/** A project from the catalogue, with its literal `id`. */
+export type CatalogueProject = (typeof projects)[number];
+export type ProjectId = CatalogueProject["id"];
+
+/** The project with this id; throws on an unknown id. */
+export function getProject(id: ProjectId): CatalogueProject {
+  const project = projects.find((p) => p.id === id);
+  if (!project) throw new Error(`Unknown project: ${id}`);
+  return project;
+}
 
 /** Portfolio editorial priorities (percent). Not universal project quality scores. */
 export const RANK_WEIGHTS: Record<RankFactor, number> = {
@@ -609,7 +618,7 @@ export function byScore(a: Project, b: Project): number {
 }
 
 /** The three highest-ranked projects, shown on the homepage. */
-export const featuredProjects: readonly Project[] = [...projects]
+export const featuredProjects: readonly CatalogueProject[] = [...projects]
   .sort(byScore)
   .slice(0, 3);
 
@@ -618,9 +627,8 @@ export function projectUrl(id: ProjectId, lang: Locale): string {
 }
 
 /** Same category first, then most shared tags, then score. */
-export function relatedProjects(id: ProjectId, n = 3): Project[] {
-  const current: Project | undefined = projects.find((p) => p.id === id);
-  if (!current) throw new Error(`Unknown project: ${id}`);
+export function relatedProjects(id: ProjectId, n = 3): CatalogueProject[] {
+  const current = getProject(id);
   const tags = new Set<string>(current.tags);
   const shared = (project: Project) =>
     project.tags.filter((tag) => tags.has(tag)).length;

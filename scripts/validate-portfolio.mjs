@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import {
@@ -8,6 +8,7 @@ import {
   RANK_WEIGHTS,
 } from "../src/data/projects.ts";
 import { technologies } from "../src/data/technologies.ts";
+import { experiences } from "../src/data/experiences.ts";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -223,5 +224,32 @@ const config = readFileSync(join(root, "astro.config.mjs"), "utf8");
 if (!config.includes("mdx()") || !config.includes('format: "preserve"')) {
   throw new Error(
     "Astro integrations and preserved .html route format are required.",
+  );
+}
+
+// The site is all-Astro: no Vue component or client framework may return.
+const vueFiles = readdirSync(join(root, "src"), { recursive: true })
+  .map(String)
+  .filter((file) => file.endsWith(".vue"));
+if (vueFiles.length > 0) {
+  throw new Error("Vue components are not allowed: " + vueFiles.join(", "));
+}
+const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+const deps = { ...pkg.dependencies, ...pkg.devDependencies };
+const banned = ["vue", "@astrojs/vue", "lucide-vue-next"].filter(
+  (name) => name in deps,
+);
+if (banned.length > 0) {
+  throw new Error("Client framework dependencies: " + banned.join(", "));
+}
+
+// The homepage shows exactly the four professional roles.
+const homepage = experiences.filter((entry) => entry.homepage);
+if (
+  homepage.length !== 4 ||
+  homepage.some((entry) => entry.group !== "professional")
+) {
+  throw new Error(
+    "Exactly four professional roles must be flagged `homepage`.",
   );
 }

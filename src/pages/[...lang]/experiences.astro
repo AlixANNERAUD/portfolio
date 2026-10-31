@@ -35,8 +35,7 @@ const creditsHref = `${localizePath("/legal-notice", lang)}#${t("legal.logoCredi
       title={t("experiences.title")}
       accent={t("experiences.accent")}
       intro={t("experiences.intro")}
-      navLabel={t("experiences.navLabel")}
-      navItems={navItems}
+      nav={{ label: t("experiences.navLabel"), items: navItems }}
     />
 
     {groups.map((group, index) => (
@@ -56,7 +55,9 @@ const creditsHref = `${localizePath("/legal-notice", lang)}#${t("legal.logoCredi
       linkLabel={t("experiences.nextLink")}
     />
     <p class="career-logo-credits">
-      <a href={creditsHref}>{t("experiences.logoCredits")} ↗</a>
+      <a href={creditsHref}>
+        {t("experiences.logoCredits")} <span aria-hidden="true">↗</span>
+      </a>
     </p>
   </div>
 </BaseLayout>

@@ -20,7 +20,7 @@ export interface SkillDomain {
   examples: readonly SkillEvidence[];
 }
 
-export const skillDomains = [
+export const skillDomains: readonly SkillDomain[] = [
   {
     id: "systems",
     icon: "cpu",
@@ -256,7 +256,7 @@ export const skillDomains = [
       },
     ],
   },
-] as const satisfies readonly SkillDomain[];
+];
 
 export interface SpokenLanguage {
   id: string;
@@ -265,7 +265,7 @@ export interface SpokenLanguage {
   detail?: Localized;
 }
 
-export const spokenLanguages = [
+export const spokenLanguages: readonly SpokenLanguage[] = [
   {
     id: "french",
     name: { fr: "Français", en: "French" },
@@ -289,4 +289,4 @@ export const spokenLanguages = [
     proficiency: { fr: "Notions", en: "Basic" },
     detail: { fr: "A2", en: "A2" },
   },
-] as const satisfies readonly SpokenLanguage[];
+];

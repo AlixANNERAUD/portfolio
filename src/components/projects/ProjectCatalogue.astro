@@ -47,7 +47,7 @@ const categories = [
 const categoryLabel = (id: (typeof categories)[number]) =>
   id === "all" ? t("projects.category.all") : t(`category.${id}`);
 
-const sorted: Project[] = [...projects].sort(byScore);
+const sorted = [...projects].sort(byScore);
 const searchText = (project: Project) =>
   [localize(project.title, lang), project.description[lang], ...project.tags]
     .join(" ")
@@ -116,7 +116,7 @@ const searchText = (project: Project) =>
     <div class="showcase-toolbar-actions">
       <label class="showcase-sort">
         <span>{t("projects.sortLabel")}</span>
-        <select data-sort>
+        <select data-catalogue-sort>
           <option value="recommended">{t("projects.sort.recommended")}</option>
           <option value="alphabetical">
             {t("projects.sort.alphabetical")}
@@ -124,8 +124,12 @@ const searchText = (project: Project) =>
         </select>
       </label>
       <label class="showcase-search">
-        <span class="sr-only">{t("projects.search")}</span>
-        <input type="search" placeholder={t("projects.search")} data-search />
+        <span class="visually-hidden">{t("projects.search")}</span>
+        <input
+          type="search"
+          placeholder={t("projects.search")}
+          data-catalogue-search
+        />
       </label>
     </div>
   </div>
@@ -166,14 +170,29 @@ const searchText = (project: Project) =>
   for (const root of document.querySelectorAll<HTMLElement>(
     "[data-catalogue]",
   )) {
-    const lang = (root.dataset.lang ?? "en") as Locale;
+    const lang = root.dataset.lang as Locale | undefined;
     const toolbar = root.querySelector<HTMLElement>(".showcase-toolbar");
     const grid = root.querySelector<HTMLElement>("[data-catalogue-grid]");
     const status = root.querySelector<HTMLElement>("[role=status]");
     const empty = root.querySelector<HTMLElement>(".showcase-empty");
-    const search = root.querySelector<HTMLInputElement>("[data-search]");
-    const sort = root.querySelector<HTMLSelectElement>("[data-sort]");
-    if (!toolbar || !grid || !status || !empty || !search || !sort) continue;
+    const search = root.querySelector<HTMLInputElement>(
+      "[data-catalogue-search]",
+    );
+    const sort = root.querySelector<HTMLSelectElement>("[data-catalogue-sort]");
+    const { countOne, countOther } = status?.dataset ?? {};
+    // Broken markup leaves the server-rendered list untouched.
+    if (
+      !lang ||
+      !countOne ||
+      !countOther ||
+      !toolbar ||
+      !grid ||
+      !status ||
+      !empty ||
+      !search ||
+      !sort
+    )
+      continue;
 
     // Server order is the relevance ranking; keep it for "recommended".
     const cards = [...grid.querySelectorAll<HTMLElement>(".showcase-card")];
@@ -182,10 +201,7 @@ const searchText = (project: Project) =>
       collator.compare(a.dataset.title ?? "", b.dataset.title ?? ""),
     );
     const filters = { group: "all", category: "all" };
-    const forms = {
-      one: status.dataset.countOne ?? "{count}",
-      other: status.dataset.countOther ?? "{count}",
-    };
+    const forms = { one: countOne, other: countOther };
 
     const update = () => {
       const term = search.value.trim().toLocaleLowerCase(lang);
@@ -230,10 +246,7 @@ const searchText = (project: Project) =>
 
 <style>
   .portfolio-showcase {
-    max-width: 1160px;
-    margin: 4.25rem auto 5rem;
-    padding: 0 1.5rem;
-    color: var(--color-text);
+    margin-block: 4.25rem 5rem;
   }
   .showcase-toolbar {
     display: flex;
@@ -334,18 +347,9 @@ const searchText = (project: Project) =>
     text-align: center;
     color: var(--color-text-muted);
   }
-  .sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-  }
   @media (max-width: 600px) {
     .portfolio-showcase {
-      margin: 2rem auto 3rem;
-      padding: 0 1rem;
+      margin-block: 2rem 3rem;
     }
     .showcase-grid {
       grid-template-columns: minmax(0, 1fr);
