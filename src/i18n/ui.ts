@@ -114,6 +114,29 @@ const en = {
   "project.details": "Read details",
   "project.external": "External link",
   "project.technologies": "Technologies used",
+  "skills.eyebrow": "Expertise / Skills",
+  "skills.title": "From code to",
+  "skills.accent": "systems.",
+  "skills.intro":
+    "Rust, web, infrastructure and networking: I work across different layers, often in the same project. Here is what I use and where to see it.",
+  "skills.navLabel": "Explore",
+  "skills.domains.nav": "Technical domains",
+  "skills.domains.eyebrow": "01 / Expertise",
+  "skills.domains.title": "What I build.",
+  "skills.domains.intro":
+    "Six complementary domains backed by code and projects you can explore.",
+  "skills.domains.count": "areas",
+  "skills.evidence": "In practice",
+  "skills.technologies": "Technologies in use",
+  "skills.languages.nav": "Languages",
+  "skills.languages.eyebrow": "02 / Communication",
+  "skills.languages.title": "Working across borders.",
+  "skills.languages.intro":
+    "Experience studying, researching and working with international teams.",
+  "skills.nextTitle": "See the work behind it.",
+  "skills.nextDescription":
+    "Skills matter most when they solve a real engineering problem.",
+  "skills.nextLink": "Explore projects",
 } as const;
 
 export type UIKey = keyof typeof en;
@@ -225,6 +248,29 @@ const fr: Record<UIKey, string> = {
   "project.details": "Lire la fiche",
   "project.external": "Lien externe",
   "project.technologies": "Technologies utilisées",
+  "skills.eyebrow": "Expertise / Compétences",
+  "skills.title": "Du code aux",
+  "skills.accent": "systèmes.",
+  "skills.intro":
+    "Rust, web, infrastructure, réseau : je travaille sur des couches différentes, souvent dans les mêmes projets. Voici ce que je pratique et où le retrouver.",
+  "skills.navLabel": "Explorer",
+  "skills.domains.nav": "Domaines techniques",
+  "skills.domains.eyebrow": "01 / Expertise",
+  "skills.domains.title": "Ce que je construis.",
+  "skills.domains.intro":
+    "Six domaines complémentaires, illustrés par du code et des projets accessibles.",
+  "skills.domains.count": "domaines",
+  "skills.evidence": "Voir en pratique",
+  "skills.technologies": "Technologies pratiquées",
+  "skills.languages.nav": "Langues",
+  "skills.languages.eyebrow": "02 / Communication",
+  "skills.languages.title": "Travailler sans frontières.",
+  "skills.languages.intro":
+    "Une expérience de travail et de recherche dans des équipes internationales.",
+  "skills.nextTitle": "Voir les projets en détail.",
+  "skills.nextDescription":
+    "Les compétences prennent tout leur sens quand elles servent une réalisation concrète.",
+  "skills.nextLink": "Explorer les projets",
 };
 
 export const ui = { en, fr } satisfies Record<Locale, Record<UIKey, string>>;

@@ -1,8 +1,11 @@
 ---
 import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import SkillsShowcase from "../../components/SkillsShowcase.vue";
-import { localeStaticPaths } from "../../i18n/locales.ts";
+import Hero from "../../components/ui/Hero.astro";
+import NextLink from "../../components/ui/NextLink.astro";
+import SkillsSection from "../../components/skills/SkillsSection.astro";
+import LanguagesSection from "../../components/skills/LanguagesSection.astro";
+import { localeStaticPaths, localizePath } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
 
 export const getStaticPaths = (() =>
@@ -19,5 +22,26 @@ const t = useTranslations(lang);
   title={t("nav.skills")}
   description={t("skills.description")}
 >
-  <SkillsShowcase lang={lang} />
+  <div class="skills-showcase editorial-page">
+    <Hero
+      eyebrow={t("skills.eyebrow")}
+      title={t("skills.title")}
+      accent={t("skills.accent")}
+      intro={t("skills.intro")}
+      navLabel={t("skills.navLabel")}
+      navItems={[
+        { href: "#domains", label: t("skills.domains.nav") },
+        { href: "#languages", label: t("skills.languages.nav") },
+      ]}
+    />
+    <SkillsSection lang={lang} />
+    <LanguagesSection lang={lang} />
+    <NextLink
+      eyebrow={t("next.eyebrow")}
+      title={t("skills.nextTitle")}
+      description={t("skills.nextDescription")}
+      href={localizePath("/projects", lang)}
+      linkLabel={t("skills.nextLink")}
+    />
+  </div>
 </BaseLayout>
