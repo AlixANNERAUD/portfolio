@@ -1,0 +1,24 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+/** Small uppercase overline above a heading. */
+type Props = HTMLAttributes<"p">;
+
+const { class: className, ...rest } = Astro.props;
+---
+
+<p class:list={["eyebrow", className]} {...rest}>
+  <slot />
+</p>
+
+<style>
+  /* Low specificity so callers can adjust spacing with their own class. */
+  :where(.eyebrow) {
+    margin: 0 0 0.9rem;
+    color: var(--vp-c-text-2);
+    font-size: 0.73rem;
+    font-weight: 600;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+  }
+</style>
