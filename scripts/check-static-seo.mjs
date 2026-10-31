@@ -1,4 +1,4 @@
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { parse } from "node-html-parser";
 import { featuredProjects, projects } from "../src/data/projects.ts";
@@ -530,6 +530,26 @@ for (const file of ["experiences.html", "fr/experiences.html"]) {
     !html.includes("logo-becquerel-blanc_tournant.jpg")
   ) {
     failed.push(file + ": experience company logo markup missing from SSR");
+  }
+}
+
+// The site is all-Astro: no page may ship a hydrated island, and every
+// client script stays a small progressive enhancement.
+{
+  const MAX_SCRIPT_BYTES = 20 * 1024;
+  const files = readdirSync(dist, { recursive: true }).map(String);
+  for (const file of files.filter((name) => name.endsWith(".html"))) {
+    if (/<astro-island\b/.test(read(file))) {
+      failed.push(file + ": contains an <astro-island> hydrated component");
+    }
+  }
+  for (const file of files.filter(
+    (name) => name.startsWith("_astro/") && name.endsWith(".js"),
+  )) {
+    const { size } = statSync(resolve(dist, file));
+    if (size > MAX_SCRIPT_BYTES) {
+      failed.push(file + ": client script is " + size + " bytes (> 20 KB)");
+    }
   }
 }
 
