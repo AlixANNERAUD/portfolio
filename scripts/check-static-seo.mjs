@@ -653,6 +653,80 @@ for (const file of ["experiences.html", "fr/experiences.html"]) {
   }
 }
 
+// Catalogue polish: the home and catalogue pages never skip a heading level;
+// sort options read "Relevance"/"Name"; the grid/list view toggle is a pair
+// of aria-pressed buttons inside the script-revealed toolbar; the homepage
+// link to the catalogue gives the real project count.
+{
+  for (const file of [
+    "index.html",
+    "fr/index.html",
+    "projects.html",
+    "fr/projects.html",
+  ]) {
+    const html = read(file);
+    if (!html) continue;
+    let previous = 0;
+    for (const heading of parse(html).querySelectorAll(
+      "main h1, main h2, main h3, main h4, main h5, main h6",
+    )) {
+      const level = Number(heading.tagName.slice(1));
+      if (level > previous + 1) {
+        failed.push(
+          file +
+            ": heading level skipped (h" +
+            previous +
+            " → h" +
+            level +
+            ") at " +
+            JSON.stringify(heading.text.trim()),
+        );
+      }
+      previous = level;
+    }
+  }
+  for (const [file, sortLabels, viewLabels] of [
+    ["projects.html", ["Relevance", "Name"], ["Grid", "List"]],
+    ["fr/projects.html", ["Pertinence", "Nom"], ["Grille", "Liste"]],
+  ]) {
+    const html = read(file);
+    if (!html) continue;
+    const root = parse(html);
+    const options = root
+      .querySelectorAll("select[data-catalogue-sort] option")
+      .map((option) => option.text.trim());
+    if (options.join("|") !== sortLabels.join("|")) {
+      failed.push(file + ": sort options must be " + sortLabels.join(" / "));
+    }
+    const view = root.querySelectorAll(
+      ".showcase-toolbar [data-catalogue-view] button[aria-pressed]",
+    );
+    if (
+      view.length !== 2 ||
+      view.map((button) => button.getAttribute("value")).join("|") !==
+        "grid|list" ||
+      view.map((button) => button.text.trim()).join("|") !==
+        viewLabels.join("|") ||
+      view[0].getAttribute("aria-pressed") !== "true" ||
+      view[1].getAttribute("aria-pressed") !== "false"
+    ) {
+      failed.push(file + ": missing grid/list view toggle (grid pressed)");
+    }
+  }
+  for (const [file, label] of [
+    ["index.html", "See all " + projects.length + " projects"],
+    ["fr/index.html", "Voir les " + projects.length + " projets"],
+  ]) {
+    const html = read(file);
+    if (!html) continue;
+    const link = parse(html).querySelector(".showcase-all-link");
+    const text = link?.text.replace("→", "").replace(/\s+/g, " ").trim();
+    if (text !== label) {
+      failed.push(file + ": catalogue link must read " + JSON.stringify(label));
+    }
+  }
+}
+
 // → marks internal links and ↗ external ones: no same-site, anchor or mailto
 // link may show the external arrow.
 for (const [file] of cases) {

@@ -208,6 +208,114 @@ for (const [engineName, engine] of [
       }
     }
 
+    // Grid/list view toggle: aria-pressed buttons, a single-column list, the
+    // choice remembered across reloads, and no overflow at 390px.
+    for (const [path, gridName, listName] of [
+      ["/projects", "Grid", "List"],
+      ["/fr/projects", "Grille", "Liste"],
+    ]) {
+      try {
+        await page.setViewportSize({ width: 1440, height: 900 });
+        await page.goto(base + path, {
+          waitUntil: "domcontentloaded",
+          timeout: 10000,
+        });
+        await page.evaluate(() => localStorage.clear());
+        await page.reload({ waitUntil: "domcontentloaded" });
+        const gridButton = page.getByRole("button", {
+          name: gridName,
+          exact: true,
+        });
+        const listButton = page.getByRole("button", {
+          name: listName,
+          exact: true,
+        });
+        const grid = page.locator("[data-catalogue-grid]");
+        await listButton.waitFor({ timeout: 10000 });
+        assert.equal(await gridButton.getAttribute("aria-pressed"), "true");
+        assert.equal(await listButton.getAttribute("aria-pressed"), "false");
+
+        await listButton.click();
+        assert.equal(await listButton.getAttribute("aria-pressed"), "true");
+        assert.equal(await gridButton.getAttribute("aria-pressed"), "false");
+        assert.equal(await grid.getAttribute("data-view"), "list");
+        const [first, second] = await page
+          .locator(".showcase-card")
+          .evaluateAll((cards) =>
+            cards.slice(0, 2).map((card) => card.getBoundingClientRect()),
+          );
+        assert.ok(
+          Math.abs(first.left - second.left) < 1 && second.top > first.top,
+          path + " list view should stack cards in one column",
+        );
+
+        await page.reload({ waitUntil: "domcontentloaded" });
+        await listButton.waitFor({ timeout: 10000 });
+        assert.equal(
+          await listButton.getAttribute("aria-pressed"),
+          "true",
+          path + " should remember the list view",
+        );
+        assert.equal(await grid.getAttribute("data-view"), "list");
+
+        await page.setViewportSize({ width: 390, height: 844 });
+        await page.waitForTimeout(60);
+        assert.equal(
+          await page.evaluate(
+            () => document.documentElement.scrollWidth > window.innerWidth + 2,
+          ),
+          false,
+          path + " list view overflows at 390px",
+        );
+
+        await gridButton.click();
+        assert.equal(await grid.getAttribute("data-view"), "grid");
+        await page.evaluate(() => localStorage.clear());
+        checked++;
+      } catch (error) {
+        failures.push(engineName + " " + path + " view toggle: " + error);
+      }
+    }
+
+    // Blocked storage must not break the catalogue script.
+    {
+      const blocked = await browser.newContext({
+        viewport: { width: 1440, height: 900 },
+      });
+      try {
+        await blocked.addInitScript(() => {
+          Object.defineProperty(window, "localStorage", {
+            get() {
+              throw new DOMException("blocked", "SecurityError");
+            },
+          });
+        });
+        const blockedPage = await blocked.newPage();
+        await blockedPage.goto(base + "/projects", {
+          waitUntil: "domcontentloaded",
+          timeout: 10000,
+        });
+        const list = blockedPage.getByRole("button", {
+          name: "List",
+          exact: true,
+        });
+        await list.waitFor({ timeout: 10000 });
+        await list.click();
+        assert.equal(await list.getAttribute("aria-pressed"), "true");
+        assert.equal(
+          await blockedPage
+            .locator("[data-catalogue-grid]")
+            .getAttribute("data-view"),
+          "list",
+        );
+        checked++;
+      } catch (error) {
+        failures.push(engineName + " blocked storage view toggle: " + error);
+      } finally {
+        await blocked.close();
+      }
+    }
+
     // Immersive typographic homepage, keyboard-friendly scroll navigation and
     // reduced-motion fallback. The intro is static Astro HTML.
     for (const path of ["/", "/fr/"]) {

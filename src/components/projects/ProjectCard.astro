@@ -20,9 +20,17 @@ import { formatPeriod } from "../../lib/format.ts";
 type Props = HTMLAttributes<"article"> & {
   project: CatalogueProject;
   lang: Locale;
+  /** Follows the surrounding outline: h2 under the catalogue H1. */
+  headingLevel?: "h2" | "h3";
 };
 
-const { project, lang, class: className, ...rest } = Astro.props;
+const {
+  project,
+  lang,
+  headingLevel: Heading = "h3",
+  class: className,
+  ...rest
+} = Astro.props;
 const t = useTranslations(lang);
 const rank = String(projectRank(project.id)).padStart(2, "0");
 ---
@@ -36,17 +44,19 @@ const rank = String(projectRank(project.id)).padStart(2, "0");
     <span class="showcase-art-symbol">{project.symbol}</span>
     <span class="showcase-art-index">
       <span class="showcase-art-position">{rank}</span>
-      {" / "}
-      {formatPeriod(project.period, lang)}
+      <span class="showcase-art-separator"> / </span>
+      <span class="showcase-art-period">
+        {formatPeriod(project.period, lang)}
+      </span>
     </span>
   </div>
   <div class="showcase-card-body">
     <p class="showcase-card-category">{t(`category.${project.category}`)}</p>
-    <h3>
+    <Heading class="showcase-card-title">
       <a class="showcase-card-link" href={projectUrl(project.id, lang)}>
         {localize(project.title, lang)}
       </a>
-    </h3>
+    </Heading>
     <p class="showcase-card-description">{project.description[lang]}</p>
     {project.tags.length > 0 && (
       <Tags
@@ -144,7 +154,7 @@ const rank = String(projectRank(project.id)).padStart(2, "0");
     letter-spacing: var(--tracking-overline);
     text-transform: uppercase;
   }
-  .showcase-card h3 {
+  .showcase-card-title {
     margin: 0 0 var(--space-xs);
     border: 0;
     padding: 0;
@@ -229,6 +239,87 @@ const rank = String(projectRank(project.id)).padStart(2, "0");
   @media (max-width: 600px) {
     .showcase-art {
       min-height: 9.5rem;
+    }
+  }
+
+  /* Catalogue list view: an index row with a narrow symbol column. */
+  :global([data-view="list"]) > .showcase-card {
+    display: grid;
+    grid-template-columns: 7rem minmax(0, 1fr);
+  }
+  :global([data-view="list"]) > .showcase-card .showcase-art {
+    min-height: 0;
+    flex-direction: column;
+    gap: var(--space-2xs);
+    padding: var(--space-s) var(--space-2xs);
+  }
+  :global([data-view="list"]) > .showcase-card .showcase-art-symbol {
+    font-size: var(--step-4);
+  }
+  :global([data-view="list"]) > .showcase-card .showcase-art-index {
+    position: relative;
+    inset: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  :global([data-view="list"]) > .showcase-card .showcase-art-separator {
+    display: none;
+  }
+  /* Title, pitch and tags on the left; the external link on the right. */
+  :global([data-view="list"]) > .showcase-card .showcase-card-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-content: center;
+    column-gap: var(--space-m);
+    padding: var(--space-s) var(--space-m);
+  }
+  :global([data-view="list"]) > .showcase-card .showcase-card-body > * {
+    grid-column: 1;
+  }
+  :global([data-view="list"])
+    > .showcase-card
+    .showcase-card-body
+    > .showcase-card-actions {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: start;
+    margin: 0;
+  }
+  :global([data-view="list"]) > .showcase-card .showcase-card-title {
+    font-size: var(--step-1);
+  }
+  :global([data-view="list"]) > .showcase-card .showcase-card-description {
+    margin-bottom: var(--space-xs);
+  }
+  :global([data-view="list"]) > .showcase-card .showcase-card-title {
+    margin-bottom: var(--space-3xs);
+  }
+  :global([data-view="list"]) > .showcase-card :global(.editorial-tags) {
+    margin-bottom: 0;
+  }
+  :global([data-view="list"]) > .showcase-card .showcase-card-cta {
+    display: none;
+  }
+  @media (max-width: 600px) {
+    :global([data-view="list"]) > .showcase-card {
+      grid-template-columns: 5rem minmax(0, 1fr);
+    }
+    :global([data-view="list"]) > .showcase-card .showcase-art-symbol {
+      font-size: var(--step-3);
+    }
+    :global([data-view="list"]) > .showcase-card .showcase-card-body {
+      grid-template-columns: minmax(0, 1fr);
+      padding: var(--space-xs) var(--space-s);
+    }
+    :global([data-view="list"])
+      > .showcase-card
+      .showcase-card-body
+      > .showcase-card-actions {
+      grid-column: 1;
+      grid-row: auto;
+      margin-top: var(--space-2xs);
     }
   }
 </style>
