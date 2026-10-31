@@ -87,6 +87,18 @@ for (const [file, canonicalPath, translationPath] of cases) {
   if (!html.includes('hreflang="fr"') || !html.includes('hreflang="en"')) {
     failed.push(file + ": incomplete language alternates");
   }
+  // Only the display face is preloaded; other families load on demand.
+  const head = html.slice(0, html.indexOf("</head>"));
+  const fontPreloads = [...head.matchAll(/<link\b[^>]*>/g)].filter(
+    ([tag]) => /\brel="preload"/.test(tag) && /\bas="font"/.test(tag),
+  );
+  if (fontPreloads.length !== 1) {
+    failed.push(
+      file +
+        ": expected exactly one font preload, found " +
+        fontPreloads.length,
+    );
+  }
 }
 for (const file of ["index.html", "fr/index.html"]) {
   const html = readFileSync(resolve(dist, file), "utf8");
