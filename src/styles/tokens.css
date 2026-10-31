@@ -1,0 +1,138 @@
+/*
+ * Design tokens: the single source for type, space, layout, radius, color
+ * and motion values. Imported first by BaseLayout.
+ *
+ * --font-display (Newsreader) and --font-mono (JetBrains Mono) are declared
+ * on :root by the Astro Fonts API (<Font> in BaseLayout), together with
+ * metric-adjusted fallbacks. They are intentionally not redeclared here.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Typography */
+  --font-body: system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --tracking-display: -0.035em;
+  --tracking-heading: -0.02em;
+  --tracking-overline: 0.14em;
+
+  /* Fluid type scale (Utopia, 360-1240px viewport, 16-18px base). */
+  --step--2: clamp(0.694rem, 0.6834rem + 0.0473vw, 0.72rem);
+  --step--1: clamp(0.833rem, 0.8056rem + 0.1218vw, 0.9rem);
+  --step-0: clamp(1rem, 0.9489rem + 0.2273vw, 1.125rem);
+  --step-1: clamp(1.2rem, 1.1157rem + 0.3745vw, 1.406rem);
+  --step-2: clamp(1.44rem, 1.3099rem + 0.5782vw, 1.758rem);
+  --step-3: clamp(1.728rem, 1.5361rem + 0.8527vw, 2.197rem);
+  --step-4: clamp(2.074rem, 1.7987rem + 1.2236vw, 2.747rem);
+  --step-5: clamp(2.488rem, 2.1014rem + 1.7182vw, 3.433rem);
+  --step-display: clamp(3rem, 1.3636rem + 7.2727vw, 7rem);
+
+  --leading-tight: 1.1;
+  --leading-snug: 1.25;
+  --leading-body: 1.6;
+
+  --measure: 65ch;
+
+  /* Fluid space scale (Utopia, same viewport range as the type scale). */
+  --space-3xs: clamp(0.25rem, 0.2372rem + 0.0568vw, 0.28125rem);
+  --space-2xs: clamp(0.5rem, 0.4744rem + 0.1136vw, 0.5625rem);
+  --space-xs: clamp(0.75rem, 0.7116rem + 0.1705vw, 0.84375rem);
+  --space-s: clamp(1rem, 0.9489rem + 0.2273vw, 1.125rem);
+  --space-m: clamp(1.5rem, 1.4233rem + 0.3409vw, 1.6875rem);
+  --space-l: clamp(2rem, 1.8977rem + 0.4545vw, 2.25rem);
+  --space-xl: clamp(3rem, 2.8466rem + 0.6818vw, 3.375rem);
+  --space-2xl: clamp(4rem, 3.7955rem + 0.9091vw, 4.5rem);
+  --space-3xl: clamp(6rem, 5.6932rem + 1.3636vw, 6.75rem);
+
+  /* Space pairs that grow with the viewport. */
+  --space-s-l: clamp(1rem, 0.4886rem + 2.2727vw, 2.25rem);
+  --space-m-xl: clamp(1.5rem, 0.733rem + 3.4091vw, 3.375rem);
+  --space-xl-3xl: clamp(3rem, 1.4659rem + 6.8182vw, 6.75rem);
+
+  /* Layout */
+  --container: 1180px;
+  --container-prose: 850px;
+  --gutter: var(--space-s-l);
+  --header-h: 3.75rem;
+
+  /* Radius */
+  --radius-s: 0.375rem;
+  --radius-m: 0.625rem;
+  --radius-l: 0.875rem;
+  --radius-full: 999px;
+
+  /*
+   * Semantic colors: light value first, dark value second. light-dark()
+   * follows color-scheme, which the html.dark class switches below.
+   */
+  --color-bg: light-dark(oklch(0.995 0.003 270), oklch(0.22 0.008 285));
+  --color-surface: light-dark(oklch(0.975 0.006 270), oklch(0.245 0.01 280));
+  --color-surface-2: light-dark(oklch(0.945 0.01 270), oklch(0.29 0.012 280));
+  --color-text: light-dark(oklch(0.3 0.04 250), oklch(0.92 0.008 280));
+  --color-text-muted: light-dark(oklch(0.46 0.03 255), oklch(0.76 0.015 270));
+  /* At least 4.5:1 on --color-bg and --color-surface in both themes. */
+  --color-text-subtle: light-dark(oklch(0.54 0.02 260), oklch(0.66 0.015 270));
+  /* Decorative rules and card outlines. */
+  --color-border: light-dark(oklch(0.9 0.01 270), oklch(0.31 0.012 280));
+  /* Control boundaries: at least 3:1 on --color-bg (WCAG 1.4.11). */
+  --color-border-strong: light-dark(oklch(0.64 0.02 270), oklch(0.54 0.02 275));
+  --color-accent: light-dark(oklch(0.47 0.17 268), oklch(0.78 0.12 275));
+  --color-accent-hover: light-dark(oklch(0.4 0.17 268), oklch(0.85 0.09 275));
+  --color-accent-soft: light-dark(
+    oklch(0.954 0.022 275),
+    oklch(0.284 0.051 278)
+  );
+  --color-focus: var(--color-accent);
+
+  /* Project category panels: dark tints, slightly raised in dark theme. */
+  --category-systems: light-dark(
+    oklch(0.335 0.031 212),
+    oklch(0.375 0.031 212)
+  );
+  --category-web: light-dark(oklch(0.375 0.043 307), oklch(0.415 0.043 307));
+  --category-software: light-dark(oklch(0.36 0.04 340), oklch(0.4 0.04 340));
+  --category-infrastructure: light-dark(
+    oklch(0.374 0.038 246),
+    oklch(0.414 0.038 246)
+  );
+  --category-embedded: light-dark(oklch(0.411 0.04 77), oklch(0.451 0.04 77));
+  --category-security: light-dark(oklch(0.37 0.045 25), oklch(0.41 0.045 25));
+  --category-data: light-dark(oklch(0.36 0.04 150), oklch(0.4 0.04 150));
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 150ms;
+  --dur-base: 220ms;
+  --dur-slow: 540ms;
+
+  /*
+   * Temporary VitePress-era aliases for the Vue components.
+   * removed in Phase 3
+   */
+  --vp-c-bg: var(--color-bg);
+  --vp-c-bg-soft: var(--color-surface);
+  --vp-c-bg-mute: var(--color-surface-2);
+  --vp-c-text-1: var(--color-text);
+  --vp-c-text-2: var(--color-text-muted);
+  --vp-c-text-3: var(--color-text-subtle);
+  --vp-c-divider: var(--color-border);
+  --vp-c-border: var(--color-border);
+  --vp-c-brand-1: var(--color-accent);
+  --vp-c-brand-soft: var(--color-accent-soft);
+}
+
+:root.light {
+  color-scheme: light;
+}
+
+:root.dark {
+  color-scheme: dark;
+}
+
+/* The header wraps its navigation onto a second row on narrow screens. */
+@media (max-width: 720px) {
+  :root {
+    --header-h: 6.5rem;
+  }
+}
