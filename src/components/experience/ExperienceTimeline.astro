@@ -1,0 +1,225 @@
+---
+import { BriefcaseBusiness, ChevronDown, GraduationCap } from "@lucide/astro";
+import ExperienceCard from "./ExperienceCard.astro";
+import SectionHeading from "../ui/SectionHeading.astro";
+import type { Experience, ExperienceGroup } from "../../data/experiences.ts";
+import type { Locale } from "../../i18n/locales.ts";
+import { useTranslations } from "../../i18n/ui.ts";
+import { formatCount } from "../../lib/format.ts";
+
+/**
+ * One group of the career page (professional or education): heading, recent
+ * cards, then earlier cards behind a single toggle. Without JavaScript every
+ * card stays visible and the toggle stays hidden; the script below collapses
+ * the earlier list and reveals the toggle.
+ */
+interface Props {
+  group: ExperienceGroup;
+  /** Position of the section on the page, from 1. */
+  index: number;
+  entries: readonly Experience[];
+  lang: Locale;
+}
+
+const { group, index, entries, lang } = Astro.props;
+const t = useTranslations(lang);
+
+const recent = entries.filter((entry) => !entry.earlier);
+const earlier = entries.filter((entry) => entry.earlier);
+const eyebrow = (count: number) =>
+  `${String(index).padStart(2, "0")} / ${formatCount(count, "milestone", lang)}`;
+const headingId = `${group}-heading`;
+const earlierId = `earlier-${group}`;
+const Icon = group === "professional" ? BriefcaseBusiness : GraduationCap;
+---
+
+<section id={group} class="career-group" aria-labelledby={headingId}>
+  <SectionHeading
+    headingId={headingId}
+    eyebrow={eyebrow(entries.length)}
+    title={t(`experiences.${group}.title`)}
+    description={t(`experiences.${group}.description`)}
+  >
+    <Fragment slot="icon">
+      <Icon size={22} />
+    </Fragment>
+  </SectionHeading>
+
+  <ol class="career-timeline">
+    {recent.map((entry) => (
+      <li class="career-timeline-item">
+        <div class="career-timeline-rail" aria-hidden="true">
+          <span class="career-timeline-dot" />
+          <span class="career-timeline-date">{entry.period[lang]}</span>
+        </div>
+        <ExperienceCard experience={entry} lang={lang} />
+      </li>
+    ))}
+  </ol>
+
+  {earlier.length > 0 && (
+    <>
+      <button
+        type="button"
+        class="career-earlier-toggle"
+        aria-expanded="false"
+        aria-controls={earlierId}
+        data-label-show={t(`experiences.${group}.showEarlier`)}
+        data-label-hide={t(`experiences.${group}.hideEarlier`)}
+        data-eyebrow-collapsed={eyebrow(recent.length)}
+        data-eyebrow-expanded={eyebrow(entries.length)}
+        hidden
+      >
+        <span>{t(`experiences.${group}.showEarlier`)}</span>
+        <ChevronDown size={17} aria-hidden="true" />
+      </button>
+      <ol id={earlierId} class="career-timeline career-timeline--earlier">
+        {earlier.map((entry) => (
+          <li class="career-timeline-item">
+            <div class="career-timeline-rail" aria-hidden="true">
+              <span class="career-timeline-dot" />
+              <span class="career-timeline-date">{entry.period[lang]}</span>
+            </div>
+            <ExperienceCard experience={entry} lang={lang} />
+          </li>
+        ))}
+      </ol>
+    </>
+  )}
+</section>
+
+<script>
+  for (const button of document.querySelectorAll<HTMLButtonElement>(
+    ".career-earlier-toggle",
+  )) {
+    const list = document.getElementById(
+      button.getAttribute("aria-controls") ?? "",
+    );
+    const label = button.querySelector("span");
+    const eyebrow = button
+      .closest(".career-group")
+      ?.querySelector(".editorial-section-heading__eyebrow");
+    if (!list || !label) continue;
+
+    const render = (expanded: boolean) => {
+      button.setAttribute("aria-expanded", String(expanded));
+      list.hidden = !expanded;
+      const { labelShow, labelHide, eyebrowCollapsed, eyebrowExpanded } =
+        button.dataset;
+      label.textContent = (expanded ? labelHide : labelShow) ?? "";
+      if (eyebrow) {
+        eyebrow.textContent =
+          (expanded ? eyebrowExpanded : eyebrowCollapsed) ?? "";
+      }
+    };
+
+    render(false);
+    button.hidden = false;
+    button.addEventListener("click", () =>
+      render(button.getAttribute("aria-expanded") !== "true"),
+    );
+  }
+</script>
+
+<style>
+  .career-group {
+    margin: 0 0 4.5rem;
+  }
+  .career-timeline {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .career-timeline--earlier {
+    margin-bottom: 0.3rem;
+  }
+  .career-timeline[hidden] {
+    display: none;
+  }
+  .career-timeline-item {
+    display: grid;
+    grid-template-columns: 11rem minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+  .career-timeline-rail {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding: 1.7rem 1.5rem 0 0;
+    border-right: 1px solid var(--vp-c-divider);
+  }
+  .career-timeline-item:last-child .career-timeline-rail {
+    border-right-color: transparent;
+  }
+  .career-timeline-dot {
+    position: absolute;
+    z-index: 1;
+    top: 2.1rem;
+    right: -0.34rem;
+    width: 0.68rem;
+    height: 0.68rem;
+    border: 2px solid var(--vp-c-brand-1);
+    border-radius: 50%;
+    background: var(--vp-c-bg);
+  }
+  .career-timeline-date {
+    color: var(--vp-c-text-2);
+    font-size: 0.76rem;
+    line-height: 1.5;
+    text-align: right;
+  }
+  .career-earlier-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    margin: 0.25rem 0 1.5rem 12.5rem;
+    padding: 0.7rem 0.95rem;
+    border: 1px solid var(--vp-c-divider);
+    border-radius: 0.55rem;
+    background: var(--vp-c-bg-soft);
+    color: var(--vp-c-brand-1);
+    font-size: 0.88rem;
+    font-weight: 650;
+    cursor: pointer;
+  }
+  .career-earlier-toggle[hidden] {
+    display: none;
+  }
+  .career-earlier-toggle:hover {
+    border-color: var(--vp-c-brand-1);
+  }
+  .career-earlier-toggle > span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    text-align: left;
+  }
+  .career-earlier-toggle svg {
+    transition: transform 160ms ease;
+  }
+  .career-earlier-toggle[aria-expanded="true"] svg {
+    transform: rotate(180deg);
+  }
+  @media (max-width: 680px) {
+    .career-timeline-item {
+      grid-template-columns: 1.1rem minmax(0, 1fr);
+      gap: 0.65rem;
+    }
+    .career-timeline-rail {
+      padding: 0;
+      align-items: flex-end;
+    }
+    .career-timeline-date {
+      display: none;
+    }
+    .career-timeline-dot {
+      top: 1.4rem;
+    }
+    .career-earlier-toggle {
+      margin-left: 1.75rem;
+      max-width: calc(100% - 1.75rem);
+      white-space: normal;
+    }
+  }
+</style>

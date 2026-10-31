@@ -56,6 +56,40 @@ const en = {
   "category.embedded": "Embedded",
   "category.security": "Security",
   "category.data": "Data / ML",
+  "count.milestone.one": "{count} milestone",
+  "count.milestone.other": "{count} milestones",
+  "next.eyebrow": "Next / 03",
+  "legal.logoCreditsId": "logo-credits",
+  "experience.ongoing": "Ongoing",
+  "experience.technologies": "Technologies and domains",
+  "experience.areas": "Areas of work",
+  "experience.viewDetail": "View this experience",
+  "experiences.eyebrow": "Journey / Experience",
+  "experiences.title": "From systems to",
+  "experiences.accent": "people.",
+  "experiences.intro":
+    "I enjoy understanding how things work and building tools that make them more reliable and easier to use. My background connects software, networking, security and research.",
+  "experiences.navLabel": "Explore my experience",
+  "experiences.professional.title": "Professional experience",
+  "experiences.professional.description": "Products, systems and research.",
+  "experiences.professional.showEarlier": "Show earlier experience",
+  "experiences.professional.hideEarlier": "Hide earlier experience",
+  "experiences.education.title": "Education and projects",
+  "experiences.education.description":
+    "Learning by building practical solutions.",
+  "experiences.education.showEarlier": "Show earlier education",
+  "experiences.education.hideEarlier": "Hide earlier education",
+  "experiences.nextTitle": "What have I built?",
+  "experiences.nextDescription":
+    "Explore the projects behind these skills, from Xila to self-hosted infrastructure.",
+  "experiences.nextLink": "Explore my projects",
+  "experiences.logoCredits":
+    "Logos and trademarks belong to their respective owners. Sources and credits",
+  "home.experience.eyebrow": "Experience / 01",
+  "home.experience.title": "Built on real experience.",
+  "home.experience.intro":
+    "Security, software engineering, networking and research: different environments with the same focus on understanding systems and building useful tools.",
+  "home.experience.more": "Explore my experience",
 } as const;
 
 export type UIKey = keyof typeof en;
@@ -108,6 +142,41 @@ const fr: Record<UIKey, string> = {
   "category.embedded": "Embarqué",
   "category.security": "Sécurité",
   "category.data": "Data / ML",
+  "count.milestone.one": "{count} étape",
+  "count.milestone.other": "{count} étapes",
+  "next.eyebrow": "Suite / 03",
+  "legal.logoCreditsId": "credits-des-logos",
+  "experience.ongoing": "En cours",
+  "experience.technologies": "Technologies et domaines",
+  "experience.areas": "Domaines pratiqués",
+  "experience.viewDetail": "Voir cette expérience",
+  "experiences.eyebrow": "Parcours / Expériences",
+  "experiences.title": "Des systèmes aux",
+  "experiences.accent": "équipes.",
+  "experiences.intro":
+    "J’aime comprendre comment les choses fonctionnent, puis concevoir les outils qui les rendent plus fiables et plus simples à utiliser. Mon parcours mêle développement, réseaux, sécurité et recherche.",
+  "experiences.navLabel": "Explorer mon parcours",
+  "experiences.professional.title": "Parcours professionnel",
+  "experiences.professional.description":
+    "Des produits, des systèmes et de la recherche.",
+  "experiences.professional.showEarlier": "Voir les expériences précédentes",
+  "experiences.professional.hideEarlier": "Masquer les expériences précédentes",
+  "experiences.education.title": "Formation et projets",
+  "experiences.education.description":
+    "Apprendre en construisant des solutions concrètes.",
+  "experiences.education.showEarlier": "Voir les formations précédentes",
+  "experiences.education.hideEarlier": "Masquer les formations précédentes",
+  "experiences.nextTitle": "Et côté projets ?",
+  "experiences.nextDescription":
+    "Découvrez les projets qui illustrent ces compétences, de Xila à l’auto-hébergement.",
+  "experiences.nextLink": "Découvrir mes projets",
+  "experiences.logoCredits":
+    "Logos et marques : propriété de leurs organismes respectifs. Sources et crédits",
+  "home.experience.eyebrow": "Parcours / 01",
+  "home.experience.title": "L’expérience du terrain.",
+  "home.experience.intro":
+    "Sécurité, développement logiciel, exploitation réseau et recherche : des environnements différents, avec un même souci de comprendre et de construire.",
+  "home.experience.more": "Voir tout mon parcours",
 };
 
 export const ui = { en, fr } satisfies Record<Locale, Record<UIKey, string>>;

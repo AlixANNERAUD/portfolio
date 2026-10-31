@@ -155,6 +155,8 @@ test("formatCount pluralizes with Intl.PluralRules", () => {
   assert.equal(formatCount(0, "project", "en"), "0 projects");
   assert.equal(formatCount(4, "role", "en"), "4 roles");
   assert.equal(formatCount(1, "role", "fr"), "1 poste");
+  assert.equal(formatCount(4, "milestone", "en"), "4 milestones");
+  assert.equal(formatCount(1, "milestone", "fr"), "1 étape");
 });
 
 test("ranking weights total 100 and drive the featured selection", () => {

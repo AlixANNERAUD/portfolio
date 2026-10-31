@@ -467,8 +467,9 @@ for (const [file, projectPrefix] of [
   }
 }
 
-// Older experiences are complete cards, initially hidden by one toggle per section.
-// All content remains SSR-rendered; Vue handles accessible group visibility.
+// Older experiences are complete cards, hidden by one toggle per section.
+// All content is SSR-rendered and visible without JavaScript: a module script
+// reveals the toggles and collapses the earlier lists. No framework island.
 for (const [file, professionalLabel, educationLabel] of [
   ["experiences.html", "Show earlier experience", "Show earlier education"],
   [
@@ -478,7 +479,16 @@ for (const [file, professionalLabel, educationLabel] of [
   ],
 ]) {
   const html = read(file);
+  if (html.includes("<astro-island")) {
+    failed.push(file + ": experience timeline must not hydrate an island");
+  }
   for (const group of ["professional", "education"]) {
+    const list = html.match(
+      new RegExp('<ol[^>]*id="earlier-' + group + '"[^>]*>'),
+    )?.[0];
+    if (list && /\shidden[\s>=]/.test(list)) {
+      failed.push(file + ": earlier " + group + " list hidden without JS");
+    }
     if (
       !html.includes('id="earlier-' + group + '"') ||
       !html.includes('aria-controls="earlier-' + group + '"')

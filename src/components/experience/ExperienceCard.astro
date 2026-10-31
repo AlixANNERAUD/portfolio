@@ -1,0 +1,380 @@
+---
+import { ArrowUpRight, MapPin } from "@lucide/astro";
+import Card from "../ui/Card.astro";
+import Tags from "../ui/Tags.astro";
+import type { Experience } from "../../data/experiences.ts";
+import { localizePath, type Locale } from "../../i18n/locales.ts";
+import { useTranslations } from "../../i18n/ui.ts";
+
+/**
+ * One role or degree. `full` is the timeline card (logo, highlights, every
+ * tag); `compact` is the homepage summary linking to the full card.
+ */
+interface Props {
+  experience: Experience;
+  lang: Locale;
+  variant?: "full" | "compact";
+}
+
+const { experience: entry, lang, variant = "full" } = Astro.props;
+const t = useTranslations(lang);
+const titleId = `${entry.id}-title`;
+const role = entry.role[lang];
+const location = entry.location[lang];
+---
+
+{variant === "compact" ? (
+  <article
+    class="experience-compact"
+    aria-labelledby={`home-experience-${entry.id}`}
+  >
+    <div class="home-experience-card-top">
+      <span class="home-experience-monogram" aria-hidden="true">
+        {entry.monogram}
+      </span>
+      <span class="home-experience-period">{entry.period[lang]}</span>
+    </div>
+    <p class="home-experience-organization">{entry.company}</p>
+    <h3 id={`home-experience-${entry.id}`}>
+      <a
+        href={`${localizePath("/experiences", lang)}#${titleId}`}
+        aria-label={`${role} - ${entry.company}. ${t("experience.viewDetail")}`}
+      >
+        {role} <span aria-hidden="true">↗</span>
+      </a>
+    </h3>
+    <p class="home-experience-summary">{entry.summary[lang]}</p>
+    <ul class="home-experience-tags" aria-label={t("experience.areas")}>
+      {entry.technologies.slice(0, 2).map((tag) => (
+        <li>{tag}</li>
+      ))}
+    </ul>
+  </article>
+) : (
+  <Card
+    class="career-card"
+    variant="timeline"
+    highlighted={!!entry.ongoing}
+    aria-labelledby={titleId}
+  >
+    <div class="career-card-top">
+      <span
+        class:list={[
+          "career-company-mark",
+          { "career-company-mark--dark": entry.logoOnDark },
+        ]}
+        aria-hidden="true"
+      >
+        {/* The monogram stays underneath: it shows if the logo fails. */}
+        <span class="career-company-fallback">{entry.monogram}</span>
+        {entry.logo && (
+          <img
+            class="career-company-logo"
+            src={entry.logo}
+            alt=""
+            data-monogram={entry.monogram}
+            width="88"
+            height="60"
+            loading="lazy"
+            decoding="async"
+            referrerpolicy="no-referrer"
+          />
+        )}
+      </span>
+      <div class="career-card-heading">
+        <div class="career-card-heading-top">
+          <p class="career-organization">
+            {entry.companyUrl ? (
+              <a
+                href={entry.companyUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {entry.company}
+                <ArrowUpRight size={15} aria-hidden="true" />
+              </a>
+            ) : (
+              <span>{entry.company}</span>
+            )}
+          </p>
+          {entry.ongoing && (
+            <span class="career-current-label">{t("experience.ongoing")}</span>
+          )}
+        </div>
+        <h3 id={titleId}>{role}</h3>
+      </div>
+    </div>
+
+    <div class="career-metadata">
+      <span class="career-period">{entry.period[lang]}</span>
+      {location && (
+        <span class="career-location">
+          <MapPin size={14} aria-hidden="true" /> {location}
+        </span>
+      )}
+    </div>
+
+    <p class="career-summary">{entry.summary[lang]}</p>
+
+    {entry.highlights.length > 0 && (
+      <ul class="career-highlights">
+        {entry.highlights.map((highlight) => (
+          <li>{highlight[lang]}</li>
+        ))}
+      </ul>
+    )}
+
+    {entry.technologies.length > 0 && (
+      <Tags
+        tags={entry.technologies}
+        label={t("experience.technologies")}
+        density="timeline"
+      />
+    )}
+  </Card>
+)}
+
+<script>
+  // Progressive enhancement: hide a logo that failed to load so the monogram
+  // underneath shows (Chromium already does this in CSS, see ::after below).
+  function reveal(img: HTMLImageElement) {
+    img.hidden = true;
+  }
+  for (const img of document.querySelectorAll<HTMLImageElement>(
+    ".career-company-logo",
+  )) {
+    if (img.complete && img.naturalWidth === 0) reveal(img);
+    else img.addEventListener("error", () => reveal(img), { once: true });
+  }
+</script>
+
+<style>
+  /* Compact (homepage) card. */
+  .experience-compact {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: clamp(1.15rem, 2.3vw, 1.55rem);
+  }
+  .home-experience-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1.1rem;
+  }
+  .home-experience-monogram {
+    display: grid;
+    place-items: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    padding: 0 0.3rem;
+    border-radius: 0.55rem;
+    border: 1px solid var(--vp-c-divider);
+    color: var(--vp-c-brand-1);
+    background: var(--vp-c-bg-soft);
+    font:
+      650 0.85rem/1 ui-monospace,
+      monospace;
+  }
+  .home-experience-period {
+    color: var(--vp-c-text-2);
+    font-size: 0.77rem;
+    text-align: right;
+  }
+  .home-experience-organization {
+    margin: 0 0 0.3rem;
+    color: var(--vp-c-text-2);
+    font-size: 0.81rem;
+    font-weight: 600;
+  }
+  .experience-compact h3 {
+    margin: 0 0 0.65rem;
+    font-size: clamp(1.12rem, 1.8vw, 1.4rem);
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+  }
+  .experience-compact h3 a {
+    color: var(--vp-c-text-1);
+    text-decoration: none;
+  }
+  .experience-compact h3 a:hover {
+    color: var(--vp-c-brand-1);
+  }
+  .experience-compact h3 span {
+    color: var(--vp-c-brand-1);
+    font-size: 0.83em;
+  }
+  .home-experience-summary {
+    margin: 0 0 1rem;
+    color: var(--vp-c-text-2);
+    font-size: 0.87rem;
+    line-height: 1.6;
+  }
+  .home-experience-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin: auto 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .home-experience-tags li {
+    padding: 0.28rem 0.55rem;
+    border-radius: 0.35rem;
+    background: var(--vp-c-bg-soft);
+    color: var(--vp-c-text-2);
+    font-size: 0.71rem;
+  }
+
+  /* Full (timeline) card. */
+  .career-card-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .career-company-mark {
+    position: relative;
+    display: grid;
+    flex: 0 0 5.5rem;
+    place-items: center;
+    width: 5.5rem;
+    height: 3.75rem;
+    overflow: hidden;
+    border: 1px solid var(--vp-c-divider);
+    border-radius: 0.65rem;
+    background: #fff;
+    color: #254b55;
+  }
+  .career-company-mark--dark {
+    background: #17191d;
+    color: white;
+  }
+  .career-company-fallback,
+  .career-company-logo::after {
+    font-family: ui-monospace, monospace;
+    font-size: 1.18rem;
+    font-weight: 700;
+    letter-spacing: -0.06em;
+  }
+  .career-company-logo {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0.45rem;
+    object-fit: contain;
+    background: inherit;
+  }
+  .career-company-logo[hidden] {
+    display: none;
+  }
+  /* Only rendered for a broken image (Chromium): draws the monogram over it. */
+  .career-company-logo::after {
+    content: attr(data-monogram);
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: inherit;
+    color: inherit;
+  }
+  .career-card-heading {
+    min-width: 0;
+    flex: 1;
+  }
+  .career-card-heading-top {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.8rem;
+  }
+  .career-organization {
+    margin: 0 0 0.35rem;
+    color: var(--vp-c-text-2);
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .career-organization a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+    color: inherit;
+    text-decoration: none;
+  }
+  .career-organization a:hover {
+    color: var(--vp-c-brand-1);
+  }
+  .career-card h3 {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: clamp(1.19rem, 2.2vw, 1.55rem);
+    line-height: 1.3;
+    letter-spacing: -0.025em;
+  }
+  .career-current-label {
+    display: inline-flex;
+    align-items: center;
+    margin: 0 0 0.35rem;
+    padding: 0.17rem 0.5rem;
+    border: 1px solid var(--vp-c-brand-1);
+    border-radius: 99px;
+    color: var(--vp-c-brand-1);
+    font-size: 0.66rem;
+    font-weight: 650;
+  }
+  .career-metadata {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.35rem 1rem;
+    margin: 1.1rem 0 0.9rem;
+    color: var(--vp-c-text-2);
+    font-size: 0.8rem;
+  }
+  /* The period is in the timeline rail, except on narrow screens. */
+  .career-period {
+    display: none;
+    font-weight: 600;
+  }
+  .career-location {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  .career-summary {
+    margin: 0 0 0.85rem;
+    color: var(--vp-c-text-1);
+    font-size: 0.93rem;
+    line-height: 1.65;
+  }
+  .career-highlights {
+    margin: 0.75rem 0 1.2rem;
+    padding-left: 1.1rem;
+    color: var(--vp-c-text-2);
+    font-size: 0.86rem;
+    line-height: 1.7;
+  }
+  .career-highlights li {
+    padding-left: 0.25rem;
+    margin: 0.25rem 0;
+  }
+  .career-highlights li::marker {
+    color: var(--vp-c-brand-1);
+  }
+  @media (max-width: 680px) {
+    .career-period {
+      display: inline;
+    }
+    .career-company-mark {
+      flex-basis: 4.25rem;
+      width: 4.25rem;
+      height: 3.3rem;
+    }
+    .career-company-logo {
+      padding: 0.32rem;
+    }
+  }
+</style>
