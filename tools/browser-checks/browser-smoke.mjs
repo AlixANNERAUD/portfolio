@@ -676,6 +676,100 @@ for (const [engineName, engine] of [
       }
     }
 
+    // Project cards: the whole card opens the project page through one
+    // stretched title link, keyboard focus rings the card, hovering dims the
+    // neighbours (motion allowed only), and numbers are stable ranks.
+    for (const [path, filter] of [
+      ["/", null],
+      ["/fr/projects", "Bibliothèques"],
+    ]) {
+      try {
+        await page.setViewportSize({ width: 1440, height: 900 });
+        await page.emulateMedia({ reducedMotion: "no-preference" });
+        await page.goto(base + path, {
+          waitUntil: "load",
+          timeout: 10000,
+        });
+        const cards = page.locator(".showcase-card");
+        const [first, second] = [cards.nth(0), cards.nth(1)];
+        const opacity = (card) =>
+          card.evaluate((node) => Number(getComputedStyle(node).opacity));
+        await first.scrollIntoViewIfNeeded();
+        // Let the homepage entry animation finish first.
+        await page.waitForTimeout(1000);
+        await first.hover();
+        await page.waitForTimeout(450);
+        // Dimming is reserved to hover-capable pointers (headless Firefox
+        // reports none): elsewhere every card keeps full opacity.
+        const canHover = await page.evaluate(
+          () => matchMedia("(hover: hover)").matches,
+        );
+        assert.equal(await opacity(first), 1, path + " hovered card dimmed");
+        if (canHover) {
+          assert.ok(
+            (await opacity(second)) < 0.8,
+            path + " neighbours should dim while a card is hovered",
+          );
+        } else {
+          assert.equal(
+            await opacity(second),
+            1,
+            path + " dimmed without hover",
+          );
+        }
+
+        const link = first.locator(".showcase-card-link");
+        await link.focus();
+        assert.notEqual(
+          await first.evaluate((node) => getComputedStyle(node).outlineStyle),
+          "none",
+          path + " focusing the card link should ring the card",
+        );
+
+        if (filter) {
+          const target = cards.filter({ hasText: "nanoexpr" });
+          const rank = () =>
+            target.locator(".showcase-art-position").innerText();
+          const before = await rank();
+          await page.getByRole("button", { name: filter, exact: true }).click();
+          assert.equal(
+            await rank(),
+            before,
+            path + " card numbers must not change when filtering",
+          );
+        }
+
+        // A click anywhere on a visible card opens its project page.
+        const clicked = cards.filter({ visible: true }).first();
+        const href = await clicked
+          .locator(".showcase-card-link")
+          .getAttribute("href");
+        await clicked.click();
+        await page.waitForURL((url) => url.pathname === href, {
+          timeout: 5000,
+        });
+
+        await page.emulateMedia({ reducedMotion: "reduce" });
+        await page.goto(base + path, { waitUntil: "load", timeout: 10000 });
+        await first.hover();
+        await page.waitForTimeout(300);
+        assert.equal(
+          await opacity(second),
+          1,
+          path + " reduced motion: neighbours must not dim",
+        );
+        assert.equal(
+          await first.evaluate((node) => getComputedStyle(node).transform),
+          "none",
+          path + " reduced motion: hovered card must not move",
+        );
+        checked++;
+      } catch (error) {
+        failures.push(engineName + " " + path + " project cards: " + error);
+      }
+      await page.emulateMedia({ reducedMotion: "no-preference" });
+    }
+
     await context.close();
 
     // Without JavaScript every card stays visible and the navigation works:

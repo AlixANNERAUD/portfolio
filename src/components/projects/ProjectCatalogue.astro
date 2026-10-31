@@ -144,11 +144,10 @@ const searchText = (project: Project) =>
   </p>
 
   <div class="showcase-grid" data-catalogue-grid>
-    {sorted.map((project, index) => (
+    {sorted.map((project) => (
       <ProjectCard
         project={project}
         lang={lang}
-        position={index + 1}
         data-group={project.group}
         data-category={project.category}
         data-search={searchText(project)}
@@ -215,10 +214,7 @@ const searchText = (project: Project) =>
           (!term || (card.dataset.search ?? "").includes(term));
         card.hidden = !visible;
         grid.append(card);
-        if (!visible) continue;
-        shown++;
-        const position = card.querySelector(".showcase-art-position");
-        if (position) position.textContent = String(shown).padStart(2, "0");
+        if (visible) shown++;
       }
       status.textContent = formatPlural(shown, forms, lang);
       empty.hidden = shown > 0;

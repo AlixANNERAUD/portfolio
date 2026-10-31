@@ -617,10 +617,17 @@ export function byScore(a: Project, b: Project): number {
   return projectScore(b) - projectScore(a) || a.id.localeCompare(b.id);
 }
 
+const ranked: readonly CatalogueProject[] = [...projects].sort(byScore);
+
+/** Stable 1-based relevance rank, shown on cards whatever the filter or sort. */
+export function projectRank(id: ProjectId): number {
+  const index = ranked.findIndex((project) => project.id === id);
+  if (index < 0) throw new Error(`Unknown project: ${id}`);
+  return index + 1;
+}
+
 /** The three highest-ranked projects, shown on the homepage. */
-export const featuredProjects: readonly CatalogueProject[] = [...projects]
-  .sort(byScore)
-  .slice(0, 3);
+export const featuredProjects: readonly CatalogueProject[] = ranked.slice(0, 3);
 
 export function projectUrl(id: ProjectId, lang: Locale): string {
   return localizePath(`/projects/${id}`, lang);

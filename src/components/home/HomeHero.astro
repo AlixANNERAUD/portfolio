@@ -70,7 +70,7 @@ const actions = [
             >
               {action.label}
               <span class="home-action-icon" aria-hidden="true">
-                ↗
+                →
               </span>
             </a>
           ))}
@@ -281,7 +281,7 @@ const actions = [
     transition: transform var(--dur-base) var(--ease-out);
   }
   .home-action:hover .home-action-icon {
-    transform: translate(2px, -2px);
+    transform: translateX(3px);
   }
 
   .home-hero-footer {

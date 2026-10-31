@@ -1,7 +1,8 @@
 import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { parse } from "node-html-parser";
-import { featuredProjects, projects } from "../src/data/projects.ts";
+import { byScore, featuredProjects, projects } from "../src/data/projects.ts";
+import { ui } from "../src/i18n/ui.ts";
 
 /**
  * Build-output smoke tests for the bilingual Astro site.
@@ -586,6 +587,84 @@ for (const file of ["experiences.html", "fr/experiences.html"]) {
     !html.includes("logo-becquerel-blanc_tournant.jpg")
   ) {
     failed.push(file + ": experience company logo markup missing from SSR");
+  }
+}
+
+// Project cards: the title link is the single link to the project page and is
+// stretched over the card; the number shown is the stable relevance rank;
+// the panel uses the category token; an external link carries ↗ and a
+// visually hidden "opens in a new tab" note.
+{
+  const ranks = new Map(
+    [...projects].sort(byScore).map((project, index) => [project.id, index]),
+  );
+  const byId = new Map(projects.map((project) => [project.id, project]));
+  for (const [file, lang, expected] of [
+    ["index.html", "en", featuredProjects.length],
+    ["fr/index.html", "fr", featuredProjects.length],
+    ["projects.html", "en", projects.length],
+    ["fr/projects.html", "fr", projects.length],
+  ]) {
+    const html = read(file);
+    if (!html) continue;
+    const prefix = lang === "fr" ? "/fr/projects/" : "/projects/";
+    const cards = parse(html).querySelectorAll(".showcase-card");
+    if (cards.length !== expected) {
+      failed.push(file + ": expected " + expected + " project cards");
+    }
+    for (const card of cards) {
+      const internal = card
+        .querySelectorAll("a[href]")
+        .filter((a) => !a.getAttribute("href").startsWith("http"));
+      const link = card.querySelector(
+        "h2 a.showcase-card-link, h3 a.showcase-card-link",
+      );
+      const id = link?.getAttribute("href")?.slice(prefix.length);
+      if (internal.length !== 1 || !link || !id || !byId.has(id)) {
+        failed.push(
+          file + ": each card needs one internal link, its title link",
+        );
+        continue;
+      }
+      const rank = card.querySelector(".showcase-art-position")?.text.trim();
+      if (rank !== String(ranks.get(id) + 1).padStart(2, "0")) {
+        failed.push(file + ": card " + id + " is not numbered by its rank");
+      }
+      const art = card.querySelector(".showcase-art");
+      if (
+        !art
+          ?.getAttribute("style")
+          ?.includes("--category-" + byId.get(id).category + ")")
+      ) {
+        failed.push(
+          file + ": card " + id + " panel must use its category token",
+        );
+      }
+      for (const external of card.querySelectorAll('a[target="_blank"]')) {
+        const note = external.querySelector(".visually-hidden")?.text.trim();
+        if (
+          note !== ui[lang]["a11y.newTab"] ||
+          !external.querySelector('[aria-hidden="true"]')?.text.includes("↗")
+        ) {
+          failed.push(file + ": external card link needs ↗ and a new-tab note");
+        }
+      }
+    }
+  }
+}
+
+// → marks internal links and ↗ external ones: no same-site, anchor or mailto
+// link may show the external arrow.
+for (const [file] of cases) {
+  const html = read(file);
+  if (!html) continue;
+  for (const link of parse(html).querySelectorAll("a[href]")) {
+    const href = link.getAttribute("href");
+    if (!/^(?:\/|#|mailto:)/.test(href)) continue;
+    if (link.getAttribute("target") === "_blank") continue;
+    if (link.text.includes("↗")) {
+      failed.push(file + ": internal link " + href + " uses the ↗ arrow");
+    }
   }
 }
 

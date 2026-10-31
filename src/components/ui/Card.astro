@@ -32,21 +32,25 @@ const {
   .editorial-card {
     min-width: 0;
     border: 1px solid var(--color-border);
-    border-radius: 0.85rem;
+    border-radius: var(--radius-l);
     background: var(--color-bg);
     transition:
-      border-color 180ms ease,
-      transform 180ms ease;
+      border-color var(--dur-base) var(--ease-out),
+      opacity var(--dur-base) var(--ease-out),
+      transform var(--dur-base) var(--ease-out);
   }
   .editorial-card:hover {
-    border-color: var(--color-accent);
-    transform: translateY(-2px);
+    border-color: var(--color-border-strong);
   }
   .editorial-card--project {
+    position: relative;
     overflow: hidden;
   }
-  .editorial-card--project:hover {
-    transform: translateY(-3px);
+  /* Only clickable cards lift, and only for a pointer with motion allowed. */
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .editorial-card--project:hover {
+      transform: translateY(-3px);
+    }
   }
   .editorial-card--timeline {
     margin: 0 0 1.25rem;
@@ -77,11 +81,6 @@ const {
   @media (max-width: 560px) {
     .editorial-card--skill {
       padding: 1.15rem;
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .editorial-card:hover {
-      transform: none;
     }
   }
 </style>

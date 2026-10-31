@@ -25,13 +25,13 @@ const t = useTranslations(lang);
   />
 
   <div class="showcase-grid">
-    {featuredProjects.map((project, index) => (
-      <ProjectCard project={project} lang={lang} position={index + 1} />
+    {featuredProjects.map((project) => (
+      <ProjectCard project={project} lang={lang} />
     ))}
   </div>
 
   <a class="showcase-all-link" href={localizePath("/projects", lang)}>
-    {t("home.projects.viewAll")} <span aria-hidden="true">↗</span>
+    {t("home.projects.viewAll")} <span aria-hidden="true">→</span>
   </a>
 </section>
 
