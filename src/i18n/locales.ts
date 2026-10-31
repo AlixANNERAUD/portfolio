@@ -25,6 +25,14 @@ export function localeStaticPaths(): {
  * The home page keeps its trailing slash (`/`, `/fr/`); other paths have none.
  */
 export function localizePath(enPath: string, lang: Locale): string {
+  const prefixed = locales.some(
+    (code) =>
+      code !== defaultLocale &&
+      (enPath === `/${code}` || enPath.startsWith(`/${code}/`)),
+  );
+  if (!enPath.startsWith("/") || prefixed) {
+    throw new Error(`localizePath expects an English absolute path: ${enPath}`);
+  }
   const clean = enPath.replace(/\/+$/, "");
   if (!clean) return lang === defaultLocale ? "/" : `/${lang}/`;
   return lang === defaultLocale ? clean : `/${lang}${clean}`;

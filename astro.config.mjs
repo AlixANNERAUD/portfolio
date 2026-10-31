@@ -7,6 +7,9 @@ const site = "https://alix.anneraud.fr";
 // The French home page is canonically `/fr/` (its indexed URL), but the
 // sitemap integration emits `/fr`; align the location and its alternates.
 const frenchHome = (url) => (url === `${site}/fr` ? `${site}/fr/` : url);
+// Only the root 404 page, never a page whose slug merely contains "404".
+const isNotFoundPage = (url) =>
+  /^\/404(\.html)?\/?$/.test(new URL(url).pathname);
 
 export default defineConfig({
   site,
@@ -25,15 +28,22 @@ export default defineConfig({
     mdx(),
     sitemap({
       i18n: { defaultLocale: "en", locales: { en: "en", fr: "fr" } },
-      filter: (page) => !page.includes("/404"),
-      serialize: (item) => ({
-        ...item,
-        url: frenchHome(item.url),
-        links: item.links?.map((link) => ({
+      filter: (page) => !isNotFoundPage(page),
+      // Mirror the page <head>: en and fr alternates plus x-default (English).
+      serialize: (item) => {
+        const links = item.links?.map((link) => ({
           ...link,
           url: frenchHome(link.url),
-        })),
-      }),
+        }));
+        const english = links?.find((link) => link.lang === "en");
+        return {
+          ...item,
+          url: frenchHome(item.url),
+          links: english
+            ? [...links, { lang: "x-default", url: english.url }]
+            : links,
+        };
+      },
     }),
   ],
   // Fontsource serves Newsreader as one variable file per style, so the

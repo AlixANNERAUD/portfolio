@@ -10,7 +10,7 @@ export const getStaticPaths = (() =>
   localeStaticPaths()) satisfies GetStaticPaths;
 type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 
-const { lang } = Astro.props as Props;
+const { lang } = Astro.props;
 const t = useTranslations(lang);
 ---
 

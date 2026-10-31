@@ -12,7 +12,8 @@ import { useTranslations } from "../../i18n/ui.ts";
 
 export interface Props {
   lang: Locale;
-  title: string;
+  /** Page title; the home page (`home`) uses its own localized title. */
+  title?: string;
   description: string;
   /** English path of the page; every locale URL derives from it. */
   path: string;
@@ -32,7 +33,10 @@ const {
   jsonLd = [],
 } = Astro.props;
 const t = useTranslations(lang);
-const titleText = home ? t("meta.homeTitle") : t("meta.pageTitle", { title });
+if (!home && !title) throw new Error(`Missing page title for ${path}`);
+const titleText = home
+  ? t("meta.homeTitle")
+  : t("meta.pageTitle", { title: title! });
 const canonical = site.url + localizePath(path, lang);
 const image = site.url + site.image;
 const hreflang = Object.entries(alternates(path));
@@ -60,7 +64,7 @@ const ogLocale: Record<Locale, string> = { en: "en_US", fr: "fr_FR" };
     ))}
 <meta property="og:title" content={titleText} />
 <meta property="og:description" content={description} />
-<meta property="og:url" content={canonical} />
+{!noindex && <meta property="og:url" content={canonical} />}
 <meta property="og:image" content={image} />
 <meta property="og:image:alt" content={t("meta.ogImageAlt")} />
 <meta name="twitter:card" content="summary" />

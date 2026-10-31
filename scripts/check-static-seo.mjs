@@ -90,13 +90,41 @@ function checkFontPreload(file, html) {
     );
   }
 }
-for (const [file, canonicalPath, translationPath] of cases) {
+/** File contents, or "" after recording the missing file as a failure. */
+function read(file) {
   const filename = resolve(dist, file);
   if (!existsSync(filename)) {
     failed.push("Missing output: " + file);
-    continue;
+    return "";
   }
-  const html = readFileSync(filename, "utf8");
+  return readFileSync(filename, "utf8");
+}
+
+/** The root 404 page only, never a page whose slug merely contains "404". */
+const isNotFoundPage = (url) =>
+  /^\/404(\.html)?\/?$/.test(new URL(url).pathname);
+
+/** Every header locale switch must lead to a page that was built. */
+function checkLocaleSwitch(file, root) {
+  const links = root.querySelectorAll("a.site-locale");
+  if (links.length !== 1) {
+    failed.push(file + ": expected one locale switch, found " + links.length);
+    return;
+  }
+  const href = links[0].getAttribute("href") ?? "";
+  const target = href.endsWith("/") ? href + "index.html" : href + ".html";
+  if (!href.startsWith("/") || !existsSync(resolve(dist, target.slice(1)))) {
+    failed.push(file + ": locale switch links to a missing page " + href);
+  }
+}
+
+// Head metadata is parsed, not matched as text: navigation links to the
+// other locale must not satisfy a canonical or hreflang assertion.
+const site = "https://alix.anneraud.fr";
+const pagesByCanonical = new Map();
+for (const [file, canonicalPath, translationPath] of cases) {
+  const html = read(file);
+  if (!html) continue;
   if (file.startsWith("projects/") || file.startsWith("fr/projects/")) {
     const headings = [...html.matchAll(/<h1(?:\s|>)/g)];
     if (headings.length !== 1) {
@@ -112,27 +140,9 @@ for (const [file, canonicalPath, translationPath] of cases) {
     if (!pattern.test(html)) failed.push(file + ": missing " + pattern);
   }
   checkFontPreload(file, html);
-}
-checkFontPreload("404.html", read("404.html"));
-
-/** File contents, or "" after recording the missing file as a failure. */
-function read(file) {
-  const filename = resolve(dist, file);
-  if (!existsSync(filename)) {
-    failed.push("Missing output: " + file);
-    return "";
-  }
-  return readFileSync(filename, "utf8");
-}
-
-// Head metadata is parsed, not matched as text: navigation links to the
-// other locale must not satisfy a canonical or hreflang assertion.
-const site = "https://alix.anneraud.fr";
-const pagesByCanonical = new Map();
-for (const [file, canonicalPath, translationPath] of cases) {
-  const html = read(file);
-  if (!html) continue;
-  const head = parse(html).querySelector("head");
+  const root = parse(html);
+  checkLocaleSwitch(file, root);
+  const head = root.querySelector("head");
   if (!head) {
     failed.push(file + ": missing <head>");
     continue;
@@ -201,7 +211,10 @@ for (const [file, canonicalPath, translationPath] of cases) {
 // The bilingual 404 page is served for every unknown path, so it must not
 // be indexed nor claim a canonical URL or locale alternates.
 {
-  const root = parse(read("404.html"));
+  const html = read("404.html");
+  checkFontPreload("404.html", html);
+  const root = parse(html);
+  checkLocaleSwitch("404.html", root);
   const head = root.querySelector("head");
   const robots = head?.querySelectorAll('meta[name="robots"]') ?? [];
   if (robots.length !== 1 || robots[0].getAttribute("content") !== "noindex") {
@@ -214,6 +227,9 @@ for (const [file, canonicalPath, translationPath] of cases) {
   }
   if (head?.querySelector("link[hreflang]")) {
     failed.push("404.html: must not declare hreflang alternates");
+  }
+  if (head?.querySelector('meta[property="og:url"]')) {
+    failed.push("404.html: must not declare an og:url");
   }
   for (const lang of ["en", "fr"]) {
     if (!root.querySelector('main [lang="' + lang + '"]')) {
@@ -242,7 +258,7 @@ for (const [file, canonicalPath, translationPath] of cases) {
         continue;
       }
       const links = url.getElementsByTagName("xhtml:link");
-      for (const code of ["en", "fr"]) {
+      for (const code of ["en", "fr", "x-default"]) {
         const found = links
           .filter((link) => link.getAttribute("hreflang") === code)
           .map((link) => link.getAttribute("href"));
@@ -268,11 +284,11 @@ for (const [file, canonicalPath, translationPath] of cases) {
     failed.push("sitemap: missing " + site + "/fr/");
   if (listed.has(site + "/fr")) failed.push("sitemap: lists " + site + "/fr");
   for (const loc of listed) {
-    if (loc.includes("/404")) failed.push("sitemap: lists the 404 page " + loc);
+    if (isNotFoundPage(loc)) failed.push("sitemap: lists the 404 page " + loc);
   }
 }
 for (const file of ["index.html", "fr/index.html"]) {
-  const html = readFileSync(resolve(dist, file), "utf8");
+  const html = read(file);
   if (!html.includes("application/ld+json") || !html.includes("schema.org")) {
     failed.push(file + ": missing Person structured data");
   }
@@ -284,7 +300,7 @@ for (const [file, experienceUrl] of [
   ["index.html", "/experiences"],
   ["fr/index.html", "/fr/experiences"],
 ]) {
-  const html = readFileSync(resolve(dist, file), "utf8");
+  const html = read(file);
   const marks = [
     'class="home-hero"',
     'class="home-experience"',
@@ -329,7 +345,7 @@ for (const [file, language, careerLink] of [
   ["index.html", "en", "/experiences"],
   ["fr/index.html", "fr", "/fr/experiences"],
 ]) {
-  const html = readFileSync(resolve(dist, file), "utf8");
+  const html = read(file);
   const heroStart = html.indexOf('<section class="home-hero"');
   const careerStart = html.indexOf('<section class="home-experience"');
   const hero =
@@ -375,9 +391,8 @@ for (const [file, marker] of [
   ["skills.html", "skills-domain-grid"],
   ["fr/skills.html", "skills-domain-grid"],
 ]) {
-  const filename = resolve(dist, file);
-  if (!existsSync(filename)) continue;
-  const html = readFileSync(filename, "utf8");
+  const html = read(file);
+  if (!html) continue;
   const h1Count = [...html.matchAll(/<h1(?:\s|>)/g)].length;
   if (h1Count !== 1) {
     failed.push(file + ": expected exactly one h1, found " + h1Count);
@@ -398,7 +413,7 @@ for (const file of [
   "skills.html",
   "fr/skills.html",
 ]) {
-  const html = readFileSync(resolve(dist, file), "utf8");
+  const html = read(file);
   if (!html.includes("editorial-hero")) {
     failed.push(file + ": shared editorial hero missing");
   }
@@ -412,7 +427,7 @@ for (const file of [
   "skills.html",
   "fr/skills.html",
 ]) {
-  const html = readFileSync(resolve(dist, file), "utf8");
+  const html = read(file);
   if (
     !html.includes("editorial-section-heading") ||
     !html.includes("editorial-next")
@@ -426,7 +441,7 @@ for (const [file, projectPrefix] of [
   ["skills.html", "/projects/"],
   ["fr/skills.html", "/fr/projects/"],
 ]) {
-  const html = readFileSync(resolve(dist, file), "utf8");
+  const html = read(file);
   const cards = [
     ...html.matchAll(/<article[^>]+class="[^"]*skills-domain-card[^"]*"/g),
   ].length;
@@ -462,7 +477,7 @@ for (const [file, professionalLabel, educationLabel] of [
     "Voir les formations précédentes",
   ],
 ]) {
-  const html = readFileSync(resolve(dist, file), "utf8");
+  const html = read(file);
   for (const group of ["professional", "education"]) {
     if (
       !html.includes('id="earlier-' + group + '"') ||
@@ -499,7 +514,7 @@ for (const [file, professionalLabel, educationLabel] of [
 // Experience logos must appear in both generated locales. This is a
 // structural check; browser/network verification of remote assets is separate.
 for (const file of ["experiences.html", "fr/experiences.html"]) {
-  const html = readFileSync(resolve(dist, file), "utf8");
+  const html = read(file);
   if (
     !html.includes("career-company-logo") ||
     !html.includes("logo-becquerel-blanc_tournant.jpg")

@@ -30,6 +30,13 @@ test("localizePath maps English paths to each locale", () => {
   assert.equal(localizePath("/projects", "fr"), "/fr/projects");
   assert.equal(localizePath("/projects/xila", "fr"), "/fr/projects/xila");
   assert.equal(localizePath("/projects/", "fr"), "/fr/projects");
+  assert.equal(localizePath("/french-tool", "fr"), "/fr/french-tool");
+});
+
+test("localizePath rejects relative and already localized paths", () => {
+  assert.throws(() => localizePath("projects", "fr"));
+  assert.throws(() => localizePath("/fr/projects", "fr"));
+  assert.throws(() => localizePath("/fr", "en"));
 });
 
 test("alternates returns absolute en, fr and x-default URLs", () => {

@@ -16,7 +16,7 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 
-const { entry, lang } = Astro.props as Props;
+const { entry, lang } = Astro.props;
 const { slug } = Astro.params;
 // hreflang points to the other locale: fail the build if that page is missing.
 for (const other of locales.filter((locale) => locale !== lang)) {

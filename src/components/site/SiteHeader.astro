@@ -2,16 +2,20 @@
 import ThemeToggle from "./ThemeToggle.astro";
 import { localizePath, locales, type Locale } from "../../i18n/locales.ts";
 import { useTranslations, type UIKey } from "../../i18n/ui.ts";
+import { site } from "../../data/site.ts";
 
 export interface Props {
   lang: Locale;
   /** English path of the current page. */
   path: string;
+  /** Locale switch target, for pages without a counterpart in the other locale. */
+  localeHref?: string;
 }
 const { lang, path } = Astro.props;
 const t = useTranslations(lang);
 const other = locales.find((locale) => locale !== lang)!;
 const tOther = useTranslations(other);
+const localeHref = Astro.props.localeHref ?? localizePath(path, other);
 const current = localizePath(path, lang);
 const links: { key: UIKey; path: string }[] = [
   { key: "nav.experiences", path: "/experiences" },
@@ -28,7 +32,7 @@ const links: { key: UIKey; path: string }[] = [
       href={localizePath("/", lang)}
       aria-label={t("nav.home")}
     >
-      Alix ANNERAUD
+      {site.name}
     </a>
     <nav class="site-main-nav" aria-label={t("nav.main")}>
       {links.map((link) => {
@@ -50,7 +54,7 @@ const links: { key: UIKey; path: string }[] = [
     <div class="site-header-tools">
       <a
         class="site-locale"
-        href={localizePath(path, other)}
+        href={localeHref}
         lang={other}
         aria-label={tOther("locale.switchTo")}
       >

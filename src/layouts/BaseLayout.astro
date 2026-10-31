@@ -11,7 +11,8 @@ import { useTranslations } from "../i18n/ui.ts";
 
 export interface Props {
   lang: Locale;
-  title: string;
+  /** Page title; the home page (`home`) uses its own localized title. */
+  title?: string;
   description: string;
   /** English path of the page (`/`, `/projects`…); locale URLs derive from it. */
   path: string;
@@ -21,8 +22,10 @@ export interface Props {
   jsonLd?: object[];
   /** Full-height pages (the resume viewer) omit the footer. */
   noFooter?: boolean;
+  /** Locale switch target, for pages without a counterpart in the other locale. */
+  localeHref?: string;
 }
-const { noFooter = false, ...head } = Astro.props;
+const { noFooter = false, localeHref, ...head } = Astro.props;
 const { lang, path, home = false } = head;
 const t = useTranslations(lang);
 ---
@@ -37,7 +40,7 @@ const t = useTranslations(lang);
       {t("a11y.skipToContent")}
     </a>
     <div class="site-shell">
-      <SiteHeader lang={lang} path={path} />
+      <SiteHeader lang={lang} path={path} localeHref={localeHref} />
       <main id="main" class={home ? "site-home" : undefined}>
         <slot />
       </main>
