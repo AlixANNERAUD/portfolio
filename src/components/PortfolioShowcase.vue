@@ -443,7 +443,7 @@ const catalogueUrl = computed(() =>
 
 .showcase-art-symbol {
   position: relative;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-display);
   font-size: clamp(4rem, 7vw, 6rem);
   font-weight: 400;
   letter-spacing: -0.07em;
@@ -528,15 +528,6 @@ const catalogueUrl = computed(() =>
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
-}
-
-.showcase-filters button:focus-visible,
-.showcase-search input:focus-visible,
-.showcase-sort select:focus-visible,
-.showcase-card a:focus-visible,
-.showcase-all-link:focus-visible {
-  outline: 2px solid var(--vp-c-brand-1);
-  outline-offset: 3px;
 }
 
 @media (max-width: 850px) {

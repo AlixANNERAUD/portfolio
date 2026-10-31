@@ -139,9 +139,7 @@ const labels = {
   color: white;
 }
 .xila-demo-mark {
-  font:
-    normal 2.65rem/1 Georgia,
-    serif;
+  font: normal 2.65rem/1 var(--font-display);
 }
 .xila-demo-terminal {
   font:
@@ -179,7 +177,7 @@ const labels = {
 .xila-demo-actions > .xila-demo-primary {
   background: var(--vp-c-brand-1);
   border-color: var(--vp-c-brand-1);
-  color: var(--vp-c-white);
+  color: var(--color-bg);
 }
 .xila-demo-actions > button {
   background: var(--vp-c-bg);
@@ -209,10 +207,6 @@ const labels = {
 .xila-demo-loading {
   font-size: 0.85rem;
   color: var(--vp-c-text-2);
-}
-.xila-demo-actions :is(a, button):focus-visible {
-  outline: 2px solid var(--vp-c-brand-1);
-  outline-offset: 3px;
 }
 
 @media (max-width: 600px) {

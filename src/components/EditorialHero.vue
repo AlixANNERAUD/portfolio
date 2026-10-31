@@ -84,7 +84,7 @@ withDefaults(
   margin: 0;
   padding: 0;
   border: 0;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-display);
   font-size: clamp(2.6rem, 5.5vw, 5.4rem);
   font-weight: 400;
   letter-spacing: -0.055em;
@@ -153,10 +153,6 @@ withDefaults(
 }
 .editorial-hero__nav a svg {
   color: var(--vp-c-brand-1);
-}
-.editorial-hero__nav a:focus-visible {
-  outline: 2px solid var(--vp-c-brand-1);
-  outline-offset: 4px;
 }
 @media (max-width: 960px) {
   .editorial-hero--wide {

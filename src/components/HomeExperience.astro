@@ -91,7 +91,6 @@ const copy = fr
     margin: 3.25rem auto 4.25rem;
     padding: 0 1.5rem;
     color: var(--vp-c-text-1);
-    scroll-margin-top: 6rem;
   }
   .home-experience-heading {
     display: flex;
@@ -113,10 +112,7 @@ const copy = fr
   }
   .home-experience-heading h2 {
     margin: 0;
-    font:
-      400 clamp(2rem, 3.8vw, 3.4rem)/1.14 Georgia,
-      "Times New Roman",
-      serif;
+    font: 400 clamp(2rem, 3.8vw, 3.4rem)/1.14 var(--font-display);
     letter-spacing: -0.04em;
   }
   .home-experience-intro {
@@ -235,11 +231,6 @@ const copy = fr
   }
   .home-experience-more:hover {
     text-decoration: underline;
-  }
-  .home-experience-card a:focus-visible,
-  .home-experience-more:focus-visible {
-    outline: 2px solid var(--vp-c-brand-1);
-    outline-offset: 4px;
   }
   @media (max-width: 680px) {
     .home-experience {

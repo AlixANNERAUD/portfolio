@@ -74,7 +74,7 @@ defineProps<{
   margin: 0;
   padding: 0;
   border: 0;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-display);
   font-size: clamp(2rem, 3.6vw, 3.2rem);
   font-weight: 400;
   letter-spacing: -0.04em;

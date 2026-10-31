@@ -50,7 +50,6 @@ withDefaults(
   display: flex;
   flex-direction: column;
   padding: clamp(1.3rem, 2.5vw, 1.9rem);
-  scroll-margin-top: 6rem;
 }
 .editorial-card--highlighted {
   border-color: color-mix(

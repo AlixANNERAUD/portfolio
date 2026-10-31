@@ -48,7 +48,7 @@ withDefaults(
   margin: 0 0 0.45rem;
   padding: 0;
   border: 0;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-display);
   font-size: clamp(1.65rem, 3vw, 2.5rem);
   font-weight: 400;
 }
@@ -69,10 +69,6 @@ withDefaults(
   font-size: 0.85rem;
   font-weight: 600;
   text-decoration: none;
-}
-.editorial-next a:focus-visible {
-  outline: 2px solid var(--vp-c-brand-1);
-  outline-offset: 4px;
 }
 @media (max-width: 680px) {
   .editorial-next {

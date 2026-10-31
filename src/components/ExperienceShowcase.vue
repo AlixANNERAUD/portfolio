@@ -224,7 +224,6 @@ function earlierButtonLabel(group: ExperienceGroup): string {
 <style scoped>
 .career-group {
   margin: 0 0 4.5rem;
-  scroll-margin-top: 6rem;
 }
 .career-earlier-toggle {
   display: inline-flex;
@@ -248,10 +247,6 @@ function earlierButtonLabel(group: ExperienceGroup): string {
   min-width: 0;
   overflow-wrap: anywhere;
   text-align: left;
-}
-.career-earlier-toggle:focus-visible {
-  outline: 2px solid var(--vp-c-brand-1);
-  outline-offset: 3px;
 }
 .career-earlier-toggle svg {
   transition: transform 160ms ease;
@@ -286,11 +281,5 @@ function earlierButtonLabel(group: ExperienceGroup): string {
 }
 .career-logo-credits a:hover {
   color: var(--vp-c-text-1);
-}
-
-.career-card a:focus-visible,
-.career-logo-credits a:focus-visible {
-  outline: 2px solid var(--vp-c-brand-1);
-  outline-offset: 4px;
 }
 </style>

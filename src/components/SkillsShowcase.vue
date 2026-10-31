@@ -262,10 +262,6 @@ const navigation = computed(() => [
 </template>
 
 <style scoped>
-.skills-section,
-.skills-languages {
-  scroll-margin-top: 6rem;
-}
 .skills-section {
   margin-bottom: 4.5rem;
 }
@@ -280,7 +276,7 @@ const navigation = computed(() => [
 }
 
 .skills-count strong {
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-display);
   color: var(--vp-c-brand-1);
   font-size: 2.8rem;
   font-weight: 400;
@@ -434,11 +430,6 @@ const navigation = computed(() => [
   font-size: 0.74rem;
   font-weight: 650;
   letter-spacing: 0.02em;
-}
-
-.skills-evidence a:focus-visible {
-  outline: 2px solid var(--vp-c-brand-1);
-  outline-offset: 4px;
 }
 
 @media (max-width: 720px) {
