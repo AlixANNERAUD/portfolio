@@ -4,7 +4,7 @@ description: Engineering decisions behind the Xila operating system, including R
 ---
 
 import ArchitectureFlow from "../../../components/mdx/ArchitectureFlow.astro";
-import XilaBrowserDemo from "../../../components/XilaBrowserDemo.vue";
+import XilaBrowserDemo from "../../../components/xila/XilaBrowserDemo.astro";
 
 # Xila: building a modular embedded operating system
 
@@ -35,7 +35,7 @@ Guest applications currently use the **Wasmi** runtime; guest calls cross an exp
 
 ## Try Xila in WebAssembly
 
-<XilaBrowserDemo lang="en" client:load />
+<XilaBrowserDemo lang="en" />
 
 ## Status and limitations
 

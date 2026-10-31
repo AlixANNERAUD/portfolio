@@ -1,29 +1,12 @@
 /**
  * The Xila system diagram, rendered as a small WebGL2 topology.
  *
- * Loaded via dynamic import only when the landing-page illustration is
- * actually visible. No Three.js, external dependencies, or network calls.
+ * Loaded via dynamic import only when the homepage illustration is about to
+ * become visible. No Three.js, external dependencies, or network calls.
  */
-type Point = readonly [number, number];
+import { EDGES, NODES as TOPOLOGY } from "./topology.ts";
 
-const NODES: Point[] = [
-  [-0.76, -0.47], // hardware / target drivers
-  [-0.33, 0.12], // kernel services
-  [0.22, 0.12], // bindings / Wasm runtime
-  [0.78, 0.4], // applications
-  [0.2, -0.57], // VFS / storage branch
-  [-0.28, 0.7], // graphics / LVGL branch
-];
-
-const EDGES: ReadonlyArray<readonly [number, number]> = [
-  [0, 1],
-  [1, 2],
-  [2, 3],
-  [1, 4],
-  [1, 5],
-  [4, 2],
-  [5, 3],
-];
+const NODES = TOPOLOGY.map((node) => node.position);
 
 const VERTEX_SOURCE = [
   "#version 300 es",

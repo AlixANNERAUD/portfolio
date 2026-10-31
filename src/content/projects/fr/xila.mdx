@@ -4,7 +4,7 @@ description: Architecture et choix techniques du système Xila, avec noyau Rust,
 ---
 
 import ArchitectureFlow from "../../../components/mdx/ArchitectureFlow.astro";
-import XilaBrowserDemo from "../../../components/XilaBrowserDemo.vue";
+import XilaBrowserDemo from "../../../components/xila/XilaBrowserDemo.astro";
 
 # Xila : construire un OS modulaire pour l'embarqué
 
@@ -35,7 +35,7 @@ Côté applications invitées, Xila utilise un runtime **Wasmi** : les appels ex
 
 ## Essayer Xila en WebAssembly
 
-<XilaBrowserDemo lang="fr" client:load />
+<XilaBrowserDemo lang="fr" />
 
 ## État et limites
 
