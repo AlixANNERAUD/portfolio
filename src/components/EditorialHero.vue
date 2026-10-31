@@ -84,10 +84,10 @@ withDefaults(
   margin: 0;
   padding: 0;
   border: 0;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-display);
   font-size: clamp(2.6rem, 5.5vw, 5.4rem);
   font-weight: 400;
-  letter-spacing: -0.055em;
+  letter-spacing: var(--tracking-display);
   line-height: 1.07;
 }
 .editorial-hero__title em {
@@ -118,7 +118,7 @@ withDefaults(
   grid-column: 1;
   grid-row: 2;
   font-size: clamp(2.3rem, 4.8vw, 4.7rem);
-  letter-spacing: -0.045em;
+  letter-spacing: var(--tracking-display);
 }
 .editorial-hero--compact .editorial-hero__intro {
   grid-column: 2;
@@ -153,10 +153,6 @@ withDefaults(
 }
 .editorial-hero__nav a svg {
   color: var(--vp-c-brand-1);
-}
-.editorial-hero__nav a:focus-visible {
-  outline: 2px solid var(--vp-c-brand-1);
-  outline-offset: 4px;
 }
 @media (max-width: 960px) {
   .editorial-hero--wide {

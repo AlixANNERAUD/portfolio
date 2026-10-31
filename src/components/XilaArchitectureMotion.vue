@@ -245,11 +245,8 @@ onBeforeUnmount(() => {
   margin: 0;
   padding: 0;
   border: 0;
-  font:
-    normal clamp(2rem, 4vw, 3.5rem)/1.14 Georgia,
-    "Times New Roman",
-    serif;
-  letter-spacing: -0.04em;
+  font: normal clamp(2rem, 3.6vw, 3.2rem)/1.14 var(--font-display);
+  letter-spacing: var(--tracking-display);
 }
 .xila-topology-intro {
   flex: 0 1 22rem;
@@ -325,10 +322,6 @@ onBeforeUnmount(() => {
 }
 .xila-topology-link:hover {
   text-decoration: underline;
-}
-.xila-topology-link:focus-visible {
-  outline: 2px solid var(--vp-c-brand-1);
-  outline-offset: 4px;
 }
 .visually-hidden {
   position: absolute;

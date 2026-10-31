@@ -1,13 +1,10 @@
 /*
- * Portfolio motion tokens and progressive enhancement.
+ * Motion: shared keyframes, progressive enhancement and the single
+ * reduced-motion guard for the whole site.
  *
  * Animations are decorative only: content remains server-rendered and fully
- * readable without JavaScript, GSAP or scroll-timeline browser support.
+ * readable without JavaScript or scroll-timeline browser support.
  */
-
-:root {
-  --portfolio-ease: cubic-bezier(0.22, 1, 0.36, 1);
-}
 
 @keyframes portfolio-enter {
   from {
@@ -22,23 +19,24 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  /* The static full-screen hero owns its own staggered typography motion
-     in HomeHero.astro. Avoid layering old generic animations on top. */
+  /* HomeHero.astro owns its own staggered typography motion. */
   .site-home .portfolio-showcase .showcase-card {
-    animation: portfolio-enter 540ms var(--portfolio-ease) both;
+    animation: portfolio-enter var(--dur-slow) var(--ease-out) both;
   }
 
   .site-home .portfolio-showcase .showcase-card:nth-child(1) {
-    animation-delay: 260ms;
-  }
-  .site-home .portfolio-showcase .showcase-card:nth-child(2) {
-    animation-delay: 330ms;
-  }
-  .site-home .portfolio-showcase .showcase-card:nth-child(3) {
-    animation-delay: 400ms;
+    animation-delay: var(--dur-base);
   }
 
-  /* Scroll-driven motion is progressive: unsupported browsers see static cards. */
+  .site-home .portfolio-showcase .showcase-card:nth-child(2) {
+    animation-delay: calc(var(--dur-base) + 70ms);
+  }
+
+  .site-home .portfolio-showcase .showcase-card:nth-child(3) {
+    animation-delay: calc(var(--dur-base) + 140ms);
+  }
+
+  /* Scroll-driven motion is progressive: other browsers see static cards. */
   @supports (animation-timeline: view()) {
     .portfolio-showcase--catalogue .showcase-card {
       animation: portfolio-enter linear both;
@@ -49,7 +47,7 @@
 
   @media (hover: hover) and (pointer: fine) {
     .portfolio-showcase .showcase-art-symbol {
-      transition: transform 260ms var(--portfolio-ease);
+      transition: transform var(--dur-base) var(--ease-out);
     }
 
     .portfolio-showcase .showcase-card:hover .showcase-art-symbol {
@@ -59,7 +57,7 @@
     .portfolio-showcase .showcase-card-actions a > span,
     .portfolio-showcase .showcase-all-link > span {
       display: inline-block;
-      transition: transform 180ms var(--portfolio-ease);
+      transition: transform var(--dur-fast) var(--ease-out);
     }
 
     .portfolio-showcase .showcase-card-actions a:hover > span,
@@ -69,25 +67,19 @@
   }
 }
 
-/* Never hide content or require an animation to reach a keyboard target. */
+/*
+ * Single global safety net. Animations finish instantly on their final
+ * keyframe, so nothing stays hidden and every keyboard target is reachable.
+ */
 @media (prefers-reduced-motion: reduce) {
-  .site-home .portfolio-showcase .showcase-card,
-  .portfolio-showcase--catalogue .showcase-card {
-    animation: none !important;
-    opacity: 1;
-    transform: none;
-  }
-
-  .portfolio-showcase .showcase-card,
-  .portfolio-showcase .showcase-art-symbol,
-  .portfolio-showcase .showcase-card-actions a > span,
-  .portfolio-showcase .showcase-all-link > span,
-  .site-home .home-action {
-    transition: none !important;
-  }
-
-  .portfolio-showcase .showcase-card:hover,
-  .site-home .home-action:hover {
-    transform: none !important;
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
   }
 }

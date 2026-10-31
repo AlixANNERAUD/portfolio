@@ -1,0 +1,227 @@
+/*
+ * Global base: reset, document defaults and the static site shell
+ * (skip link, header, footer, shared page container).
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  line-height: var(--leading-body);
+}
+
+a {
+  color: var(--color-accent);
+}
+
+button {
+  font: inherit;
+}
+
+/* Align Lucide icons across static Astro content and Vue islands. */
+svg {
+  display: inline;
+  vertical-align: middle;
+}
+
+/* One focus indicator for every interactive element. */
+:where(a, button, summary, input, select, [tabindex]):focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* Keep anchored targets clear of the sticky header. */
+[id] {
+  scroll-margin-top: calc(var(--header-h) + var(--space-s));
+}
+
+/* Shell */
+
+.site-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.site-shell > main {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Shared editorial page container (Skills, Experience, Projects). */
+.editorial-page {
+  width: min(100%, var(--container));
+  max-width: var(--container);
+  margin-inline: auto;
+  padding: var(--space-xl) var(--space-m) var(--space-3xl);
+  color: var(--color-text);
+}
+
+.skip-link {
+  position: absolute;
+  top: -5rem;
+  left: var(--space-s);
+  z-index: 1000;
+  padding: var(--space-2xs) var(--space-s);
+  border: 2px solid var(--color-accent);
+  background: var(--color-bg);
+}
+
+.skip-link:focus {
+  top: var(--space-2xs);
+}
+
+/* Header */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg);
+}
+
+.site-header-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-xs) var(--space-l);
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: var(--space-xs) var(--space-m);
+}
+
+.site-brand {
+  color: var(--color-text);
+  font-size: var(--step-0);
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.site-main-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs) var(--space-s-l);
+  margin-left: auto;
+}
+
+.site-main-nav a {
+  color: var(--color-text-muted);
+  font-size: var(--step--1);
+  font-weight: 550;
+  text-decoration: none;
+}
+
+.site-main-nav a:hover,
+.site-main-nav a[aria-current] {
+  color: var(--color-accent);
+}
+
+.site-header-tools {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+}
+
+.site-locale,
+.site-theme-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--control-size);
+  min-height: var(--control-size);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-s);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--step--1);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Footer */
+
+.site-footer {
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: var(--step--1);
+}
+
+.site-footer-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-s);
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: var(--space-m);
+}
+
+.site-footer a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.site-footer a:hover {
+  color: var(--color-accent);
+}
+
+.site-footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+@media (max-width: 720px) {
+  .site-header-inner {
+    gap: var(--space-2xs);
+    padding: var(--space-2xs) var(--space-s);
+  }
+
+  .site-brand {
+    font-size: var(--step--1);
+  }
+
+  .site-main-nav {
+    order: 3;
+    justify-content: space-between;
+    gap: var(--space-3xs);
+    width: 100%;
+  }
+
+  .site-main-nav a {
+    padding: var(--space-3xs) 0;
+    font-size: var(--step--1);
+  }
+
+  .site-header-tools {
+    margin-left: auto;
+  }
+
+  .site-footer-inner {
+    padding: var(--space-s);
+  }
+
+  .editorial-page {
+    padding: var(--space-l) var(--space-s) var(--space-2xl);
+  }
+}
