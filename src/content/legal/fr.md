@@ -51,9 +51,12 @@ Copies hébergées sur ce site, issues de Wikimedia Commons :
 - **Amazon :** [Amazon_logo.svg](https://commons.wikimedia.org/wiki/File:Amazon_logo.svg), par Amazon.com, Inc., domaine public sur Wikimedia Commons, marque déposée ; sans modification.
 - **New York University :** [Nyu_short_color.svg](https://commons.wikimedia.org/wiki/File:Nyu_short_color.svg), par New York University, domaine public sur Wikimedia Commons, marque déposée ; sans modification. Voir aussi le [guide d’identité visuelle de NYU Tandon](https://engineering.nyu.edu/marketing-and-communications/identity-guide/logos-lockups).
 - **INSA Rouen Normandie :** [Logo_INSA_RN.jpg](https://commons.wikimedia.org/wiki/File:Logo_INSA_RN.jpg), par le Service communication INSA Rouen Normandie, sous licence [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) ; redimensionné et converti en WebP. Cette copie adaptée est partagée sous la même licence.
+- **Ampère :** [Ampere 2023.svg](https://commons.wikimedia.org/wiki/File:Ampere_2023.svg), par WXDS, sous licence [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) ; sans modification.
 
 Copies hébergées sur ce site, issues des sites des organismes :
 
 - **Memo Bank :** [fichier d’origine](https://memo.bank/logo-footer.svg), sans modification, [site de l’organisme](https://memo.bank/).
 - **Linkt :** [fichier d’origine](https://www.linkt.fr/wp-content/uploads/2026/05/logo-linkt-bleu-marine.svg), sans modification, [site de l’organisme](https://www.linkt.fr/).
 - **Centre Henri Becquerel :** [fichier d’origine](https://www.becquerel.fr/wp-content/uploads/2022/10/logo-becquerel-blanc_tournant.jpg), redimensionné et converti en WebP, [espace presse](https://www.becquerel.fr/le-centre/decouvrir-le-centre/espace-presse/).
+- **Guénola Sahut :** [fichier d’origine](https://guenola-sahut.fr/web/image/website/1/logo/Gu%C3%A9nola%20SAHUT), converti en WebP ; [site](https://guenola-sahut.fr/).
+- **Institution Jean-Paul II :** [fichier d’origine](https://www.institutionjeanpaul2.fr/wp-content/themes/jp2mdl/img/logo.png), redimensionné et converti en WebP ; [site](https://www.institutionjeanpaul2.fr/).
