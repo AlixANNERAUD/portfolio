@@ -1,20 +1,26 @@
 ---
-title: "nanoaudio"
-description: "Allocation-free embedded audio processing: PCM conversion, mixing, ring buffers and codecs using caller-owned memory."
+title: "nanoaudio: allocation-free audio for Rust"
+description: "An allocation-free no_std Rust library that converts, mixes and decodes PCM audio on microcontrollers, with single-pass pipelines and a DMA ring buffer."
 ---
 
-# nanoaudio
-
-> Allocation-free embedded audio processing: PCM conversion, mixing, ring buffers and codecs using caller-owned memory.
+# nanoaudio: audio processing without an allocator
 
 ## Overview
 
-An allocation-free `no_std` audio processing library providing PCM conversion, mixing, volume control, DMA-friendly ring buffers, and codecs. Its routines operate on caller-provided buffers and are designed for integration into hardware drivers and operating systems. [Code and examples](https://github.com/AlixANNERAUD/nanoaudio).
+`nanoaudio` provides the audio building blocks that a driver, a mixer task or an operating system needs: format conversion, volume, mixing, buffering for DMA or audio callbacks, and decoders. It does not own a runtime and does not talk to the hardware; the caller brings the memory.
 
-## Engineering approach
+It is published on crates.io as one crate that re-exports a set of smaller ones, one per codec or building block, which can also be used on their own.
 
-The library separates PCM sample processing from audio hardware and scheduling. Caller-owned buffers avoid implicit allocation and allow codecs, mixing and conversions to be embedded in device drivers.
+## Technical choices
 
-## Scope and limitations
+- **Buffers provided by the caller.** Everything works with `core` alone, and nothing allocates, on the hot path or anywhere else.
+- **Single-pass pipelines.** Format conversion, channel mapping, volume and mixing chain from a source to a sink. The compiler fuses the chain into a single loop, without intermediate buffers.
+- **Fixed or floating point.** Volume and mixing run in Q31 fixed point on cores without a floating-point unit and in `f32` on cores with one. The default is chosen from the target at build time, can be forced with a feature, or selected at run time once per buffer.
+- **Made for DMA and interrupts.** A lock-free single-producer, single-consumer ring buffer hands out contiguous slices. Every operation is non-blocking: it processes what fits and reports how much it did.
+- **Codecs included.** WAV, G.711 and IMA ADPCM encoders and decoders are bit-exact with the reference implementations; MP3 and Opus decoding sit behind optional features.
+- **Checked in CI.** Tests on every combination of features, runs under Miri, and builds for Cortex-M0, Cortex-M4F and RISC-V targets.
 
-Designed as a reusable library independent of one application. Refer to the upstream repository for current APIs, examples, platform constraints and supported versions.
+## Explore the project
+
+- [Source code, codec guide and examples](https://github.com/AlixANNERAUD/nanoaudio)
+- [API documentation on docs.rs](https://docs.rs/nanoaudio)

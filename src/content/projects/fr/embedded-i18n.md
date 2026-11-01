@@ -1,20 +1,25 @@
 ---
-title: "embedded-i18n"
-description: "Internationalisation compilée dans le firmware Rust : traductions en ROM, validation à la compilation et fonctionnement sans allocateur."
+title: "embedded-i18n : traduction compilée en Rust"
+description: "Une bibliothèque de traduction pour micrologiciel Rust no_std : les textes sont compilés en mémoire flash, et une traduction manquante bloque la compilation."
 ---
 
-# embedded-i18n
-
-> Internationalisation compilée dans le firmware Rust : traductions en ROM, validation à la compilation et fonctionnement sans allocateur.
+# embedded-i18n : des traductions résolues à la compilation
 
 ## Présentation
 
-Outil d'internationalisation pour firmware Rust : les traductions sont résolues à la compilation et intégrées en ROM, sans parseur ni allocation au runtime. Les macros vérifient les clés et les paramètres de format, avec gestion des pluriels et plusieurs formats de fichiers. [Code et guide](https://github.com/AlixANNERAUD/embedded_i18n).
+`embedded-i18n` traduit les chaînes d’un micrologiciel Rust au moment de la compilation. Les traductions, issues de fichiers JSON, YAML, TOML, gettext PO et MO ou Fluent, deviennent de simples littéraux `&'static str` stockés en mémoire flash. Il n’y a ni analyseur à l’exécution, ni allocateur, ni système de fichiers, ni tas, et le micrologiciel ne contient que les chaînes qu’il utilise, dans la langue pour laquelle il est compilé. La crate est publiée sur crates.io.
 
-## Démarche technique
+## Choix techniques
 
-Les ressources de langue deviennent des chaînes statiques au moment de la compilation, stockées dans la ROM. Les macros vérifient les clés et les paramètres de format pour déplacer les erreurs de traduction du runtime vers la compilation.
+- **Des erreurs de compilation plutôt qu’un écran vide.** Clés manquantes, formes plurielles absentes, fichiers de langue invalides et paramètres de format qui ne correspondent pas aux arguments sont signalés à l’endroit de l’appel. Un mode strict optionnel interdit de se rabattre sur une autre langue.
+- **Les formats que les traducteurs connaissent déjà.** Tous les formats de fichiers de langue sont lus par les macros procédurales : en prendre un en charge n’ajoute ni code ni dépendance au micrologiciel.
+- **Une vraie prise en compte des langues.** Règles de pluriel CLDR pour 40 langues, `Plural-Forms` de gettext, contexte des messages, variantes selon le genre, chaînes de repli comme `fr-CA` → `fr` → `en`, isolation des textes écrits de droite à gauche et dates localisées sans `libc`.
+- **Un formatage sans allocation.** Les messages traduits s’écrivent vers toute cible `core::fmt::Write`, comme un pilote d’écran, avec des paramètres vérifiés à la compilation dans chaque langue.
+- **Un changement de langue à l’exécution si besoin.** Plusieurs langues peuvent être intégrées et choisies grâce à une seule variable atomique, toujours sans allocation.
 
-## Portée et limites
+L’ensemble des langues doit être connu à la compilation. Pour une application qui télécharge des packs de langue, une bibliothèque qui travaille à l’exécution, comme Fluent, reste plus adaptée.
 
-Bibliothèque conçue pour être réutilisée indépendamment d'une application. Les API et exemples à jour figurent dans le dépôt source ; les contraintes d'environnement et les versions supportées doivent y être vérifiées.
+## Explorer le projet
+
+- [Code source et guide](https://github.com/AlixANNERAUD/embedded_i18n)
+- [Documentation de l’API sur docs.rs](https://docs.rs/embedded-i18n)

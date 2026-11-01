@@ -35,7 +35,6 @@ export const technologies = [
   "Java",
   "JavaScript",
   "LVGL",
-  "Macros",
   "MCU",
   "ML",
   "MQTT",
@@ -67,8 +66,12 @@ const technologyLabels: Partial<Record<Technology, Localized>> = {
   Algorithmique: { en: "Algorithms", fr: "Algorithmique" },
   Battery: { en: "Battery", fr: "Batterie" },
   Capteurs: { en: "Sensors", fr: "Capteurs" },
+  CLI: { en: "CLI", fr: "Ligne de commande" },
   Électronique: { en: "Electronics", fr: "Électronique" },
+  Parser: { en: "Parser", fr: "Analyseur syntaxique" },
+  "Proc macros": { en: "Proc macros", fr: "Macros procédurales" },
   Recherche: { en: "Research", fr: "Recherche" },
+  UI: { en: "UI", fr: "Interface graphique" },
 };
 
 /** The tag as shown in `lang`. */
