@@ -231,19 +231,38 @@ export const experiences: readonly Experience[] = [
     companyUrl: "https://www.insa-rouen.fr/",
     monogram: "IN",
     role: {
-      fr: "Diplôme d’ingénieur informatique",
-      en: "Computer Engineering Degree",
+      fr: "Diplôme d’ingénieur, Informatique et technologies de l’information",
+      en: "Engineering Degree, Computer Science and Information Technology",
     },
     period: { fr: "2021–2027", en: "2021–2027" },
     location: { fr: "Rouen, France", en: "Rouen, France" },
     summary: {
-      fr: "Formation en algorithmique, systèmes d’exploitation, informatique embarquée, réseaux, génie logiciel et intelligence artificielle.",
-      en: "Studies in algorithms, operating systems, embedded computing, networks, software engineering and AI.",
+      fr: "Cycle ingénieur au département Informatique et technologies de l’information (ITI), après deux années de cycle préparatoire intégré (STPI) ; dernière année en alternance.",
+      en: "Engineering cycle in the Computer Science and Information Technology (ITI) department, after the two-year integrated preparatory cycle (STPI); final year in work-study.",
     },
-    highlights: [],
+    highlights: [
+      {
+        fr: "Systèmes et logiciel : systèmes d’exploitation, algorithmique avancée et programmation C, introduction à la compilation, programmation avancée, UML et design patterns, bases de données, technologies web.",
+        en: "Systems and software: operating systems, advanced algorithms and C programming, introduction to compilers, advanced programming, UML and design patterns, databases, web technologies.",
+      },
+      {
+        fr: "Électronique et signal : électronique, capteurs, automatique, traitement du signal et des signaux aléatoires.",
+        en: "Electronics and signals: electronics, sensors, control engineering, signal processing and random signals.",
+      },
+      {
+        fr: "Données et IA : machine learning, apprentissage de représentations et deep learning, traitement d’images, théorie de l’information, big data (stockage et calcul distribués), optimisation, théorie des graphes et recherche opérationnelle.",
+        en: "Data and AI: machine learning, representation and deep learning, image processing, information theory, big data (distributed storage and computing), optimization, graph theory and operations research.",
+      },
+      {
+        fr: "Gestion de projet : conduite de grands projets informatiques, et direction du projet d’ingénieur ThéraPIC (management, communication, réalisation).",
+        en: "Project management: managing large IT projects, and leading the ThéraPIC engineering project (management, communication, delivery).",
+      },
+    ],
     technologies: [
       { en: "Systems", fr: "Systèmes" },
-      { en: "Networks", fr: "Réseaux" },
+      { en: "Embedded systems", fr: "Systèmes embarqués" },
+      { en: "Machine learning", fr: "Machine learning" },
+      { en: "Signal processing", fr: "Traitement du signal" },
       { en: "Software engineering", fr: "Génie logiciel" },
     ],
     ongoing: true,
