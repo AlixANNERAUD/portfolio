@@ -258,6 +258,130 @@ if (
   );
 }
 
+/** Splits a page into its `title`/`description` frontmatter and its body. */
+function parseFrontmatter(source) {
+  const [, frontmatter = "", body = source] =
+    source.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/) ?? [];
+  const fields = {};
+  for (const [, key, raw] of frontmatter.matchAll(
+    /^(title|description): (.*)$/gm,
+  )) {
+    const quoted = raw.match(/^"(.*)"$/) ?? raw.match(/^'(.*)'$/);
+    fields[key] = quoted
+      ? quoted[1].replace(/\\"/g, '"').replace(/''/g, "'")
+      : raw;
+  }
+  return { fields, body };
+}
+
+/** Reads the single `.md` or `.mdx` page of a project. */
+function readProjectPage(lang, id) {
+  const base = join(root, "src", "content", "projects", lang, id);
+  return readFileSync(
+    existsSync(base + ".mdx") ? base + ".mdx" : base + ".md",
+    "utf8",
+  );
+}
+
+// Editorial rules for project pages: a meta description of 120-160
+// characters, a unique title per locale, a <title> of 50-60 characters
+// (a target, reported as a warning), no generic defensive "Scope and
+// limitations" section, and a team size for every academic project.
+// Projects not yet rewritten are listed in PENDING_EDITORIAL; each content
+// batch removes its ids until the list is empty. `--strict` ignores the list.
+const PENDING_EDITORIAL = new Set([
+  "xila",
+  "infrastructure",
+  "mini-train-store",
+  "model-railway",
+  "connected-speaker",
+  "dera",
+  "lvgl-theme-shadcn",
+  "nanoexpr",
+  "nanoaudio",
+  "embedded-i18n",
+  "getargs-derive",
+  "battery-percent",
+  "jeanne-hack-2026",
+  "codinsa-2025",
+  "jeanne-hack-2025",
+  "tracs-2024",
+  "deez-nalyzer",
+  "eogm",
+  "iti-adventure",
+  "huffman",
+  "robot-mouche",
+  "music-danceability",
+  "insatram",
+  "linear-equations",
+  "odor-localization",
+  "medical-image-deep-learning",
+]);
+const SCOPE_HEADING_ALLOWED = new Set([
+  "odor-localization",
+  "music-danceability",
+]);
+const strictEditorial = process.argv.includes("--strict");
+const editorialIssues = [];
+const editorialWarnings = [];
+const charCount = (text) => [...text].length;
+
+for (const id of PENDING_EDITORIAL) {
+  if (!ids.has(id)) editorialIssues.push(`pending list: unknown project ${id}`);
+}
+for (const lang of locales) {
+  const seenTitles = new Map();
+  for (const project of projects) {
+    const where = `${lang}/${project.id}`;
+    const { fields, body } = parseFrontmatter(
+      readProjectPage(lang, project.id),
+    );
+    const title = fields.title.trim();
+    const duplicate = seenTitles.get(title.toLowerCase());
+    const bothPending =
+      PENDING_EDITORIAL.has(project.id) && PENDING_EDITORIAL.has(duplicate);
+    if (duplicate && (strictEditorial || !bothPending)) {
+      editorialIssues.push(`${where}: title duplicates ${lang}/${duplicate}`);
+    }
+    seenTitles.set(title.toLowerCase(), project.id);
+
+    if (PENDING_EDITORIAL.has(project.id) && !strictEditorial) continue;
+    const description = charCount(fields.description.trim());
+    if (description < 120 || description > 160) {
+      editorialIssues.push(
+        `${where}: description is ${description} characters (expected 120-160)`,
+      );
+    }
+    const pageTitle = charCount(
+      ui[lang]["meta.pageTitle"].replace("{title}", title),
+    );
+    if (pageTitle < 50 || pageTitle > 60) {
+      editorialWarnings.push(
+        `${where}: <title> is ${pageTitle} characters (target 50-60)`,
+      );
+    }
+    if (
+      !SCOPE_HEADING_ALLOWED.has(project.id) &&
+      /^#{2,6} +(?:Scope and limitations|Portée et limites)\s*$/im.test(body)
+    ) {
+      editorialIssues.push(`${where}: generic "Scope and limitations" section`);
+    }
+    if (lang === "en" && project.group === "academic" && !project.team) {
+      editorialIssues.push(`${project.id}: academic project without team size`);
+    }
+  }
+}
+for (const warning of editorialWarnings) console.warn("Warning: " + warning);
+if (editorialIssues.length > 0) {
+  throw new Error("Project editorial rules:\n" + editorialIssues.join("\n"));
+}
+if (PENDING_EDITORIAL.size > 0 && !strictEditorial) {
+  console.log(
+    PENDING_EDITORIAL.size +
+      " project(s) still pending the editorial rewrite (run with --strict to list their issues).",
+  );
+}
+
 // French typography. Markdown bodies are typeset at build time by
 // src/lib/rehype-french-typography.mjs (verify:static checks the result), but
 // plain strings never go through it: the UI dictionary, data `Localized.fr`
@@ -304,17 +428,9 @@ const frenchMarkdown = [
 ].filter((file) => /\.mdx?$/.test(file));
 for (const file of frenchMarkdown) {
   const source = readFileSync(join(root, file), "utf8");
-  const [, frontmatter = "", body = source] =
-    source.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/) ?? [];
-  for (const [, key, raw] of frontmatter.matchAll(
-    /^(title|description): (.*)$/gm,
-  )) {
-    const quoted = raw.match(/^"(.*)"$/) ?? raw.match(/^'(.*)'$/);
-    const value = quoted
-      ? quoted[1].replace(/\\"/g, '"').replace(/''/g, "'")
-      : raw;
+  const { fields, body } = parseFrontmatter(source);
+  for (const [key, value] of Object.entries(fields))
     checkFrench(`${file} ${key}`, value);
-  }
   // Prose only: no code, MDX imports, HTML/JSX tags or link targets.
   const prose = body
     .replace(/^(```|~~~)[\s\S]*?^\1/gm, "")
