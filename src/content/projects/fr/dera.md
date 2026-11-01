@@ -1,20 +1,19 @@
 ---
-title: "dera.page"
-description: "Plateforme de services étudiants auto-hébergée, avec agenda, messagerie et réseau social."
+title: "dera.page : services étudiants auto-hébergés"
+description: "Une plateforme respectueuse de la vie privée pour les étudiants de l’INSA Rouen Normandie, qui réunit agenda, messagerie instantanée et réseau social."
 ---
 
-# dera.page
-
-> Plateforme de services étudiants auto-hébergée, avec agenda, messagerie et réseau social.
+# dera.page : des services partagés pour les étudiants de l’INSA Rouen Normandie
 
 ## Présentation
 
-Une plateforme respectueuse de la vie privée offrant des services partagés aux étudiants de l'INSA Rouen Normandie : agenda, messagerie instantanée et réseau social. Auto-hébergée et développée en Rust pour les performances et la fiabilité.
+dera.page propose aux étudiants de l’INSA Rouen Normandie plusieurs services partagés au même endroit : un agenda, une messagerie instantanée et un réseau social. La plateforme est conçue pour respecter la vie privée de ses utilisateurs.
 
-## Démarche technique
+## Choix techniques
 
-La plateforme rassemble plusieurs services étudiants dans une même expérience : messagerie, calendrier et réseau social. L'architecture auto-hébergée et le choix de Rust répondent à la volonté de contrôler les données et le déploiement.
+- **Auto-hébergée.** Les services tournent sur une infrastructure que je gère, ce qui garde la maîtrise des données et du déploiement.
+- **Écrite en Rust**, pour les performances et la fiabilité.
 
-## Portée et limites
+## Explorer le projet
 
-Projet personnel : les choix techniques et le maintien à long terme guident l'évolution. La fiche décrit les fonctions documentées, pas des performances ou usages non mesurés.
+- [Visiter dera.page](https://dera.page)

@@ -1,20 +1,19 @@
 ---
-title: "dera.page"
-description: "A privacy-focused student services platform with a calendar, messaging and a social network."
+title: "dera.page: self-hosted student services"
+description: "A privacy-focused platform for INSA Rouen Normandie students that brings a calendar, instant messaging and a social network together, self-hosted in Rust."
 ---
 
-# dera.page
-
-> A privacy-focused student services platform with a calendar, messaging and a social network.
+# dera.page: shared services for INSA Rouen Normandie students
 
 ## Overview
 
-A privacy-respecting platform offering shared services to INSA Rouen Normandie students: calendar, instant messaging, and a social network. Self-hosted and built in Rust for performance and reliability.
+dera.page offers INSA Rouen Normandie students several shared services in one place: a calendar, instant messaging and a social network. The platform is designed to respect its users' privacy.
 
-## Engineering approach
+## Technical choices
 
-The platform combines messaging, a calendar and a social network in a single student experience. Self-hosting and Rust reflect the goal of retaining control of data and deployment.
+- **Self-hosted.** The services run on infrastructure I manage, which keeps control of the data and of deployment.
+- **Written in Rust**, chosen for performance and reliability.
 
-## Scope and limitations
+## Explore the project
 
-Personal project: design choices and long-term maintenance shape its evolution. This page describes documented capabilities rather than unmeasured results.
+- [Visit dera.page](https://dera.page)
