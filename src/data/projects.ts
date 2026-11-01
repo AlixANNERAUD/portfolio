@@ -344,8 +344,8 @@ export const projects = [
     id: "codinsa-2025",
     title: "Cod’INSA",
     description: {
-      en: "With the INSA Rouen team, first place in the overall ranking of Cod'INSA 2025, a team programming contest that rewards fast, correct algorithmic solutions.",
-      fr: "Première place au classement général de Cod’INSA 2025, un concours de programmation par équipes qui récompense des solutions algorithmiques rapides et justes.",
+      en: "With the INSA Rouen team, first place at Cod'INSA 2025, an inter-INSA contest where each school's team programs an AI for a game designed for the event.",
+      fr: "Avec l’équipe de l’INSA Rouen, première place à Cod’INSA 2025, un concours inter-INSA où chaque école programme une IA pour un jeu conçu pour l’événement.",
     },
     period: { start: "2025" },
     group: "competition",
@@ -358,7 +358,7 @@ export const projects = [
       practicalImpact: 4.2,
       evidence: 4.5,
     },
-    externalUrl: "https://codinsa.org/static/past",
+    externalUrl: "https://codinsa.org/",
   },
   {
     id: "jeanne-hack-2025",
