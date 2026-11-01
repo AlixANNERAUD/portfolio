@@ -155,58 +155,78 @@ function checkHeader(file, root) {
       failed.push(file + ": missing a " + scheme + " theme-color meta");
     }
   }
-  checkThemeSwitch(file, root);
+  checkThemeMenu(file, root);
 }
 
 /**
- * Theme switch: each copy (header row, mobile menu panel) is a radio group
- * named by a label in the page locale, offering auto, light and dark in that
- * order, with auto checked in the HTML: the no-JS default follows the system
- * through the CSS. The head script must apply the stored choice before paint.
+ * Theme menu: one icon button in the header row, never in the menu panel,
+ * that opens a menu of auto, light and dark radio items, in that order. The
+ * HTML marks auto as current (the no-JS default follows the system through
+ * the CSS) and names the button after it, in the page locale. The head
+ * script must apply the stored choice before paint.
  */
-function checkThemeSwitch(file, root) {
+function checkThemeMenu(file, root) {
   const lang =
     root.querySelector("html")?.getAttribute("lang") === "fr" ? "fr" : "en";
   const t = ui[lang];
-  const groups = root.querySelectorAll("[data-theme-switch]");
-  if (groups.length !== 2) {
-    failed.push(file + ": expected 2 theme switches, found " + groups.length);
+  const menus = root.querySelectorAll("[data-theme-menu]");
+  if (menus.length !== 1) {
+    failed.push(file + ": expected 1 theme menu, found " + menus.length);
   }
-  const names = new Set();
-  for (const group of groups) {
-    const label = root.getElementById(
-      group.getAttribute("aria-labelledby") ?? "",
+  if (!root.querySelector(".site-header-tools [data-theme-menu]")) {
+    failed.push(file + ": the theme menu belongs in the header tools");
+  }
+  if (root.querySelector("#site-menu-panel [data-theme-menu]")) {
+    failed.push(file + ": the menu panel must not hold a theme menu");
+  }
+  for (const menu of menus) {
+    const button = menu.querySelector("button[aria-haspopup]");
+    if (
+      !button ||
+      button.getAttribute("aria-haspopup") !== "menu" ||
+      button.getAttribute("aria-expanded") !== "false"
+    ) {
+      failed.push(
+        file + ': theme button needs aria-haspopup="menu", aria-expanded',
+      );
+      continue;
+    }
+    const name = t["theme.current"].replace("{choice}", t["theme.auto"]);
+    if (button.getAttribute("aria-label") !== name) {
+      failed.push(file + ': theme button must be named "' + name + '"');
+    }
+    const list = root.getElementById(
+      button.getAttribute("aria-controls") ?? "",
     );
-    if (group.getAttribute("role") !== "radiogroup") {
-      failed.push(file + ': theme switch needs role="radiogroup"');
+    if (
+      !list ||
+      list.getAttribute("role") !== "menu" ||
+      !menu.querySelector("#" + list.id)
+    ) {
+      failed.push(file + ": theme button aria-controls must name its menu");
+      continue;
     }
-    if (label?.textContent.trim() !== t["theme.label"]) {
-      failed.push(file + ": theme switch must be labelled " + t["theme.label"]);
+    if (!list.hasAttribute("hidden")) {
+      failed.push(file + ": the theme menu must start hidden");
     }
-    const radios = group.querySelectorAll('input[type="radio"]');
-    const values = radios.map((radio) => radio.getAttribute("value"));
+    const items = list.querySelectorAll('[role="menuitemradio"]');
+    const values = items.map((item) => item.getAttribute("data-theme-choice"));
     if (values.join() !== "auto,light,dark") {
-      failed.push(file + ": theme radios are " + values.join());
+      failed.push(file + ": theme menu items are " + values.join());
     }
-    const name = radios[0]?.getAttribute("name");
-    if (!name || radios.some((radio) => radio.getAttribute("name") !== name)) {
-      failed.push(file + ": theme radios must share one name per group");
-    }
-    names.add(name);
-    const checked = radios.filter((radio) => radio.hasAttribute("checked"));
-    if (checked.length !== 1 || checked[0].getAttribute("value") !== "auto") {
-      failed.push(file + ": only the auto theme radio may be checked in HTML");
-    }
-    for (const radio of radios) {
-      const text = radio.closest("label")?.textContent.trim();
-      const key = "theme." + radio.getAttribute("value");
-      if (text !== t[key]) {
-        failed.push(file + ": theme option " + key + ' reads "' + text + '"');
+    for (const item of items) {
+      const value = item.getAttribute("data-theme-choice");
+      const text = item.textContent.trim();
+      if (text !== t["theme." + value]) {
+        failed.push(file + ": theme item " + value + ' reads "' + text + '"');
+      }
+      if (item.getAttribute("aria-checked") !== String(value === "auto")) {
+        failed.push(file + ": only the auto theme item may be checked in HTML");
+      }
+      if (item.getAttribute("tabindex") !== "-1") {
+        failed.push(file + ": theme items take focus only from the script");
       }
     }
-  }
-  if (names.size !== groups.length) {
-    failed.push(file + ": each theme switch needs its own radio name");
   }
   const head = root.querySelector("head")?.innerHTML ?? "";
   if (!/localStorage\.getItem\("portfolio-theme"\)/.test(head)) {

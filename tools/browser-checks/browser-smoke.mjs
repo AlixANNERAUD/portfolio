@@ -24,6 +24,8 @@ const targets = [
   "/fr/resume",
 ];
 const widths = [320, 375, 768, 1440];
+// Header collapse breakpoint: same value as narrowQuery in SiteHeader.astro.
+const headerBreakpoint = 820;
 const failures = [];
 let checked = 0;
 
@@ -1146,9 +1148,51 @@ for (const [engineName, engine] of [
       await staticContext.close();
     }
 
-    // Theme switch: auto, light and dark radios. Each choice survives a
-    // reload, auto follows the emulated system scheme live, and the arrow
-    // keys move the choice like any radio group.
+    // Theme menu: one icon button in the header row opens a menu of auto,
+    // light and dark radio items, by mouse or keyboard. Each choice survives
+    // a reload, auto follows the emulated system scheme live, and the choice
+    // reaches the other open tabs.
+    const themeNames = {
+      en: { label: "Theme: ", auto: "Auto", light: "Light", dark: "Dark" },
+      fr: {
+        label: "Thème : ",
+        auto: "Auto",
+        light: "Clair",
+        dark: "Sombre",
+      },
+    };
+    const themeState = (page) =>
+      page.evaluate(() => {
+        const root = document.documentElement;
+        const menu = document.querySelector(
+          ".site-header-tools [data-theme-menu]",
+        );
+        const button = menu?.querySelector("button[aria-haspopup]");
+        const list = menu?.querySelector('[role="menu"]');
+        const icon = [...(button?.querySelectorAll("[data-theme-icon]") ?? [])]
+          .filter((node) => getComputedStyle(node).display !== "none")
+          .map((node) => node.dataset.themeIcon);
+        return {
+          checked: [...(list?.querySelectorAll('[aria-checked="true"]') ?? [])]
+            .map((item) => item.dataset.themeChoice)
+            .join(),
+          name: button?.getAttribute("aria-label"),
+          icon: icon.join(),
+          expanded: button?.getAttribute("aria-expanded"),
+          open: Boolean(list && !list.hidden && list.offsetParent !== null),
+          focused: document.activeElement?.dataset?.themeChoice ?? null,
+          buttonFocused: document.activeElement === button,
+          stored: localStorage.getItem("portfolio-theme"),
+          scheme: getComputedStyle(root).colorScheme,
+          dark: matchMedia("(prefers-color-scheme: dark)").matches,
+          classes: root.className,
+          // Schemes of the theme-color metas the browser would apply.
+          meta: [...document.querySelectorAll("meta[data-theme-color]")]
+            .filter((meta) => matchMedia(meta.media || "all").matches)
+            .map((meta) => meta.dataset.themeColor),
+        };
+      });
+
     for (const systemScheme of ["light", "dark"]) {
       const themeContext = await browser.newContext({
         viewport: { width: 1440, height: 900 },
@@ -1156,30 +1200,15 @@ for (const [engineName, engine] of [
       });
       const themePage = await themeContext.newPage();
       const path = systemScheme === "light" ? "/" : "/fr/projects";
+      const names = themeNames[path.startsWith("/fr") ? "fr" : "en"];
       try {
         await themePage.goto(base + path, { waitUntil: "load" });
-        const group = themePage.locator(
-          ".site-header-tools [data-theme-switch]",
-        );
-        await group.waitFor({ state: "visible", timeout: 5000 });
-        const state = () =>
-          themePage.evaluate(() => {
-            const root = document.documentElement;
-            const checked = document.querySelector(
-              ".site-header-tools [data-theme-switch] input:checked",
-            );
-            return {
-              checked: checked && checked.value,
-              stored: localStorage.getItem("portfolio-theme"),
-              scheme: getComputedStyle(root).colorScheme,
-              dark: matchMedia("(prefers-color-scheme: dark)").matches,
-              classes: root.className,
-              // Schemes of the theme-color metas the browser would apply.
-              meta: [...document.querySelectorAll("meta[data-theme-color]")]
-                .filter((meta) => matchMedia(meta.media || "all").matches)
-                .map((meta) => meta.dataset.themeColor),
-            };
-          });
+        const menu = themePage.locator(".site-header-tools [data-theme-menu]");
+        const button = menu.locator("button[aria-haspopup]");
+        const item = (choice) =>
+          menu.locator('[data-theme-choice="' + choice + '"]');
+        await button.waitFor({ state: "visible", timeout: 5000 });
+        const state = () => themeState(themePage);
         const expectScheme = (actual, scheme, label) => {
           assert.equal(actual.scheme, scheme, path + " " + label);
           const expected =
@@ -1190,42 +1219,82 @@ for (const [engineName, engine] of [
             path + " " + label + ": active theme-color",
           );
         };
-
-        // Same 44px targets as the other header controls.
-        for (const option of await group.locator("label").all()) {
-          const box = await option.boundingBox();
-          assert.ok(
-            box && Math.round(box.height) >= 44 && Math.round(box.width) >= 44,
-            path + " header theme option is " + box?.width + "x" + box?.height,
+        const expectChoice = (actual, choice, label) => {
+          assert.equal(actual.checked, choice, path + " " + label + " checked");
+          assert.equal(actual.icon, choice, path + " " + label + " icon");
+          assert.equal(
+            actual.name,
+            names.label + names[choice],
+            path + " " + label + " button name",
           );
-        }
+        };
+
+        // Same 44px target as the other header controls.
+        const buttonBox = await button.boundingBox();
+        assert.ok(
+          buttonBox &&
+            Math.round(buttonBox.height) >= 44 &&
+            Math.round(buttonBox.width) >= 44,
+          path +
+            " theme button is " +
+            buttonBox?.width +
+            "x" +
+            buttonBox?.height,
+        );
 
         let current = await state();
-        assert.equal(current.checked, "auto", path + " default choice");
+        expectChoice(current, "auto", "default");
+        assert.equal(current.expanded, "false");
+        assert.equal(current.open, false, path + " menu starts closed");
         assert.equal(current.stored, null);
         assert.equal(current.classes, "", path + " auto adds no class");
         expectScheme(current, "light dark", "auto by default");
 
+        // Mouse: open, check the anchoring, pick, reload.
         for (const choice of ["light", "dark", "auto"]) {
-          await group
-            .locator("label", {
-              has: themePage.locator('input[value="' + choice + '"]'),
-            })
-            .click();
+          await button.click();
           current = await state();
+          assert.equal(current.expanded, "true", path + " click opens");
+          assert.equal(current.open, true, path + " menu visible");
+          const listBox = await menu.locator('[role="menu"]').boundingBox();
+          const box = await button.boundingBox();
+          assert.ok(
+            listBox &&
+              listBox.y >= box.y + box.height - 1 &&
+              Math.abs(listBox.x + listBox.width - (box.x + box.width)) <= 1,
+            path + " menu must hang right-aligned under the button",
+          );
+          for (const option of await menu
+            .locator('[role="menuitemradio"]')
+            .all()) {
+            const optionBox = await option.boundingBox();
+            assert.ok(
+              optionBox && Math.round(optionBox.height) >= 44,
+              path + " theme item is " + optionBox?.height + "px high",
+            );
+          }
+          await item(choice).click();
+          current = await state();
+          assert.equal(current.open, false, path + " picking closes");
+          assert.equal(current.expanded, "false");
           assert.equal(current.stored, choice, path + " stores " + choice);
+          expectChoice(current, choice, choice + " picked");
           const scheme = choice === "auto" ? "light dark" : choice;
           expectScheme(current, scheme, choice + " applies");
           await themePage.reload({ waitUntil: "load" });
-          await group.waitFor({ state: "visible", timeout: 5000 });
+          await button.waitFor({ state: "visible", timeout: 5000 });
           current = await state();
-          assert.equal(
-            current.checked,
-            choice,
-            path + " " + choice + " reload",
-          );
+          expectChoice(current, choice, choice + " after reload");
           expectScheme(current, scheme, choice + " survives a reload");
         }
+
+        // A click outside closes the menu without choosing.
+        await button.click();
+        await themePage.mouse.click(20, 600);
+        current = await state();
+        assert.equal(current.open, false, path + " outside click closes");
+        assert.equal(current.expanded, "false");
+        assert.equal(current.checked, "auto");
 
         // Auto follows the system scheme live, without a reload.
         const background = () =>
@@ -1244,28 +1313,79 @@ for (const [engineName, engine] of [
         current = await state();
         expectScheme(current, "light dark", "auto with a dark system");
         // An explicit choice ignores the system scheme.
-        await group
-          .locator("label", { has: themePage.locator('input[value="light"]') })
-          .click();
+        await button.click();
+        await item("light").click();
         assert.equal(await background(), lightBackground, path + " light");
         await themePage.emulateMedia({ colorScheme: "light" });
         assert.equal(await background(), lightBackground);
 
-        // Keyboard: Tab reaches the checked radio, arrows move the choice.
-        await group.locator('input[value="light"]').focus();
-        await themePage.keyboard.press("ArrowRight");
+        // Keyboard: Enter opens on the current item, arrows, Home and End
+        // move the focus (wrapping), Space picks and returns to the button.
+        await button.focus();
+        await themePage.keyboard.press("Enter");
         current = await state();
-        assert.equal(current.checked, "dark", path + " ArrowRight to dark");
+        assert.equal(current.open, true, path + " Enter opens");
+        assert.equal(current.focused, "light", path + " focus on current item");
+        await themePage.keyboard.press("ArrowDown");
+        assert.equal((await state()).focused, "dark", path + " ArrowDown");
+        await themePage.keyboard.press("ArrowDown");
+        assert.equal((await state()).focused, "auto", path + " Down wraps");
+        await themePage.keyboard.press("ArrowUp");
+        assert.equal((await state()).focused, "dark", path + " Up wraps");
+        await themePage.keyboard.press("Home");
+        assert.equal((await state()).focused, "auto", path + " Home");
+        await themePage.keyboard.press("End");
+        assert.equal((await state()).focused, "dark", path + " End");
+        const focusRing = await themePage.evaluate(
+          () => getComputedStyle(document.activeElement).outlineStyle,
+        );
+        assert.notEqual(focusRing, "none", path + " focused item ring");
+        await themePage.keyboard.press("Space");
+        current = await state();
+        assert.equal(current.open, false, path + " Space picks and closes");
+        assert.equal(current.buttonFocused, true, path + " focus back");
+        expectChoice(current, "dark", "Space");
         assert.equal(current.stored, "dark");
         assert.equal(await background(), darkBackground, path + " dark");
-        await themePage.keyboard.press("ArrowRight");
+        // Space on the button opens too; Enter on an item picks it.
+        await themePage.keyboard.press("Space");
+        assert.equal((await state()).focused, "dark", path + " Space opens");
+        await themePage.keyboard.press("Home");
+        await themePage.keyboard.press("Enter");
         current = await state();
-        assert.equal(current.checked, "auto", path + " arrows wrap to auto");
-        const focusRing = await themePage.evaluate(() => {
-          const label = document.activeElement?.closest("label");
-          return label ? getComputedStyle(label).outlineStyle : "none";
-        });
-        assert.notEqual(focusRing, "none", path + " focused option ring");
+        assert.equal(current.open, false, path + " Enter picks and closes");
+        assert.equal(current.buttonFocused, true);
+        expectChoice(current, "auto", "Enter");
+        // Escape closes without choosing and returns the focus.
+        await themePage.keyboard.press("ArrowDown");
+        assert.equal((await state()).open, true, path + " ArrowDown opens");
+        await themePage.keyboard.press("End");
+        await themePage.keyboard.press("Escape");
+        current = await state();
+        assert.equal(current.open, false, path + " Escape closes");
+        assert.equal(current.expanded, "false");
+        assert.equal(current.buttonFocused, true, path + " Escape focus");
+        assert.equal(current.checked, "auto", path + " Escape keeps choice");
+        // Tab leaves the menu and closes it.
+        await themePage.keyboard.press("Enter");
+        await themePage.keyboard.press("Tab");
+        current = await state();
+        assert.equal(current.open, false, path + " Tab closes");
+        assert.equal(current.expanded, "false");
+
+        // Another tab of the same site picks up the choice.
+        const otherPage = await themeContext.newPage();
+        await otherPage.goto(base + path, { waitUntil: "load" });
+        const otherMenu = otherPage.locator(
+          ".site-header-tools [data-theme-menu]",
+        );
+        await otherMenu.locator("button[aria-haspopup]").click();
+        await otherMenu.locator('[data-theme-choice="dark"]').click();
+        await themePage.waitForFunction(() =>
+          document.documentElement.classList.contains("dark"),
+        );
+        expectChoice(await state(), "dark", "other tab");
+        await otherPage.close();
         checked++;
       } catch (error) {
         failures.push(
@@ -1277,7 +1397,7 @@ for (const [engineName, engine] of [
 
     // Mobile header: one row with a menu button that opens and closes with
     // the keyboard, returns focus on Escape and exposes 44px nav targets.
-    // The theme switch moves into the menu panel.
+    // The theme button stays in that row; its menu fits the viewport.
     const mobileContext = await browser.newContext({
       viewport: { width: 390, height: 844 },
     });
@@ -1300,11 +1420,24 @@ for (const [engineName, engine] of [
           false,
           path + " nav links must be hidden while the menu is closed",
         );
+        const themeMenu = mobilePage.locator(
+          ".site-header-tools [data-theme-menu]",
+        );
+        const themeButton = themeMenu.locator("button[aria-haspopup]");
         const header = await mobilePage.locator(".site-header").boundingBox();
         const button = await menuButton.boundingBox();
+        const themeBox = await themeButton.boundingBox();
         assert.ok(
           header && button && button.y + button.height <= header.y + 80,
           path + " brand, locale, theme and menu must share one row",
+        );
+        assert.ok(
+          themeBox &&
+            (await themeButton.isVisible()) &&
+            Math.abs(themeBox.y - button.y) <= 1 &&
+            Math.round(themeBox.width) >= 44 &&
+            Math.round(themeBox.height) >= 44,
+          path + " the theme button must sit in the header row at 390px",
         );
 
         await menuButton.focus();
@@ -1319,6 +1452,11 @@ for (const [engineName, engine] of [
             path + " nav link target is " + box?.height + "px high",
           );
         }
+        assert.equal(
+          await nav.locator("[data-theme-menu]").count(),
+          0,
+          path + " the menu panel must not repeat the theme menu",
+        );
         // Tab from the open button lands on the first link it revealed,
         // and the menu stays open (WCAG 2.4.3).
         await mobilePage.keyboard.press("Tab");
@@ -1343,23 +1481,22 @@ for (const [engineName, engine] of [
         await mobilePage.keyboard.press("Space");
         assert.equal(await menuButton.getAttribute("aria-expanded"), "false");
 
-        // The theme radios join the open menu panel on narrow screens.
+        // Opening the theme menu closes the navigation panel; its items
+        // stay inside the 390px viewport.
         await menuButton.click();
-        const menuTheme = nav.locator("[data-theme-switch]");
-        await menuTheme.waitFor({ state: "visible", timeout: 5000 });
-        for (const option of await menuTheme.locator("label").all()) {
-          const box = await option.boundingBox();
-          assert.ok(
-            box && Math.round(box.height) >= 44 && Math.round(box.width) >= 44,
-            path + " menu theme option is " + box?.width + "x" + box?.height,
-          );
-        }
+        await themeButton.click();
         assert.equal(
-          await menuTheme.evaluate((node) => node.closest("nav") === null),
-          true,
-          path + " the theme switch must sit outside the navigation landmark",
+          await menuButton.getAttribute("aria-expanded"),
+          "false",
+          path + " the theme menu must close the navigation panel",
         );
-        // The longer French labels must still fit the 390px panel.
+        const list = themeMenu.locator('[role="menu"]');
+        await list.waitFor({ state: "visible", timeout: 5000 });
+        const listBox = await list.boundingBox();
+        assert.ok(
+          listBox && listBox.x >= 0 && listBox.x + listBox.width <= 390,
+          path + " the theme menu must fit the 390px viewport",
+        );
         assert.equal(
           await mobilePage.evaluate(
             () =>
@@ -1367,16 +1504,19 @@ for (const [engineName, engine] of [
               document.documentElement.clientWidth,
           ),
           true,
-          path + " the open menu overflows horizontally at 390px",
+          path + " the open theme menu overflows horizontally at 390px",
         );
+        await themeMenu.locator('[data-theme-choice="dark"]').click();
         assert.equal(
-          await mobilePage
-            .locator(".site-header-tools [data-theme-switch]")
-            .isVisible(),
-          false,
-          path + " the header theme switch must hide on narrow screens",
+          await mobilePage.evaluate(() =>
+            document.documentElement.classList.contains("dark"),
+          ),
+          true,
+          path + " dark from the 390px theme menu",
         );
-        await mobilePage.keyboard.press("Escape");
+        await mobilePage.evaluate(() =>
+          localStorage.removeItem("portfolio-theme"),
+        );
         checked++;
       } catch (error) {
         failures.push(
@@ -1386,39 +1526,48 @@ for (const [engineName, engine] of [
     }
     await mobileContext.close();
 
-    // Either side of the header breakpoint (960px), in the longer French
-    // labels: one row that fits, with the menu button only when narrow.
-    for (const width of [961, 960]) {
-      const edgeContext = await browser.newContext({
-        viewport: { width, height: 700 },
-      });
-      const edgePage = await edgeContext.newPage();
-      try {
-        await edgePage.goto(base + "/fr/projects", { waitUntil: "load" });
-        await edgePage
-          .locator("[data-theme-switch][data-ready]")
-          .first()
-          .waitFor({ state: "attached", timeout: 5000 });
-        const layout = await edgePage.evaluate(() => {
-          const header = document.querySelector(".site-header");
-          return {
-            overflow:
-              document.documentElement.scrollWidth >
-              document.documentElement.clientWidth,
-            height: header.getBoundingClientRect().height,
-            menu:
-              getComputedStyle(header.querySelector(".site-menu-button"))
-                .display !== "none",
-          };
+    // Either side of the header breakpoint, in both locales: one row that
+    // fits, with the menu button only when narrow.
+    for (const path of ["/projects", "/fr/projects"]) {
+      for (const width of [headerBreakpoint + 1, headerBreakpoint]) {
+        const edgeContext = await browser.newContext({
+          viewport: { width, height: 700 },
         });
-        assert.equal(layout.overflow, false, width + "px header overflows");
-        assert.ok(layout.height <= 80, width + "px header wraps");
-        assert.equal(layout.menu, width <= 960, width + "px menu button");
-        checked++;
-      } catch (error) {
-        failures.push(engineName + " header at " + width + "px: " + error);
+        const edgePage = await edgeContext.newPage();
+        try {
+          await edgePage.goto(base + path, { waitUntil: "load" });
+          await edgePage
+            .locator("[data-theme-menu][data-ready]")
+            .waitFor({ state: "attached", timeout: 5000 });
+          const layout = await edgePage.evaluate(() => {
+            const header = document.querySelector(".site-header");
+            const inner = header.querySelector(".site-header-inner");
+            return {
+              overflow:
+                document.documentElement.scrollWidth >
+                  document.documentElement.clientWidth ||
+                inner.scrollWidth > inner.clientWidth,
+              height: header.getBoundingClientRect().height,
+              menu:
+                getComputedStyle(header.querySelector(".site-menu-button"))
+                  .display !== "none",
+            };
+          });
+          assert.equal(layout.overflow, false, width + "px header overflows");
+          assert.ok(layout.height <= 80, width + "px header wraps");
+          assert.equal(
+            layout.menu,
+            width <= headerBreakpoint,
+            width + "px menu button",
+          );
+          checked++;
+        } catch (error) {
+          failures.push(
+            engineName + " " + path + " header at " + width + "px: " + error,
+          );
+        }
+        await edgeContext.close();
       }
-      await edgeContext.close();
     }
   } finally {
     await browser.close();
