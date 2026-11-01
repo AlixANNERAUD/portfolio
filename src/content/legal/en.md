@@ -1,52 +1,60 @@
 # Legal notice
 
-In accordance with the provisions of Article 6 of French Law No. 2004-575 of June 21, 2004, for Confidence in the Digital Economy (LCEN), users of the website **alix.anneraud.fr** are informed of the identity of the various parties involved in its creation and maintenance.
+In accordance with Article 6 of French Law No. 2004-575 of 21 June 2004 on confidence in the digital economy (LCEN), visitors to **alix.anneraud.fr** are informed of the identity of the parties involved in publishing and hosting it.
 
 ## 1. Website editor
 
-The website **alix.anneraud.fr** is a personal, non-commercial website (professionnal portfolio).
+**alix.anneraud.fr** is a personal, non-commercial website: a professional portfolio.
 
-- **Director of Publication & Editorial Responsible:** Alix ANNERAUD
-- **Status:** Individual
+- **Publication director:** Alix ANNERAUD
+- **Status:** private individual
 - **Contact:** alix@anneraud.fr
 
-_Note: In accordance with Article 6, III, 2° of French Law No. 2004-575 of June 21, 2004, the editor has chosen to remain anonymous regarding their personal postal address. This data has been securely provided to the web hosts and domain registrars mentioned below._
+_As permitted by Article 6, III, 2° of the same law for non-professional editors, the editor's postal address is not published. It has been provided to the hosting provider listed below._
 
-## 2. Web hosting & infrastructure
+## 2. Hosting
 
-The storage and distribution of the website are handled by the following infrastructure:
+- **Hosting provider:** GitHub Inc. (GitHub Pages), 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, USA. Website: [pages.github.com](https://pages.github.com)
 
-- **Static Files Hosting:** GitHub Inc. - 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, USA - Website: [https://pages.github.com](https://pages.github.com)
+## 3. Personal data and cookies
 
-## 3. Personal data & cookies
+### No accounts or forms
 
-### Data collection and privacy
-
-This website is a static site generated using **Astro**. It does not use any database, requires no user registration, and does not collect any personal identifiable information (such as names, addresses, or emails) directly or indirectly.
+This is a static website generated with **Astro**. It has no database, no user accounts and no forms, and it does not ask visitors for any personal data such as a name, an address or an email address.
 
 ### Audience analytics (Umami)
 
-To monitor traffic and interest in the displayed projects, this website uses **Umami**, an open-source, privacy-focused web analytics solution that complies with GDPR and CNIL directives.
+To measure interest in the projects shown, the site loads **Umami**, an open-source web analytics tool, from `s.anneraud.fr`.
 
-- **No cookies** (third-party or persistent) are stored on your device.
-- IP addresses are anonymized immediately, and no personal data or cross-site/cross-device tracking is collected.
-- Since no tracking mechanisms requiring user consent are used, this website is legally exempt from displaying a cookie consent banner.
+- Umami does not set cookies on your device.
+- It reports aggregated statistics, such as page views, and does not follow visitors across other websites.
+- Since the site sets no cookies, it shows no cookie banner.
+
+### Third-party content
+
+- Some organization logos in the experience timeline are loaded from the organizations' own websites (see section 5), without sending the referring page.
+- The interactive Xila demonstration is served from `platforms.xila.dev` and only loads after you click to start it.
 
 ## 4. Intellectual property
 
-Unless otherwise stated, the entire source code of this portfolio and its associated configurations are licensed under the terms of the [MIT License](https://mit-license.org/).
+Unless otherwise stated, the source code of this portfolio is released under the [MIT License](https://github.com/AlixANNERAUD/portfolio/blob/main/License).
 
-The textual content and project imagery remain the exclusive property of Alix ANNERAUD, unless specific credits are given to collaborative or third-party projects.
+Texts and project images belong to Alix ANNERAUD, except where credits are given for collaborative or third-party projects.
 
 <span id="logo-credits"></span>
 
-## 5. Logo credits 
+## 5. Logo credits
 
-Logos used in the experience timeline identify the organizations concerned and **do not imply partnership or endorsement**. Trademarks remain the property of their respective owners. Images are loaded from organization sites or Wikimedia Commons, with initials shown if an image fails to load.
+Logos in the experience timeline identify the organizations concerned and **do not imply any partnership or endorsement**. Trademarks remain the property of their respective owners. If a logo fails to load, the organization's initials are shown instead.
 
-- **Memo Bank**: [official logo](https://memo.bank/logo-footer.svg), [organization website](https://memo.bank/).
-- **Linkt**: [company logo](https://www.linkt.fr/wp-content/uploads/2026/05/logo-linkt-bleu-marine.svg), [official website](https://www.linkt.fr/).
-- **Amazon**: [Wikimedia Commons logo](https://commons.wikimedia.org/wiki/File:Amazon_logo.svg).
-- **New York University**: [Wikimedia Commons logo](https://commons.wikimedia.org/wiki/File:Nyu_short_color.svg), [visual identity guidance](https://engineering.nyu.edu/marketing-and-communications/identity-guide/logos-lockups).
-- **INSA Rouen Normandie**: [Wikimedia Commons logo](https://commons.wikimedia.org/wiki/File:Logo_INSA_RN.jpg), author: Service communication INSA Rouen Normandie, [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) licensed, unmodified.
-- **Centre Henri Becquerel**: [official logo](https://www.becquerel.fr/wp-content/uploads/2022/10/logo-becquerel-blanc_tournant.jpg), [press resources](https://www.becquerel.fr/le-centre/decouvrir-le-centre/espace-presse/).
+Copies hosted on this website, taken from Wikimedia Commons:
+
+- **Amazon**: [Amazon_logo.svg](https://commons.wikimedia.org/wiki/File:Amazon_logo.svg), by Amazon.com, Inc., public domain on Wikimedia Commons, trademark; unmodified.
+- **New York University**: [Nyu_short_color.svg](https://commons.wikimedia.org/wiki/File:Nyu_short_color.svg), by New York University, public domain on Wikimedia Commons, trademark; unmodified. See also the [NYU Tandon identity guide](https://engineering.nyu.edu/marketing-and-communications/identity-guide/logos-lockups).
+- **INSA Rouen Normandie**: [Logo_INSA_RN.jpg](https://commons.wikimedia.org/wiki/File:Logo_INSA_RN.jpg), by Service communication INSA Rouen Normandie, licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0); resized and converted to WebP. This adapted copy is shared under the same licence.
+
+Logos loaded from the organizations' websites:
+
+- **Memo Bank**: [logo file](https://memo.bank/logo-footer.svg), [organization website](https://memo.bank/).
+- **Linkt**: [logo file](https://www.linkt.fr/wp-content/uploads/2026/05/logo-linkt-bleu-marine.svg), [organization website](https://www.linkt.fr/).
+- **Centre Henri Becquerel**: [logo file](https://www.becquerel.fr/wp-content/uploads/2022/10/logo-becquerel-blanc_tournant.jpg), [press resources](https://www.becquerel.fr/le-centre/decouvrir-le-centre/espace-presse/).

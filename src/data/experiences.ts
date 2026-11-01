@@ -10,7 +10,11 @@ export interface Experience {
   company: Label;
   companyUrl?: string;
   monogram: string;
-  /** Verified public logo URL; only shown alongside the organization name. */
+  /**
+   * Self-hosted path under /images/logos/ when the logo's licence allows it
+   * (credited in the legal notice), otherwise a verified public URL. Only
+   * shown alongside the organization name.
+   */
   logo?: string;
   /** Logo whose artwork is intentionally white (on a dark card). */
   logoOnDark?: boolean;
@@ -97,7 +101,7 @@ export const experiences: readonly Experience[] = [
   {
     id: "amazon",
     homepage: true,
-    logo: "https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg",
+    logo: "/images/logos/amazon.svg",
     group: "professional",
     company: "Amazon",
     companyUrl: "https://www.amazon.jobs/",
@@ -127,7 +131,7 @@ export const experiences: readonly Experience[] = [
   {
     id: "nyu",
     homepage: true,
-    logo: "https://upload.wikimedia.org/wikipedia/commons/6/6a/Nyu_short_color.svg",
+    logo: "/images/logos/nyu.svg",
     group: "professional",
     company: "New York University",
     companyUrl: "https://www.nyu.edu/",
@@ -159,7 +163,7 @@ export const experiences: readonly Experience[] = [
   {
     id: "insa-relations",
     earlier: true,
-    logo: "https://upload.wikimedia.org/wikipedia/commons/f/f0/Logo_INSA_RN.jpg",
+    logo: "/images/logos/insa-rouen-normandie.webp",
     group: "professional",
     company: "INSA Rouen Normandie",
     companyUrl: "https://www.insa-rouen.fr/",
@@ -220,7 +224,7 @@ export const experiences: readonly Experience[] = [
   },
   {
     id: "insa-engineering",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/f/f0/Logo_INSA_RN.jpg",
+    logo: "/images/logos/insa-rouen-normandie.webp",
     group: "education",
     company: "INSA Rouen Normandie",
     companyUrl: "https://www.insa-rouen.fr/",
