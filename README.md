@@ -53,7 +53,7 @@ src/
     projects/             ProjectCard, ProjectCatalogue (filterable), Breadcrumb, RelatedProjects
     resume/               ResumeSummary (HTML summary) and PdfEmbed
     skills/ xila/ mdx/    Page sections and MDX components
-    site/                 SiteHead, SiteHeader, SiteFooter, ThemeSwitch (Auto / Light / Dark), JsonLd
+    site/                 SiteHead, SiteHeader, SiteFooter, ThemeMenu (Auto / Light / Dark), JsonLd
   content.config.ts       Typed project collection
   content/
     projects/{en,fr}/     27 projects, one Markdown / MDX page per locale
