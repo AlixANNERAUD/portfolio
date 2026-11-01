@@ -315,6 +315,13 @@ const searchText = (project: Project) =>
     padding-bottom: var(--space-s);
     border-bottom: 1px solid var(--color-border);
   }
+  /*
+   * With scripts (html.js, set before paint in SiteHead), the toolbar takes
+   * its place in the first frame instead of pushing the cards down later.
+   */
+  :global(html.js) .showcase-toolbar[hidden] {
+    display: grid;
+  }
   .showcase-toolbar[hidden],
   .showcase-empty[hidden],
   .showcase-grid > :global([hidden]) {

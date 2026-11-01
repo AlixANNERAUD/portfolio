@@ -1187,7 +1187,11 @@ for (const [engineName, engine] of [
           stored: localStorage.getItem("portfolio-theme"),
           scheme: getComputedStyle(root).colorScheme,
           dark: matchMedia("(prefers-color-scheme: dark)").matches,
-          classes: root.className,
+          // Theme classes only: html.js (scripts ran) is not a theme choice.
+          classes: [...root.classList]
+            .filter((name) => name === "light" || name === "dark")
+            .join(" "),
+          scripted: root.classList.contains("js"),
           // Schemes of the theme-color metas the browser would apply.
           meta: [...document.querySelectorAll("meta[data-theme-color]")]
             .filter((meta) => matchMedia(meta.media || "all").matches)
@@ -1250,6 +1254,7 @@ for (const [engineName, engine] of [
         assert.equal(current.open, false, path + " menu starts closed");
         assert.equal(current.stored, null);
         assert.equal(current.classes, "", path + " auto adds no class");
+        assert.ok(current.scripted, path + " html.js is set before paint");
         expectScheme(current, "light dark", "auto by default");
 
         // Mouse: open, check the anchoring, pick, reload.

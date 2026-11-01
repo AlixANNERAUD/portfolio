@@ -74,6 +74,12 @@ export default defineConfig({
       styles: ["normal", "italic"],
       subsets: ["latin"],
       fallbacks: ["Georgia", "serif"],
+      // Preloaded, so it is almost always ready for the first paint. If not,
+      // keep the fallback for this view rather than swapping: the metric
+      // fallback relies on a local Times New Roman, absent on Android and
+      // Linux, where a swap re-wrapped headings and shifted the page
+      // (CLS 0.24 on /experiences, mobile).
+      display: "optional",
     },
     {
       provider: fontProviders.fontsource(),

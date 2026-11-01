@@ -137,6 +137,15 @@ const Icon = group === "professional" ? BriefcaseBusiness : GraduationCap;
   .career-timeline[hidden] {
     display: none;
   }
+  /*
+   * With scripts (html.js, set before paint in SiteHead), the earlier list
+   * starts collapsed in the first frame instead of collapsing on load.
+   */
+  :global(html.js)
+    .career-earlier-toggle[aria-expanded="false"]
+    + .career-timeline--earlier {
+    display: none;
+  }
   .career-timeline-item {
     display: grid;
     grid-template-columns: 11rem minmax(0, 1fr);
@@ -198,6 +207,9 @@ const Icon = group === "professional" ? BriefcaseBusiness : GraduationCap;
   }
   .career-earlier-toggle[hidden] {
     display: none;
+  }
+  :global(html.js) .career-earlier-toggle[hidden] {
+    display: inline-flex;
   }
   .career-earlier-toggle:hover {
     border-style: solid;
