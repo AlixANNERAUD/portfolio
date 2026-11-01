@@ -8,6 +8,7 @@ import SiteHeader from "../components/site/SiteHeader.astro";
 import SiteFooter from "../components/site/SiteFooter.astro";
 import type { Locale } from "../i18n/locales.ts";
 import { useTranslations } from "../i18n/ui.ts";
+import type { JsonLdNode } from "../lib/seo.ts";
 
 export interface Props {
   lang: Locale;
@@ -19,7 +20,9 @@ export interface Props {
   home?: boolean;
   noindex?: boolean;
   ogType?: "website" | "article";
-  jsonLd?: object[];
+  jsonLd?: JsonLdNode[];
+  /** Breadcrumb after Home, as English paths (see SiteHead). */
+  trail?: readonly { name: string; path: string }[];
   /** Locale switch target, for pages without a counterpart in the other locale. */
   localeHref?: string;
 }

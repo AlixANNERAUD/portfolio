@@ -17,6 +17,7 @@ import { localize } from "../data/types.ts";
 import { localizePath, type Locale } from "../i18n/locales.ts";
 import { useTranslations } from "../i18n/ui.ts";
 import { formatPeriod } from "../lib/format.ts";
+import { projectLd } from "../lib/seo.ts";
 
 /**
  * A project page: breadcrumb, H1 and a meta line built from the project data
@@ -59,6 +60,11 @@ const { team, externalUrl: external }: Project = project;
   title={title}
   description={description}
   ogType="article"
+  jsonLd={[projectLd(project, lang, description)]}
+  trail={[
+    { name: t("nav.projects"), path: "/projects" },
+    { name: localize(project.title, lang), path: `/projects/${project.id}` },
+  ]}
 >
   <article class="project-page">
     <header class="project-header">

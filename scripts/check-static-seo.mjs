@@ -323,10 +323,207 @@ for (const [file, canonicalPath, translationPath] of cases) {
     if (isNotFoundPage(loc)) failed.push("sitemap: lists the 404 page " + loc);
   }
 }
-for (const file of ["index.html", "fr/index.html"]) {
-  const html = read(file);
-  if (!html.includes("application/ld+json") || !html.includes("schema.org")) {
-    failed.push(file + ": missing Person structured data");
+// Structured data: each indexable page has one JSON-LD block, a schema.org
+// @graph with unique @ids and no raw "<". The homes share the Person,
+// WebSite and ProfilePage ids; project pages describe the project
+// (SoftwareSourceCode for a code host, otherwise CreativeWork) with the
+// Person as author; every inner page has a BreadcrumbList from Home.
+{
+  const personId = site + "/#person";
+  const websiteId = site + "/#website";
+  const codeHosts = new Set(["github.com", "gitlab.com", "codeberg.org"]);
+  const localized = (path, lang) =>
+    lang === "en" ? path : path === "/" ? "/fr/" : "/fr" + path;
+  /** The @graph nodes of the page, after recording any malformed block. */
+  const graphOf = (file, html) => {
+    const blocks = parse(html).querySelectorAll(
+      'script[type="application/ld+json"]',
+    );
+    if (blocks.length !== 1) {
+      failed.push(
+        file + ": expected one JSON-LD block, found " + blocks.length,
+      );
+      return [];
+    }
+    const raw = blocks[0].rawText;
+    if (raw.includes("<")) failed.push(file + ': JSON-LD contains a raw "<"');
+    let data;
+    try {
+      data = JSON.parse(raw);
+    } catch (error) {
+      failed.push(file + ": invalid JSON-LD: " + error.message);
+      return [];
+    }
+    if (
+      data["@context"] !== "https://schema.org" ||
+      !Array.isArray(data["@graph"])
+    ) {
+      failed.push(file + ": JSON-LD must be a https://schema.org @graph");
+      return [];
+    }
+    const ids = data["@graph"].map((node) => node["@id"]).filter(Boolean);
+    if (new Set(ids).size !== ids.length) {
+      failed.push(file + ": duplicate JSON-LD @id");
+    }
+    return data["@graph"];
+  };
+  const ofType = (graph, type) =>
+    graph.filter((node) => node["@type"] === type);
+  const checkBreadcrumb = (file, graph, expected) => {
+    const lists = ofType(graph, "BreadcrumbList");
+    const items = lists[0]?.itemListElement ?? [];
+    const ok =
+      lists.length === 1 &&
+      items.length === expected.length &&
+      items.every(
+        (item, index) =>
+          item["@type"] === "ListItem" &&
+          item.position === index + 1 &&
+          item.name === expected[index].name &&
+          item.item === expected[index].item,
+      );
+    if (!ok) {
+      failed.push(
+        file +
+          ": BreadcrumbList expected " +
+          JSON.stringify(expected) +
+          ", found " +
+          JSON.stringify(lists.map((list) => list.itemListElement)),
+      );
+    }
+  };
+  const current = experiences.find(
+    (entry) => entry.group === "professional" && entry.ongoing,
+  );
+  for (const lang of ["en", "fr"]) {
+    const t = ui[lang];
+    const prefix = lang === "en" ? "" : "fr/";
+    const home = { name: t["nav.home"], item: site + localized("/", lang) };
+
+    // Home: Person, WebSite and ProfilePage with ids shared by both locales.
+    {
+      const file = prefix + "index.html";
+      const graph = graphOf(file, read(file));
+      const [person] = ofType(graph, "Person");
+      const [website] = ofType(graph, "WebSite");
+      const [profile] = ofType(graph, "ProfilePage");
+      if (person?.["@id"] !== personId)
+        failed.push(file + ": Person @id must be " + personId);
+      if (person?.name !== siteData.name) failed.push(file + ": Person name");
+      if (person?.jobTitle !== current.role[lang]) {
+        failed.push(file + ": Person jobTitle must be " + current.role[lang]);
+      }
+      if (person?.worksFor?.name !== current.company) {
+        failed.push(file + ": Person worksFor must be " + current.company);
+      }
+      if (!Array.isArray(person?.alumniOf) || !person.alumniOf.length) {
+        failed.push(file + ": Person alumniOf missing");
+      }
+      const sameAs = Object.values(siteData.social);
+      if (JSON.stringify(person?.sameAs) !== JSON.stringify(sameAs)) {
+        failed.push(file + ": Person sameAs must list site.social");
+      }
+      if (
+        website?.["@id"] !== websiteId ||
+        website?.publisher?.["@id"] !== personId
+      ) {
+        failed.push(
+          file +
+            ": WebSite must have @id " +
+            websiteId +
+            " and the Person as publisher",
+        );
+      }
+      if (
+        profile?.["@id"] !== home.item + "#profilepage" ||
+        profile?.url !== home.item ||
+        profile?.inLanguage !== lang ||
+        profile?.mainEntity?.["@id"] !== personId ||
+        profile?.isPartOf?.["@id"] !== websiteId
+      ) {
+        failed.push(
+          file + ": ProfilePage must be the localized home about the Person",
+        );
+      }
+      if (ofType(graph, "BreadcrumbList").length) {
+        failed.push(file + ": home must not have a BreadcrumbList");
+      }
+    }
+
+    // Listing and static inner pages: Home > page.
+    for (const [path, key] of [
+      ["/projects", "nav.projects"],
+      ["/experiences", "nav.experiences"],
+      ["/skills", "nav.skills"],
+      ["/resume", "nav.resume"],
+      ["/legal-notice", "footer.legalNotice"],
+    ]) {
+      const file = prefix + path.slice(1) + ".html";
+      checkBreadcrumb(file, graphOf(file, read(file)), [
+        home,
+        { name: t[key], item: site + localized(path, lang) },
+      ]);
+    }
+
+    // Project pages: project node + Home > Projects > project.
+    for (const project of projects) {
+      const file = prefix + "projects/" + project.id + ".html";
+      const html = read(file);
+      const graph = graphOf(file, html);
+      const url = site + localized("/projects/" + project.id, lang);
+      const name =
+        typeof project.title === "string" ? project.title : project.title[lang];
+      checkBreadcrumb(file, graph, [
+        home,
+        { name: t["nav.projects"], item: site + localized("/projects", lang) },
+        { name, item: url },
+      ]);
+      const code =
+        project.externalUrl !== undefined &&
+        codeHosts.has(new URL(project.externalUrl).hostname);
+      const type = code ? "SoftwareSourceCode" : "CreativeWork";
+      const nodes = ofType(graph, type);
+      const node = nodes[0];
+      const description = parse(html)
+        .querySelector('meta[name="description"]')
+        ?.getAttribute("content");
+      if (
+        nodes.length !== 1 ||
+        node["@id"] !== url + "#project" ||
+        node.url !== url ||
+        node.name !== name ||
+        node.description !== description ||
+        node.inLanguage !== lang ||
+        node.author?.["@id"] !== personId ||
+        Object.keys(node.author).length !== 1
+      ) {
+        failed.push(
+          file +
+            ": expected one " +
+            type +
+            " for the project, authored by " +
+            personId,
+        );
+        continue;
+      }
+      if (
+        code
+          ? node.codeRepository !== project.externalUrl
+          : "codeRepository" in node
+      ) {
+        failed.push(file + ": codeRepository must be the code host URL only");
+      }
+      if (!code && "programmingLanguage" in node) {
+        failed.push(
+          file + ": CreativeWork must not declare a programmingLanguage",
+        );
+      }
+    }
+  }
+  if (
+    parse(read("404.html")).querySelector('script[type="application/ld+json"]')
+  ) {
+    failed.push("404.html: must not have structured data");
   }
 }
 // Home is an engineering portfolio, not an Xila-only landing page.

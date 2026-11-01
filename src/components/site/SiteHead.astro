@@ -9,6 +9,7 @@ import {
   type Locale,
 } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
+import { breadcrumbLd, type JsonLdNode } from "../../lib/seo.ts";
 
 export interface Props {
   lang: Locale;
@@ -20,7 +21,13 @@ export interface Props {
   home?: boolean;
   noindex?: boolean;
   ogType?: "website" | "article";
-  jsonLd?: object[];
+  /** Page-specific JSON-LD nodes (the breadcrumb is added here). */
+  jsonLd?: JsonLdNode[];
+  /**
+   * Breadcrumb after Home, as English paths; defaults to the page itself.
+   * Not emitted on the home page nor on a noindex page.
+   */
+  trail?: readonly { name: string; path: string }[];
 }
 const {
   lang,
@@ -31,6 +38,7 @@ const {
   noindex = false,
   ogType = "website",
   jsonLd = [],
+  trail,
 } = Astro.props;
 const t = useTranslations(lang);
 if (!home && !title) throw new Error(`Missing page title for ${path}`);
@@ -41,6 +49,22 @@ const canonical = site.url + localizePath(path, lang);
 const image = site.url + site.image;
 const hreflang = Object.entries(alternates(path));
 const ogLocale: Record<Locale, string> = { en: "en_US", fr: "fr_FR" };
+const crumbs = [
+  { name: t("nav.home"), path: "/" },
+  ...(trail ?? [{ name: title!, path }]),
+];
+const graph =
+  home || noindex
+    ? jsonLd
+    : [
+        ...jsonLd,
+        breadcrumbLd(
+          crumbs.map((crumb) => ({
+            name: crumb.name,
+            url: site.url + localizePath(crumb.path, lang),
+          })),
+        ),
+      ];
 ---
 
 <meta charset="UTF-8" />
@@ -92,9 +116,7 @@ const ogLocale: Record<Locale, string> = { en: "en_US", fr: "fr_FR" };
 )}
 <link rel="icon" href="/images/icon.png" type="image/png" />
 <link rel="sitemap" href="/sitemap-index.xml" />
-{jsonLd.map((data) => (
-  <JsonLd data={data} />
-))}
+<JsonLd nodes={graph} />
 <script is:inline>
   try {
     const stored = localStorage.getItem("portfolio-theme");

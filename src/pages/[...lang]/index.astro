@@ -5,9 +5,9 @@ import HomeHero from "../../components/home/HomeHero.astro";
 import HomeExperience from "../../components/home/HomeExperience.astro";
 import FeaturedProjects from "../../components/home/FeaturedProjects.astro";
 import XilaTopology from "../../components/xila/XilaTopology.astro";
-import { personJsonLd } from "../../data/jsonLd.ts";
 import { localeStaticPaths } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
+import { personLd, profilePageLd, websiteLd } from "../../lib/seo.ts";
 
 export const getStaticPaths = (() =>
   localeStaticPaths()) satisfies GetStaticPaths;
@@ -25,7 +25,7 @@ const sections = [HomeHero, HomeExperience, FeaturedProjects, XilaTopology];
   path="/"
   description={t("home.description")}
   home
-  jsonLd={[personJsonLd]}
+  jsonLd={[personLd(lang), websiteLd(), profilePageLd(lang)]}
 >
   {sections.map((Section, index) => (
     <Section lang={lang} index={index} />

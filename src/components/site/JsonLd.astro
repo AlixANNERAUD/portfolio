@@ -1,8 +1,13 @@
 ---
+import { serializeGraph, type JsonLdNode } from "../../lib/seo.ts";
+
 export interface Props {
-  data: object;
+  /** Nodes of the page's single schema.org `@graph`. */
+  nodes: readonly JsonLdNode[];
 }
-const { data } = Astro.props;
+const { nodes } = Astro.props;
 ---
 
-<script type="application/ld+json" set:html={JSON.stringify(data)} />
+{nodes.length > 0 && (
+  <script type="application/ld+json" set:html={serializeGraph(nodes)} />
+)}
