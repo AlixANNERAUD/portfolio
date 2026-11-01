@@ -9,7 +9,7 @@ import type { Locale } from "./locales.ts";
 const en = {
   "meta.homeTitle": "Alix ANNERAUD | Software, Rust and embedded systems",
   "meta.pageTitle": "{title} | Alix ANNERAUD",
-  "meta.ogImageAlt": "Alix ANNERAUD — Software, Rust and embedded systems",
+  "meta.ogImageAlt": "Alix ANNERAUD | Software, Rust and embedded systems",
   "a11y.skipToContent": "Skip to content",
   /** Visually hidden suffix of links opening in a new tab. */
   "a11y.newTab": "(opens in a new tab)",
@@ -136,7 +136,7 @@ const en = {
   "home.hero.experience": "My experience",
   "home.hero.projects": "My projects",
   "home.hero.contact": "Get in touch",
-  "home.hero.scroll": "Explore further — my experience",
+  "home.hero.scroll": "Explore further: my experience",
   "home.hero.scrollLabel": "Explore further",
   "home.hero.footnote": "Design · Build · Operate",
   "home.projects.label": "Selected projects",
@@ -240,7 +240,7 @@ export type UIKey = keyof typeof en;
 const fr: Record<UIKey, string> = {
   "meta.homeTitle": "Alix ANNERAUD | Logiciel, Rust et systèmes embarqués",
   "meta.pageTitle": "{title} | Alix ANNERAUD",
-  "meta.ogImageAlt": "Alix ANNERAUD — Logiciel, Rust et systèmes embarqués",
+  "meta.ogImageAlt": "Alix ANNERAUD | Logiciel, Rust et systèmes embarqués",
   "a11y.skipToContent": "Aller au contenu",
   "a11y.newTab": "(s’ouvre dans un nouvel onglet)",
   "nav.home": "Accueil",
@@ -364,7 +364,7 @@ const fr: Record<UIKey, string> = {
   "home.hero.experience": "Mon parcours",
   "home.hero.projects": "Mes projets",
   "home.hero.contact": "Me contacter",
-  "home.hero.scroll": "Découvrir la suite — mon parcours",
+  "home.hero.scroll": "Découvrir la suite : mon parcours",
   "home.hero.scrollLabel": "Découvrir la suite",
   "home.hero.footnote": "Concevoir · Construire · Exploiter",
   "home.projects.label": "Projets sélectionnés",

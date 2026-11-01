@@ -1231,7 +1231,7 @@ for (const file of ["experiences.html", "fr/experiences.html"]) {
   }
 }
 
-// Section numbering: every numbered overline reads "NN — Label", and the
+// Section numbering: every numbered overline reads "NN / Label", and the
 // numbers follow the order of the sections on the page (home: Introduction 00,
 // Experience 01, Projects 02, Xila 03). No overline keeps the old "NN / X" or
 // "X / NN" format, and the closing link's overline is in the page language.
@@ -1239,18 +1239,18 @@ for (const file of ["experiences.html", "fr/experiences.html"]) {
   for (const [file, expected, next] of [
     [
       "index.html",
-      ["00 — Introduction", "01 — Experience", "02 — Projects", "03 — Xila"],
+      ["00 / Introduction", "01 / Experience", "02 / Projects", "03 / Xila"],
       null,
     ],
     [
       "fr/index.html",
-      ["00 — Introduction", "01 — Parcours", "02 — Projets", "03 — Xila"],
+      ["00 / Introduction", "01 / Parcours", "02 / Projets", "03 / Xila"],
       null,
     ],
-    ["experiences.html", ["01 — ", "02 — "], "Up next"],
-    ["fr/experiences.html", ["01 — ", "02 — "], "À suivre"],
-    ["skills.html", ["01 — Expertise", "02 — Communication"], "Up next"],
-    ["fr/skills.html", ["01 — Expertise", "02 — Communication"], "À suivre"],
+    ["experiences.html", ["01 / ", "02 / "], "Up next"],
+    ["fr/experiences.html", ["01 / ", "02 / "], "À suivre"],
+    ["skills.html", ["01 / Expertise", "02 / Communication"], "Up next"],
+    ["fr/skills.html", ["01 / Expertise", "02 / Communication"], "À suivre"],
   ]) {
     const html = read(file);
     if (!html) continue;
@@ -1265,8 +1265,8 @@ for (const file of ["experiences.html", "fr/experiences.html"]) {
       labels.length === expected.length &&
       labels.every(
         ({ index, text }, i) =>
-          /^\d{2} — \S/.test(text) &&
-          text.startsWith(index + " — ") &&
+          /^\d{2} \/ \S/.test(text) &&
+          text.startsWith(index + " / ") &&
           text.startsWith(expected[i]),
       );
     if (!ok) {
@@ -1282,9 +1282,9 @@ for (const file of ["experiences.html", "fr/experiences.html"]) {
       ".eyebrow, .home-hero-overline-index",
     )) {
       const text = node.text.replace(/\s+/g, " ").trim();
-      if (/\b\d{2} \/|\/ \d{2}\b/.test(text)) {
+      if (text.includes("\u2014")) {
         failed.push(
-          file + ": old section number format " + JSON.stringify(text),
+          file + ": em dash in a section label " + JSON.stringify(text),
         );
       }
     }

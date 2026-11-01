@@ -202,8 +202,8 @@ export const experiences: readonly Experience[] = [
     companyUrl: "https://www.becquerel.fr/",
     monogram: "T",
     role: {
-      fr: "Chef de projet / Product Owner — ThéraPIC",
-      en: "Project Lead / Product Owner — ThéraPIC",
+      fr: "Chef de projet / Product Owner, ThéraPIC",
+      en: "Project Lead / Product Owner, ThéraPIC",
     },
     period: { fr: "2025", en: "2025" },
     location: { fr: "Rouen, France", en: "Rouen, France" },
@@ -318,8 +318,8 @@ export const experiences: readonly Experience[] = [
     monogram: "JP2",
     logo: "/images/logos/jean-paul-2.webp",
     role: {
-      fr: "Baccalauréat général — section européenne",
-      en: "French General Baccalaureate — European Section",
+      fr: "Baccalauréat général, section européenne",
+      en: "French General Baccalaureate, European Section",
     },
     period: { fr: "2021", en: "2021" },
     location: { fr: "Rouen, France", en: "Rouen, France" },
