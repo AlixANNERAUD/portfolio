@@ -1,5 +1,5 @@
 ---
-import { LayoutGrid, List, Search } from "@lucide/astro";
+import { ChevronDown, LayoutGrid, List, Search } from "@lucide/astro";
 import Hero from "../ui/Hero.astro";
 import ProjectCard from "./ProjectCard.astro";
 import {
@@ -131,11 +131,18 @@ const searchText = (project: Project) =>
         />
       </label>
       <label class="showcase-sort">
-        <span>{t("projects.sortLabel")}</span>
-        <select data-catalogue-sort>
-          <option value="relevance">{t("projects.sort.relevance")}</option>
-          <option value="name">{t("projects.sort.name")}</option>
-        </select>
+        <span class="showcase-sort-label">{t("projects.sortLabel")}</span>
+        <span class="showcase-select">
+          <select data-catalogue-sort>
+            <option value="relevance">{t("projects.sort.relevance")}</option>
+            <option value="name">{t("projects.sort.name")}</option>
+          </select>
+          <ChevronDown
+            class="showcase-select-icon"
+            size={16}
+            aria-hidden="true"
+          />
+        </span>
       </label>
       <div
         class="showcase-view"
@@ -324,7 +331,7 @@ const searchText = (project: Project) =>
     gap: var(--space-2xs) var(--space-s);
   }
   .showcase-control-label,
-  .showcase-sort > span {
+  .showcase-sort-label {
     color: var(--color-text-subtle);
     font-size: var(--step--2);
     font-weight: 600;
@@ -414,9 +421,31 @@ const searchText = (project: Project) =>
     gap: var(--space-2xs);
     margin-left: auto;
   }
+  /*
+   * The native arrow sits flush against the border and differs per browser;
+   * draw a Lucide chevron instead, with the same inset as the search icon.
+   */
+  .showcase-select {
+    position: relative;
+    display: inline-flex;
+  }
   .showcase-sort select {
-    padding: 0 var(--space-xs);
+    appearance: none;
+    min-width: 9.5rem;
+    padding: 0 calc(var(--space-xs) + 1.5rem) 0 var(--space-xs);
+    text-align: start;
     cursor: pointer;
+  }
+  .showcase-select :global(.showcase-select-icon) {
+    position: absolute;
+    top: 50%;
+    right: var(--space-xs);
+    color: var(--color-text-subtle);
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+  .showcase-select:hover :global(.showcase-select-icon) {
+    color: var(--color-accent);
   }
   .showcase-view {
     display: flex;
@@ -481,7 +510,7 @@ const searchText = (project: Project) =>
       margin-left: 0;
     }
     /* The select names its own options; keep the label for screen readers. */
-    .showcase-sort > span {
+    .showcase-sort-label {
       position: absolute;
       width: 1px;
       height: 1px;
