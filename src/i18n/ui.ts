@@ -16,7 +16,7 @@ const en = {
   "nav.home": "Home",
   "nav.main": "Main navigation",
   "nav.menu": "Menu",
-  "nav.experiences": "Experiences",
+  "nav.experiences": "Experience",
   "nav.projects": "Projects",
   "nav.about": "About",
   /** Short name of this locale, shown on the switcher pointing to it. */
