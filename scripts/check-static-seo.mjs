@@ -515,6 +515,18 @@ for (const [file, canonicalPath, translationPath] of cases) {
     .getElementsByTagName("loc")
     .map((loc) => loc.text.trim().replace(site + "/", ""));
   if (!sitemapFiles.length) failed.push("sitemap-index.xml: no sitemap listed");
+  // /sitemap.xml (the former VitePress address) must list the same chunks.
+  const legacyFiles = parse(read("sitemap.xml"))
+    .getElementsByTagName("loc")
+    .map((loc) => loc.text.trim().replace(site + "/", ""));
+  if (legacyFiles.join() !== sitemapFiles.join()) {
+    failed.push(
+      "sitemap.xml lists " +
+        JSON.stringify(legacyFiles) +
+        ", sitemap-index.xml lists " +
+        JSON.stringify(sitemapFiles),
+    );
+  }
   const listed = new Set();
   for (const sitemapFile of sitemapFiles) {
     for (const url of parse(read(sitemapFile)).getElementsByTagName("url")) {
