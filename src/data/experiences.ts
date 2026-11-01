@@ -17,6 +17,8 @@ export interface Experience {
   logo?: string;
   /** Logo whose artwork is intentionally white (on a dark card). */
   logoOnDark?: boolean;
+  /** Brand colour behind the logo, when the organization's identity uses one. */
+  logoBackground?: string;
   role: Localized;
   period: Localized;
   location: Localized;
@@ -284,8 +286,11 @@ export const experiences: readonly Experience[] = [
     id: "guenola-sahut",
     group: "professional",
     earlier: true,
-    company: "Guenola Sahut",
+    company: "Guénola Sahut",
+    companyUrl: "https://guenola-sahut.fr/",
     monogram: "GS",
+    logo: "/images/logos/guenola-sahut.webp",
+    logoBackground: "#88a2aa",
     role: {
       fr: "Assistant en communication",
       en: "Communication Assistant",
@@ -293,8 +298,8 @@ export const experiences: readonly Experience[] = [
     period: { fr: "2019", en: "2019" },
     location: { fr: "France", en: "France" },
     summary: {
-      fr: "Expérience d’assistance en communication auprès de Guenola Sahut.",
-      en: "Early experience assisting Guenola Sahut with communication work.",
+      fr: "Expérience d’assistance en communication auprès de Guénola Sahut, artiste peintre.",
+      en: "Early experience assisting the painter Guénola Sahut with communication work.",
     },
     highlights: [
       {
@@ -308,14 +313,16 @@ export const experiences: readonly Experience[] = [
     id: "baccalaureat",
     group: "education",
     earlier: true,
-    company: { en: "Secondary school", fr: "Enseignement secondaire" },
-    monogram: "BAC",
+    company: "Institution Jean-Paul II",
+    companyUrl: "https://www.institutionjeanpaul2.fr/",
+    monogram: "JP2",
+    logo: "/images/logos/jean-paul-2.webp",
     role: {
       fr: "Baccalauréat scientifique — section européenne",
       en: "Scientific Baccalaureate — European Section",
     },
     period: { fr: "2021", en: "2021" },
-    location: { fr: "France", en: "France" },
+    location: { fr: "Rouen, France", en: "Rouen, France" },
     summary: {
       fr: "Baccalauréat scientifique obtenu avec un parcours en section européenne.",
       en: "Scientific baccalaureate with a European-section curriculum.",

@@ -69,6 +69,11 @@ const tags = entry.technologies.map((tag) => localize(tag, lang));
           "career-company-mark",
           { "career-company-mark--dark": entry.logoOnDark },
         ]}
+        style={
+          entry.logoBackground
+            ? { background: entry.logoBackground }
+            : undefined
+        }
         aria-hidden="true"
       >
         {/* The monogram stays underneath: it shows if the logo fails. */}

@@ -58,3 +58,5 @@ Copies hosted on this website, taken from the organizations' own websites:
 - **Memo Bank**: [original logo file](https://memo.bank/logo-footer.svg), unmodified, [organization website](https://memo.bank/).
 - **Linkt**: [original logo file](https://www.linkt.fr/wp-content/uploads/2026/05/logo-linkt-bleu-marine.svg), unmodified, [organization website](https://www.linkt.fr/).
 - **Centre Henri Becquerel**: [original logo file](https://www.becquerel.fr/wp-content/uploads/2022/10/logo-becquerel-blanc_tournant.jpg), resized and converted to WebP, [press resources](https://www.becquerel.fr/le-centre/decouvrir-le-centre/espace-presse/).
+- **Guénola Sahut**: [original logo file](https://guenola-sahut.fr/web/image/website/1/logo/Gu%C3%A9nola%20SAHUT), converted to WebP; [website](https://guenola-sahut.fr/).
+- **Institution Jean-Paul II**: [original logo file](https://www.institutionjeanpaul2.fr/wp-content/themes/jp2mdl/img/logo.png), resized and converted to WebP; [website](https://www.institutionjeanpaul2.fr/).
