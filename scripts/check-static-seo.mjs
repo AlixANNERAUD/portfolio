@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { parse } from "node-html-parser";
@@ -238,6 +239,39 @@ function checkPng(path, width, height) {
   }
 }
 
+// /llms.txt lists every page and project in both locales; security.txt has
+// a contact and an expiry less than a year away.
+{
+  const llms = read("llms.txt");
+  if (!llms.startsWith("# " + siteData.name + "\n\n> ")) {
+    failed.push("llms.txt: expected an H1 then a > summary");
+  }
+  for (const lang of ["en", "fr"]) {
+    for (const path of [
+      "/",
+      "/experiences",
+      "/projects",
+      "/skills",
+      "/resume",
+      ...projects.map((project) => "/projects/" + project.id),
+    ]) {
+      const href = site + localized(path, lang);
+      if (!llms.includes("](" + href + ")")) {
+        failed.push("llms.txt: missing a link to " + href);
+      }
+    }
+  }
+  const security = read(".well-known/security.txt");
+  const expires = Date.parse(/^Expires: (.+)$/m.exec(security)?.[1]);
+  const year = 365 * 24 * 60 * 60 * 1000;
+  if (!security.includes("Contact: mailto:" + siteData.email + "\n")) {
+    failed.push(".well-known/security.txt: missing the contact");
+  }
+  if (!(expires > Date.now() && expires < Date.now() + year)) {
+    failed.push(".well-known/security.txt: Expires must be within a year");
+  }
+}
+
 // Social cards (one per locale, since the tagline is translated) and icons.
 const ogImages = {
   en: "/images/og-default.png",
@@ -312,6 +346,10 @@ function checkSocialMeta(file, head, lang) {
     "/images/favicon.svg"
   ) {
     failed.push(file + ": expected one SVG favicon /images/favicon.svg");
+  }
+  const analytics = new URL(siteData.analytics.src).origin;
+  if (links('link[rel="preconnect"]').join() !== analytics) {
+    failed.push(file + ": expected one preconnect to " + analytics);
   }
   if (
     links('link[rel="apple-touch-icon"]').join() !==
@@ -444,6 +482,14 @@ for (const [file, canonicalPath, translationPath] of cases) {
 // Every sitemap URL is a page canonical with en/fr alternates equal to the
 // page hreflang links, and every indexable page is listed exactly once.
 {
+  let fullHistory = false;
+  try {
+    fullHistory =
+      execFileSync("git", ["rev-parse", "--is-shallow-repository"], {
+        encoding: "utf8",
+        stdio: "pipe",
+      }).trim() === "false";
+  } catch {}
   const index = parse(read("sitemap-index.xml"));
   const sitemapFiles = index
     .getElementsByTagName("loc")
@@ -459,6 +505,14 @@ for (const [file, canonicalPath, translationPath] of cases) {
       if (!expected) {
         failed.push("sitemap: " + loc + " is not a page canonical URL");
         continue;
+      }
+      // <lastmod> comes from Git: every URL has one with the full history,
+      // none in a shallow clone.
+      const lastmod = url.getElementsByTagName("lastmod")[0]?.text.trim();
+      if (fullHistory !== Boolean(lastmod)) {
+        failed.push("sitemap: " + loc + " lastmod " + (lastmod ?? "missing"));
+      } else if (lastmod && Number.isNaN(Date.parse(lastmod))) {
+        failed.push("sitemap: " + loc + " invalid lastmod " + lastmod);
       }
       const links = url.getElementsByTagName("xhtml:link");
       for (const code of ["en", "fr", "x-default"]) {

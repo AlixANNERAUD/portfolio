@@ -4,6 +4,7 @@ import sitemap from "@astrojs/sitemap";
 import { satteri } from "@astrojs/markdown-satteri";
 import projectTitlePlugin from "./src/lib/project-title-plugin.mjs";
 import frenchTypographyPlugin from "./src/lib/rehype-french-typography.mjs";
+import { lastModified } from "./src/lib/sitemap-lastmod.mjs";
 
 const site = "https://alix.anneraud.fr";
 // The French home page is canonically `/fr/` (its indexed URL), but the
@@ -39,15 +40,19 @@ export default defineConfig({
     sitemap({
       i18n: { defaultLocale: "en", locales: { en: "en", fr: "fr" } },
       filter: (page) => !isNotFoundPage(page),
-      // Mirror the page <head>: en and fr alternates plus x-default (English).
+      // Mirror the page <head>: en and fr alternates plus x-default (English),
+      // and date each page from Git (src/lib/sitemap-lastmod.mjs).
       serialize: (item) => {
         const links = item.links?.map((link) => ({
           ...link,
           url: frenchHome(link.url),
         }));
         const english = links?.find((link) => link.lang === "en");
+        // Last commit changing the page's content (none in a shallow clone).
+        const lastmod = lastModified(item.url);
         return {
           ...item,
+          ...(lastmod && { lastmod }),
           url: frenchHome(item.url),
           links: english
             ? [...links, { lang: "x-default", url: english.url }]

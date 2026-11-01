@@ -39,6 +39,8 @@ src/
     [...lang]/            Chaque page une seule fois, générée pour / (anglais) et /fr/ (français) :
                           index, projects, experiences, skills, resume, legal-notice, projects/[slug]
     404.astro
+    llms.txt.ts           /llms.txt, index Markdown de toutes les pages pour les modèles de langage
+    .well-known/          security.txt (contact, renouvelé à chaque build)
   layouts/
     BaseLayout.astro      Structure HTML : en-tête, navigation, pied de page, JSON-LD
     ProjectLayout.astro   Fiche projet : fil d’Ariane, titre, métadonnées, contenu, projets liés et suivant
