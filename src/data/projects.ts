@@ -173,7 +173,7 @@ export const projects = [
     ranking: {
       technicalDepth: 2.5,
       originality: 3.5,
-      practicalImpact: 4,
+      practicalImpact: 5,
       evidence: 2,
     },
   },
@@ -333,8 +333,8 @@ export const projects = [
     symbol: "#1",
     tags: ["CTF"],
     ranking: {
-      technicalDepth: 3,
-      originality: 3.7,
+      technicalDepth: 4,
+      originality: 3.8,
       practicalImpact: 4.5,
       evidence: 5,
     },
@@ -353,7 +353,7 @@ export const projects = [
     symbol: "</>",
     tags: ["Algorithmique"],
     ranking: {
-      technicalDepth: 3.2,
+      technicalDepth: 3.8,
       originality: 3.4,
       practicalImpact: 4.2,
       evidence: 4.5,
