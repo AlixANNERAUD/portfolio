@@ -48,12 +48,12 @@ src/
     ProjectLayout.astro   Project page: breadcrumb, title, meta line, body, related and next projects
   components/
     ui/                   Editorial primitives: Hero, SectionHeading, Card, Tags, NextLink, Eyebrow
-    home/                 Homepage introduction, experience overview, featured projects
+    home/                 Homepage: animated tile field, Now, doorways and contact
     experience/           ExperienceCard and ExperienceTimeline
     projects/             ProjectCard, ProjectCatalogue (filterable), Breadcrumb, RelatedProjects
     resume/               ResumeSummary (HTML summary) and PdfEmbed
     skills/ xila/ mdx/    Page sections and MDX components
-    site/                 SiteHead, SiteHeader, SiteFooter, ThemeSwitch (Auto / Light / Dark), JsonLd
+    site/                 SiteHead, SiteHeader, SiteFooter, ThemeMenu (Auto / Light / Dark), JsonLd
   content.config.ts       Typed project collection
   content/
     projects/{en,fr}/     27 projects, one Markdown / MDX page per locale
@@ -61,7 +61,7 @@ src/
   data/                   projects, experiences, skills, technologies (tags), site identity, shared types
   i18n/                   Locales and the typed UI dictionary (ui.ts)
   lib/                    seo.ts (JSON-LD), Markdown plugins (project title, French typography),
-                          formatting, Xila topology
+                          formatting, homepage orbit layout (home-orbit.ts)
   styles/                 tokens.css (design tokens), base, prose and motion styles
 public/                   Images (including self-hosted logos), CNAME, robots.txt
 scripts/                  Source validation, built-HTML checks, snapshot, unit tests

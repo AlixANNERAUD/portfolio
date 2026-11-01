@@ -1,0 +1,1190 @@
+---
+import Eyebrow from "../ui/Eyebrow.astro";
+import { experiences } from "../../data/experiences.ts";
+import { getProject } from "../../data/projects.ts";
+import { site } from "../../data/site.ts";
+import { localize } from "../../data/types.ts";
+import type { Locale } from "../../i18n/locales.ts";
+import { useTranslations } from "../../i18n/ui.ts";
+import { templateParts } from "../../lib/format.ts";
+import {
+  buildOrbitNodes,
+  layoutOrbit,
+  orbitCategories,
+  visibleOnMobile,
+} from "../../lib/home-orbit.ts";
+
+/**
+ * Homepage hero: the name, one line about now, and a field of linked tiles
+ * (the homepage roles, INSA, the top-ranked projects) laid out at build time.
+ * The module script below only adds motion; without it the composition is
+ * complete and every tile is a plain link.
+ */
+interface Props {
+  lang: Locale;
+  /** Position of the section on the page, numbering its overline. */
+  index: number;
+}
+
+const { lang, index } = Astro.props;
+const t = useTranslations(lang);
+
+const current = experiences.find(
+  (entry) => entry.group === "professional" && entry.ongoing,
+);
+if (!current) throw new Error("No ongoing professional experience");
+const tagline = templateParts(t("home.orbit.tagline"), {
+  role: current.role[lang],
+  company: localize(current.company, lang),
+  project: localize(getProject("xila").title, lang),
+});
+
+const [firstName, lastName] = site.name.split(" ");
+const nodes = buildOrbitNodes(lang);
+const layout = layoutOrbit(nodes);
+const categories = orbitCategories(nodes);
+
+const position = (i: number) => {
+  const p = layout[i];
+  return [
+    `--x:${p.x}%`,
+    `--y:${p.y}%`,
+    `--mx:${p.mx}%`,
+    `--my:${p.my}%`,
+    `--dx:${p.dx}px`,
+    `--dy:${p.dy}px`,
+    `--dd:${p.dd}s`,
+    `--dl:${p.dl}s`,
+    `--i:${i}`,
+  ].join(";");
+};
+---
+
+<section class="orbit" aria-labelledby="home-title" data-orbit>
+  <div class="orbit-copy-wrap container">
+    <div class="orbit-copy">
+      <Eyebrow as="span" class="orbit-eyebrow" index={index} aria-hidden="true">
+        {t("home.orbit.eyebrow")}
+      </Eyebrow>
+      <h1 id="home-title" class="orbit-title">
+        <span class="orbit-title-mask">
+          <span class="orbit-title-line">{firstName}</span>
+        </span>{" "}
+        <span class="orbit-title-mask">
+          <span class="orbit-title-line orbit-title-accent">{lastName}</span>
+        </span>
+      </h1>
+      <p class="orbit-tagline">
+        {tagline.map((part) =>
+          part.name === "company" || part.name === "project" ? (
+            <strong>{part.text}</strong>
+          ) : (
+            part.text
+          ),
+        )}
+      </p>
+      <div
+        class="orbit-chips"
+        role="group"
+        aria-label={t("home.orbit.filterLabel")}
+        hidden
+      >
+        <button type="button" aria-pressed="true" data-cat="all">
+          {t("home.orbit.all")}
+        </button>
+        {categories.map((category) => (
+          <button
+            type="button"
+            aria-pressed="false"
+            data-cat={category}
+            style={`--cat:var(--category-${category})`}
+          >
+            <span class="orbit-chip-dot" aria-hidden="true" />
+            {t(`category.${category}`)}
+          </button>
+        ))}
+      </div>
+      <p class="orbit-hint" hidden>
+        {t("home.orbit.hint")}
+      </p>
+    </div>
+  </div>
+
+  <nav class="orbit-field" aria-label={t("home.orbit.fieldLabel")}>
+    <div class="orbit-stage">
+      <span class="orbit-ring" aria-hidden="true"></span>
+      <span class="orbit-ring orbit-ring--inner" aria-hidden="true"></span>
+      <svg class="orbit-links" aria-hidden="true" focusable="false"></svg>
+      <ul class="orbit-nodes" role="list">
+        {nodes.map((node, i) => (
+          <li
+            class="orbit-node"
+            data-kind={node.kind}
+            data-id={node.id}
+            data-cat={node.kind === "project" ? node.category : undefined}
+            data-rank={node.kind === "project" ? node.rank : undefined}
+            data-related={
+              node.kind === "project" && node.related.length
+                ? node.related.join(" ")
+                : undefined
+            }
+            data-core={node.kind === "project" && node.core ? "" : undefined}
+            data-extra={visibleOnMobile(node) ? undefined : ""}
+            style={position(i)}
+          >
+            <div class="orbit-drift">
+              {node.kind === "org" ? (
+                <a
+                  class="orbit-tile orbit-tile--org"
+                  href={node.href}
+                  data-caption={node.caption}
+                >
+                  <span
+                    class:list={[
+                      "orbit-logo",
+                      { "orbit-logo--dark": node.logoOnDark },
+                    ]}
+                  >
+                    <span class="orbit-monogram" aria-hidden="true">
+                      {node.monogram}
+                    </span>
+                    {node.logo && (
+                      <img
+                        src={node.logo.src}
+                        alt=""
+                        width={node.logo.width}
+                        height={node.logo.height}
+                        loading="eager"
+                        fetchpriority="low"
+                        decoding="async"
+                      />
+                    )}
+                  </span>
+                  <span class="orbit-label">{node.label}</span>
+                </a>
+              ) : (
+                <a
+                  class="orbit-tile orbit-tile--project"
+                  href={node.href}
+                  data-caption={node.caption}
+                  style={`--cat:var(--category-${node.category})`}
+                >
+                  <span class="orbit-glyph" aria-hidden="true">
+                    {node.symbol}
+                  </span>
+                  <span class="orbit-label">{node.label}</span>
+                </a>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+    <p class="orbit-caption" aria-hidden="true">
+      <span class="orbit-caption-label"></span>
+      <span class="orbit-caption-text"></span>
+    </p>
+  </nav>
+</section>
+
+<script>
+  /*
+   * Progressive enhancement of the homepage field: idle drift (CSS, enabled
+   * by data-ready), pointer push, related-project connectors, category chips
+   * and the decoding caption. Every position is read once (init, resize):
+   * the frame loop only writes `translate` and two custom properties.
+   */
+  type Node = {
+    el: HTMLElement;
+    tile: HTMLAnchorElement;
+    cat?: string;
+    related: string[];
+    /** Rest anchor in field coordinates; offset; velocity. */
+    ax: number;
+    ay: number;
+    ox: number;
+    oy: number;
+    vx: number;
+    vy: number;
+    /** Tile centre relative to the anchor, measured when a line is drawn. */
+    cx: number;
+    cy: number;
+    reach: number;
+    held: boolean;
+  };
+
+  const root = document.querySelector<HTMLElement>("[data-orbit]");
+  if (root && "IntersectionObserver" in window) {
+    const field = root.querySelector<HTMLElement>(".orbit-stage")!;
+    const svg = root.querySelector<SVGSVGElement>(".orbit-links")!;
+    const caption = root.querySelector<HTMLElement>(".orbit-caption")!;
+    const [capLabel, capText] = caption.children as unknown as HTMLElement[];
+    const chips = root.querySelector<HTMLElement>(".orbit-chips")!;
+    const hint = root.querySelector<HTMLElement>(".orbit-hint")!;
+    const SVG = "http://www.w3.org/2000/svg";
+    const nodes: Node[] = [];
+    const byId = new Map<string, Node>();
+    for (const el of root.querySelectorAll<HTMLElement>(".orbit-node")) {
+      const node: Node = {
+        el,
+        tile: el.querySelector("a")!,
+        cat: el.dataset.cat,
+        related: (el.dataset.related ?? "").split(" ").filter(Boolean),
+        ax: 0,
+        ay: 0,
+        ox: 0,
+        oy: 0,
+        vx: 0,
+        vy: 0,
+        cx: 0,
+        cy: 0,
+        reach: "core" in el.dataset ? 190 : 150,
+        held: false,
+      };
+      nodes.push(node);
+      byId.set(el.dataset.id!, node);
+    }
+
+    // A logo that fails to load leaves its monogram visible.
+    for (const img of root.querySelectorAll("img")) {
+      const fail = () => (img.hidden = true);
+      if (img.complete && !img.naturalWidth) fail();
+      else img.addEventListener("error", fail, { once: true });
+    }
+
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)");
+    const fine = matchMedia("(pointer: fine)");
+    let motion = !reduce.matches;
+    let push = motion && fine.matches;
+    const syncMedia = () => {
+      motion = !reduce.matches;
+      push = motion && fine.matches;
+      hint.hidden = !fine.matches;
+      if (!push) settle();
+    };
+    reduce.addEventListener("change", syncMedia);
+    fine.addEventListener("change", syncMedia);
+    chips.hidden = false;
+    hint.hidden = !fine.matches;
+    root.dataset.ready = "";
+
+    /* Geometry: one read pass at init and on resize. */
+    let fx = 0;
+    let fy = 0;
+    let sx = 0;
+    let sy = 0;
+    const measure = () => {
+      const f = field.getBoundingClientRect();
+      const s = root.getBoundingClientRect();
+      fx = f.left + scrollX;
+      fy = f.top + scrollY;
+      sx = s.left + scrollX;
+      sy = s.top + scrollY;
+      for (const n of nodes) {
+        const r = n.el.getBoundingClientRect();
+        n.ax = r.left - f.left - n.ox;
+        n.ay = r.top - f.top - n.oy;
+      }
+      measureTiles();
+      drawLines(false);
+    };
+    new ResizeObserver(measure).observe(field);
+
+    /* Physics: spring back to rest, pushed away from the pointer. */
+    const STEP = 1 / 120;
+    let px = 0;
+    let py = 0;
+    let pvx = 0;
+    let pvy = 0;
+    let lastMove = 0;
+    let inside = false;
+    let visible = true;
+    let raf = 0;
+    let last = 0;
+    let acc = 0;
+
+    const step = () => {
+      for (const n of nodes) {
+        if (n.held) continue;
+        let ax = -70 * n.ox - 13 * n.vx;
+        let ay = -70 * n.oy - 13 * n.vy;
+        if (inside) {
+          const dx = n.ax - px;
+          const dy = n.ay - py;
+          const d = Math.hypot(dx, dy) || 1;
+          if (d < n.reach) {
+            const k = 1 - d / n.reach;
+            const f = (2600 * k * k) / d;
+            ax += dx * f + pvx * 0.12 * 9 * k;
+            ay += dy * f + pvy * 0.12 * 9 * k;
+          }
+        }
+        n.vx += ax * STEP;
+        n.vy += ay * STEP;
+        n.ox += n.vx * STEP;
+        n.oy += n.vy * STEP;
+        const len = Math.hypot(n.ox, n.oy);
+        if (len > 56) {
+          n.ox *= 56 / len;
+          n.oy *= 56 / len;
+        }
+      }
+    };
+    const render = () => {
+      for (const n of nodes) n.el.style.translate = `${n.ox}px ${n.oy}px`;
+      updateLines();
+    };
+    const frame = (now: number) => {
+      acc += Math.min(34, now - last) / 1000;
+      last = now;
+      while (acc >= STEP) {
+        step();
+        acc -= STEP;
+      }
+      // The pointer's wake fades once it stops moving.
+      if (now - lastMove > 60) pvx = pvy = 0;
+      render();
+      const slow = nodes.every((n) => n.held || Math.hypot(n.vx, n.vy) < 0.4);
+      if (
+        slow &&
+        !inside &&
+        nodes.every((n) => Math.hypot(n.ox, n.oy) < 0.25)
+      ) {
+        settle();
+        return;
+      }
+      // A resting pointer holds the tiles where they are: no frames needed
+      // until it moves again.
+      if (slow && inside && now - lastMove > 120) {
+        raf = 0;
+        return;
+      }
+      raf = requestAnimationFrame(frame);
+    };
+    const wake = () => {
+      if (raf || !push || !visible) return;
+      last = performance.now();
+      raf = requestAnimationFrame(frame);
+    };
+    /** Stops the loop and puts every free tile back at rest. */
+    function settle() {
+      cancelAnimationFrame(raf);
+      raf = 0;
+      inside = false;
+      root!.removeAttribute("data-pointer");
+      for (const n of nodes) {
+        if (n.held) continue;
+        n.ox = n.oy = n.vx = n.vy = 0;
+      }
+      render();
+    }
+
+    root.addEventListener(
+      "pointermove",
+      (event) => {
+        if (!push || event.pointerType === "touch") return;
+        const x = event.pageX - fx;
+        const y = event.pageY - fy;
+        const dt = Math.max(8, event.timeStamp - lastMove) / 1000;
+        if (inside) {
+          const clamp = (v: number) => Math.max(-900, Math.min(900, v));
+          pvx = clamp((x - px) / dt);
+          pvy = clamp((y - py) / dt);
+        }
+        px = x;
+        py = y;
+        lastMove = event.timeStamp;
+        inside = true;
+        root.dataset.pointer = "";
+        root.style.setProperty("--px", `${event.pageX - sx}px`);
+        root.style.setProperty("--py", `${event.pageY - sy}px`);
+        wake();
+      },
+      { passive: true },
+    );
+    root.addEventListener(
+      "pointerleave",
+      () => {
+        inside = false;
+        root.removeAttribute("data-pointer");
+        wake();
+      },
+      { passive: true },
+    );
+
+    /* Off screen or in a hidden tab: drift pauses, the loop stops. */
+    const pause = () => {
+      root.toggleAttribute("data-paused", !visible || document.hidden);
+      if (!visible || document.hidden) settle();
+    };
+    new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      pause();
+    }).observe(field);
+    document.addEventListener("visibilitychange", pause);
+
+    /* Connectors: a line per related pair, drawn from tile centre to centre. */
+    let lines: { line: SVGLineElement; a: Node; b: Node }[] = [];
+    let pairs: [Node, Node][] = [];
+    function measureTiles() {
+      const f = field.getBoundingClientRect();
+      for (const n of nodes) {
+        if (!n.el.hasAttribute("data-hold")) continue;
+        const r = n.tile.getBoundingClientRect();
+        n.cx = r.left + r.width / 2 - f.left - n.ax - n.ox;
+        n.cy = r.top + r.height / 2 - f.top - n.ay - n.oy;
+      }
+    }
+    function drawLines(animate = true) {
+      svg.replaceChildren();
+      lines = pairs.map(([a, b]) => {
+        const line = document.createElementNS(SVG, "line");
+        line.setAttribute("pathLength", "1");
+        if (animate && motion) line.classList.add("is-drawing");
+        svg.append(line);
+        return { line, a, b };
+      });
+      updateLines();
+      if (animate && motion) {
+        requestAnimationFrame(() =>
+          requestAnimationFrame(() => {
+            for (const { line } of lines) line.classList.remove("is-drawing");
+          }),
+        );
+      }
+    }
+    function updateLines() {
+      for (const { line, a, b } of lines) {
+        line.setAttribute("x1", `${a.ax + a.ox + a.cx}`);
+        line.setAttribute("y1", `${a.ay + a.oy + a.cy}`);
+        line.setAttribute("x2", `${b.ax + b.ox + b.cx}`);
+        line.setAttribute("y2", `${b.ay + b.oy + b.cy}`);
+      }
+    }
+
+    /* Highlight: the active tile, its related projects, and the caption. */
+    let active: Node | undefined;
+    let filter = "all";
+    let clearTimer = 0;
+    let decodeRaf = 0;
+    const HEX = "0123456789abcdef";
+
+    const decode = (label: string, text: string) => {
+      cancelAnimationFrame(decodeRaf);
+      capLabel.textContent = label;
+      caption.dataset.on = "";
+      if (!motion) {
+        capText.textContent = text;
+        return;
+      }
+      const start = performance.now();
+      const per = Math.min(18, 360 / text.length);
+      const tick = (now: number) => {
+        const done = Math.floor((now - start) / per);
+        if (done >= text.length) {
+          capText.textContent = text;
+          return;
+        }
+        const noise = text
+          .slice(done)
+          .replace(/\S/g, () => HEX[(Math.random() * 16) | 0]);
+        capText.innerHTML = "";
+        const pending = document.createElement("span");
+        pending.textContent = noise;
+        capText.append(text.slice(0, done), pending);
+        decodeRaf = requestAnimationFrame(tick);
+      };
+      decodeRaf = requestAnimationFrame(tick);
+    };
+
+    /** Highlight, connectors and drift hold for the current state. */
+    const apply = () => {
+      root.toggleAttribute("data-active", !!active);
+      const lit = new Set(active ? [active, ...relatedOf(active)] : []);
+      const match = (n: Node) => filter !== "all" && n.cat === filter;
+      for (const n of nodes) {
+        n.el.toggleAttribute("data-lit", lit.has(n));
+        n.el.toggleAttribute("data-on", n === active);
+        n.el.toggleAttribute("data-match", match(n));
+        n.el.toggleAttribute("data-dim", filter !== "all" && !match(n));
+        n.el.toggleAttribute("data-hold", lit.has(n) || match(n));
+      }
+      pairs = [];
+      if (active) {
+        for (const r of relatedOf(active)) pairs.push([active, r]);
+      } else if (filter !== "all") {
+        for (const a of nodes) {
+          if (!match(a)) continue;
+          for (const r of relatedOf(a)) {
+            // Each related pair once.
+            if (match(r) && !pairs.some(([x, y]) => x === r && y === a)) {
+              pairs.push([a, r]);
+            }
+          }
+        }
+      }
+      measureTiles();
+      drawLines();
+    };
+    const relatedOf = (n: Node) =>
+      n.related.map((id) => byId.get(id)).filter((r): r is Node => !!r);
+
+    const nodeOf = (target: EventTarget | null) =>
+      target instanceof Element
+        ? nodes.find((n) => n.el === target.closest(".orbit-node"))
+        : undefined;
+    const activate = (n: Node) => {
+      clearTimeout(clearTimer);
+      if (active === n) return;
+      active = n;
+      apply();
+      decode(
+        n.tile.querySelector(".orbit-label")!.textContent ?? "",
+        n.tile.dataset.caption ?? "",
+      );
+    };
+    const release = () => {
+      clearTimeout(clearTimer);
+      clearTimer = window.setTimeout(() => {
+        active = undefined;
+        cancelAnimationFrame(decodeRaf);
+        caption.removeAttribute("data-on");
+        apply();
+      }, 120);
+    };
+
+    field.addEventListener("pointerover", (event) => {
+      const n = nodeOf(event.target);
+      if (!n) return;
+      // The hovered tile stays where it is, so it never slips away.
+      n.held = true;
+      n.vx = n.vy = 0;
+      activate(n);
+    });
+    field.addEventListener("pointerout", (event) => {
+      const n = nodeOf(event.target);
+      if (!n || n.el.contains(event.relatedTarget as globalThis.Node)) return;
+      n.held = n.tile === document.activeElement;
+      release();
+    });
+    field.addEventListener("focusin", (event) => {
+      const n = nodeOf(event.target);
+      if (!n) return;
+      // A focused tile rests at its anchor, so the focus ring never moves.
+      n.held = true;
+      n.ox = n.oy = n.vx = n.vy = 0;
+      render();
+      activate(n);
+    });
+    field.addEventListener("focusout", (event) => {
+      const n = nodeOf(event.target);
+      if (!n) return;
+      n.held = false;
+      wake();
+      release();
+    });
+
+    /* Category chips: one pressed at a time; "all" resets. */
+    chips.addEventListener("click", (event) => {
+      const button = (event.target as Element).closest("button");
+      if (!button) return;
+      for (const chip of chips.querySelectorAll("button")) {
+        chip.setAttribute("aria-pressed", String(chip === button));
+      }
+      filter = button.dataset.cat ?? "all";
+      apply();
+    });
+  }
+</script>
+
+<style>
+  /* Desktop: the copy sits on the left, the field fills the whole hero. */
+  .orbit {
+    position: relative;
+    display: grid;
+    min-height: calc(100svh - var(--header-h));
+    isolation: isolate;
+    overflow: clip;
+    color: var(--color-text);
+  }
+
+  .orbit-copy-wrap {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+    padding-block: var(--space-xl);
+    /* The wrap spans the hero; only the copy itself takes the pointer. */
+    pointer-events: none;
+  }
+  .orbit-copy {
+    min-width: 0;
+    max-width: calc(100% * 7 / 12);
+    pointer-events: auto;
+  }
+  .orbit-eyebrow {
+    display: block;
+    margin-bottom: var(--space-s);
+  }
+
+  .orbit-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--step-display);
+    font-weight: 400;
+    letter-spacing: var(--tracking-display);
+    line-height: 0.92;
+    color: var(--color-text);
+  }
+  .orbit-title-mask {
+    display: block;
+    overflow: clip;
+    /* Room for ascenders and descenders inside the mask. */
+    padding-block: 0.1em 0.12em;
+    margin-block: -0.1em -0.12em;
+  }
+  .orbit-title-line {
+    display: block;
+    width: fit-content;
+  }
+  .orbit-title-accent {
+    color: var(--color-accent);
+  }
+
+  .orbit-tagline {
+    max-width: 34ch;
+    margin: var(--space-m) 0 0;
+    color: var(--color-text-muted);
+    font-size: var(--step-1);
+    line-height: var(--leading-snug);
+    text-wrap: pretty;
+  }
+  .orbit-tagline strong {
+    color: var(--color-text);
+    font-weight: 600;
+  }
+
+  .orbit-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3xs);
+    margin-top: var(--space-l);
+  }
+  .orbit-chips[hidden],
+  .orbit-hint[hidden] {
+    display: none;
+  }
+  .orbit-chips button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+    min-height: 2.25rem;
+    padding: 0 var(--space-xs);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    background: var(--color-bg);
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: var(--tracking-mono);
+    cursor: pointer;
+    transition:
+      border-color var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out),
+      background-color var(--dur-fast) var(--ease-out);
+  }
+  .orbit-chips button:hover {
+    border-color: var(--color-border-strong);
+    color: var(--color-text);
+  }
+  .orbit-chips button[aria-pressed="true"] {
+    border-color: var(--color-accent);
+    background: var(--color-accent-soft);
+    color: var(--color-text);
+  }
+  .orbit-chip-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--cat);
+  }
+
+  .orbit-hint {
+    margin: var(--space-s) 0 0;
+    color: var(--color-text-subtle);
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: var(--tracking-mono);
+  }
+
+  /* The field. */
+  .orbit-field {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    pointer-events: none;
+  }
+  .orbit-stage {
+    position: absolute;
+    inset: 0;
+    isolation: isolate;
+  }
+  /* Dot grid, fading out towards the copy. */
+  .orbit-stage::before,
+  .orbit-stage::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    /* Texture and spotlight stay under the rings, lines and tiles. */
+    z-index: -1;
+  }
+  .orbit-stage::before {
+    background: radial-gradient(var(--color-border) 1px, transparent 1.5px) 0
+      0 / 24px 24px;
+    mask-image: radial-gradient(
+      ellipse 50% 62% at 72% 50%,
+      #000 35%,
+      transparent 100%
+    );
+  }
+  /* Pointer spotlight (fine pointer, motion allowed: set by the script). */
+  .orbit-stage::after {
+    background: radial-gradient(
+      340px circle at var(--px, 50%) var(--py, 50%),
+      var(--color-accent-soft),
+      transparent
+    );
+    opacity: 0;
+    transition: opacity var(--dur-slow) var(--ease-out);
+  }
+  .orbit[data-pointer] .orbit-stage::after {
+    opacity: 1;
+  }
+
+  /* Orbits through the organizations and around the core. */
+  .orbit-ring {
+    position: absolute;
+    left: 52%;
+    top: 20%;
+    width: 40%;
+    height: 60%;
+    border: 1px dashed var(--color-border);
+    border-radius: 50%;
+  }
+  .orbit-ring--inner {
+    left: 63%;
+    top: 34%;
+    width: 18%;
+    height: 32%;
+    border-style: solid;
+  }
+
+  .orbit-links {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .orbit-links :global(line) {
+    stroke: color-mix(in oklch, var(--color-accent) 55%, transparent);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 360ms var(--ease-out);
+  }
+  .orbit-links :global(line.is-drawing) {
+    stroke-dashoffset: 1;
+    transition: none;
+  }
+
+  .orbit-nodes {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  /* A zero-size anchor at the tile's centre; the script translates it. */
+  .orbit-node {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    width: 0;
+    height: 0;
+    transition: opacity 300ms var(--ease-out);
+  }
+  .orbit-node:hover,
+  .orbit-node:focus-within,
+  .orbit-node[data-on] {
+    z-index: 2;
+  }
+  .orbit-drift {
+    position: absolute;
+    top: 0;
+    left: 0;
+    /* The anchor has no width: size the tile on its own content. */
+    width: max-content;
+    transform: translate(-50%, -50%);
+  }
+
+  .orbit-tile {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    white-space: nowrap;
+    pointer-events: auto;
+    transition:
+      scale 220ms var(--ease-spring),
+      border-color var(--dur-base) var(--ease-out),
+      box-shadow var(--dur-base) var(--ease-out);
+  }
+  .orbit-tile:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 3px;
+  }
+  .orbit-label {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: var(--tracking-mono);
+    line-height: 1.25;
+  }
+
+  /* Organization: logo plate and name in one pill. */
+  .orbit-tile--org {
+    gap: var(--space-2xs);
+    min-height: 2.5rem;
+    padding: var(--space-3xs) var(--space-xs) var(--space-3xs) var(--space-3xs);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    background: var(--color-surface);
+  }
+  .orbit-logo {
+    display: grid;
+    place-items: center;
+    min-width: 1.75rem;
+    height: 1.75rem;
+    padding-inline: 0.375rem;
+    border-radius: var(--radius-full);
+    background: var(--color-logo-plate);
+    color: oklch(0.3 0.04 250);
+  }
+  .orbit-logo--dark {
+    background: var(--color-logo-plate-dark);
+    color: var(--color-on-category);
+  }
+  .orbit-logo > * {
+    grid-area: 1 / 1;
+  }
+  .orbit-logo img {
+    display: block;
+    width: auto;
+    max-width: none;
+    background: inherit;
+  }
+  .orbit-logo img[hidden] {
+    display: none;
+  }
+  .orbit-monogram {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    font-weight: 700;
+  }
+
+  /* Project: a category glyph; the name unfolds beside it. */
+  .orbit-glyph {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--radius-m);
+    background: var(--cat);
+    color: var(--color-on-category);
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    font-weight: 500;
+    box-shadow: 0 1px 0 color-mix(in oklch, var(--color-text) 12%, transparent);
+    transition: box-shadow var(--dur-base) var(--ease-out);
+  }
+  .orbit-tile--project {
+    border-radius: var(--radius-m);
+  }
+  .orbit-tile--project .orbit-label {
+    position: absolute;
+    inset-block: 0;
+    left: calc(100% + 0.375rem);
+    height: fit-content;
+    margin-block: auto;
+    padding: 0.2rem 0.45rem;
+    border-radius: var(--radius-s);
+    background: color-mix(in oklch, var(--color-bg) 85%, transparent);
+    color: var(--color-text);
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path var(--dur-base) var(--ease-out);
+    /* The unfolded name never steals the pointer from a neighbour. */
+    pointer-events: none;
+  }
+  .orbit-node[data-core] .orbit-glyph {
+    width: 3.75rem;
+    height: 3.75rem;
+    font-size: var(--step-2);
+  }
+  /* The core keeps its name visible. */
+  .orbit-node[data-core] .orbit-tile--project {
+    gap: 0.625rem;
+  }
+  .orbit-node[data-core] .orbit-label {
+    position: static;
+    pointer-events: auto;
+    padding: 0;
+    background: none;
+    font-size: var(--step--1);
+    clip-path: none;
+  }
+
+  /* Hover, focus and the script's highlight. */
+  .orbit-tile--org:hover,
+  .orbit-tile--org:focus-visible,
+  .orbit-node[data-on] .orbit-tile--org {
+    border-color: var(--color-accent);
+    color: var(--color-text);
+  }
+  .orbit-tile--project:hover .orbit-glyph,
+  .orbit-tile--project:focus-visible .orbit-glyph,
+  .orbit-node[data-on] .orbit-glyph {
+    box-shadow:
+      0 0 0 2px var(--color-bg),
+      0 0 0 3px var(--color-accent);
+  }
+  .orbit-tile--project:hover .orbit-label,
+  .orbit-tile--project:focus-visible .orbit-label,
+  .orbit-node[data-on] .orbit-tile--project .orbit-label {
+    clip-path: inset(0);
+  }
+  .orbit[data-active] .orbit-node:not([data-lit]) {
+    opacity: 0.35;
+  }
+  .orbit-node[data-dim] {
+    opacity: 0.28;
+  }
+  .orbit[data-active] .orbit-node[data-dim][data-lit] {
+    opacity: 1;
+  }
+  .orbit-node[data-match] .orbit-glyph {
+    box-shadow:
+      0 0 0 2px var(--color-bg),
+      0 0 0 3px var(--color-accent);
+  }
+
+  /* Caption: bottom left, aligned with the page column. */
+  .orbit-caption {
+    position: absolute;
+    bottom: var(--space-l);
+    left: max(
+      var(--page-inline),
+      calc((100% - var(--container)) / 2 + var(--page-inline))
+    );
+    max-width: min(60ch, 50%);
+    min-height: 3lh;
+    margin: 0;
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    line-height: var(--leading-snug);
+    opacity: 0;
+    transition: opacity var(--dur-base) var(--ease-out);
+  }
+  .orbit-caption[data-on] {
+    opacity: 1;
+  }
+  .orbit-caption-label {
+    display: block;
+    color: var(--color-accent);
+    font-size: var(--step--2);
+    letter-spacing: var(--tracking-overline);
+    text-transform: uppercase;
+  }
+  .orbit-caption-text :global(span) {
+    color: var(--color-text-subtle);
+  }
+
+  /* Motion: entrance, idle drift, spring hover. Nothing under reduced motion. */
+  @keyframes orbit-rise {
+    from {
+      translate: 0 105%;
+    }
+  }
+  @keyframes orbit-fade {
+    from {
+      opacity: 0;
+      translate: 0 12px;
+    }
+  }
+  @keyframes orbit-pop {
+    from {
+      opacity: 0;
+      scale: 0.6;
+    }
+  }
+  @keyframes orbit-drift {
+    0% {
+      translate: calc(var(--dx) * -1) calc(var(--dy) * -1);
+    }
+    50% {
+      translate: var(--dx) calc(var(--dy) * -1);
+    }
+    100% {
+      translate: var(--dx) var(--dy);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .orbit-title-line {
+      animation: orbit-rise 760ms var(--ease-out) 80ms backwards;
+    }
+    .orbit-title-mask + .orbit-title-mask .orbit-title-line {
+      animation-delay: 160ms;
+    }
+    .orbit-tagline {
+      animation: orbit-fade var(--dur-slow) var(--ease-out) 320ms backwards;
+    }
+    .orbit-chips,
+    .orbit-hint {
+      animation: orbit-fade var(--dur-slow) var(--ease-out) 420ms backwards;
+    }
+    .orbit-tile {
+      animation: orbit-pop 700ms var(--ease-out) backwards;
+      animation-delay: calc(480ms + min(var(--i) * 28ms, 520ms));
+    }
+    .orbit[data-ready] .orbit-drift {
+      animation: orbit-drift var(--dd) ease-in-out var(--dl) infinite alternate;
+    }
+    .orbit[data-paused] .orbit-drift,
+    .orbit-node[data-hold] .orbit-drift {
+      animation-play-state: paused;
+    }
+    .orbit-node[data-on] .orbit-tile,
+    .orbit-tile:hover,
+    .orbit-tile:focus-visible {
+      scale: 1.08;
+    }
+    .orbit-node[data-dim] .orbit-tile {
+      scale: 0.92;
+    }
+  }
+
+  /* Tablet: the same composition with a narrower copy column. */
+  @media (max-width: 959px) {
+    .orbit-copy {
+      max-width: 52%;
+    }
+    .orbit-title {
+      font-size: var(--step-5);
+    }
+  }
+
+  /* Phones: the copy, then the field as its own box. */
+  @media (max-width: 719px) {
+    .orbit {
+      display: block;
+      min-height: 0;
+    }
+    .orbit-copy-wrap {
+      padding-block: var(--space-l) var(--space-s);
+    }
+    .orbit-copy {
+      max-width: none;
+    }
+    .orbit-title {
+      font-size: var(--step-display-narrow);
+    }
+    .orbit-chips {
+      flex-wrap: nowrap;
+      margin-inline: calc(var(--page-inline) * -1);
+      padding-inline: var(--page-inline);
+      overflow-x: auto;
+      scroll-snap-type: x proximity;
+      scroll-padding-inline: var(--page-inline);
+      scrollbar-width: none;
+    }
+    .orbit-chips button {
+      flex: none;
+      min-height: var(--control-size);
+      scroll-snap-align: start;
+    }
+    .orbit-field {
+      position: relative;
+      inset: auto;
+    }
+    .orbit-stage {
+      position: relative;
+      height: clamp(440px, 64svh, 540px);
+    }
+    .orbit-stage::before {
+      mask-image: radial-gradient(
+        ellipse 60% 55% at 50% 50%,
+        #000 30%,
+        transparent 100%
+      );
+    }
+    .orbit-ring {
+      left: 8%;
+      top: 14%;
+      width: 84%;
+      height: 72%;
+    }
+    .orbit-ring--inner {
+      left: 30%;
+      top: 36%;
+      width: 40%;
+      height: 28%;
+    }
+    .orbit-node {
+      left: var(--mx);
+      top: var(--my);
+    }
+    .orbit-node[data-extra] {
+      display: none;
+    }
+    .orbit-tile--org {
+      min-height: var(--control-size);
+    }
+    .orbit-tile--org .orbit-label {
+      max-width: 12ch;
+      white-space: normal;
+    }
+    /* Labels are always visible: nothing depends on hover. */
+    .orbit-tile--project {
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .orbit-tile--project .orbit-label,
+    .orbit-node[data-core] .orbit-label {
+      position: static;
+      pointer-events: auto;
+      max-width: 12ch;
+      padding: 0 0.25rem;
+      font-size: var(--step--2);
+      text-align: center;
+      white-space: normal;
+      clip-path: none;
+    }
+    .orbit-node[data-core] .orbit-glyph {
+      width: 3.5rem;
+      height: 3.5rem;
+    }
+    /* Touch taps navigate: the caption only shows for keyboard focus. */
+    .orbit-caption {
+      position: static;
+      max-width: none;
+      min-height: 0;
+      padding-inline: var(--page-inline);
+    }
+    .orbit-caption:not([data-on]) {
+      display: none;
+    }
+  }
+</style>

@@ -129,11 +129,19 @@
   --category-embedded: light-dark(oklch(0.411 0.04 77), oklch(0.451 0.04 77));
   --category-security: light-dark(oklch(0.37 0.045 25), oklch(0.41 0.045 25));
   --category-data: light-dark(oklch(0.36 0.04 150), oklch(0.4 0.04 150));
+  /*
+   * Logo plates: logos are shown unaltered, on white, or on a fixed dark
+   * plate for white artwork (logoOnDark), whatever the theme.
+   */
+  --color-logo-plate: oklch(1 0 0);
+  --color-logo-plate-dark: oklch(0.22 0.008 285);
   /* Text and rules on a category panel (light on dark in both themes). */
   --color-on-category: oklch(0.97 0.005 270);
 
   /* Motion */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  /* A small overshoot, only for the homepage tiles' hover scale. */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --dur-fast: 150ms;
   --dur-base: 220ms;
   --dur-slow: 540ms;

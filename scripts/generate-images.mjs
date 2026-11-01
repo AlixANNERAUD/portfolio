@@ -170,7 +170,7 @@ function socialCard(lang) {
     <rect width="${tile}" height="${tile}" rx="12" fill="${color.accent}"/>
     ${monogram(tile, color.bg)}
   </g>
-  ${overline(t["home.hero.discipline"], { lang, x: M, y: top, width: width - tile - 40, fill: color.muted })}
+  ${overline(t["meta.discipline"], { lang, x: M, y: top, width: width - tile - 40, fill: color.muted })}
   ${text(name, { font: fonts.display, size: nameSize, x: M - 4, y: 320, fill: color.text, letterSpacing: tracking.display })}
   ${text(tagline, { font: fonts.displayItalic, size: taglineSize, x: M - 2, y: 320 + taglineSize * 1.45, fill: color.accent, letterSpacing: -0.01 })}
   <rect x="${M}" y="${rule}" width="${width}" height="1" fill="${color.border}"/>

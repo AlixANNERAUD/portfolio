@@ -68,3 +68,20 @@ export function sectionNumber(index: number): string {
 export function sectionLabel(index: number, label: string): string {
   return `${sectionNumber(index)} / ${label}`;
 }
+
+/**
+ * Splits a `{name}` template into text runs and filled placeholders, so a
+ * component can style the values (e.g. bold) without HTML in the dictionary.
+ */
+export function templateParts(
+  template: string,
+  vars: Record<string, string>,
+): { text: string; name?: string }[] {
+  return template
+    .split(/(\{\w+\})/)
+    .filter(Boolean)
+    .map((part) => {
+      const name = part.match(/^\{(\w+)\}$/)?.[1];
+      return name && name in vars ? { text: vars[name], name } : { text: part };
+    });
+}

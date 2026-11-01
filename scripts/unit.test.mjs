@@ -16,7 +16,22 @@ import {
   formatPeriod,
   periodParts,
   sectionLabel,
+  templateParts,
 } from "../src/lib/format.ts";
+import {
+  DESKTOP_FIELD,
+  DESKTOP_GAP,
+  EXCLUSION,
+  MOBILE_FIELD,
+  MOBILE_GAP,
+  buildOrbitNodes,
+  footprint,
+  layoutOrbit,
+  orbitCategories,
+  rectGap,
+  tileRect,
+  visibleOnMobile,
+} from "../src/lib/home-orbit.ts";
 import {
   RANK_WEIGHTS,
   byScore,
@@ -120,8 +135,8 @@ test("useTranslations translates and interpolates variables", () => {
   );
   assert.equal(en("meta.pageTitle"), "{title} | Alix ANNERAUD");
   assert.equal(
-    fr("experience.compactLinkLabel", { role: "Stagiaire", company: "ACME" }),
-    "Stagiaire \u2013 ACME. Voir cette expérience",
+    fr("home.now.role", { role: "Stagiaire", company: "ACME" }),
+    "Stagiaire chez ACME",
   );
 });
 
@@ -297,4 +312,120 @@ test("skill evidence is a project reference or an explicit link", () => {
       }
     }
   }
+});
+
+test("home orbit: organizations are the homepage roles plus INSA", () => {
+  for (const lang of locales) {
+    const orgs = buildOrbitNodes(lang).filter((node) => node.kind === "org");
+    assert.deepEqual(
+      orgs.map((node) => node.id),
+      [
+        ...experiences.filter((entry) => entry.homepage).map((e) => e.id),
+        "insa-engineering",
+      ],
+    );
+    for (const node of orgs) {
+      // A logo always comes with the organization's name.
+      assert.ok(node.label.trim(), node.id);
+      if (node.logo) assert.ok(node.logo.width > 0 && node.logo.height > 0);
+    }
+  }
+});
+
+test("home orbit: projects are the top ranked, related only to shown ones", () => {
+  const nodes = buildOrbitNodes("en");
+  const shown = nodes.filter((node) => node.kind === "project");
+  assert.deepEqual(
+    shown.map((node) => node.id),
+    [...projects]
+      .sort(byScore)
+      .slice(0, 14)
+      .map((p) => p.id),
+  );
+  const ids = new Set(shown.map((node) => node.id));
+  for (const node of shown) {
+    for (const id of node.related) assert.ok(ids.has(id), id);
+  }
+  assert.ok(orbitCategories(nodes).length > 1);
+});
+
+test("home orbit: every tile links a built route or a visible card", () => {
+  const visible = new Set(
+    experiences.filter((entry) => !entry.earlier).map((entry) => entry.id),
+  );
+  for (const lang of locales) {
+    for (const node of buildOrbitNodes(lang)) {
+      if (node.kind === "org") {
+        const [path, anchor] = node.href.split("#");
+        assert.equal(path, localizePath("/experiences", lang));
+        assert.ok(visible.has(anchor.replace(/-title$/, "")), node.href);
+      } else {
+        assert.equal(node.href, projectUrl(node.id, lang));
+      }
+      assert.ok(node.caption.includes(" · "), node.id);
+    }
+  }
+});
+
+test("home orbit: the layout is deterministic, spaced and clear of the copy", () => {
+  const nodes = buildOrbitNodes("fr");
+  const layout = layoutOrbit(nodes);
+  assert.deepEqual(layoutOrbit(buildOrbitNodes("en")), layout);
+  assert.deepEqual(layoutOrbit(nodes), layout);
+  const desktop = nodes.map((node, i) =>
+    tileRect(
+      layout[i].x,
+      layout[i].y,
+      footprint(node, "desktop"),
+      DESKTOP_FIELD,
+    ),
+  );
+  const mobile = nodes.map((node, i) =>
+    tileRect(
+      layout[i].mx,
+      layout[i].my,
+      footprint(node, "mobile"),
+      MOBILE_FIELD,
+    ),
+  );
+  for (let i = 0; i < nodes.length; i++) {
+    const { x, y } = layout[i];
+    assert.ok(
+      !(
+        x > EXCLUSION.x0 &&
+        x < EXCLUSION.x1 &&
+        y > EXCLUSION.y0 &&
+        y < EXCLUSION.y1
+      ),
+      nodes[i].id + " sits on the copy",
+    );
+    assert.ok(x >= 0 && x <= 100 && y >= 0 && y <= 100);
+    for (let j = i + 1; j < nodes.length; j++) {
+      assert.ok(
+        rectGap(desktop[i], desktop[j]) >= DESKTOP_GAP - 0.5,
+        `${nodes[i].id} / ${nodes[j].id} too close on desktop`,
+      );
+      if (visibleOnMobile(nodes[i]) && visibleOnMobile(nodes[j])) {
+        assert.ok(
+          rectGap(mobile[i], mobile[j]) >= MOBILE_GAP - 0.5,
+          `${nodes[i].id} / ${nodes[j].id} too close on mobile`,
+        );
+      }
+    }
+    const p = layout[i];
+    assert.ok(p.dx >= 5 && p.dx <= 11 && p.dy >= 4 && p.dy <= 9);
+    assert.ok(p.dd >= 9 && p.dd <= 17 && p.dl <= 0 && -p.dl <= p.dd);
+  }
+});
+
+test("templateParts splits a template around its placeholders", () => {
+  assert.deepEqual(
+    templateParts("{role} at {company}.", { role: "R", company: "C" }),
+    [
+      { text: "R", name: "role" },
+      { text: " at " },
+      { text: "C", name: "company" },
+      { text: "." },
+    ],
+  );
 });
