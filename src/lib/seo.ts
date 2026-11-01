@@ -82,7 +82,7 @@ export function personLd(lang: Locale): JsonLdNode {
       })),
     }),
     knowsAbout: skillDomains.map((domain) => domain.title[lang]),
-    sameAs: Object.values(site.social),
+    sameAs: [...site.sameAs],
   };
 }
 
@@ -132,6 +132,8 @@ export function projectLd(
     description,
     inLanguage: lang,
     keywords: project.tags.map((tag) => technologyLabel(tag, lang)),
+    // The start year of the project period; no modification date is claimed.
+    dateCreated: project.period.start,
     author: personSummary(),
     isPartOf: websiteSummary(),
     ...(repository && {

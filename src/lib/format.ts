@@ -13,6 +13,36 @@ export function formatPeriod(period: Period, lang: Locale): string {
   return t("period.range", { start: period.start, end: period.end });
 }
 
+/**
+ * The same text as `formatPeriod`, with its years as separate parts, so
+ * they can be marked up as `<time datetime="2019">`.
+ */
+export function periodParts(
+  period: Period,
+  lang: Locale,
+): (string | { year: string })[] {
+  const start = "\u0001";
+  const end = "\u0002";
+  const single = !period.end || period.end === period.start;
+  const text = formatPeriod(
+    {
+      start,
+      end: single ? undefined : period.end === "present" ? "present" : end,
+    },
+    lang,
+  );
+  return text
+    .split(/(\u0001|\u0002)/)
+    .filter(Boolean)
+    .map((part) =>
+      part === start
+        ? { year: period.start }
+        : part === end
+          ? { year: period.end! }
+          : part,
+    );
+}
+
 export type CountKey =
   "project" | "role" | "milestone" | "earlierRole" | "earlierMilestone";
 

@@ -11,7 +11,12 @@ import {
 import { ui, useTranslations } from "../src/i18n/ui.ts";
 import { site } from "../src/data/site.ts";
 import { localize } from "../src/data/types.ts";
-import { formatCount, formatPeriod, sectionLabel } from "../src/lib/format.ts";
+import {
+  formatCount,
+  formatPeriod,
+  periodParts,
+  sectionLabel,
+} from "../src/lib/format.ts";
 import {
   RANK_WEIGHTS,
   byScore,
@@ -150,6 +155,33 @@ test("formatPeriod renders ongoing, single-year and closed periods", () => {
       formatPeriod({ start: "2022", end: "2023" }, lang),
       "2022\u20132023",
     );
+  }
+});
+
+test("periodParts splits the formatted period around its years", () => {
+  assert.deepEqual(periodParts({ start: "2019", end: "present" }, "fr"), [
+    "Depuis ",
+    { year: "2019" },
+  ]);
+  assert.deepEqual(periodParts({ start: "2022", end: "2023" }, "en"), [
+    { year: "2022" },
+    "\u2013",
+    { year: "2023" },
+  ]);
+  assert.deepEqual(periodParts({ start: "2023", end: "2023" }, "en"), [
+    { year: "2023" },
+  ]);
+  for (const lang of locales) {
+    for (const period of [
+      { start: "2019", end: "present" },
+      { start: "2022", end: "2023" },
+      { start: "2024" },
+    ]) {
+      const text = periodParts(period, lang)
+        .map((part) => (typeof part === "string" ? part : part.year))
+        .join("");
+      assert.equal(text, formatPeriod(period, lang));
+    }
   }
 });
 

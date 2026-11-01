@@ -31,6 +31,15 @@ export const site = {
   /** Browser chrome colors: hex equivalents of the --color-bg token. */
   themeColor: { light: "#fdfdff", dark: "#1a1a1e" },
   social,
+  /**
+   * Person `sameAs` in structured data: the social profiles, plus the
+   * crates.io profile and the Xila GitHub organization, not shown as links.
+   */
+  sameAs: [
+    ...Object.values(social),
+    "https://crates.io/users/AlixANNERAUD",
+    "https://github.com/xila-project",
+  ],
   /** Profiles listed in the footer, in display order (brand names). */
   profiles: [
     { label: "GitHub", href: social.github },

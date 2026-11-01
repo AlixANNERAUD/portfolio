@@ -87,7 +87,9 @@ const externalUrl = projectExternalUrl(project);
           rel="noopener noreferrer"
         >
           {t("project.external")}
-          <span class="visually-hidden">{t("a11y.newTab")}</span>
+          <span class="visually-hidden">
+            {` ${t("project.externalOf", { title: localize(project.title, lang) })} ${t("a11y.newTab")}`}
+          </span>
           <span aria-hidden="true">↗</span>
         </a>
       )}
@@ -227,6 +229,16 @@ const externalUrl = projectExternalUrl(project);
     gap: 0.3em;
     color: var(--color-text-muted);
     text-decoration: none;
+  }
+  /* A 44px-high target around the compact text link, without a taller row. */
+  .showcase-external-link::before {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    left: 0;
+    height: var(--control-size);
+    content: "";
+    translate: 0 -50%;
   }
   .showcase-external-link:hover {
     color: var(--color-accent);

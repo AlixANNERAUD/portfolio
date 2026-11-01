@@ -26,7 +26,8 @@ const creditsHref = `${localizePath("/legal-notice", lang)}#${t("legal.logoCredi
 <BaseLayout
   lang={lang}
   path="/experiences"
-  title={t("nav.experiences")}
+  title={t("experiences.metaTitle")}
+  trail={[{ name: t("nav.experiences"), path: "/experiences" }]}
   description={t("experiences.description")}
 >
   <div class="career-showcase editorial-page">

@@ -21,7 +21,8 @@ const pdf = site.resumePdf[lang];
 <BaseLayout
   lang={lang}
   path="/resume"
-  title={t("nav.resume")}
+  title={t("resume.metaTitle")}
+  trail={[{ name: t("nav.resume"), path: "/resume" }]}
   description={t("resume.description")}
 >
   <div class="resume-page editorial-page">

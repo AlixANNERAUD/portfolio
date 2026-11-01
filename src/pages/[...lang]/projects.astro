@@ -16,7 +16,8 @@ const t = useTranslations(lang);
 <BaseLayout
   lang={lang}
   path="/projects"
-  title={t("nav.projects")}
+  title={t("projects.metaTitle")}
+  trail={[{ name: t("nav.projects"), path: "/projects" }]}
   description={t("projects.description")}
 >
   <ProjectCatalogue lang={lang} />

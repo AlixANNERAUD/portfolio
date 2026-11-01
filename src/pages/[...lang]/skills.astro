@@ -19,7 +19,8 @@ const t = useTranslations(lang);
 <BaseLayout
   lang={lang}
   path="/skills"
-  title={t("nav.skills")}
+  title={t("skills.metaTitle")}
+  trail={[{ name: t("nav.skills"), path: "/skills" }]}
   description={t("skills.description")}
 >
   <div class="skills-showcase editorial-page">

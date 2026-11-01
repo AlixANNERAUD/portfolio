@@ -16,7 +16,7 @@ import { technologyLabel } from "../data/technologies.ts";
 import { localize } from "../data/types.ts";
 import { localizePath, type Locale } from "../i18n/locales.ts";
 import { useTranslations } from "../i18n/ui.ts";
-import { formatPeriod } from "../lib/format.ts";
+import { periodParts } from "../lib/format.ts";
 import { projectLd } from "../lib/seo.ts";
 
 /**
@@ -82,7 +82,13 @@ const { team, externalUrl: external }: Project = project;
       <h1 class="project-title">{heading}</h1>
       <p class="project-meta" aria-label={t("project.meta")}>
         <span class="project-meta__period">
-          {formatPeriod(project.period, lang)}
+          {periodParts(project.period, lang).map((part) =>
+            typeof part === "string" ? (
+              part
+            ) : (
+              <time datetime={part.year}>{part.year}</time>
+            ),
+          )}
         </span>
         <span class="project-meta__badge">
           {t(`project.group.${project.group}`)}

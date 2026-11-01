@@ -36,14 +36,18 @@ const en = {
   "footer.builtWith": "Built with Astro",
   "home.description":
     "Alix ANNERAUD's engineering portfolio: security at Memo Bank, experience at Amazon, Linkt and NYU, Rust systems and open-source projects.",
+  "experiences.metaTitle": "Experience: security, software and research",
   "experiences.description":
-    "Alix ANNERAUD's experience across software engineering, Rust systems, security, networking and research.",
+    "Alix ANNERAUD's experience in software engineering, Rust systems, security, networking and research, at Memo Bank, Linkt, Amazon and NYU.",
+  "projects.metaTitle": "Projects: Rust, embedded systems and web",
   "projects.description":
-    "Explore Alix ANNERAUD's software and embedded projects, with search and category filters.",
+    "Alix ANNERAUD's software projects: a Rust operating system for microcontrollers, embedded libraries, web apps and data work, with search and filters.",
+  "skills.metaTitle": "Skills: Rust, embedded, backend and security",
   "skills.description":
     "Alix ANNERAUD's experience with Rust systems, embedded development, backend, web interfaces, infrastructure and security, backed by real projects.",
+  "resume.metaTitle": "Resume: software and security engineer",
   "resume.description":
-    "Alix ANNERAUD's resume and professional experience in Rust, software systems and security.",
+    "Alix ANNERAUD's resume: security engineer at Memo Bank, internships at Amazon and NYU, education and skills, with the full PDF to download.",
   "resume.pdfTitle": "CV (PDF)",
   "resume.eyebrow": "Resume",
   "resume.title": "My resume,",
@@ -60,7 +64,7 @@ const en = {
   "resume.education": "Education",
   "resume.skills": "Skills",
   "legal.description":
-    "Legal information, website hosting, privacy and logo attribution for alix.anneraud.fr.",
+    "Legal notice for alix.anneraud.fr: website editor, GitHub Pages hosting, cookie-free Umami analytics, personal data and logo attribution.",
   "notFound.title": "Page not found",
   "notFound.description": "The requested portfolio page could not be found.",
   "notFound.body": "The page you requested does not exist.",
@@ -141,6 +145,7 @@ const en = {
   "home.projects.viewAll": "See all {count} projects",
   "project.details": "Read details",
   "project.external": "External link",
+  "project.externalOf": "for {title}",
   "project.technologies": "Technologies used",
   "project.breadcrumb": "Breadcrumb",
   "project.meta": "Project details",
@@ -255,14 +260,18 @@ const fr: Record<UIKey, string> = {
   "footer.builtWith": "Conçu avec Astro",
   "home.description":
     "Portfolio d’Alix ANNERAUD : ingénierie logicielle, sécurité chez Memo Bank, expériences Amazon, Linkt et NYU, systèmes Rust et projets open source.",
+  "experiences.metaTitle": "Parcours : sécurité, logiciel et recherche",
   "experiences.description":
     "Parcours professionnel, recherche et formation d’Alix ANNERAUD dans les systèmes Rust, la sécurité, les réseaux et le développement logiciel.",
+  "projects.metaTitle": "Projets : Rust, systèmes embarqués et web",
   "projects.description":
-    "Explorez les projets logiciels et embarqués d’Alix ANNERAUD avec recherche et filtres par domaine.",
+    "Projets logiciels d’Alix ANNERAUD : un système d’exploitation Rust pour microcontrôleurs, des bibliothèques embarquées, des applications web et de la data.",
+  "skills.metaTitle": "Compétences : Rust, embarqué et sécurité",
   "skills.description":
     "Compétences d’Alix ANNERAUD en Rust, systèmes embarqués, backend, développement web, infrastructure et cybersécurité, illustrées par des projets.",
+  "resume.metaTitle": "CV : ingénieur logiciel et sécurité",
   "resume.description":
-    "CV et expériences d’Alix ANNERAUD, ingénieur logiciel spécialisé en Rust, systèmes et sécurité.",
+    "CV d’Alix ANNERAUD : ingénieur sécurité chez Memo Bank, stages chez Amazon et à NYU, formation et compétences, avec le PDF complet à télécharger.",
   "resume.pdfTitle": "CV français (PDF)",
   "resume.eyebrow": "CV",
   "resume.title": "Mon CV,",
@@ -279,7 +288,7 @@ const fr: Record<UIKey, string> = {
   "resume.education": "Formation",
   "resume.skills": "Compétences",
   "legal.description":
-    "Mentions légales, hébergement, confidentialité et crédits des logos du portfolio alix.anneraud.fr.",
+    "Mentions légales d’alix.anneraud.fr : éditeur, hébergement GitHub Pages, mesure d’audience Umami sans cookie, données personnelles et crédits des logos.",
   "notFound.title": "Page introuvable",
   "notFound.description": "La page demandée est introuvable.",
   "notFound.body": "Cette page n’existe pas.",
@@ -361,6 +370,7 @@ const fr: Record<UIKey, string> = {
   "home.projects.viewAll": "Voir les {count} projets",
   "project.details": "Lire la fiche",
   "project.external": "Lien externe",
+  "project.externalOf": "du projet {title}",
   "project.technologies": "Technologies utilisées",
   "project.breadcrumb": "Fil d’Ariane",
   "project.meta": "Détails du projet",

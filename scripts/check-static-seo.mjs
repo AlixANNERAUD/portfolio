@@ -597,9 +597,9 @@ for (const [file, canonicalPath, translationPath] of cases) {
       if (person && "alumniOf" in person) {
         failed.push(file + ": Person alumniOf must not list ongoing studies");
       }
-      const sameAs = Object.values(siteData.social);
+      const sameAs = siteData.sameAs;
       if (JSON.stringify(person?.sameAs) !== JSON.stringify(sameAs)) {
-        failed.push(file + ": Person sameAs must list site.social");
+        failed.push(file + ": Person sameAs must list site.sameAs");
       }
       if (
         website?.["@id"] !== websiteId ||
@@ -698,6 +698,17 @@ for (const [file, canonicalPath, translationPath] of cases) {
         failed.push(
           file + ": CreativeWork must not declare a programmingLanguage",
         );
+      }
+      // Dated from the project data: the start year, in JSON-LD and as a
+      // <time> in the meta line; no modification date is claimed.
+      if (node.dateCreated !== project.period.start || "dateModified" in node) {
+        failed.push(file + ": dateCreated must be the period start year");
+      }
+      const times = parse(html)
+        .querySelectorAll(".project-meta time")
+        .map((time) => time.getAttribute("datetime"));
+      if (times[0] !== project.period.start) {
+        failed.push(file + ": the period must start with a <time> element");
       }
     }
   }
@@ -1031,12 +1042,24 @@ for (const file of ["experiences.html", "fr/experiences.html"]) {
         );
       }
       for (const external of card.querySelectorAll('a[target="_blank"]')) {
-        const note = external.querySelector(".visually-hidden")?.text.trim();
+        // Hidden text: the project it leads from, then the new-tab note.
+        const note = external
+          .querySelector(".visually-hidden")
+          ?.text.replace(/\s+/g, " ")
+          .trim();
+        const title = card.querySelector(".showcase-card-link")?.text.trim();
+        const expected =
+          ui[lang]["project.externalOf"].replace("{title}", title) +
+          " " +
+          ui[lang]["a11y.newTab"];
         if (
-          note !== ui[lang]["a11y.newTab"] ||
+          note !== expected ||
           !external.querySelector('[aria-hidden="true"]')?.text.includes("↗")
         ) {
-          failed.push(file + ": external card link needs ↗ and a new-tab note");
+          failed.push(
+            file +
+              ": external card link needs ↗, the project name and a new-tab note",
+          );
         }
       }
     }
