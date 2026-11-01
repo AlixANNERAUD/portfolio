@@ -1,0 +1,224 @@
+---
+import { Moon, Sun, SunMoon } from "@lucide/astro";
+import type { Locale } from "../../i18n/locales.ts";
+import { useTranslations } from "../../i18n/ui.ts";
+
+export interface Props {
+  lang: Locale;
+  /**
+   * "header": an icon-only segmented control in the header row (wide
+   * screens). "menu": a labelled row in the mobile menu panel, where the
+   * header row has no room for three 44px options next to the brand.
+   */
+  placement: "header" | "menu";
+}
+const { lang, placement } = Astro.props;
+const t = useTranslations(lang);
+const options = [
+  { value: "auto", icon: SunMoon },
+  { value: "light", icon: Sun },
+  { value: "dark", icon: Moon },
+] as const;
+const labelId = "theme-label-" + placement;
+const iconOnly = placement === "header";
+---
+
+<!--
+  Auto / Light / Dark as native radios: arrow keys move the choice and
+  assistive technologies announce a group of three. Auto is checked in the
+  HTML, matching the CSS default (color-scheme: light dark). The switch stays
+  hidden until its script runs, since it cannot work without JavaScript.
+-->
+<div
+  class={"theme-switch theme-switch--" + placement}
+  role="radiogroup"
+  aria-labelledby={labelId}
+  data-theme-switch
+>
+  <span
+    id={labelId}
+    class:list={["theme-switch-label", { "visually-hidden": iconOnly }]}
+  >
+    {t("theme.label")}
+  </span>
+  <span class="theme-switch-options">
+    {options.map(({ value, icon: Icon }) => (
+      <label
+        class="theme-switch-option"
+        title={iconOnly ? t(`theme.${value}`) : undefined}
+      >
+        <input
+          class="visually-hidden"
+          type="radio"
+          name={"theme-" + placement}
+          value={value}
+          checked={value === "auto"}
+          autocomplete="off"
+        />
+        <Icon size={18} />
+        <span class:list={{ "visually-hidden": iconOnly }}>
+          {t(`theme.${value}`)}
+        </span>
+      </label>
+    ))}
+  </span>
+</div>
+
+<script>
+  /*
+   * The head script in SiteHead.astro already applied the stored choice
+   * before paint; this keeps the radios, the html class and the
+   * theme-color metas in sync with later choices, other tabs included.
+   * Auto needs no listener: the CSS follows the system scheme live.
+   */
+  type Choice = "auto" | "light" | "dark";
+  const key = "portfolio-theme";
+  const root = document.documentElement;
+  const isChoice = (value: unknown): value is Choice =>
+    value === "auto" || value === "light" || value === "dark";
+  const stored = (): Choice => {
+    try {
+      const value = localStorage.getItem(key);
+      return isChoice(value) ? value : "auto";
+    } catch {
+      return "auto";
+    }
+  };
+  const apply = (choice: Choice) => {
+    root.classList.toggle("light", choice === "light");
+    root.classList.toggle("dark", choice === "dark");
+    for (const meta of document.querySelectorAll<HTMLMetaElement>(
+      "meta[data-theme-color]",
+    )) {
+      const scheme = meta.dataset.themeColor;
+      meta.media =
+        choice === "auto"
+          ? "(prefers-color-scheme: " + scheme + ")"
+          : scheme === choice
+            ? "all"
+            : "not all";
+    }
+    for (const input of document.querySelectorAll<HTMLInputElement>(
+      "[data-theme-switch] input",
+    )) {
+      input.checked = input.value === choice;
+    }
+  };
+
+  apply(stored());
+  for (const group of document.querySelectorAll<HTMLElement>(
+    "[data-theme-switch]",
+  )) {
+    group.addEventListener("change", (event) => {
+      const choice = (event.target as HTMLInputElement).value;
+      if (!isChoice(choice)) return;
+      apply(choice);
+      try {
+        localStorage.setItem(key, choice);
+      } catch {}
+    });
+    group.dataset.ready = "";
+  }
+  addEventListener("storage", (event) => {
+    if (event.key === key || event.key === null) apply(stored());
+  });
+  // A page restored from the back/forward cache may hold an older choice.
+  addEventListener("pageshow", (event) => {
+    if (event.persisted) apply(stored());
+  });
+</script>
+
+<style>
+  .theme-switch:not([data-ready]) {
+    display: none;
+  }
+
+  .theme-switch-options {
+    display: flex;
+  }
+
+  .theme-switch-option {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3xs);
+    min-width: var(--control-size);
+    min-height: var(--control-size);
+    border-radius: var(--radius-m);
+    color: var(--color-text-muted);
+    font-size: var(--step--1);
+    font-weight: 550;
+    cursor: pointer;
+    transition:
+      color var(--dur-fast) var(--ease-out),
+      background-color var(--dur-fast) var(--ease-out);
+  }
+
+  .theme-switch-option:has(input:checked) {
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+  }
+
+  /* The radio itself is visually hidden: its label carries the ring. */
+  .theme-switch-option:has(input:focus-visible) {
+    z-index: 1;
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  @media (hover: hover) {
+    .theme-switch-option:not(:has(input:checked)):hover {
+      background: var(--color-surface-2);
+      color: var(--color-text);
+    }
+  }
+
+  /* Header row: a compact segmented control, wide screens only. */
+  .theme-switch--header .theme-switch-options {
+    padding: 1px;
+    border: 1px solid var(--color-border);
+    border-radius: calc(var(--radius-m) + 2px);
+  }
+
+  .theme-switch--header .theme-switch-option {
+    min-width: calc(var(--control-size) - 4px);
+    min-height: calc(var(--control-size) - 4px);
+  }
+
+  @media (max-width: 840px) {
+    .theme-switch--header {
+      display: none;
+    }
+  }
+
+  /* Menu panel row: visible label, then the three labelled options. */
+  .theme-switch--menu {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3xs) var(--space-xs);
+    padding-top: var(--space-2xs);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .theme-switch--menu .theme-switch-label {
+    color: var(--color-text);
+    font-size: var(--step-0);
+  }
+
+  .theme-switch--menu .theme-switch-options {
+    gap: var(--space-3xs);
+  }
+
+  .theme-switch--menu .theme-switch-option {
+    padding-inline: var(--space-xs);
+  }
+
+  @media (width > 840px) {
+    .theme-switch--menu {
+      display: none;
+    }
+  }
+</style>

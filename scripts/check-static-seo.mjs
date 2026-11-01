@@ -153,6 +153,63 @@ function checkHeader(file, root) {
       failed.push(file + ": missing a " + scheme + " theme-color meta");
     }
   }
+  checkThemeSwitch(file, root);
+}
+
+/**
+ * Theme switch: each copy (header row, mobile menu panel) is a radio group
+ * named by a label in the page locale, offering auto, light and dark in that
+ * order, with auto checked in the HTML: the no-JS default follows the system
+ * through the CSS. The head script must apply the stored choice before paint.
+ */
+function checkThemeSwitch(file, root) {
+  const lang =
+    root.querySelector("html")?.getAttribute("lang") === "fr" ? "fr" : "en";
+  const t = ui[lang];
+  const groups = root.querySelectorAll("[data-theme-switch]");
+  if (groups.length !== 2) {
+    failed.push(file + ": expected 2 theme switches, found " + groups.length);
+  }
+  const names = new Set();
+  for (const group of groups) {
+    const label = root.getElementById(
+      group.getAttribute("aria-labelledby") ?? "",
+    );
+    if (group.getAttribute("role") !== "radiogroup") {
+      failed.push(file + ': theme switch needs role="radiogroup"');
+    }
+    if (label?.textContent.trim() !== t["theme.label"]) {
+      failed.push(file + ": theme switch must be labelled " + t["theme.label"]);
+    }
+    const radios = group.querySelectorAll('input[type="radio"]');
+    const values = radios.map((radio) => radio.getAttribute("value"));
+    if (values.join() !== "auto,light,dark") {
+      failed.push(file + ": theme radios are " + values.join());
+    }
+    const name = radios[0]?.getAttribute("name");
+    if (!name || radios.some((radio) => radio.getAttribute("name") !== name)) {
+      failed.push(file + ": theme radios must share one name per group");
+    }
+    names.add(name);
+    const checked = radios.filter((radio) => radio.hasAttribute("checked"));
+    if (checked.length !== 1 || checked[0].getAttribute("value") !== "auto") {
+      failed.push(file + ": only the auto theme radio may be checked in HTML");
+    }
+    for (const radio of radios) {
+      const text = radio.closest("label")?.textContent.trim();
+      const key = "theme." + radio.getAttribute("value");
+      if (text !== t[key]) {
+        failed.push(file + ": theme option " + key + ' reads "' + text + '"');
+      }
+    }
+  }
+  if (names.size !== groups.length) {
+    failed.push(file + ": each theme switch needs its own radio name");
+  }
+  const head = root.querySelector("head")?.innerHTML ?? "";
+  if (!/localStorage\.getItem\("portfolio-theme"\)/.test(head)) {
+    failed.push(file + ": the head script must apply the stored theme");
+  }
 }
 
 // Head metadata is parsed, not matched as text: navigation links to the

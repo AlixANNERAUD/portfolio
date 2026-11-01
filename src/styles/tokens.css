@@ -12,7 +12,11 @@
  */
 
 :root {
-  color-scheme: light;
+  /*
+   * Auto theme: light-dark() follows the system preference, live and
+   * without JavaScript. An explicit choice adds html.light or html.dark.
+   */
+  color-scheme: light dark;
 
   /* Typography */
   --font-body: system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -81,7 +85,7 @@
 
   /*
    * Semantic colors: light value first, dark value second. light-dark()
-   * follows color-scheme, which the html.dark class switches below.
+   * follows color-scheme, which the html.light and html.dark classes pin.
    */
   --color-bg: light-dark(oklch(0.995 0.003 270), oklch(0.22 0.008 285));
   --color-surface: light-dark(oklch(0.975 0.006 270), oklch(0.245 0.01 280));
@@ -152,9 +156,10 @@
 
 /*
  * Without JavaScript (no data-menu on the header), narrow screens wrap the
- * navigation onto a second row of controls.
+ * navigation onto a second row of controls. Header breakpoint: see
+ * SiteHeader.astro.
  */
-@media (max-width: 720px) {
+@media (max-width: 840px) {
   :root:not(:has(.site-header[data-menu])) {
     --header-h: calc(
       2 * var(--control-size) + var(--space-3xs) + 2 * var(--space-2xs) + 1px

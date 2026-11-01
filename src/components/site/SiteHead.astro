@@ -74,11 +74,13 @@ const graph =
 <meta
   name="theme-color"
   media="(prefers-color-scheme: light)"
+  data-theme-color="light"
   content={site.themeColor.light}
 />
 <meta
   name="theme-color"
   media="(prefers-color-scheme: dark)"
+  data-theme-color="dark"
   content={site.themeColor.dark}
 />
 <Font
@@ -124,13 +126,16 @@ const graph =
 <link rel="sitemap" href="/sitemap-index.xml" />
 <JsonLd nodes={graph} />
 <script is:inline>
+  // Before paint: pin an explicit light or dark choice (auto needs nothing,
+  // the CSS follows the system), and make the browser chrome use only the
+  // matching theme-color meta. ThemeToggle.astro keeps both in sync after.
   try {
-    const stored = localStorage.getItem("portfolio-theme");
-    if (
-      stored === "dark" ||
-      (stored !== "light" && matchMedia("(prefers-color-scheme: dark)").matches)
-    ) {
-      document.documentElement.classList.add("dark");
+    const choice = localStorage.getItem("portfolio-theme");
+    if (choice === "light" || choice === "dark") {
+      document.documentElement.classList.add(choice);
+      for (const meta of document.querySelectorAll("meta[data-theme-color]")) {
+        meta.media = meta.dataset.themeColor === choice ? "all" : "not all";
+      }
     }
   } catch {}
 </script>

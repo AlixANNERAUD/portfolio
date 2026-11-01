@@ -1,6 +1,6 @@
 ---
 import { Menu, X } from "@lucide/astro";
-import ThemeToggle from "./ThemeToggle.astro";
+import ThemeSwitch from "./ThemeSwitch.astro";
 import { localizePath, locales, type Locale } from "../../i18n/locales.ts";
 import { useTranslations, type UIKey } from "../../i18n/ui.ts";
 import { site } from "../../data/site.ts";
@@ -18,8 +18,12 @@ const other = locales.find((locale) => locale !== lang)!;
 const tOther = useTranslations(other);
 const localeHref = Astro.props.localeHref ?? localizePath(path, other);
 const current = localizePath(path, lang);
-/* Same breakpoint as the @media (max-width: 720px) rules below. */
-const narrowQuery = "(max-width: 720px)";
+/*
+ * Same breakpoint as the @media (max-width: 840px) rules below, in tokens.css
+ * and in ThemeSwitch.astro. Wider than the 720px page breakpoint: below 840px
+ * the brand, four links, locale switch and theme switch overflow one row.
+ */
+const narrowQuery = "(max-width: 840px)";
 const links: { key: UIKey; path: string }[] = [
   { key: "nav.experiences", path: "/experiences" },
   { key: "nav.projects", path: "/projects" },
@@ -76,6 +80,7 @@ const links: { key: UIKey; path: string }[] = [
           </a>
         );
       })}
+      <ThemeSwitch lang={lang} placement="menu" />
     </nav>
     <div class="site-header-tools">
       <a
@@ -86,7 +91,7 @@ const links: { key: UIKey; path: string }[] = [
       >
         {tOther("locale.short")}
       </a>
-      <ThemeToggle lang={lang} />
+      <ThemeSwitch lang={lang} placement="header" />
     </div>
   </div>
 </header>
@@ -199,7 +204,7 @@ const links: { key: UIKey; path: string }[] = [
     border-left: 1px solid var(--color-border);
   }
 
-  /* Square header controls: locale switch, theme toggle and menu button. */
+  /* Square header controls: locale switch and menu button. */
   .site-header-inner :global(.site-control) {
     display: inline-flex;
     align-items: center;
@@ -251,7 +256,7 @@ const links: { key: UIKey; path: string }[] = [
     display: inline-flex;
   }
 
-  @media (max-width: 720px) {
+  @media (max-width: 840px) {
     .site-header-inner {
       flex-wrap: wrap;
       gap: var(--space-3xs);

@@ -1146,9 +1146,129 @@ for (const [engineName, engine] of [
       await staticContext.close();
     }
 
+    // Theme switch: auto, light and dark radios. Each choice survives a
+    // reload, auto follows the emulated system scheme live, and the arrow
+    // keys move the choice like any radio group.
+    for (const systemScheme of ["light", "dark"]) {
+      const themeContext = await browser.newContext({
+        viewport: { width: 1440, height: 900 },
+        colorScheme: systemScheme,
+      });
+      const themePage = await themeContext.newPage();
+      const path = systemScheme === "light" ? "/" : "/fr/projects";
+      try {
+        await themePage.goto(base + path, { waitUntil: "load" });
+        const group = themePage.locator(
+          ".site-header-tools [data-theme-switch]",
+        );
+        await group.waitFor({ state: "visible", timeout: 5000 });
+        const state = () =>
+          themePage.evaluate(() => {
+            const root = document.documentElement;
+            const checked = document.querySelector(
+              ".site-header-tools [data-theme-switch] input:checked",
+            );
+            return {
+              checked: checked && checked.value,
+              stored: localStorage.getItem("portfolio-theme"),
+              scheme: getComputedStyle(root).colorScheme,
+              dark: matchMedia("(prefers-color-scheme: dark)").matches,
+              classes: root.className,
+              // Schemes of the theme-color metas the browser would apply.
+              meta: [...document.querySelectorAll("meta[data-theme-color]")]
+                .filter((meta) => matchMedia(meta.media || "all").matches)
+                .map((meta) => meta.dataset.themeColor),
+            };
+          });
+        const expectScheme = (actual, scheme, label) => {
+          assert.equal(actual.scheme, scheme, path + " " + label);
+          const expected =
+            scheme === "light dark" ? (actual.dark ? "dark" : "light") : scheme;
+          assert.deepEqual(
+            actual.meta,
+            [expected],
+            path + " " + label + ": active theme-color",
+          );
+        };
+
+        let current = await state();
+        assert.equal(current.checked, "auto", path + " default choice");
+        assert.equal(current.stored, null);
+        assert.equal(current.classes, "", path + " auto adds no class");
+        expectScheme(current, "light dark", "auto by default");
+
+        for (const choice of ["light", "dark", "auto"]) {
+          await group
+            .locator("label", {
+              has: themePage.locator('input[value="' + choice + '"]'),
+            })
+            .click();
+          current = await state();
+          assert.equal(current.stored, choice, path + " stores " + choice);
+          const scheme = choice === "auto" ? "light dark" : choice;
+          expectScheme(current, scheme, choice + " applies");
+          await themePage.reload({ waitUntil: "load" });
+          await group.waitFor({ state: "visible", timeout: 5000 });
+          current = await state();
+          assert.equal(
+            current.checked,
+            choice,
+            path + " " + choice + " reload",
+          );
+          expectScheme(current, scheme, choice + " survives a reload");
+        }
+
+        // Auto follows the system scheme live, without a reload.
+        const background = () =>
+          themePage.evaluate(
+            () => getComputedStyle(document.body).backgroundColor,
+          );
+        await themePage.emulateMedia({ colorScheme: "light" });
+        const lightBackground = await background();
+        await themePage.emulateMedia({ colorScheme: "dark" });
+        const darkBackground = await background();
+        assert.notEqual(
+          lightBackground,
+          darkBackground,
+          path + " auto must follow the system scheme",
+        );
+        current = await state();
+        expectScheme(current, "light dark", "auto with a dark system");
+        // An explicit choice ignores the system scheme.
+        await group
+          .locator("label", { has: themePage.locator('input[value="light"]') })
+          .click();
+        assert.equal(await background(), lightBackground, path + " light");
+        await themePage.emulateMedia({ colorScheme: "light" });
+        assert.equal(await background(), lightBackground);
+
+        // Keyboard: Tab reaches the checked radio, arrows move the choice.
+        await group.locator('input[value="light"]').focus();
+        await themePage.keyboard.press("ArrowRight");
+        current = await state();
+        assert.equal(current.checked, "dark", path + " ArrowRight to dark");
+        assert.equal(current.stored, "dark");
+        assert.equal(await background(), darkBackground, path + " dark");
+        await themePage.keyboard.press("ArrowRight");
+        current = await state();
+        assert.equal(current.checked, "auto", path + " arrows wrap to auto");
+        const focusRing = await themePage.evaluate(() => {
+          const label = document.activeElement?.closest("label");
+          return label ? getComputedStyle(label).outlineStyle : "none";
+        });
+        assert.notEqual(focusRing, "none", path + " focused option ring");
+        checked++;
+      } catch (error) {
+        failures.push(
+          engineName + " " + path + " theme (" + systemScheme + "): " + error,
+        );
+      }
+      await themeContext.close();
+    }
+
     // Mobile header: one row with a menu button that opens and closes with
     // the keyboard, returns focus on Escape and exposes 44px nav targets.
-    // The theme toggle reports its state with aria-pressed.
+    // The theme switch moves into the menu panel.
     const mobileContext = await browser.newContext({
       viewport: { width: 390, height: 844 },
     });
@@ -1214,23 +1334,25 @@ for (const [engineName, engine] of [
         await mobilePage.keyboard.press("Space");
         assert.equal(await menuButton.getAttribute("aria-expanded"), "false");
 
-        const toggle = mobilePage.locator("[data-theme-toggle]");
-        await toggle.waitFor({ state: "visible", timeout: 5000 });
-        const wasDark = await mobilePage.evaluate(() =>
-          document.documentElement.classList.contains("dark"),
-        );
+        // The theme radios join the open menu panel on narrow screens.
+        await menuButton.click();
+        const menuTheme = nav.locator("[data-theme-switch]");
+        await menuTheme.waitFor({ state: "visible", timeout: 5000 });
+        for (const option of await menuTheme.locator("label").all()) {
+          const box = await option.boundingBox();
+          assert.ok(
+            box && Math.round(box.height) >= 44 && Math.round(box.width) >= 44,
+            path + " menu theme option is " + box?.width + "x" + box?.height,
+          );
+        }
         assert.equal(
-          await toggle.getAttribute("aria-pressed"),
-          String(wasDark),
+          await mobilePage
+            .locator(".site-header-tools [data-theme-switch]")
+            .isVisible(),
+          false,
+          path + " the header theme switch must hide on narrow screens",
         );
-        await toggle.click();
-        assert.equal(
-          await toggle.getAttribute("aria-pressed"),
-          String(!wasDark),
-          path + " theme toggle must update aria-pressed",
-        );
-        await toggle.click();
-        await mobilePage.evaluate(() => localStorage.clear());
+        await mobilePage.keyboard.press("Escape");
         checked++;
       } catch (error) {
         failures.push(
