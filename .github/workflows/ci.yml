@@ -35,3 +35,57 @@ jobs:
         run: npm ci
       - name: Format, type-check, validate, build and verify
         run: npm run check
+
+  browser:
+    name: Browser smoke (Chromium, Firefox)
+    runs-on: ubuntu-24.04 # Playwright 1.57 has no browser builds for Ubuntu 26.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+      - name: Build Astro
+        run: |
+          npm ci
+          npm run validate:portfolio
+          npm run build
+      - name: Install browser test dependencies
+        run: npm install --prefix tools/browser-checks --no-audit --no-fund
+      - name: Install test browsers
+        working-directory: tools/browser-checks
+        run: npx playwright install --with-deps chromium firefox
+      - name: Start preview server and run tests
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/portfolio-preview.log 2>&1 &
+          for i in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then break; fi
+            sleep 1
+          done
+          node tools/browser-checks/browser-smoke.mjs
+      - name: Upload screenshots and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: portfolio-browser-screenshots
+          path: |
+            artifacts/browser
+            /tmp/portfolio-preview.log
+          if-no-files-found: ignore
+
+  # The single check required on main. Add any new job to `needs` so that
+  # branch protection keeps one stable check name.
+  required:
+    name: Required
+    if: always()
+    needs: [build, browser]
+    runs-on: ubuntu-latest
+    steps:
+      - name: All required jobs passed
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "Results: $RESULTS"
+          for result in $RESULTS; do
+            if [ "$result" != "success" ]; then exit 1; fi
+          done

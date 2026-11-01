@@ -40,4 +40,4 @@ npm ci
 npm run check   # format, astro check, unit tests, validate:portfolio, build, verify:static, snapshot compare
 ```
 
-`npm run check` must pass before every commit. `npm run dev` starts Astro locally; `npm run preview` previews the static `dist/` output. Both English and French pages must be server-rendered correctly. To run the browser smoke test, serve `dist/` with `npm run preview`, then run `TEST_BASE_URL=<preview URL> npm test` in `tools/browser-checks/`; the browser audit workflow may also be launched when visual or hydration regressions are suspected.
+`npm run check` must pass before every commit. `npm run dev` starts Astro locally; `npm run preview` previews the static `dist/` output. Both English and French pages must be server-rendered correctly. To run the browser smoke test, serve `dist/` with `npm run preview`, then run `TEST_BASE_URL=<preview URL> npm test` in `tools/browser-checks/`. CI (`.github/workflows/ci.yml`) runs the build and the browser smoke test on every PR; its `Required` job aggregates them and is the only check required on `main` (add new jobs to its `needs`).
