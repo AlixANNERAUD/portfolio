@@ -62,9 +62,9 @@ export function sectionNumber(index: number): string {
 }
 
 /**
- * Numbered section overline, `03 — Xila`. The no-break space keeps the dash
+ * Numbered section overline, `03 / Xila`. The no-break space keeps the slash
  * on the number's line, as French typography requires.
  */
 export function sectionLabel(index: number, label: string): string {
-  return `${sectionNumber(index)} — ${label}`;
+  return `${sectionNumber(index)} / ${label}`;
 }

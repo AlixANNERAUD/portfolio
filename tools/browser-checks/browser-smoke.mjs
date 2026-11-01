@@ -805,7 +805,7 @@ for (const [engineName, engine] of [
     // Timeline dates and section numbers are machine metadata: JetBrains
     // Mono with tabular figures, in the rail at 1440 and inside the card at
     // 390 (where the rail hides). The earlier-roles toggle keeps the
-    // "NN — Label" overline format while it updates the count.
+    // "NN / Label" overline format while it updates the count.
     for (const [path, width, selector] of [
       ["/experiences", 1440, ".career-timeline-date"],
       ["/fr/experiences", 390, ".career-period"],
@@ -830,11 +830,11 @@ for (const [engineName, engine] of [
         assert.match(style.family, /JetBrains Mono/, selector + " font");
         assert.match(style.numeric, /tabular-nums/, selector + " figures");
         if (path.endsWith("experiences")) {
-          // The overline is a label ("01 — Experience"); the count lives in
+          // The overline is a label ("01 / Experience"); the count lives in
           // the toggle, which names the number of earlier roles.
           const numbered = page.locator("#professional [data-section-index]");
           const overline = (await numbered.textContent()).replace(/\s+/g, " ");
-          assert.match(overline, /^01 — \D/, "overline " + overline);
+          assert.match(overline, /^01 \/ \D/, "overline " + overline);
           const toggle = page.locator("#professional .career-earlier-toggle");
           assert.match(await toggle.innerText(), /\d/, "toggle needs a count");
         }

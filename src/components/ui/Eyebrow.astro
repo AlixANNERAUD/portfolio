@@ -4,7 +4,7 @@ import { sectionNumber } from "../../lib/format.ts";
 
 /**
  * Small uppercase overline above a heading. With `index`, it becomes a
- * numbered section overline, `03 — Label`: the number is set in the mono
+ * numbered section overline, `03 / Label`: the number is set in the mono
  * face and the label stays in its own span so scripts can update it.
  */
 type Props = HTMLAttributes<"p"> & {
@@ -22,7 +22,7 @@ const number = index === undefined ? undefined : sectionNumber(index);
     <slot />
   ) : (
     <>
-      <span class="eyebrow__index">{number}</span>&nbsp;—{" "}
+      <span class="eyebrow__index">{number}</span>&nbsp;/{" "}
       <span class="eyebrow__label">
         <slot />
       </span>

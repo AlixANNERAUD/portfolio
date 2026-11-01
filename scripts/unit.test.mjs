@@ -197,10 +197,10 @@ test("formatCount pluralizes with Intl.PluralRules", () => {
   assert.equal(formatCount(1, "milestone", "fr"), "1 étape");
 });
 
-test("sectionLabel numbers sections as NN — Label", () => {
-  assert.equal(sectionLabel(0, "Introduction"), "00\u00a0— Introduction");
-  assert.equal(sectionLabel(3, "Xila"), "03\u00a0— Xila");
-  assert.equal(sectionLabel(12, "Projets"), "12\u00a0— Projets");
+test("sectionLabel numbers sections as NN / Label", () => {
+  assert.equal(sectionLabel(0, "Introduction"), "00\u00a0/ Introduction");
+  assert.equal(sectionLabel(3, "Xila"), "03\u00a0/ Xila");
+  assert.equal(sectionLabel(12, "Projets"), "12\u00a0/ Projets");
 });
 
 test("ranking weights total 100 and drive the featured selection", () => {
