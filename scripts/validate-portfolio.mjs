@@ -287,21 +287,14 @@ function readProjectPage(lang, id) {
 // characters, a unique title per locale, a <title> of 50-60 characters
 // (a target, reported as a warning), no generic defensive "Scope and
 // limitations" section, and a team size for every academic project.
-// Projects not yet rewritten are listed in PENDING_EDITORIAL; each content
-// batch removes its ids until the list is empty. `--strict` ignores the list.
-const PENDING_EDITORIAL = new Set([]);
 const SCOPE_HEADING_ALLOWED = new Set([
   "odor-localization",
   "music-danceability",
 ]);
-const strictEditorial = process.argv.includes("--strict");
 const editorialIssues = [];
 const editorialWarnings = [];
 const charCount = (text) => [...text].length;
 
-for (const id of PENDING_EDITORIAL) {
-  if (!ids.has(id)) editorialIssues.push(`pending list: unknown project ${id}`);
-}
 for (const lang of locales) {
   const seenTitles = new Map();
   for (const project of projects) {
@@ -311,14 +304,11 @@ for (const lang of locales) {
     );
     const title = fields.title.trim();
     const duplicate = seenTitles.get(title.toLowerCase());
-    const bothPending =
-      PENDING_EDITORIAL.has(project.id) && PENDING_EDITORIAL.has(duplicate);
-    if (duplicate && (strictEditorial || !bothPending)) {
+    if (duplicate) {
       editorialIssues.push(`${where}: title duplicates ${lang}/${duplicate}`);
     }
     seenTitles.set(title.toLowerCase(), project.id);
 
-    if (PENDING_EDITORIAL.has(project.id) && !strictEditorial) continue;
     const description = charCount(fields.description.trim());
     if (description < 120 || description > 160) {
       editorialIssues.push(
@@ -347,12 +337,6 @@ for (const lang of locales) {
 for (const warning of editorialWarnings) console.warn("Warning: " + warning);
 if (editorialIssues.length > 0) {
   throw new Error("Project editorial rules:\n" + editorialIssues.join("\n"));
-}
-if (PENDING_EDITORIAL.size > 0 && !strictEditorial) {
-  console.log(
-    PENDING_EDITORIAL.size +
-      " project(s) still pending the editorial rewrite (run with --strict to list their issues).",
-  );
 }
 
 // French typography. Markdown bodies are typeset at build time by
