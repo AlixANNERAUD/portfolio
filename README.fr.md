@@ -59,7 +59,7 @@ src/
   data/                   Projets, expériences, compétences, technologies (tags), identité du site, types
   i18n/                   Langues et dictionnaire typé de l’interface (ui.ts)
   lib/                    seo.ts (JSON-LD), plugins Markdown (titre des projets, typographie française),
-                          formatage, topologie Xila
+                          formatage, disposition de l’accueil (home-orbit.ts)
   styles/                 tokens.css (jetons de design), styles de base, prose et animations
 public/                   Images (dont les logos auto-hébergés), CNAME, robots.txt
 scripts/                  Validation des sources, vérification du HTML compilé, instantané, tests unitaires
