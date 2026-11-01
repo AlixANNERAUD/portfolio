@@ -85,7 +85,7 @@ export const projects = [
       en: "Self-hosted services on a TrueNAS server and a VPS, deployed with Ansible and Docker Compose and monitored with Grafana.",
       fr: "Des services auto-hébergés sur un serveur TrueNAS et un VPS, déployés avec Ansible et Docker Compose, et supervisés avec Grafana.",
     },
-    period: { start: "2020", end: "present" },
+    period: { start: "2023", end: "present" },
     group: "personal",
     category: "infrastructure",
     symbol: "↗",
