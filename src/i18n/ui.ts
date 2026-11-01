@@ -9,7 +9,7 @@ import type { Locale } from "./locales.ts";
 const en = {
   "meta.homeTitle": "Alix ANNERAUD | Software, Rust and embedded systems",
   "meta.pageTitle": "{title} | Alix ANNERAUD",
-  "meta.ogImageAlt": "Portrait of Alix ANNERAUD",
+  "meta.ogImageAlt": "Alix ANNERAUD — Software, Rust and embedded systems",
   "a11y.skipToContent": "Skip to content",
   /** Visually hidden suffix of links opening in a new tab. */
   "a11y.newTab": "(opens in a new tab)",
@@ -228,7 +228,7 @@ export type UIKey = keyof typeof en;
 const fr: Record<UIKey, string> = {
   "meta.homeTitle": "Alix ANNERAUD | Logiciel, Rust et systèmes embarqués",
   "meta.pageTitle": "{title} | Alix ANNERAUD",
-  "meta.ogImageAlt": "Portrait d’Alix ANNERAUD",
+  "meta.ogImageAlt": "Alix ANNERAUD — Logiciel, Rust et systèmes embarqués",
   "a11y.skipToContent": "Aller au contenu",
   "a11y.newTab": "(s’ouvre dans un nouvel onglet)",
   "nav.home": "Accueil",

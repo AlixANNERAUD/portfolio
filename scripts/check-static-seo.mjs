@@ -158,6 +158,91 @@ function checkHeader(file, root) {
 // Head metadata is parsed, not matched as text: navigation links to the
 // other locale must not satisfy a canonical or hreflang assertion.
 const site = "https://alix.anneraud.fr";
+
+/** Width and height of a PNG from its IHDR chunk, or null if not a PNG. */
+function pngSize(buffer) {
+  const signature = "89504e470d0a1a0a";
+  if (buffer.length < 24 || buffer.subarray(0, 8).toString("hex") !== signature)
+    return null;
+  return { width: buffer.readUInt32BE(16), height: buffer.readUInt32BE(20) };
+}
+
+/** A published PNG asset of the expected size, as a site-root path. */
+function checkPng(path, width, height) {
+  const filename = resolve(dist, path.slice(1));
+  if (!existsSync(filename)) {
+    failed.push("Missing asset: " + path);
+    return;
+  }
+  const size = pngSize(readFileSync(filename));
+  if (!size || size.width !== width || size.height !== height) {
+    failed.push(path + ": expected a " + width + "x" + height + " PNG");
+  }
+}
+
+// Social cards (one per locale, since the tagline is translated) and icons.
+const ogImages = {
+  en: "/images/og-default.png",
+  fr: "/images/og-default.fr.png",
+};
+for (const path of Object.values(ogImages)) checkPng(path, 1200, 630);
+checkPng("/images/apple-touch-icon.png", 180, 180);
+{
+  const favicon = resolve(dist, "images/favicon.svg");
+  const svg = existsSync(favicon) ? readFileSync(favicon, "utf8") : "";
+  if (!/^<svg\b[^>]*\bviewBox="0 0 \d+ \d+"/.test(svg.trim())) {
+    failed.push("/images/favicon.svg: expected an SVG with a viewBox");
+  }
+  if (!svg.includes("prefers-color-scheme: dark")) {
+    failed.push("/images/favicon.svg: expected a dark-scheme variant");
+  }
+}
+
+/**
+ * Large social card in the page locale, with its size, type and alt text,
+ * plus the SVG favicon and the Apple touch icon.
+ */
+function checkSocialMeta(file, head, lang) {
+  const meta = (key) =>
+    head
+      .querySelectorAll(
+        'meta[property="' + key + '"], meta[name="' + key + '"]',
+      )
+      .map((tag) => tag.getAttribute("content"));
+  const image = site + ogImages[lang];
+  const expected = {
+    "og:image": image,
+    "og:image:width": "1200",
+    "og:image:height": "630",
+    "og:image:type": "image/png",
+    "og:image:alt": ui[lang]["meta.ogImageAlt"],
+    "twitter:card": "summary_large_image",
+    "twitter:image": image,
+    "twitter:image:alt": ui[lang]["meta.ogImageAlt"],
+  };
+  for (const [key, value] of Object.entries(expected)) {
+    const found = meta(key);
+    if (found.length !== 1 || found[0] !== value) {
+      failed.push(
+        file + ": expected " + key + " " + value + ", found " + found,
+      );
+    }
+  }
+  const links = (selector) =>
+    head.querySelectorAll(selector).map((link) => link.getAttribute("href"));
+  if (
+    links('link[rel="icon"][type="image/svg+xml"]').join() !==
+    "/images/favicon.svg"
+  ) {
+    failed.push(file + ": expected one SVG favicon /images/favicon.svg");
+  }
+  if (
+    links('link[rel="apple-touch-icon"]').join() !==
+    "/images/apple-touch-icon.png"
+  ) {
+    failed.push(file + ": expected one apple-touch-icon");
+  }
+}
 const pagesByCanonical = new Map();
 for (const [file, canonicalPath, translationPath] of cases) {
   const html = read(file);
@@ -186,6 +271,7 @@ for (const [file, canonicalPath, translationPath] of cases) {
     continue;
   }
   const french = file.startsWith("fr/");
+  checkSocialMeta(file, head, french ? "fr" : "en");
   const canonical = site + canonicalPath;
   const expected = {
     en: site + (french ? translationPath : canonicalPath),
@@ -270,6 +356,7 @@ for (const [file, canonicalPath, translationPath] of cases) {
   if (head?.querySelector('meta[property="og:url"]')) {
     failed.push("404.html: must not declare an og:url");
   }
+  if (head) checkSocialMeta("404.html", head, "en");
   for (const lang of ["en", "fr"]) {
     if (!root.querySelector('main [lang="' + lang + '"]')) {
       failed.push("404.html: missing a lang=" + lang + " content section");

@@ -46,7 +46,8 @@ const titleText = home
   ? t("meta.homeTitle")
   : t("meta.pageTitle", { title: title! });
 const canonical = site.url + localizePath(path, lang);
-const image = site.url + site.image;
+const ogImage = site.ogImage;
+const image = site.url + ogImage.src[lang];
 const hreflang = Object.entries(alternates(path));
 const ogLocale: Record<Locale, string> = { en: "en_US", fr: "fr_FR" };
 const crumbs = [
@@ -101,11 +102,15 @@ const graph =
 <meta property="og:description" content={description} />
 {!noindex && <meta property="og:url" content={canonical} />}
 <meta property="og:image" content={image} />
+<meta property="og:image:width" content={String(ogImage.width)} />
+<meta property="og:image:height" content={String(ogImage.height)} />
+<meta property="og:image:type" content={ogImage.type} />
 <meta property="og:image:alt" content={t("meta.ogImageAlt")} />
-<meta name="twitter:card" content="summary" />
+<meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content={titleText} />
 <meta name="twitter:description" content={description} />
 <meta name="twitter:image" content={image} />
+<meta name="twitter:image:alt" content={t("meta.ogImageAlt")} />
 {!noindex && (
   <>
     <link rel="canonical" href={canonical} />
@@ -114,7 +119,8 @@ const graph =
     ))}
   </>
 )}
-<link rel="icon" href="/images/icon.png" type="image/png" />
+<link rel="icon" href="/images/favicon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png" />
 <link rel="sitemap" href="/sitemap-index.xml" />
 <JsonLd nodes={graph} />
 <script is:inline>

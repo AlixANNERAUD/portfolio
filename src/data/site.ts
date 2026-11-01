@@ -11,8 +11,23 @@ export const site = {
   url: "https://alix.anneraud.fr",
   name: "Alix ANNERAUD",
   email: "alix@anneraud.fr",
-  /** Default social preview image, relative to `url`. */
+  /** Portrait used as the Person image in structured data, relative to `url`. */
   image: "/images/alix.webp",
+  /**
+   * Social card per locale (the tagline is translated), relative to `url`.
+   * Generated with `npm run images`, see scripts/generate-images.mjs.
+   */
+  ogImage: {
+    src: { en: "/images/og-default.png", fr: "/images/og-default.fr.png" },
+    width: 1200,
+    height: 630,
+    type: "image/png",
+  } satisfies {
+    src: Record<Locale, string>;
+    width: number;
+    height: number;
+    type: string;
+  },
   /** Browser chrome colors: hex equivalents of the --color-bg token. */
   themeColor: { light: "#fdfdff", dark: "#1a1a1e" },
   social,
