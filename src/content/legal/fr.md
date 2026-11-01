@@ -60,3 +60,4 @@ Copies hébergées sur ce site, issues des sites des organismes :
 - **Centre Henri Becquerel :** [fichier d’origine](https://www.becquerel.fr/wp-content/uploads/2022/10/logo-becquerel-blanc_tournant.jpg), redimensionné et converti en WebP, [espace presse](https://www.becquerel.fr/le-centre/decouvrir-le-centre/espace-presse/).
 - **Guénola Sahut :** [fichier d’origine](https://guenola-sahut.fr/web/image/website/1/logo/Gu%C3%A9nola%20SAHUT), converti en WebP ; [site](https://guenola-sahut.fr/).
 - **Institution Jean-Paul II :** [fichier d’origine](https://www.institutionjeanpaul2.fr/wp-content/themes/jp2mdl/img/logo.png), redimensionné et converti en WebP ; [site](https://www.institutionjeanpaul2.fr/).
+- **Cambridge English :** [fichier d’origine](https://www.cambridgeenglish.org/images/icons/apple-touch-icon.png), redimensionné et converti en WebP ; [site](https://www.cambridgeenglish.org/).

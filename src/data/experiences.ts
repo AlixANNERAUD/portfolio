@@ -318,19 +318,23 @@ export const experiences: readonly Experience[] = [
     monogram: "JP2",
     logo: "/images/logos/jean-paul-2.webp",
     role: {
-      fr: "Baccalauréat scientifique — section européenne",
-      en: "Scientific Baccalaureate — European Section",
+      fr: "Baccalauréat général — section européenne",
+      en: "French General Baccalaureate — European Section",
     },
     period: { fr: "2021", en: "2021" },
     location: { fr: "Rouen, France", en: "Rouen, France" },
     summary: {
-      fr: "Baccalauréat scientifique obtenu avec un parcours en section européenne.",
-      en: "Scientific baccalaureate with a European-section curriculum.",
+      fr: "Baccalauréat général de la réforme de 2020, avec les spécialités mathématiques et physique-chimie, en section européenne.",
+      en: "General baccalaureate under the 2020 reform, with mathematics and physics-chemistry as specialties, in the European section.",
     },
     highlights: [
       {
-        fr: "Enseignement général scientifique complété par la section européenne.",
-        en: "Science-focused secondary education including a European section.",
+        fr: "Spécialités : mathématiques et physique-chimie, plus sciences de la vie et de la Terre jusqu’en première.",
+        en: "Specialties: mathematics and physics-chemistry, plus life and Earth sciences until the eleventh grade.",
+      },
+      {
+        fr: "Option mathématiques expertes en terminale.",
+        en: "Advanced mathematics option (mathématiques expertes) in the final year.",
       },
     ],
     technologies: [],
@@ -342,6 +346,7 @@ export const experiences: readonly Experience[] = [
     company: "Cambridge English",
     companyUrl: "https://www.cambridgeenglish.org/",
     monogram: "B1",
+    logo: "/images/logos/cambridge-english.webp",
     role: {
       fr: "Certification Cambridge B1 Preliminary",
       en: "Cambridge B1 Preliminary Certificate",
