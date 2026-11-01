@@ -1,5 +1,5 @@
 ---
-import { Moon, Sun, SunMoon } from "@lucide/astro";
+import { Contrast, Moon, Sun } from "@lucide/astro";
 import type { Locale } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
 
@@ -15,7 +15,9 @@ export interface Props {
 const { lang, placement } = Astro.props;
 const t = useTranslations(lang);
 const options = [
-  { value: "auto", icon: SunMoon },
+  // A half-filled circle: both schemes, unlike SunMoon which reads as a
+  // second sun at icon size.
+  { value: "auto", icon: Contrast },
   { value: "light", icon: Sun },
   { value: "dark", icon: Moon },
 ] as const;
@@ -27,7 +29,9 @@ const iconOnly = placement === "header";
   Auto / Light / Dark as native radios: arrow keys move the choice and
   assistive technologies announce a group of three. Auto is checked in the
   HTML, matching the CSS default (color-scheme: light dark). The switch stays
-  hidden until its script runs, since it cannot work without JavaScript.
+  hidden until its script runs, since it cannot work without JavaScript; in
+  the header it keeps its place meanwhile, so nothing shifts when it shows.
+  Icon-only options show their name as a tooltip on hover and focus.
 -->
 <div
   class={"theme-switch theme-switch--" + placement}
@@ -43,10 +47,7 @@ const iconOnly = placement === "header";
   </span>
   <span class="theme-switch-options">
     {options.map(({ value, icon: Icon }) => (
-      <label
-        class="theme-switch-option"
-        title={iconOnly ? t(`theme.${value}`) : undefined}
-      >
+      <label class="theme-switch-option">
         <input
           class="visually-hidden"
           type="radio"
@@ -55,8 +56,8 @@ const iconOnly = placement === "header";
           checked={value === "auto"}
           autocomplete="off"
         />
-        <Icon size={18} />
-        <span class:list={{ "visually-hidden": iconOnly }}>
+        <Icon size={20} stroke-width={1.75} aria-hidden="true" />
+        <span class:list={{ "theme-switch-tip": iconOnly }}>
           {t(`theme.${value}`)}
         </span>
       </label>
@@ -129,8 +130,13 @@ const iconOnly = placement === "header";
 </script>
 
 <style>
-  .theme-switch:not([data-ready]) {
+  .theme-switch--menu:not([data-ready]) {
     display: none;
+  }
+
+  /* Hidden (and out of the tab order) yet keeping its width. */
+  .theme-switch--header:not([data-ready]) {
+    visibility: hidden;
   }
 
   .theme-switch-options {
@@ -155,9 +161,21 @@ const iconOnly = placement === "header";
       background-color var(--dur-fast) var(--ease-out);
   }
 
+  /*
+   * The checked option also gets an inset ring, so the choice does not rest
+   * on color alone; forced-colors mode drops both, hence the outline below.
+   */
   .theme-switch-option:has(input:checked) {
     background: var(--color-accent-soft);
+    box-shadow: inset 0 0 0 1px var(--color-accent);
     color: var(--color-accent);
+  }
+
+  @media (forced-colors: active) {
+    .theme-switch-option:has(input:checked) {
+      outline: 2px solid Highlight;
+      outline-offset: -2px;
+    }
   }
 
   /* The radio itself is visually hidden: its label carries the ring. */
@@ -174,19 +192,39 @@ const iconOnly = placement === "header";
     }
   }
 
-  /* Header row: a compact segmented control, wide screens only. */
-  .theme-switch--header .theme-switch-options {
-    padding: 1px;
+  /*
+   * Header row, wide screens only: three borderless 44px icon buttons, like
+   * the locale switch beside them; only the checked one is filled.
+   */
+  .theme-switch-tip {
+    position: absolute;
+    top: calc(100% + var(--space-3xs));
+    left: 50%;
+    z-index: 2;
+    padding: var(--space-3xs) var(--space-2xs);
     border: 1px solid var(--color-border);
-    border-radius: calc(var(--radius-m) + 2px);
+    border-radius: var(--radius-s);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-size: var(--step--2);
+    white-space: nowrap;
+    translate: -50% 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--dur-fast) var(--ease-out);
   }
 
-  .theme-switch--header .theme-switch-option {
-    min-width: calc(var(--control-size) - 4px);
-    min-height: calc(var(--control-size) - 4px);
+  .theme-switch-option:has(input:focus-visible) .theme-switch-tip {
+    opacity: 1;
   }
 
-  @media (max-width: 840px) {
+  @media (hover: hover) {
+    .theme-switch-option:hover .theme-switch-tip {
+      opacity: 1;
+    }
+  }
+
+  @media (max-width: 960px) {
     .theme-switch--header {
       display: none;
     }
@@ -216,7 +254,7 @@ const iconOnly = placement === "header";
     padding-inline: var(--space-xs);
   }
 
-  @media (width > 840px) {
+  @media (width > 960px) {
     .theme-switch--menu {
       display: none;
     }

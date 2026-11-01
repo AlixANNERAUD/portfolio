@@ -121,6 +121,8 @@ const graph =
     ))}
   </>
 )}
+{/* ICO first for clients without SVG icons; the others pick the SVG. */}
+<link rel="icon" href="/favicon.ico" sizes="32x32" />
 <link rel="icon" href="/images/favicon.svg" type="image/svg+xml" />
 <link rel="apple-touch-icon" href="/images/apple-touch-icon.png" />
 <link rel="sitemap" href="/sitemap-index.xml" />
@@ -128,7 +130,7 @@ const graph =
 <script is:inline>
   // Before paint: pin an explicit light or dark choice (auto needs nothing,
   // the CSS follows the system), and make the browser chrome use only the
-  // matching theme-color meta. ThemeToggle.astro keeps both in sync after.
+  // matching theme-color meta. ThemeSwitch.astro keeps both in sync after.
   try {
     const choice = localStorage.getItem("portfolio-theme");
     if (choice === "light" || choice === "dark") {

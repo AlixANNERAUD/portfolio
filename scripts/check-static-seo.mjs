@@ -134,16 +134,17 @@ function checkLocaleSwitch(file, root) {
 }
 
 /**
- * Header shell: a menu button bound to the main navigation (collapsed in the
- * HTML, so the no-JS fallback is the CSS), and light/dark theme-color metas.
+ * Header shell: a menu button bound to the panel holding the main navigation
+ * (collapsed in the HTML, so the no-JS fallback is the CSS), and light/dark
+ * theme-color metas.
  */
 function checkHeader(file, root) {
   const button = root.querySelector("button.site-menu-button");
   const controls = button?.getAttribute("aria-controls");
   if (!button || button.getAttribute("aria-expanded") !== "false") {
     failed.push(file + ': expected a menu button with aria-expanded="false"');
-  } else if (!controls || !root.querySelector("nav#" + controls)) {
-    failed.push(file + ": menu button aria-controls must name the main nav");
+  } else if (!controls || !root.querySelector("#" + controls + " > nav")) {
+    failed.push(file + ": menu button aria-controls must name the nav panel");
   }
   const themeColors = root
     .querySelectorAll('head meta[name="theme-color"]')
@@ -254,10 +255,26 @@ checkPng("/images/apple-touch-icon.png", 180, 180);
     failed.push("/images/favicon.svg: expected a dark-scheme variant");
   }
 }
+{
+  // /favicon.ico: 16, 32 and 48px PNG images in an ICO container.
+  const file = resolve(dist, "favicon.ico");
+  const ico = existsSync(file) ? readFileSync(file) : Buffer.alloc(0);
+  const [type, count] =
+    ico.length >= 6 ? [ico.readUInt16LE(2), ico.readUInt16LE(4)] : [0, 0];
+  const sizes = Array.from({ length: count }, (_, index) => {
+    const entry = 6 + 16 * index;
+    const offset = ico.readUInt32LE(entry + 12);
+    const png = ico.subarray(offset, offset + 8).toString("latin1");
+    return png === "\x89PNG\r\n\x1a\n" ? ico.readUInt8(entry) : 0;
+  });
+  if (type !== 1 || sizes.join() !== "16,32,48") {
+    failed.push("/favicon.ico: expected 16, 32 and 48px PNG icons");
+  }
+}
 
 /**
  * Large social card in the page locale, with its size, type and alt text,
- * plus the SVG favicon and the Apple touch icon.
+ * plus the ICO and SVG favicons and the Apple touch icon.
  */
 function checkSocialMeta(file, head, lang) {
   const meta = (key) =>
@@ -287,6 +304,9 @@ function checkSocialMeta(file, head, lang) {
   }
   const links = (selector) =>
     head.querySelectorAll(selector).map((link) => link.getAttribute("href"));
+  if (links('link[rel="icon"]').join() !== "/favicon.ico,/images/favicon.svg") {
+    failed.push(file + ": expected the ICO then the SVG favicon");
+  }
   if (
     links('link[rel="icon"][type="image/svg+xml"]').join() !==
     "/images/favicon.svg"

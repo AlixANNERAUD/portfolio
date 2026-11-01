@@ -28,6 +28,8 @@ npm run preview   # sert le dossier dist/ compilé
 
 Le test de fumée facultatif dans le navigateur (Playwright) se trouve dans `tools/browser-checks/` : lancer `npm run preview`, puis `npm install` et `TEST_BASE_URL=<URL de prévisualisation> npm test` dans ce dossier.
 
+**Images :** les cartes sociales (`public/images/og-default.png`, `og-default.fr.png`), les favicons (`public/images/favicon.svg`, `public/favicon.ico`), l’icône Apple et le monogramme de l’en-tête (`src/assets/monogram.svg`) sont générés par `scripts/generate-images.mjs`. Lancer `npm run images` après avoir modifié `meta.homeTitle` ou `home.hero.discipline` dans `src/i18n/ui.ts`, un jeton de couleur ou une police, puis committer les fichiers régénérés. Le résultat ne dépend que des paquets de polices figés : il est identique sur toutes les machines.
+
 ## Structure
 
 ```text
@@ -47,7 +49,7 @@ src/
     projects/             ProjectCard, ProjectCatalogue (filtrable), Breadcrumb, RelatedProjects
     resume/               ResumeSummary (résumé HTML) et PdfEmbed
     skills/ xila/ mdx/    Sections de pages et composants MDX
-    site/                 SiteHead, SiteHeader, SiteFooter, ThemeToggle, JsonLd
+    site/                 SiteHead, SiteHeader, SiteFooter, ThemeSwitch (Auto / Clair / Sombre), JsonLd
   content.config.ts       Collection de projets typée
   content/
     projects/{en,fr}/     27 projets, une fiche Markdown / MDX par langue

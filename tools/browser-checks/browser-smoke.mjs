@@ -1191,6 +1191,15 @@ for (const [engineName, engine] of [
           );
         };
 
+        // Same 44px targets as the other header controls.
+        for (const option of await group.locator("label").all()) {
+          const box = await option.boundingBox();
+          assert.ok(
+            box && Math.round(box.height) >= 44 && Math.round(box.width) >= 44,
+            path + " header theme option is " + box?.width + "x" + box?.height,
+          );
+        }
+
         let current = await state();
         assert.equal(current.checked, "auto", path + " default choice");
         assert.equal(current.stored, null);
@@ -1346,6 +1355,21 @@ for (const [engineName, engine] of [
           );
         }
         assert.equal(
+          await menuTheme.evaluate((node) => node.closest("nav") === null),
+          true,
+          path + " the theme switch must sit outside the navigation landmark",
+        );
+        // The longer French labels must still fit the 390px panel.
+        assert.equal(
+          await mobilePage.evaluate(
+            () =>
+              document.documentElement.scrollWidth <=
+              document.documentElement.clientWidth,
+          ),
+          true,
+          path + " the open menu overflows horizontally at 390px",
+        );
+        assert.equal(
           await mobilePage
             .locator(".site-header-tools [data-theme-switch]")
             .isVisible(),
@@ -1361,6 +1385,41 @@ for (const [engineName, engine] of [
       }
     }
     await mobileContext.close();
+
+    // Either side of the header breakpoint (960px), in the longer French
+    // labels: one row that fits, with the menu button only when narrow.
+    for (const width of [961, 960]) {
+      const edgeContext = await browser.newContext({
+        viewport: { width, height: 700 },
+      });
+      const edgePage = await edgeContext.newPage();
+      try {
+        await edgePage.goto(base + "/fr/projects", { waitUntil: "load" });
+        await edgePage
+          .locator("[data-theme-switch][data-ready]")
+          .first()
+          .waitFor({ state: "attached", timeout: 5000 });
+        const layout = await edgePage.evaluate(() => {
+          const header = document.querySelector(".site-header");
+          return {
+            overflow:
+              document.documentElement.scrollWidth >
+              document.documentElement.clientWidth,
+            height: header.getBoundingClientRect().height,
+            menu:
+              getComputedStyle(header.querySelector(".site-menu-button"))
+                .display !== "none",
+          };
+        });
+        assert.equal(layout.overflow, false, width + "px header overflows");
+        assert.ok(layout.height <= 80, width + "px header wraps");
+        assert.equal(layout.menu, width <= 960, width + "px menu button");
+        checked++;
+      } catch (error) {
+        failures.push(engineName + " header at " + width + "px: " + error);
+      }
+      await edgeContext.close();
+    }
   } finally {
     await browser.close();
   }

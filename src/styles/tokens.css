@@ -159,7 +159,7 @@
  * navigation onto a second row of controls. Header breakpoint: see
  * SiteHeader.astro.
  */
-@media (max-width: 840px) {
+@media (max-width: 960px) {
   :root:not(:has(.site-header[data-menu])) {
     --header-h: calc(
       2 * var(--control-size) + var(--space-3xs) + 2 * var(--space-2xs) + 1px

@@ -1,6 +1,7 @@
 ---
 import { Menu, X } from "@lucide/astro";
 import ThemeSwitch from "./ThemeSwitch.astro";
+import Monogram from "../../assets/monogram.svg";
 import { localizePath, locales, type Locale } from "../../i18n/locales.ts";
 import { useTranslations, type UIKey } from "../../i18n/ui.ts";
 import { site } from "../../data/site.ts";
@@ -19,11 +20,12 @@ const tOther = useTranslations(other);
 const localeHref = Astro.props.localeHref ?? localizePath(path, other);
 const current = localizePath(path, lang);
 /*
- * Same breakpoint as the @media (max-width: 840px) rules below, in tokens.css
- * and in ThemeSwitch.astro. Wider than the 720px page breakpoint: below 840px
- * the brand, four links, locale switch and theme switch overflow one row.
+ * Same breakpoint as the @media (max-width: 960px) rules below, in tokens.css
+ * and in ThemeSwitch.astro. Wider than the 720px page breakpoint: the brand
+ * and its monogram, four links, the locale switch and the three theme options
+ * need about 920px in French, so below 960px they would overflow one row.
  */
-const narrowQuery = "(max-width: 840px)";
+const narrowQuery = "(max-width: 960px)";
 const links: { key: UIKey; path: string }[] = [
   { key: "nav.experiences", path: "/experiences" },
   { key: "nav.projects", path: "/projects" },
@@ -44,6 +46,10 @@ const links: { key: UIKey; path: string }[] = [
       href={localizePath("/", lang)}
       aria-label={t("nav.home")}
     >
+      {/* The favicon and social card monogram, drawn with the theme tokens. */}
+      <span class="site-brand-mark" aria-hidden="true">
+        <Monogram width={20} height={20} />
+      </span>
       {site.name}
     </a>
     {/*
@@ -54,7 +60,7 @@ const links: { key: UIKey; path: string }[] = [
       class="site-menu-button site-control"
       type="button"
       aria-expanded="false"
-      aria-controls="site-main-nav"
+      aria-controls="site-menu-panel"
     >
       <span class="site-menu-icon site-menu-icon-open" aria-hidden="true">
         <Menu size={20} />
@@ -64,24 +70,30 @@ const links: { key: UIKey; path: string }[] = [
       </span>
       <span class="visually-hidden">{t("nav.menu")}</span>
     </button>
-    <nav id="site-main-nav" class="site-main-nav" aria-label={t("nav.main")}>
-      {links.map((link) => {
-        const href = localizePath(link.path, lang);
-        return (
-          <a
-            href={href}
-            aria-current={
-              current === href || current.startsWith(href + "/")
-                ? "page"
-                : undefined
-            }
-          >
-            {t(link.key)}
-          </a>
-        );
-      })}
+    {/*
+      The panel the menu button opens on narrow screens: the navigation,
+      then the theme switch as a sibling, outside the navigation landmark.
+    */}
+    <div id="site-menu-panel" class="site-menu-panel">
+      <nav class="site-main-nav" aria-label={t("nav.main")}>
+        {links.map((link) => {
+          const href = localizePath(link.path, lang);
+          return (
+            <a
+              href={href}
+              aria-current={
+                current === href || current.startsWith(href + "/")
+                  ? "page"
+                  : undefined
+              }
+            >
+              {t(link.key)}
+            </a>
+          );
+        })}
+      </nav>
       <ThemeSwitch lang={lang} placement="menu" />
-    </nav>
+    </div>
     <div class="site-header-tools">
       <a
         class="site-locale site-control"
@@ -164,6 +176,24 @@ const links: { key: UIKey; path: string }[] = [
 
   .site-brand:hover {
     color: var(--color-accent);
+  }
+
+  .site-brand-mark {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    margin-right: var(--space-2xs);
+    border-radius: var(--radius-s);
+    background: var(--color-accent);
+    color: var(--color-bg);
+  }
+
+  /* Wide screens: the panel is not a box, the navigation sits in the row. */
+  .site-menu-panel {
+    display: contents;
   }
 
   .site-main-nav {
@@ -256,7 +286,7 @@ const links: { key: UIKey; path: string }[] = [
     display: inline-flex;
   }
 
-  @media (max-width: 840px) {
+  @media (max-width: 960px) {
     .site-header-inner {
       flex-wrap: wrap;
       gap: var(--space-3xs);
@@ -269,10 +299,14 @@ const links: { key: UIKey; path: string }[] = [
     }
 
     /* No-JS fallback: the navigation takes its own full-width row. */
-    .site-main-nav {
+    .site-menu-panel {
+      display: block;
       order: 3;
-      justify-content: space-between;
       width: 100%;
+    }
+
+    .site-main-nav {
+      justify-content: space-between;
       margin-left: 0;
     }
 
@@ -287,24 +321,31 @@ const links: { key: UIKey; path: string }[] = [
       display: inline-flex;
     }
 
-    .site-header[data-menu] .site-main-nav {
+    .site-header[data-menu] .site-menu-panel {
       display: none;
     }
 
-    .site-header[data-menu="open"] .site-main-nav {
+    .site-header[data-menu="open"] .site-menu-panel {
       position: absolute;
       top: 100%;
       right: 0;
       left: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      padding: 0 var(--space-s) var(--space-xs);
+      display: block;
+      /* Same gutter as the header row, so the links align with the brand. */
+      padding: 0 var(--page-inline) var(--space-xs);
       border-bottom: 1px solid var(--color-border);
       background: var(--color-bg);
     }
 
+    .site-header[data-menu="open"] .site-main-nav {
+      flex-direction: column;
+      gap: 0;
+    }
+
+    /* Links and the theme label share the panel's left edge. */
     .site-header[data-menu="open"] .site-main-nav a {
+      justify-content: flex-start;
+      padding-inline: 0;
       color: var(--color-text);
       font-size: var(--step-0);
     }
