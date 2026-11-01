@@ -67,15 +67,13 @@ svg {
 }
 
 /*
- * The single page column. Header, footer, home hero, home sections, the
+ * The single page column. Header, footer, home sections, the
  * catalogue and the editorial pages share its width and inline padding, so
  * their edges line up from page to page.
  */
 .container,
 .editorial-page,
-.portfolio-showcase,
-.home-experience,
-.xila-topology {
+.portfolio-showcase {
   width: 100%;
   max-width: var(--container);
   margin-inline: auto;

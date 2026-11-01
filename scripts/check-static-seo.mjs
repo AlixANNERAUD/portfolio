@@ -804,126 +804,122 @@ for (const [file, canonicalPath, translationPath] of cases) {
     failed.push("404.html: must not have structured data");
   }
 }
-// Home is an engineering portfolio, not an Xila-only landing page.
-// Professional experience and a broad project selection must precede
-// the explicitly labelled Xila architecture deep dive in both locales.
-for (const [file, experienceUrl] of [
-  ["index.html", "/experiences"],
-  ["fr/index.html", "/fr/experiences"],
+// Home: the "orbit" hero (the name as the single H1, a tagline and a field
+// of linked tiles), then the Now section (doorways and contact). Every tile
+// is a plain link in the static HTML: organizations point at a visible
+// timeline card, projects at their page.
+for (const [file, lang] of [
+  ["index.html", "en"],
+  ["fr/index.html", "fr"],
 ]) {
   const html = read(file);
-  const marks = [
-    'class="home-hero"',
-    'class="home-experience"',
-    'class="home-experience-grid"',
-    'class="portfolio-showcase"',
-    'class="xila-topology"',
-  ];
-  const positions = marks.map((part) => html.indexOf(part));
+  if (!html) continue;
+  const root = parse(html);
+  const hero = root.querySelector("section.orbit[data-orbit]");
+  const now = root.querySelector("section.home-now");
   if (
-    positions.some((index) => index < 0) ||
-    positions.some((index, i) => i > 0 && index <= positions[i - 1])
+    !hero ||
+    !now ||
+    html.indexOf('class="orbit"') > html.indexOf("home-now")
   ) {
-    failed.push(file + ": homepage sections missing or in the wrong order");
+    failed.push(file + ": homepage needs the orbit hero, then the Now section");
+    continue;
   }
-  if ([...html.matchAll(/class="home-experience-card"/g)].length !== 4) {
-    failed.push(file + ": expected four featured professional cards");
+  const h1s = root.querySelectorAll("h1");
+  const h1Text = h1s[0]?.text.replace(/\s+/g, " ").trim();
+  if (h1s.length !== 1 || h1Text !== siteData.name) {
+    failed.push(file + ": homepage H1 must be exactly " + siteData.name);
   }
-  for (const id of ["memo-bank", "linkt", "amazon", "nyu"]) {
-    if (!html.includes(experienceUrl + "#" + id + "-title")) {
-      failed.push(file + ": missing professional milestone link for " + id);
-    }
+  if (!hero.querySelector(".orbit-tagline")?.text.includes("Xila")) {
+    failed.push(file + ": hero tagline must mention Xila");
   }
-  for (const { id: project } of featuredProjects) {
-    const prefix = file.startsWith("fr/") ? "/fr/projects/" : "/projects/";
-    if (!html.includes(prefix + project)) {
-      failed.push(file + ": missing selected project " + project);
-    }
-  }
-  if (!/Xila[^<]{0,140}/i.test(html) || !html.includes("xila-topology-link")) {
-    failed.push(
-      file + ": Xila graph must be presented as a named project deep dive",
-    );
-  }
-  if ([...html.matchAll(/<h1(?:\s|>)/g)].length !== 1) {
-    failed.push(file + ": homepage should have exactly one H1");
-  }
-}
-
-// The immersive introduction must be purely typographic, full-height styled
-// and provide an accessible path to the real career content in BOTH locales.
-for (const [file, language, careerLink] of [
-  ["index.html", "en", "/experiences"],
-  ["fr/index.html", "fr", "/fr/experiences"],
-]) {
-  const html = read(file);
-  const heroStart = html.indexOf('<section class="home-hero"');
-  const careerStart = html.indexOf('<section class="home-experience"');
-  const hero =
-    heroStart >= 0 && careerStart > heroStart
-      ? html.slice(heroStart, careerStart)
-      : "";
-  if (
-    !hero.includes("home-hero-title-mask") ||
-    !hero.includes("home-hero-title-line--accent")
-  ) {
-    failed.push(file + ": animated editorial title is missing");
-  }
-  if (
-    !hero.includes('href="#career-highlights"') ||
-    !hero.includes("home-hero-scroll")
-  ) {
-    failed.push(file + ": accessible scroll cue to career section is missing");
-  }
-  if (
-    !hero.includes('href="' + careerLink + '"') ||
-    !hero.includes(language === "fr" ? "/fr/projects" : "/projects") ||
-    !hero.includes("mailto:alix@anneraud.fr")
-  ) {
-    failed.push(file + ": professional, projects or contact CTAs missing");
-  }
-  // The name belongs to the single H1 so the page heading identifies its owner.
-  const h1 = hero.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/);
-  const h1Text = h1
-    ? h1[1]
-        .replace(/<[^>]+>/g, " ")
-        .replace(/\s+/g, " ")
-        .trim()
-    : "";
-  if (!h1Text.includes("Alix ANNERAUD")) {
-    failed.push(file + ": homepage H1 must contain Alix ANNERAUD");
-  }
-  if (!/<em\b[^>]*>[^<]+<\/em>/.test(h1 ? h1[1] : "")) {
-    failed.push(file + ": hero accent line must be set in italic <em>");
-  }
-  if (language === "fr" && /&amp;|&(?!\w+;)/.test(h1 ? h1[1] : "")) {
-    failed.push(file + ": French hero accent line must not use an ampersand");
-  }
-  // WCAG 2.5.3 Label in Name: the scroll link's accessible name must contain
-  // its visible text.
-  const scroll = hero.match(
-    /<a\b(?=[^>]*class="home-hero-scroll")([^>]*)>([\s\S]*?)<\/a>/,
+  const tiles = hero.querySelectorAll(
+    ".orbit-node > .orbit-drift > a.orbit-tile",
   );
-  if (scroll) {
-    const visible = scroll[2]
-      .replace(/<span[^>]*aria-hidden="true"[^>]*>[\s\S]*?<\/span>/g, "")
-      .replace(/<[^>]+>/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
-    const label = scroll[1].match(/aria-label="([^"]*)"/);
-    if (!visible || (label && !label[1].includes(visible))) {
-      failed.push(
-        file + ": scroll link aria-label must contain its visible text",
-      );
+  if (tiles.length !== 19) {
+    failed.push(file + ": expected 19 linked tiles, found " + tiles.length);
+  }
+  const timeline = parse(
+    read(lang === "fr" ? "fr/experiences.html" : "experiences.html"),
+  );
+  const earlier = new Set(
+    experiences.filter((entry) => entry.earlier).map((entry) => entry.id),
+  );
+  const orgIds = [];
+  for (const tile of tiles) {
+    const href = tile.getAttribute("href") ?? "";
+    const label = tile.querySelector(".orbit-label")?.text.trim();
+    if (!label) failed.push(file + ": tile without a visible label " + href);
+    if (tile.getAttribute("aria-label")) {
+      failed.push(file + ": tiles take their name from the visible label");
+    }
+    if (!tile.getAttribute("data-caption")) {
+      failed.push(file + ": tile without a caption " + href);
+    }
+    const anchor = href.match(/^(\/(?:fr\/)?experiences)#(.+)-title$/);
+    if (anchor) {
+      orgIds.push(anchor[2]);
+      if (
+        earlier.has(anchor[2]) ||
+        !timeline.getElementById(anchor[2] + "-title")
+      ) {
+        failed.push(
+          file + ": organization tile must link a visible card: " + href,
+        );
+      }
+      if (
+        tile.querySelector("img") &&
+        tile.querySelector("img").getAttribute("alt") !== ""
+      ) {
+        failed.push(file + ": logo next to its name must have an empty alt");
+      }
+    } else if (!existsSync(resolve(dist, href.replace(/^\//, "") + ".html"))) {
+      failed.push(file + ": tile links a missing page " + href);
     }
   }
-  if (/<img(?:\s|>)/.test(hero) || hero.includes("home-hero-portrait")) {
-    failed.push(file + ": homepage hero must not embed the old pixel portrait");
-  }
-  if (heroStart < 0 || careerStart < 0 || careerStart <= heroStart) {
+  const expectedOrgs = [
+    ...experiences.filter((entry) => entry.homepage).map((entry) => entry.id),
+    "insa-engineering",
+  ];
+  if (orgIds.join() !== expectedOrgs.join()) {
     failed.push(
-      file + ": homepage introduction must come before professional work",
+      file + ": organization tiles must be " + expectedOrgs.join(", "),
     );
+  }
+  for (const { id } of featuredProjects) {
+    if (
+      !tiles.some((tile) => tile.getAttribute("href") === projectUrl(id, lang))
+    ) {
+      failed.push(file + ": missing top project tile " + id);
+    }
+  }
+  const doors = now
+    .querySelectorAll(".home-doors a")
+    .map((a) => a.getAttribute("href"));
+  const expectedDoors = ["/experiences", "/projects", "/projects/xila"].map(
+    (path) => localized(path, lang),
+  );
+  if (doors.join() !== expectedDoors.join()) {
+    failed.push(file + ": doorways must be " + expectedDoors.join(", "));
+  }
+  const projectsMeta = ui[lang]["home.doors.projectsMeta"].replace(
+    "{count}",
+    String(projects.length),
+  );
+  if (!now.text.includes(projectsMeta)) {
+    failed.push(
+      file + ": projects doorway must read " + JSON.stringify(projectsMeta),
+    );
+  }
+  if (!now.querySelector('a[href="mailto:' + siteData.email + '"]')) {
+    failed.push(file + ": contact email link missing");
+  }
+  if (
+    !now.querySelector(
+      'a[href="' + siteData.resumePdf[lang] + '"][target="_blank"]',
+    )
+  ) {
+    failed.push(file + ": resume link missing");
   }
 }
 
@@ -1101,8 +1097,6 @@ for (const file of ["experiences.html", "fr/experiences.html"]) {
   );
   const byId = new Map(projects.map((project) => [project.id, project]));
   for (const [file, lang, expected] of [
-    ["index.html", "en", featuredProjects.length],
-    ["fr/index.html", "fr", featuredProjects.length],
     ["projects.html", "en", projects.length],
     ["fr/projects.html", "fr", projects.length],
   ]) {
@@ -1229,36 +1223,16 @@ for (const file of ["experiences.html", "fr/experiences.html"]) {
       failed.push(file + ": missing grid/list view toggle (list by default)");
     }
   }
-  for (const [file, label] of [
-    ["index.html", "See all " + projects.length + " projects"],
-    ["fr/index.html", "Voir les " + projects.length + " projets"],
-  ]) {
-    const html = read(file);
-    if (!html) continue;
-    const link = parse(html).querySelector(".showcase-all-link");
-    const text = link?.text.replace("→", "").replace(/\s+/g, " ").trim();
-    if (text !== label) {
-      failed.push(file + ": catalogue link must read " + JSON.stringify(label));
-    }
-  }
 }
 
 // Section numbering: every numbered overline reads "NN / Label", and the
 // numbers follow the order of the sections on the page (home: Introduction 00,
-// Experience 01, Projects 02, Xila 03). No overline keeps the old "NN / X" or
+// Now 01). No overline keeps the old "NN / X" or
 // "X / NN" format, and the closing link's overline is in the page language.
 {
   for (const [file, expected, next] of [
-    [
-      "index.html",
-      ["00 / Introduction", "01 / Experience", "02 / Projects", "03 / Xila"],
-      null,
-    ],
-    [
-      "fr/index.html",
-      ["00 / Introduction", "01 / Parcours", "02 / Projets", "03 / Xila"],
-      null,
-    ],
+    ["index.html", ["00 / Introduction", "01 / Now"], null],
+    ["fr/index.html", ["00 / Introduction", "01 / En ce moment"], null],
     ["experiences.html", ["01 / ", "02 / "], "Up next"],
     ["fr/experiences.html", ["01 / ", "02 / "], "À suivre"],
     ["skills.html", ["01 / Expertise", "02 / Communication"], "Up next"],
@@ -1290,9 +1264,7 @@ for (const file of ["experiences.html", "fr/experiences.html"]) {
           JSON.stringify(labels.map(({ text }) => text)),
       );
     }
-    for (const node of root.querySelectorAll(
-      ".eyebrow, .home-hero-overline-index",
-    )) {
+    for (const node of root.querySelectorAll(".eyebrow")) {
       const text = node.text.replace(/\s+/g, " ").trim();
       if (text.includes("\u2014")) {
         failed.push(
@@ -1543,7 +1515,7 @@ for (const [file, lang] of [
     if (!html) continue;
     const lang = file.startsWith("fr/") ? "fr" : "en";
     for (const tag of parse(html).querySelectorAll(
-      "main .editorial-tags li, main .home-experience-tags li, main .resume-inline li",
+      "main .editorial-tags li, main .resume-inline li",
     )) {
       const text = tag.text.replace(/\s+/g, " ").trim();
       if (
@@ -1559,7 +1531,8 @@ for (const [file, lang] of [
 }
 
 // → marks internal links and ↗ external ones: no same-site, anchor or mailto
-// link may show the external arrow.
+// link may show the external arrow. Decorative glyphs (aria-hidden, such as
+// a project symbol) are not link arrows.
 for (const [file] of cases) {
   const html = read(file);
   if (!html) continue;
@@ -1567,7 +1540,11 @@ for (const [file] of cases) {
     const href = link.getAttribute("href");
     if (!/^(?:\/|#|mailto:)/.test(href)) continue;
     if (link.getAttribute("target") === "_blank") continue;
-    if (link.text.includes("↗")) {
+    const visible = link.clone();
+    for (const hidden of visible.querySelectorAll('[aria-hidden="true"]')) {
+      hidden.remove();
+    }
+    if (visible.text.includes("↗")) {
       failed.push(file + ": internal link " + href + " uses the ↗ arrow");
     }
   }

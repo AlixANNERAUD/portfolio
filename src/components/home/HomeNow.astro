@@ -1,0 +1,301 @@
+---
+import { ArrowRight, ArrowUpRight } from "@lucide/astro";
+import Eyebrow from "../ui/Eyebrow.astro";
+import { experiences } from "../../data/experiences.ts";
+import { getProject, projects } from "../../data/projects.ts";
+import { site } from "../../data/site.ts";
+import { localize } from "../../data/types.ts";
+import { localizePath, type Locale } from "../../i18n/locales.ts";
+import { useTranslations } from "../../i18n/ui.ts";
+
+/**
+ * What is going on now (role, studies, Xila), the three ways into the site,
+ * and how to get in touch. Every value comes from the data.
+ */
+interface Props {
+  lang: Locale;
+  /** Position of the section on the page, numbering its overline. */
+  index: number;
+}
+
+const { lang, index } = Astro.props;
+const t = useTranslations(lang);
+const number = (n: number) => new Intl.NumberFormat(lang).format(n);
+
+const role = experiences.find(
+  (entry) => entry.group === "professional" && entry.ongoing,
+);
+const study = experiences.find((entry) => entry.id === "insa-engineering");
+if (!role || !study) throw new Error("Missing current role or studies");
+const xila = getProject("xila");
+
+const now = [
+  {
+    text: t("home.now.role", {
+      role: role.role[lang],
+      company: localize(role.company, lang),
+    }),
+    live: true,
+  },
+  {
+    text: t("home.now.study", {
+      degree: study.role[lang],
+      school: localize(study.company, lang),
+    }),
+    live: false,
+  },
+  {
+    text: t("home.now.building", { project: localize(xila.title, lang) }),
+    live: false,
+  },
+];
+
+const professional = experiences.filter(
+  (entry) => entry.group === "professional",
+).length;
+const doors = [
+  {
+    title: t("home.doors.experience"),
+    meta: t("home.doors.experienceMeta", { count: number(professional) }),
+    href: localizePath("/experiences", lang),
+  },
+  {
+    title: t("home.doors.projects"),
+    meta: t("home.doors.projectsMeta", { count: number(projects.length) }),
+    href: localizePath("/projects", lang),
+  },
+  {
+    title: t("home.doors.xila"),
+    meta: t("home.doors.xilaMeta"),
+    href: localizePath("/projects/xila", lang),
+  },
+];
+---
+
+<section class="home-now container" aria-labelledby="home-now-title">
+  <div class="home-now-top">
+    <div>
+      <Eyebrow index={index}>{t("home.now.eyebrow")}</Eyebrow>
+      <h2 id="home-now-title">{t("home.now.title")}</h2>
+    </div>
+    <ul class="home-now-list" role="list">
+      {now.map((item) => (
+        <li>
+          <span
+            class:list={["home-now-dot", { "home-now-dot--live": item.live }]}
+            aria-hidden="true"
+          />
+          {item.text}
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <nav class="home-doors" aria-label={t("home.doors.label")}>
+    <ul role="list">
+      {doors.map((door) => (
+        <li>
+          <a href={door.href}>
+            <span class="home-door-title">{door.title}</span>
+            <span class="home-door-meta">{door.meta}</span>
+            <ArrowRight class="home-door-arrow" size={22} aria-hidden="true" />
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+
+  <div class="home-contact">
+    <h3>{t("home.contact.title")}</h3>
+    <p>{t("home.contact.text")}</p>
+    <div class="home-contact-links">
+      <a class="home-contact-email" href={`mailto:${site.email}`}>
+        {site.email}
+      </a>
+      <a
+        class="button-link"
+        href={site.resumePdf[lang]}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {t("home.contact.resume")}
+        <ArrowUpRight size={16} aria-hidden="true" />
+        <span class="visually-hidden"> {t("a11y.newTab")}</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .home-now {
+    padding-block: var(--space-2xl) var(--space-3xl);
+    color: var(--color-text);
+  }
+
+  .home-now-top {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-l) var(--space-xl);
+    align-items: end;
+    padding-bottom: var(--space-l);
+  }
+  .home-now-top h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--step-4);
+    font-weight: 400;
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-tight);
+  }
+
+  .home-now-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: var(--tracking-tight);
+    color: var(--color-text-muted);
+  }
+  .home-now-list li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding-block: var(--space-2xs);
+    border-top: 1px solid var(--color-border);
+  }
+  .home-now-list li:last-child {
+    border-bottom: 1px solid var(--color-border);
+  }
+  .home-now-dot {
+    flex: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-border-strong);
+  }
+  .home-now-dot--live {
+    background: var(--color-accent);
+  }
+
+  .home-doors ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--color-text);
+  }
+  .home-doors li {
+    border-bottom: 1px solid var(--color-border);
+  }
+  .home-doors a {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: baseline;
+    gap: var(--space-s) var(--space-m);
+    padding: var(--space-m) var(--space-3xs);
+    color: var(--color-text);
+    text-decoration: none;
+    transition:
+      color var(--dur-fast) var(--ease-out),
+      background-color var(--dur-fast) var(--ease-out);
+  }
+  .home-doors a:hover {
+    color: var(--color-accent);
+  }
+  .home-door-title {
+    font-family: var(--font-display);
+    font-size: var(--step-3);
+    letter-spacing: var(--tracking-heading);
+    line-height: var(--leading-tight);
+  }
+  .home-door-meta {
+    color: var(--color-text-subtle);
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: var(--tracking-tight);
+  }
+  .home-doors :global(.home-door-arrow) {
+    align-self: center;
+    color: var(--color-accent);
+  }
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .home-doors :global(.home-door-arrow) {
+      transition: translate var(--dur-fast) var(--ease-out);
+    }
+    .home-doors a:hover :global(.home-door-arrow) {
+      translate: var(--nudge-x) 0;
+    }
+  }
+
+  .home-contact {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-2xs) var(--space-l);
+    align-items: center;
+    margin-top: var(--space-2xl);
+  }
+  .home-contact h3 {
+    grid-column: 1 / -1;
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--step--2);
+    font-weight: 600;
+    letter-spacing: var(--tracking-overline);
+    text-transform: uppercase;
+  }
+  .home-contact p {
+    margin: 0;
+    color: var(--color-text-muted);
+  }
+  .home-contact-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-s) var(--space-m);
+    grid-row: span 1;
+  }
+  .home-contact-email {
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    letter-spacing: var(--tracking-heading);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+  }
+  .home-contact-email:hover {
+    color: var(--color-accent-hover);
+  }
+
+  @keyframes home-now-pulse {
+    50% {
+      opacity: 0.35;
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .home-now-dot--live {
+      animation: home-now-pulse 2.4s ease-in-out infinite;
+    }
+  }
+
+  @media (max-width: 719px) {
+    .home-now {
+      padding-block: var(--space-xl) var(--space-2xl);
+    }
+    .home-now-top {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .home-doors a {
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: var(--space-3xs) var(--space-s);
+    }
+    .home-door-meta {
+      grid-row: 2;
+    }
+    .home-doors :global(.home-door-arrow) {
+      grid-row: 1 / span 2;
+      grid-column: 2;
+    }
+    .home-contact {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

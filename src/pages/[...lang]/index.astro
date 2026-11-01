@@ -1,10 +1,8 @@
 ---
 import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import HomeHero from "../../components/home/HomeHero.astro";
-import HomeExperience from "../../components/home/HomeExperience.astro";
-import FeaturedProjects from "../../components/home/FeaturedProjects.astro";
-import XilaTopology from "../../components/xila/XilaTopology.astro";
+import HomeOrbit from "../../components/home/HomeOrbit.astro";
+import HomeNow from "../../components/home/HomeNow.astro";
 import { localeStaticPaths } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
 import { personLd, profilePageLd, websiteLd } from "../../lib/seo.ts";
@@ -17,7 +15,7 @@ const { lang } = Astro.props;
 const t = useTranslations(lang);
 
 // Page order is the single source of the section numbers (00, 01, …).
-const sections = [HomeHero, HomeExperience, FeaturedProjects, XilaTopology];
+const sections = [HomeOrbit, HomeNow];
 ---
 
 <BaseLayout

@@ -4,20 +4,18 @@ import Card from "../ui/Card.astro";
 import Tags from "../ui/Tags.astro";
 import type { Experience } from "../../data/experiences.ts";
 import { localize } from "../../data/types.ts";
-import { localizePath, type Locale } from "../../i18n/locales.ts";
+import type { Locale } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
 
 /**
- * One role or degree. `full` is the timeline card (logo, highlights, every
- * tag); `compact` is the homepage summary linking to the full card.
+ * One role or degree on the timeline: logo, highlights and every tag.
  */
 interface Props {
   experience: Experience;
   lang: Locale;
-  variant?: "full" | "compact";
 }
 
-const { experience: entry, lang, variant = "full" } = Astro.props;
+const { experience: entry, lang } = Astro.props;
 const t = useTranslations(lang);
 const titleId = `${entry.id}-title`;
 const role = entry.role[lang];
@@ -26,125 +24,87 @@ const location = entry.location[lang];
 const tags = entry.technologies.map((tag) => localize(tag, lang));
 ---
 
-{variant === "compact" ? (
-  <article
-    class="experience-compact"
-    aria-labelledby={`home-experience-${entry.id}`}
-  >
-    <div class="home-experience-card-top">
-      <span class="home-experience-monogram" aria-hidden="true">
-        {entry.monogram}
-      </span>
-      <span class="home-experience-period">{entry.period[lang]}</span>
+<Card
+  class="career-card"
+  variant="timeline"
+  highlighted={!!entry.ongoing}
+  aria-labelledby={titleId}
+>
+  <div class="career-card-top">
+    <span
+      class:list={[
+        "career-company-mark",
+        { "career-company-mark--dark": entry.logoOnDark },
+      ]}
+      style={
+        entry.logoBackground ? { background: entry.logoBackground } : undefined
+      }
+      aria-hidden="true"
+    >
+      {/* The monogram stays underneath: it shows if the logo fails. */}
+      <span class="career-company-fallback">{entry.monogram}</span>
+      {entry.logo && (
+        <img
+          class="career-company-logo"
+          src={entry.logo}
+          alt=""
+          data-monogram={entry.monogram}
+          width="88"
+          height="60"
+          loading="lazy"
+          decoding="async"
+          referrerpolicy="no-referrer"
+        />
+      )}
+    </span>
+    <div class="career-card-heading">
+      <div class="career-card-heading-top">
+        <p class="career-organization">
+          {entry.companyUrl ? (
+            <a
+              href={entry.companyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {company}
+              <ArrowUpRight size={15} aria-hidden="true" />
+              <span class="visually-hidden"> {t("a11y.newTab")}</span>
+            </a>
+          ) : (
+            <span>{company}</span>
+          )}
+        </p>
+        {entry.ongoing && (
+          <span class="career-current-label">{t("experience.ongoing")}</span>
+        )}
+      </div>
+      <h3 id={titleId}>{role}</h3>
     </div>
-    <p class="home-experience-organization">{company}</p>
-    <h3 id={`home-experience-${entry.id}`}>
-      <a
-        href={`${localizePath("/experiences", lang)}#${titleId}`}
-        aria-label={t("experience.compactLinkLabel", {
-          role,
-          company,
-        })}
-      >
-        {role} <span aria-hidden="true">→</span>
-      </a>
-    </h3>
-    <p class="home-experience-summary">{entry.summary[lang]}</p>
-    <ul class="home-experience-tags" aria-label={t("experience.areas")}>
-      {tags.slice(0, 2).map((tag) => (
-        <li>{tag}</li>
+  </div>
+
+  <div class="career-metadata">
+    <span class="career-period">{entry.period[lang]}</span>
+    {location && (
+      <span class="career-location">
+        <MapPin size={14} aria-hidden="true" /> {location}
+      </span>
+    )}
+  </div>
+
+  <p class="career-summary">{entry.summary[lang]}</p>
+
+  {entry.highlights.length > 0 && (
+    <ul class="career-highlights">
+      {entry.highlights.map((highlight) => (
+        <li>{highlight[lang]}</li>
       ))}
     </ul>
-  </article>
-) : (
-  <Card
-    class="career-card"
-    variant="timeline"
-    highlighted={!!entry.ongoing}
-    aria-labelledby={titleId}
-  >
-    <div class="career-card-top">
-      <span
-        class:list={[
-          "career-company-mark",
-          { "career-company-mark--dark": entry.logoOnDark },
-        ]}
-        style={
-          entry.logoBackground
-            ? { background: entry.logoBackground }
-            : undefined
-        }
-        aria-hidden="true"
-      >
-        {/* The monogram stays underneath: it shows if the logo fails. */}
-        <span class="career-company-fallback">{entry.monogram}</span>
-        {entry.logo && (
-          <img
-            class="career-company-logo"
-            src={entry.logo}
-            alt=""
-            data-monogram={entry.monogram}
-            width="88"
-            height="60"
-            loading="lazy"
-            decoding="async"
-            referrerpolicy="no-referrer"
-          />
-        )}
-      </span>
-      <div class="career-card-heading">
-        <div class="career-card-heading-top">
-          <p class="career-organization">
-            {entry.companyUrl ? (
-              <a
-                href={entry.companyUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {company}
-                <ArrowUpRight size={15} aria-hidden="true" />
-                <span class="visually-hidden"> {t("a11y.newTab")}</span>
-              </a>
-            ) : (
-              <span>{company}</span>
-            )}
-          </p>
-          {entry.ongoing && (
-            <span class="career-current-label">{t("experience.ongoing")}</span>
-          )}
-        </div>
-        <h3 id={titleId}>{role}</h3>
-      </div>
-    </div>
+  )}
 
-    <div class="career-metadata">
-      <span class="career-period">{entry.period[lang]}</span>
-      {location && (
-        <span class="career-location">
-          <MapPin size={14} aria-hidden="true" /> {location}
-        </span>
-      )}
-    </div>
-
-    <p class="career-summary">{entry.summary[lang]}</p>
-
-    {entry.highlights.length > 0 && (
-      <ul class="career-highlights">
-        {entry.highlights.map((highlight) => (
-          <li>{highlight[lang]}</li>
-        ))}
-      </ul>
-    )}
-
-    {tags.length > 0 && (
-      <Tags
-        tags={tags}
-        label={t("experience.technologies")}
-        density="timeline"
-      />
-    )}
-  </Card>
-)}
+  {tags.length > 0 && (
+    <Tags tags={tags} label={t("experience.technologies")} density="timeline" />
+  )}
+</Card>
 
 <script>
   // Progressive enhancement: hide a logo that failed to load so the monogram
@@ -167,94 +127,6 @@ const tags = entry.technologies.map((tag) => localize(tag, lang));
 </script>
 
 <style>
-  /* Compact (homepage) card. */
-  .experience-compact {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    padding: var(--space-m);
-  }
-  .home-experience-card-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-xs);
-    margin-bottom: var(--space-s);
-  }
-  .home-experience-monogram {
-    display: grid;
-    place-items: center;
-    width: 2.6rem;
-    height: 2.6rem;
-    padding: 0 var(--space-3xs);
-    border-radius: var(--radius-m);
-    border: 1px solid var(--color-border);
-    color: var(--color-accent);
-    background: var(--color-surface);
-    font-family: var(--font-mono);
-    font-size: var(--step--1);
-    font-weight: 600;
-    line-height: 1;
-    /* Monograms are initials: "a" for Amazon reads as "A". */
-    text-transform: uppercase;
-  }
-  .home-experience-period {
-    color: var(--color-text-muted);
-    font-family: var(--font-mono);
-    font-size: var(--step--2);
-    font-variant-numeric: tabular-nums;
-    letter-spacing: var(--tracking-tight);
-    text-align: right;
-  }
-  .home-experience-organization {
-    margin: 0 0 var(--space-3xs);
-    color: var(--color-text-muted);
-    font-size: var(--step--1);
-    font-weight: 600;
-  }
-  /* Card titles share the serif display face with the project cards. */
-  .experience-compact h3 {
-    margin: 0 0 var(--space-2xs);
-    font-family: var(--font-display);
-    font-size: var(--step-2);
-    font-weight: 500;
-    line-height: var(--leading-snug);
-    letter-spacing: var(--tracking-heading);
-    text-wrap: balance;
-  }
-  .experience-compact h3 a {
-    color: var(--color-text);
-    text-decoration: none;
-  }
-  .experience-compact h3 a:hover {
-    color: var(--color-accent);
-  }
-  .experience-compact h3 span {
-    color: var(--color-accent);
-    font-size: 0.83em;
-  }
-  .home-experience-summary {
-    margin: 0 0 var(--space-s);
-    color: var(--color-text-muted);
-    font-size: var(--step--1);
-    line-height: var(--leading-body);
-  }
-  .home-experience-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-3xs);
-    margin: auto 0 0;
-    padding: 0;
-    list-style: none;
-  }
-  .home-experience-tags li {
-    padding: var(--space-3xs) var(--space-2xs);
-    border-radius: var(--radius-s);
-    background: var(--color-surface);
-    color: var(--color-text-muted);
-    font-size: var(--step--2);
-  }
-
   /* Full (timeline) card. */
   .career-card-top {
     display: flex;

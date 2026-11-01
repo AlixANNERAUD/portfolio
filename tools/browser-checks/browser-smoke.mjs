@@ -334,278 +334,288 @@ for (const [engineName, engine] of [
       }
     }
 
-    // Immersive typographic homepage, keyboard-friendly scroll navigation and
-    // reduced-motion fallback. The intro is static Astro HTML.
+    // Homepage "orbit": the name as the single H1, a field of linked tiles
+    // that never covers the copy, then the Now section. With JavaScript the
+    // tiles part around the pointer, hovering shows related projects and a
+    // decoded caption, and the chips highlight a category.
     for (const path of ["/", "/fr/"]) {
       try {
         for (const [width, height] of [
           [1440, 900],
+          [1024, 768],
           [768, 900],
           [375, 812],
           [320, 640],
         ]) {
           await page.setViewportSize({ width, height });
           await page.goto(base + path, {
-            waitUntil: "domcontentloaded",
+            waitUntil: "load",
             timeout: 10000,
           });
-          const intro = page.locator(".home-hero");
-          const title = intro.locator("#home-hero-title");
+          const hero = page.locator("section.orbit");
           assert.equal(
-            await intro.count(),
+            await hero.count(),
             1,
             path + " hero should render once",
           );
+          assert.equal(await page.locator("h1").count(), 1, path + " one H1");
           assert.equal(
-            await title.count(),
-            1,
-            path + " must have one typographic title",
+            (await page.locator("#home-title").innerText())
+              .replace(/\s+/g, " ")
+              .trim(),
+            "Alix ANNERAUD",
+            path + " H1 names its owner",
+          );
+          const tiles = hero.locator(".orbit-tile:visible");
+          assert.equal(
+            await tiles.count(),
+            width >= 720 ? 19 : 13,
+            path + " visible tiles at " + width,
           );
           assert.equal(
-            await intro.locator("img").count(),
-            0,
-            path + " should not load the removed pixel portrait",
+            await hero.locator(".orbit-chips").isVisible(),
+            true,
+            path + " chips appear with JavaScript",
           );
-          assert.equal(await intro.locator(".home-hero-title-mask").count(), 2);
-          assert.match(
-            await title.innerText(),
-            /Alix ANNERAUD/,
-            path + " H1 should name its owner",
+          // Wait for the entrance, then check that no tile covers the copy.
+          await page.waitForTimeout(1300);
+          const overlaps = await page.evaluate(() => {
+            const copy = [
+              ...document.querySelectorAll(
+                ".orbit-title-line, .orbit-tagline, .orbit-chips button",
+              ),
+            ]
+              .filter((node) => node.getClientRects().length)
+              .map((node) => node.getBoundingClientRect());
+            return [...document.querySelectorAll(".orbit-tile")]
+              .filter((tile) => tile.getClientRects().length)
+              .filter((tile) => {
+                const t = tile.getBoundingClientRect();
+                return copy.some(
+                  (c) =>
+                    t.left < c.right &&
+                    t.right > c.left &&
+                    t.top < c.bottom &&
+                    t.bottom > c.top,
+                );
+              })
+              .map((tile) => tile.getAttribute("href"));
+          });
+          assert.deepEqual(
+            overlaps,
+            [],
+            path + " tiles cover the copy at " + width,
           );
-          const accent = await title
-            .locator("em")
-            .evaluate((node) => getComputedStyle(node).fontStyle);
-          assert.equal(accent, "italic", path + " accent line is italic");
-          const scrollLink = intro.locator(".home-hero-scroll");
-          const scrollLabel = await scrollLink.getAttribute("aria-label");
-          if (scrollLabel) {
-            const visible = (
-              await scrollLink.locator("span:not([aria-hidden])").innerText()
-            ).trim();
+          if (width < 720) {
+            const small = await page.evaluate(
+              () =>
+                [...document.querySelectorAll(".orbit-tile")]
+                  .filter((tile) => tile.getClientRects().length)
+                  .filter((tile) => {
+                    const r = tile.getBoundingClientRect();
+                    return r.width < 43.5 || r.height < 43.5;
+                  }).length,
+            );
+            assert.equal(small, 0, path + " touch targets under 44px");
+          } else {
+            const fill = await page.evaluate(
+              () =>
+                document.querySelector(".site-header").getBoundingClientRect()
+                  .height +
+                document.querySelector(".orbit").getBoundingClientRect()
+                  .height -
+                window.innerHeight,
+            );
             assert.ok(
-              scrollLabel.includes(visible),
-              path + " scroll aria-label should contain its visible text",
+              fill >= -2,
+              path + " hero fills the viewport (" + fill + ")",
             );
           }
-          // The hero fills exactly what the sticky header leaves.
-          const fill = await page.evaluate(() => {
-            const header = document.querySelector(".site-header");
-            const hero = document.querySelector(".home-hero");
-            return (
-              (header?.getBoundingClientRect().height ?? 0) +
-              (hero?.getBoundingClientRect().height ?? 0) -
-              window.innerHeight
-            );
-          });
-          assert.ok(
-            fill >= -2,
-            path + " header + hero should fill the viewport (gap " + fill + ")",
-          );
           assert.equal(
-            await intro.locator(".home-hero-scroll").getAttribute("href"),
-            "#career-highlights",
-            path + " scroll cue should target career",
-          );
-          assert.equal(
-            await intro.locator(".home-action").count(),
-            3,
-            path + " should preserve professional, project and contact CTAs",
-          );
-
-          const rect = await intro.boundingBox();
-          assert.ok(
-            rect && rect.height >= height - 119,
-            path +
-              " hero should nearly fill the viewport at " +
-              width +
-              "×" +
-              height +
-              " (height=" +
-              rect?.height +
-              ")",
-          );
-          assert.ok(
-            rect.width <= width + 2,
-            path + " hero must not overflow at " + width,
-          );
-          const overflow = await page.evaluate(
-            () => document.documentElement.scrollWidth > window.innerWidth + 2,
-          );
-          assert.equal(
-            overflow,
+            await page.evaluate(
+              () =>
+                document.documentElement.scrollWidth > window.innerWidth + 2,
+            ),
             false,
             path + " horizontal overflow at " + width,
           );
           checked++;
-
           if (width === 1440 || width === 375) {
-            // Capture the final visual state, not a mid-animation text reveal.
-            await page.waitForTimeout(1250);
             await page.screenshot({
               path: resolve(
                 output,
                 engineName +
                   "-" +
                   (path === "/" ? "en" : "fr") +
-                  "-hero-animated-" +
+                  "-orbit-" +
                   width +
                   ".png",
               ),
-              fullPage: false,
               timeout: 15000,
             });
           }
         }
 
+        // Pointer: tiles part around the cursor, then settle once it leaves.
         await page.setViewportSize({ width: 1440, height: 900 });
+        await page.goto(base + path, { waitUntil: "load", timeout: 10000 });
+        await page.waitForTimeout(1300);
+        const core = await page
+          .locator("[data-id=xila] .orbit-glyph")
+          .boundingBox();
+        await page.mouse.move(core.x - 90, core.y + 20, { steps: 4 });
+        await page.mouse.move(core.x - 40, core.y + 30, { steps: 6 });
+        await page.waitForTimeout(150);
+        // Headless Firefox reports no fine pointer: the push is then off.
+        const fine = await page.evaluate(
+          () => matchMedia("(pointer: fine)").matches,
+        );
+        if (fine) {
+          const moved = await page.evaluate(
+            () =>
+              [...document.querySelectorAll(".orbit-node")].filter((node) => {
+                const [x = 0, y = 0] = (node.style.translate || "0px")
+                  .split(" ")
+                  .map(parseFloat);
+                return Math.hypot(x, y) > 1;
+              }).length,
+          );
+          assert.ok(moved > 0, path + " tiles should part around the pointer");
+          const largest = await page.evaluate(() =>
+            Math.max(
+              ...[...document.querySelectorAll(".orbit-node")].map((node) => {
+                const [x = 0, y = 0] = (node.style.translate || "0px")
+                  .split(" ")
+                  .map(parseFloat);
+                return Math.hypot(x, y);
+              }),
+            ),
+          );
+          assert.ok(
+            largest <= 56.5,
+            path + " push is capped (" + largest + ")",
+          );
+        }
+
+        // Hover: related projects light up with connectors, and the
+        // caption decodes to the tile's data.
+        const tile = page.locator("[data-id=xila] a");
+        await page.mouse.move(
+          core.x + core.width / 2,
+          core.y + core.height / 2,
+          {
+            steps: 3,
+          },
+        );
+        await page.waitForTimeout(600);
+        const related = (
+          await page.locator("[data-id=xila]").getAttribute("data-related")
+        ).split(" ");
+        assert.equal(
+          await page.locator(".orbit-links line").count(),
+          related.length,
+          path + " one connector per related project",
+        );
+        assert.equal(
+          await page.locator(".orbit-caption-text").innerText(),
+          await tile.getAttribute("data-caption"),
+          path + " caption decodes to the tile caption",
+        );
+        await page.mouse.move(700, 20, { steps: 4 });
+        await page.waitForTimeout(1500);
+        const settled = await page.evaluate(() =>
+          [...document.querySelectorAll(".orbit-node")].every((node) =>
+            /^(0px( 0px)?)?$/.test(node.style.translate),
+          ),
+        );
+        assert.ok(settled, path + " tiles settle once the pointer leaves");
+        assert.equal(
+          await page.locator(".orbit-links line").count(),
+          0,
+          path + " connectors clear after hover",
+        );
+
+        // Chips: one category highlighted, the others dimmed; "all" resets.
+        await page.locator(".orbit-chips button[data-cat=embedded]").click();
+        assert.equal(
+          await page
+            .locator(".orbit-chips button[data-cat=embedded]")
+            .getAttribute("aria-pressed"),
+          "true",
+        );
+        assert.equal(
+          await page.locator(".orbit-node[data-match]").count(),
+          await page.locator(".orbit-node[data-cat=embedded]").count(),
+        );
+        assert.equal(
+          await page.locator('.orbit-node[data-kind="org"][data-dim]').count(),
+          5,
+          path + " organizations dim under a category",
+        );
+        await page.locator(".orbit-chips button[data-cat=all]").click();
+        assert.equal(await page.locator(".orbit-node[data-dim]").count(), 0);
+
+        // Keyboard: a focused tile rests at its anchor and shows its caption.
+        await page.locator("[data-id=nanoexpr] a").focus();
+        await page.waitForTimeout(500);
+        const rest = await page
+          .locator("[data-id=nanoexpr]")
+          .evaluate((node) => {
+            const [x = 0, y = 0] = (node.style.translate || "0px")
+              .split(" ")
+              .map(parseFloat);
+            return Math.hypot(x, y);
+          });
+        assert.ok(rest < 0.5, path + " a focused tile rests at its anchor");
+        assert.equal(
+          await page.locator(".orbit-caption").getAttribute("data-on"),
+          "",
+          path + " focus shows the caption",
+        );
+
+        // Off screen, the drift pauses.
+        await page.setViewportSize({ width: 1440, height: 500 });
+        await page.evaluate(() =>
+          window.scrollTo(0, document.body.scrollHeight),
+        );
+        await page.waitForFunction(
+          () => document.querySelector(".orbit").hasAttribute("data-paused"),
+          null,
+          { timeout: 3000 },
+        );
+        checked++;
+
+        // Reduced motion: nothing moves, the caption still shows instantly.
         await page.emulateMedia({ reducedMotion: "reduce" });
-        await page.goto(base + path, {
-          waitUntil: "domcontentloaded",
-          timeout: 10000,
-        });
+        await page.goto(base + path, { waitUntil: "load", timeout: 10000 });
         const reduced = await page
-          .locator(".home-hero-title-line")
+          .locator(".orbit-title-line")
           .first()
           .evaluate((node) => ({
             animation: getComputedStyle(node).animationName,
             opacity: getComputedStyle(node).opacity,
           }));
+        assert.equal(reduced.animation, "none", path + " title is static");
+        assert.equal(reduced.opacity, "1", path + " title stays readable");
         assert.equal(
-          reduced.animation,
+          await page
+            .locator(".orbit-drift")
+            .first()
+            .evaluate((node) => getComputedStyle(node).animationName),
           "none",
-          path + " must disable title animation for reduced motion",
+          path + " no drift under reduced motion",
         );
+        await page.locator("[data-id=dera] a").focus();
         assert.equal(
-          reduced.opacity,
-          "1",
-          path + " title remains readable without animation",
-        );
-        checked++;
-
-        // Same-page anchor works with either motion preference.
-        await page.locator(".home-hero-scroll").click();
-        await page.waitForFunction(
-          () =>
-            location.hash === "#career-highlights" &&
-            document
-              .querySelector("#career-highlights")
-              ?.getBoundingClientRect().top <
-              window.innerHeight * 0.65,
-          null,
-          { timeout: 6000 },
+          await page.locator(".orbit-caption-text").innerText(),
+          await page.locator("[data-id=dera] a").getAttribute("data-caption"),
+          path + " caption is instant under reduced motion",
         );
         checked++;
         await page.emulateMedia({ reducedMotion: "no-preference" });
       } catch (error) {
-        failures.push(engineName + " " + path + " immersive hero: " + error);
+        failures.push(engineName + " " + path + " orbit hero: " + error);
         await page.emulateMedia({ reducedMotion: "no-preference" });
-      }
-    }
-
-    // A balanced homepage must show professional experience first, then
-    // multiple projects, with Xila's topology as a clearly labelled deep dive.
-    for (const [path, careerUrl] of [
-      ["/", "/experiences"],
-      ["/fr/", "/fr/experiences"],
-    ]) {
-      try {
-        await page.setViewportSize({ width: 1440, height: 900 });
-        await page.goto(base + path, {
-          waitUntil: "domcontentloaded",
-          timeout: 10000,
-        });
-        const experience = page.locator(".home-experience");
-        const featuredCards = experience.locator(".home-experience-card");
-        assert.equal(
-          await featuredCards.count(),
-          4,
-          path + " must surface four professional roles",
-        );
-        const employers = await featuredCards
-          .locator(".home-experience-organization")
-          .allTextContents();
-        for (const company of [
-          "Memo Bank",
-          "Linkt",
-          "Amazon",
-          "New York University",
-        ]) {
-          assert.ok(
-            employers.includes(company),
-            path + " missing employer: " + company,
-          );
-        }
-        for (const id of ["memo-bank", "linkt", "amazon", "nyu"]) {
-          const link = experience.locator(
-            'a[href="' + careerUrl + "#" + id + '-title"]',
-          );
-          assert.equal(
-            await link.count(),
-            1,
-            path + " role needs a link to its timeline entry",
-          );
-        }
-        const sections = await page.evaluate(() => ({
-          hero: document.querySelector(".home-hero")?.getBoundingClientRect()
-            .top,
-          career: document
-            .querySelector(".home-experience")
-            ?.getBoundingClientRect().top,
-          projects: document
-            .querySelector(".portfolio-showcase")
-            ?.getBoundingClientRect().top,
-          xila: document
-            .querySelector(".xila-topology")
-            ?.getBoundingClientRect().top,
-        }));
-        assert.ok(
-          Object.values(sections).every((value) => typeof value === "number") &&
-            sections.hero < sections.career &&
-            sections.career < sections.projects &&
-            sections.projects < sections.xila,
-          path +
-            " homepage sections are out of order: " +
-            JSON.stringify(sections),
-        );
-        assert.match(
-          await page.locator(".xila-topology-heading").innerText(),
-          /Xila/i,
-        );
-
-        for (const [width, columns] of [
-          [1440, 2],
-          [375, 1],
-        ]) {
-          await page.setViewportSize({ width, height: 900 });
-          const grid = await experience
-            .locator(".home-experience-grid")
-            .evaluate(
-              (el) =>
-                getComputedStyle(el)
-                  .gridTemplateColumns.split(" ")
-                  .filter(Boolean).length,
-            );
-          assert.equal(
-            grid,
-            columns,
-            path + " experience grid columns at " + width,
-          );
-          checked++;
-        }
-        await page.setViewportSize({ width: 1440, height: 900 });
-        await page.screenshot({
-          path: resolve(
-            output,
-            engineName +
-              "-" +
-              (path === "/" ? "home" : "fr-home") +
-              "-career-1440.png",
-          ),
-          fullPage: true,
-          timeout: 15000,
-        });
-      } catch (error) {
-        failures.push(engineName + " " + path + " homepage balance: " + error);
       }
     }
 
@@ -809,7 +819,6 @@ for (const [engineName, engine] of [
     for (const [path, width, selector] of [
       ["/experiences", 1440, ".career-timeline-date"],
       ["/fr/experiences", 390, ".career-period"],
-      ["/", 1440, ".home-experience-period"],
       ["/fr/", 1440, "[data-section-index] .eyebrow__index"],
     ]) {
       try {
@@ -851,7 +860,7 @@ for (const [engineName, engine] of [
     // neighbours' art panels (motion allowed only), and numbers are stable
     // ranks.
     for (const [path, filter] of [
-      ["/", null],
+      ["/projects", null],
       ["/fr/projects", "Bibliothèques"],
     ]) {
       try {
@@ -944,9 +953,8 @@ for (const [engineName, engine] of [
       await page.emulateMedia({ reducedMotion: "no-preference" });
     }
 
-    // Motion audit: with reduced motion requested, nothing animates, hovered
-    // cards, buttons and their arrows do not move, and the Xila topology keeps
-    // its static drawing instead of the WebGL animation.
+    // Motion audit: with reduced motion requested, nothing animates, and
+    // hovered cards, tiles, buttons and their arrows do not move.
     await page.emulateMedia({ reducedMotion: "reduce" });
     for (const path of [
       "/",
@@ -970,23 +978,17 @@ for (const [engineName, engine] of [
         if (path === "/" || path === "/fr/") {
           assert.equal(
             await page
-              .locator(".home-hero-title-line")
+              .locator(".orbit-title-line")
               .first()
               .evaluate((node) => getComputedStyle(node).animationName),
             "none",
             path + " hero lines must not animate",
           );
-          assert.equal(
-            await page.locator(".xila-topology canvas.is-ready").count(),
-            0,
-            path + " Xila topology must stay static",
-          );
         }
         for (const selector of [
           ".showcase-card",
-          ".home-experience-card",
-          ".home-action",
-          ".showcase-all-link",
+          ".orbit-tile",
+          ".home-doors a",
           ".editorial-next a",
           ".resume-action",
         ]) {
@@ -1085,8 +1087,8 @@ for (const [engineName, engine] of [
       });
       const staticPage = await staticContext.newPage();
       for (const [path, cardSelector, minimum] of [
-        ["/", ".showcase-card", 3],
-        ["/", ".home-experience-card", 4],
+        ["/", ".orbit-node:not([data-extra]) .orbit-tile", 13],
+        ["/fr/", ".home-doors a", 3],
         ["/projects", ".showcase-card", 26],
         ["/fr/projects", ".showcase-card", 26],
         ["/experiences", ".career-card", 11],

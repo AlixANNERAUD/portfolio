@@ -9,6 +9,7 @@
 /*
  * Entry motion uses `translate` and a backwards fill, so once it ends the
  * card's own opacity and transform (hover lift, neighbour dimming) apply.
+ * The homepage hero (HomeOrbit.astro) owns its own motion.
  */
 @keyframes portfolio-enter {
   from {
@@ -23,23 +24,6 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  /* HomeHero.astro owns its own staggered typography motion. */
-  .site-home .portfolio-showcase .showcase-card {
-    animation: portfolio-enter var(--dur-slow) var(--ease-out) backwards;
-  }
-
-  .site-home .portfolio-showcase .showcase-card:nth-child(1) {
-    animation-delay: var(--dur-base);
-  }
-
-  .site-home .portfolio-showcase .showcase-card:nth-child(2) {
-    animation-delay: calc(var(--dur-base) + 70ms);
-  }
-
-  .site-home .portfolio-showcase .showcase-card:nth-child(3) {
-    animation-delay: calc(var(--dur-base) + 140ms);
-  }
-
   /* Scroll-driven motion is progressive: other browsers see static cards. */
   @supports (animation-timeline: view()) {
     .portfolio-showcase--catalogue .showcase-card {
