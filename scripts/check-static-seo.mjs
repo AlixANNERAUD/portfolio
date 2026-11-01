@@ -1033,15 +1033,29 @@ for (const [file, professionalLabel, educationLabel] of [
   }
 }
 
-// Experience logos must appear in both generated locales. This is a
-// structural check; browser/network verification of remote assets is separate.
+// Experience logos must appear in both generated locales, every one served
+// from this site (no hotlinking) and present in dist.
+const expectedLogos = experiences.filter((entry) => entry.logo).length;
 for (const file of ["experiences.html", "fr/experiences.html"]) {
-  const html = read(file);
-  if (
-    !html.includes("career-company-logo") ||
-    !html.includes("logo-becquerel-blanc_tournant.jpg")
-  ) {
-    failed.push(file + ": experience company logo markup missing from SSR");
+  const logos = parse(read(file))
+    .querySelectorAll("img.career-company-logo")
+    .map((img) => img.getAttribute("src") ?? "");
+  const external = logos.filter(
+    (src) =>
+      !src.startsWith("/images/logos/") ||
+      !existsSync(resolve(dist, src.slice(1))),
+  );
+  if (logos.length !== expectedLogos || external.length) {
+    failed.push(
+      file +
+        ": expected " +
+        expectedLogos +
+        " self-hosted experience logos, found " +
+        logos.length +
+        (external.length
+          ? "; not self-hosted or missing: " + external.join(", ")
+          : ""),
+    );
   }
 }
 
