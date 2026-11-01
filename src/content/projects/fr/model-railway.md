@@ -1,6 +1,6 @@
 ---
 title: "Réseau ferroviaire miniature"
-description: "Cartes électroniques de détection d'occupation et commande de signalisation pour un réseau H0 numérique."
+description: "Cartes électroniques de détection d’occupation et commande de signalisation pour un réseau H0 numérique."
 ---
 
 # Réseau ferroviaire miniature

@@ -41,7 +41,7 @@ export const experiences: readonly Experience[] = [
     period: { fr: "Sept. 2026 – Août 2027", en: "Sep 2026 – Aug 2027" },
     location: { fr: "Paris, France", en: "Paris, France" },
     summary: {
-      fr: "Ingénierie sécurité dans l'environnement d'une banque.",
+      fr: "Ingénierie sécurité dans l’environnement d’une banque.",
       en: "Security engineering in a banking environment.",
     },
     highlights: [],
@@ -69,7 +69,7 @@ export const experiences: readonly Experience[] = [
       en: "Mont-Saint-Aignan, France",
     },
     summary: {
-      fr: "Diagnostic d'incidents, exploitation réseau et automatisation des outils de support.",
+      fr: "Diagnostic d’incidents, exploitation réseau et automatisation des outils de support.",
       en: "Incident investigation, network operations and support-tool automation.",
     },
     highlights: [
@@ -78,11 +78,11 @@ export const experiences: readonly Experience[] = [
         en: "Investigated FTTH/FTTO, xDSL and 4G/5G connectivity, MPLS VPNs and SIP telephony alongside upstream operators.",
       },
       {
-        fr: "Dépannage d'équipements Cisco, Juniper, MikroTik et Keenetic : routage, VLAN, DHCP et redondance.",
+        fr: "Dépannage d’équipements Cisco, Juniper, MikroTik et Keenetic : routage, VLAN, DHCP et redondance.",
         en: "Troubleshot Cisco, Juniper, MikroTik and Keenetic equipment: routing, VLANs, DHCP and failover.",
       },
       {
-        fr: "Création d'une extension Vue/WXT pour enrichir les tickets et accélérer les diagnostics.",
+        fr: "Création d’une extension Vue/WXT pour enrichir les tickets et accélérer les diagnostics.",
         en: "Built a Vue/WXT browser extension to enrich support tickets and streamline diagnostics.",
       },
     ],
@@ -109,7 +109,7 @@ export const experiences: readonly Experience[] = [
     period: { fr: "Mai – Août 2025", en: "May – Aug 2025" },
     location: { fr: "Madrid, Espagne", en: "Madrid, Spain" },
     summary: {
-      fr: "Modernisation d'un outil interne d'investigation de contenus pour des équipes marketing.",
+      fr: "Modernisation d’un outil interne d’investigation de contenus pour des équipes marketing.",
       en: "Modernized an internal content discovery and investigation tool for marketing teams.",
     },
     highlights: [
@@ -141,11 +141,11 @@ export const experiences: readonly Experience[] = [
     },
     highlights: [
       {
-        fr: "Simulation de la diffusion et exploration d'algorithmes de localisation en présence de bruit.",
+        fr: "Simulation de la diffusion et exploration d’algorithmes de localisation en présence de bruit.",
         en: "Simulated diffusion and explored source-localization algorithms under noisy measurements.",
       },
       {
-        fr: "Prototypage d'acquisition et analyse statistique des données.",
+        fr: "Prototypage d’acquisition et analyse statistique des données.",
         en: "Prototyped data acquisition and statistical analysis.",
       },
     ],
@@ -180,7 +180,7 @@ export const experiences: readonly Experience[] = [
         en: "Collected, cleaned and maintained partner-company and alumni data.",
       },
       {
-        fr: "Appui au suivi administratif et aux campagnes de taxe d'apprentissage.",
+        fr: "Appui au suivi administratif et aux campagnes de taxe d’apprentissage.",
         en: "Supported administrative follow-up and apprenticeship-tax outreach.",
       },
     ],
@@ -203,12 +203,12 @@ export const experiences: readonly Experience[] = [
     period: { fr: "2025", en: "2025" },
     location: { fr: "Rouen, France", en: "Rouen, France" },
     summary: {
-      fr: "Projet d'ingénierie avec des pharmaciens cliniciens pour centraliser les données utiles à la validation pharmaceutique.",
+      fr: "Projet d’ingénierie avec des pharmaciens cliniciens pour centraliser les données utiles à la validation pharmaceutique.",
       en: "Engineering project with clinical pharmacists to centralize information used for pharmaceutical prescription review.",
     },
     highlights: [
       {
-        fr: "Coordination de l'équipe, recueil des besoins et pilotage des livrables.",
+        fr: "Coordination de l’équipe, recueil des besoins et pilotage des livrables.",
         en: "Coordinated the team, requirements and delivery milestones.",
       },
       {
@@ -226,13 +226,13 @@ export const experiences: readonly Experience[] = [
     companyUrl: "https://www.insa-rouen.fr/",
     monogram: "IN",
     role: {
-      fr: "Diplôme d'ingénieur informatique",
+      fr: "Diplôme d’ingénieur informatique",
       en: "Computer Engineering Degree",
     },
     period: { fr: "2021–2027", en: "2021–2027" },
     location: { fr: "Rouen, France", en: "Rouen, France" },
     summary: {
-      fr: "Formation en algorithmique, systèmes d'exploitation, informatique embarquée, réseaux, génie logiciel et intelligence artificielle.",
+      fr: "Formation en algorithmique, systèmes d’exploitation, informatique embarquée, réseaux, génie logiciel et intelligence artificielle.",
       en: "Studies in algorithms, operating systems, embedded computing, networks, software engineering and AI.",
     },
     highlights: [],
@@ -259,7 +259,7 @@ export const experiences: readonly Experience[] = [
     period: { fr: "2022", en: "2022" },
     location: { fr: "Cléon, France", en: "Cléon, France" },
     summary: {
-      fr: "Stage ouvrier d'un mois sur une ligne de production de rotors et de stators.",
+      fr: "Stage ouvrier d’un mois sur une ligne de production de rotors et de stators.",
       en: "One-month production internship on a rotor and stator manufacturing line.",
     },
     highlights: [
@@ -268,7 +268,7 @@ export const experiences: readonly Experience[] = [
         en: "Gained first-hand exposure to an automotive manufacturing environment.",
       },
       {
-        fr: "Découverte des contraintes et de l'organisation du travail sur une ligne de production.",
+        fr: "Découverte des contraintes et de l’organisation du travail sur une ligne de production.",
         en: "Observed the constraints and organization of work on a production line.",
       },
     ],
@@ -289,7 +289,7 @@ export const experiences: readonly Experience[] = [
     period: { fr: "2019", en: "2019" },
     location: { fr: "France", en: "France" },
     summary: {
-      fr: "Expérience d'assistance en communication auprès de Guenola Sahut.",
+      fr: "Expérience d’assistance en communication auprès de Guenola Sahut.",
       en: "Early experience assisting Guenola Sahut with communication work.",
     },
     highlights: [
@@ -338,7 +338,7 @@ export const experiences: readonly Experience[] = [
     period: { fr: "2018", en: "2018" },
     location: { fr: "", en: "" },
     summary: {
-      fr: "Certification d'anglais attestant le niveau B1.",
+      fr: "Certification d’anglais attestant le niveau B1.",
       en: "English-language certification at B1 level.",
     },
     highlights: [

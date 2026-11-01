@@ -1,6 +1,6 @@
 ---
 title: "Robot mouche"
-description: "Robot C++ pilotable en Wi-Fi ou autonome avec suivi de ligne et détection d'obstacles."
+description: "Robot C++ pilotable en Wi-Fi ou autonome avec suivi de ligne et détection d’obstacles."
 ---
 
 # Robot mouche

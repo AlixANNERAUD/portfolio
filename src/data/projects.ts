@@ -38,7 +38,7 @@ export const projects = [
     title: "Xila",
     description: {
       en: "A lightweight operating system for microcontrollers, combining a Rust kernel, WebAssembly applications and a browser demo.",
-      fr: "Un système d'exploitation léger pour microcontrôleurs avec noyau Rust, applications WebAssembly et démonstration dans le navigateur.",
+      fr: "Un système d’exploitation léger pour microcontrôleurs avec noyau Rust, applications WebAssembly et démonstration dans le navigateur.",
     },
     period: { start: "2019", end: "present" },
     group: "personal",
@@ -98,7 +98,7 @@ export const projects = [
     title: { en: "Model railway network", fr: "Réseau ferroviaire miniature" },
     description: {
       en: "Custom electronics for occupancy detection and automated signalling on an H0-scale railway.",
-      fr: "Cartes électroniques de détection d'occupation et commande de signalisation pour un réseau H0 numérique.",
+      fr: "Cartes électroniques de détection d’occupation et commande de signalisation pour un réseau H0 numérique.",
     },
     period: { start: "2019", end: "present" },
     group: "personal",
@@ -118,7 +118,7 @@ export const projects = [
     title: { en: "Connected speaker", fr: "Enceinte connectée" },
     description: {
       en: "An ESP32-powered Wi-Fi control interface for a hi-fi amplifier.",
-      fr: "Commande Wi-Fi d'un amplificateur hi-fi avec microcontrôleur ESP32 et interface web.",
+      fr: "Commande Wi-Fi d’un amplificateur hi-fi avec microcontrôleur ESP32 et interface web.",
     },
     period: { start: "2023" },
     group: "personal",
@@ -158,7 +158,7 @@ export const projects = [
     title: "lvgl_theme_shadcn",
     description: {
       en: "A shadcn/ui-inspired LVGL 9 theme: widget styling, light/dark palettes and customizable embedded interfaces.",
-      fr: "Un thème inspiré de shadcn/ui pour LVGL 9 : widgets, palettes claires/sombres et personnalisation sur microcontrôleurs.",
+      fr: "Un thème inspiré de shadcn/ui pour LVGL 9 : widgets, palettes claires/sombres et personnalisation sur microcontrôleurs.",
     },
     period: { start: "2026", end: "present" },
     group: "library",
@@ -178,7 +178,7 @@ export const projects = [
     title: "nanoexpr",
     description: {
       en: "Heap-free mathematical expression parser and evaluator for embedded Rust with bounded stack usage.",
-      fr: "Parseur et évaluateur d'expressions mathématiques pour Rust embarqué, sans allocation dynamique et avec taille de pile bornée.",
+      fr: "Parseur et évaluateur d’expressions mathématiques pour Rust embarqué, sans allocation dynamique et avec taille de pile bornée.",
     },
     period: { start: "2026", end: "present" },
     group: "library",
@@ -198,7 +198,7 @@ export const projects = [
     title: "nanoaudio",
     description: {
       en: "Allocation-free embedded audio processing: PCM conversion, mixing, ring buffers and codecs using caller-owned memory.",
-      fr: "Bibliothèque audio embarquée sans allocation : traitement PCM, mixage, buffers circulaires et codecs avec buffers fournis par l'appelant.",
+      fr: "Bibliothèque audio embarquée sans allocation : traitement PCM, mixage, buffers circulaires et codecs avec buffers fournis par l’appelant.",
     },
     period: { start: "2026", end: "present" },
     group: "library",
@@ -218,7 +218,7 @@ export const projects = [
     title: "embedded-i18n",
     description: {
       en: "Compile-time localization for embedded Rust: translations stored in firmware, compile-time checks and allocator-free operation.",
-      fr: "Internationalisation compilée dans le firmware Rust : traductions en ROM, validation à la compilation et fonctionnement sans allocateur.",
+      fr: "Internationalisation compilée dans le firmware Rust : traductions en ROM, validation à la compilation et fonctionnement sans allocateur.",
     },
     period: { start: "2026", end: "present" },
     group: "library",
@@ -258,7 +258,7 @@ export const projects = [
     title: "battery-percent",
     description: {
       en: "Battery state-of-charge estimation from discharge curves and interpolation, with ADC filtering, in C99 and no_std Rust.",
-      fr: "Estimation de charge par courbes de décharge et interpolation, avec filtrage ADC : bibliothèque C99 et bindings Rust no_std.",
+      fr: "Estimation de charge par courbes de décharge et interpolation, avec filtrage ADC : bibliothèque C99 et bindings Rust no_std.",
     },
     period: { start: "2026", end: "present" },
     group: "library",
@@ -277,11 +277,11 @@ export const projects = [
     id: "jeanne-hack-2026",
     title: {
       en: "Jeanne d'Hack CTF (University of Rouen)",
-      fr: "Jeanne d'Hack CTF (Université de Rouen)",
+      fr: "Jeanne d’Hack CTF (Université de Rouen)",
     },
     description: {
       en: "Joint first place in the overall ranking of the 2026 Jeanne d'Hack CTF.",
-      fr: "Première place ex æquo au classement général du CTF Jeanne d'Hack 2026.",
+      fr: "Première place ex æquo au classement général du CTF Jeanne d’Hack 2026.",
     },
     period: { start: "2026" },
     group: "competition",
@@ -298,10 +298,10 @@ export const projects = [
   },
   {
     id: "codinsa-2025",
-    title: "Cod'INSA",
+    title: "Cod’INSA",
     description: {
       en: "First place in the 2025 Cod'INSA competitive programming contest.",
-      fr: "Première place au concours de programmation compétitive Cod'INSA 2025.",
+      fr: "Première place au concours de programmation compétitive Cod’INSA 2025.",
     },
     period: { start: "2025" },
     group: "competition",
@@ -320,11 +320,11 @@ export const projects = [
     id: "jeanne-hack-2025",
     title: {
       en: "Jeanne d'Hack CTF (University of Rouen)",
-      fr: "Jeanne d'Hack CTF (Université de Rouen)",
+      fr: "Jeanne d’Hack CTF (Université de Rouen)",
     },
     description: {
       en: "Third place in the overall ranking of the 2025 Jeanne d'Hack CTF.",
-      fr: "Troisième place au classement général du CTF Jeanne d'Hack 2025.",
+      fr: "Troisième place au classement général du CTF Jeanne d’Hack 2025.",
     },
     period: { start: "2025" },
     group: "competition",
@@ -362,10 +362,10 @@ export const projects = [
   },
   {
     id: "deez-nalyzer",
-    title: "Deez'Nalyzer",
+    title: "Deez’Nalyzer",
     description: {
       en: "A Django/Vue application using audio analysis and machine learning to classify music genres.",
-      fr: "Application Django/Vue utilisant l'analyse audio et l'apprentissage automatique pour classifier des genres musicaux.",
+      fr: "Application Django/Vue utilisant l’analyse audio et l’apprentissage automatique pour classifier des genres musicaux.",
     },
     period: { start: "2024" },
     group: "academic",
@@ -384,11 +384,11 @@ export const projects = [
     id: "eogm",
     title: {
       en: "Evidential Occupancy Grid Map (EOGM)",
-      fr: "Cartographie d'occupation évidentielle (EOGM)",
+      fr: "Cartographie d’occupation évidentielle (EOGM)",
     },
     description: {
       en: "Robotic occupancy mapping from onboard sensors, using Dempster-Shafer evidence theory.",
-      fr: "Cartographie d'occupation robotique à partir de capteurs embarqués, basée sur la théorie de Dempster-Shafer.",
+      fr: "Cartographie d’occupation robotique à partir de capteurs embarqués, basée sur la théorie de Dempster-Shafer.",
     },
     period: { start: "2024" },
     group: "academic",
@@ -451,7 +451,7 @@ export const projects = [
     title: "Robot mouche",
     description: {
       en: "A C++ robot combining Wi-Fi remote control, line following and obstacle avoidance.",
-      fr: "Robot C++ pilotable en Wi-Fi ou autonome avec suivi de ligne et détection d'obstacles.",
+      fr: "Robot C++ pilotable en Wi-Fi ou autonome avec suivi de ligne et détection d’obstacles.",
     },
     period: { start: "2023" },
     group: "academic",
@@ -474,7 +474,7 @@ export const projects = [
     },
     description: {
       en: "Machine-learning experiments predicting song danceability from Spotify audio features.",
-      fr: "Expérimentation en machine learning pour prédire la dansabilité d'un titre à partir de données Spotify.",
+      fr: "Expérimentation en machine learning pour prédire la dansabilité d’un titre à partir de données Spotify.",
     },
     period: { start: "2023" },
     group: "academic",
@@ -514,7 +514,7 @@ export const projects = [
     id: "linear-equations",
     title: {
       en: "System of linear equations calculator",
-      fr: "Solveur de systèmes d'équations linéaires",
+      fr: "Solveur de systèmes d’équations linéaires",
     },
     description: {
       en: "A C implementation of Gaussian elimination with partial pivoting for linear systems.",
@@ -542,7 +542,7 @@ export const projects = [
     },
     description: {
       en: "ESP32/MQ sensor acquisition and MQTT pipeline prototype for exploring gas source localization during a research internship.",
-      fr: "Prototype de collecte de mesures de capteurs MQ via ESP32 et MQTT pour explorer la localisation de sources de gaz lors d'un stage de recherche.",
+      fr: "Prototype de collecte de mesures de capteurs MQ via ESP32 et MQTT pour explorer la localisation de sources de gaz lors d’un stage de recherche.",
     },
     period: { start: "2024" },
     group: "academic",
@@ -561,7 +561,7 @@ export const projects = [
     id: "medical-image-deep-learning",
     title: {
       en: "Medical image segmentation",
-      fr: "Segmentation d'images médicales",
+      fr: "Segmentation d’images médicales",
     },
     description: {
       en: "Histopathology tissue and cell segmentation/classification experiments using nnU-Net, CellViT++ and HoVer-Net.",

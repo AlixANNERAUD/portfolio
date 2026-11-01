@@ -1,6 +1,6 @@
 ---
-title: "Deez'Nalyzer"
-description: "Application Django/Vue utilisant l'analyse audio et l'apprentissage automatique pour classifier des genres musicaux."
+title: "Deez’Nalyzer"
+description: "Application Django/Vue utilisant l’analyse audio et l’apprentissage automatique pour classifier des genres musicaux."
 ---
 
 # Deez'Nalyzer

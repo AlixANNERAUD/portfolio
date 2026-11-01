@@ -1,6 +1,6 @@
 ---
 title: "embedded-i18n"
-description: "Internationalisation compilée dans le firmware Rust : traductions en ROM, validation à la compilation et fonctionnement sans allocateur."
+description: "Internationalisation compilée dans le firmware Rust : traductions en ROM, validation à la compilation et fonctionnement sans allocateur."
 ---
 
 # embedded-i18n

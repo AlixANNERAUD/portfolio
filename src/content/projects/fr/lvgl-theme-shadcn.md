@@ -1,6 +1,6 @@
 ---
 title: "lvgl_theme_shadcn"
-description: "Un thème inspiré de shadcn/ui pour LVGL 9 : widgets, palettes claires/sombres et personnalisation sur microcontrôleurs."
+description: "Un thème inspiré de shadcn/ui pour LVGL 9 : widgets, palettes claires/sombres et personnalisation sur microcontrôleurs."
 ---
 
 # lvgl_theme_shadcn

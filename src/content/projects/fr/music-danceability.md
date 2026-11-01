@@ -1,6 +1,6 @@
 ---
 title: "Prédiction de la dansabilité musicale"
-description: "Expérimentation en machine learning pour prédire la dansabilité d'un titre à partir de données Spotify."
+description: "Expérimentation en machine learning pour prédire la dansabilité d’un titre à partir de données Spotify."
 ---
 
 # Prédiction de la dansabilité musicale

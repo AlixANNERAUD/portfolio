@@ -1,6 +1,6 @@
 ---
-title: "Jeanne d'Hack CTF (Université de Rouen)"
-description: "Première place ex æquo au classement général du CTF Jeanne d'Hack 2026."
+title: "Jeanne d’Hack CTF (Université de Rouen)"
+description: "Première place ex æquo au classement général du CTF Jeanne d’Hack 2026."
 ---
 
 # Jeanne d'Hack CTF (Université de Rouen)
@@ -9,7 +9,7 @@ description: "Première place ex æquo au classement général du CTF Jeanne d'H
 
 ## Présentation
 
-Équipe "#JeSuisAlix" : <a href="https://www.jeanne-hack-ctf.org/post/2026/">1ère place au classement général (égalité avec 2 autres équipes)</a>.
+Équipe « #JeSuisAlix » : <a href="https://www.jeanne-hack-ctf.org/post/2026/">1ère place au classement général (égalité avec 2 autres équipes)</a>.
 
 ## Démarche technique
 

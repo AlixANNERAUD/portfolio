@@ -1,6 +1,6 @@
 ---
 title: "nanoexpr"
-description: "Parseur et évaluateur d'expressions mathématiques pour Rust embarqué, sans allocation dynamique et avec taille de pile bornée."
+description: "Parseur et évaluateur d’expressions mathématiques pour Rust embarqué, sans allocation dynamique et avec taille de pile bornée."
 ---
 
 # nanoexpr

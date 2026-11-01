@@ -14,6 +14,7 @@ import { site as siteData } from "../src/data/site.ts";
 import { skillDomains } from "../src/data/skills.ts";
 import { formatPeriod } from "../src/lib/format.ts";
 import { ui } from "../src/i18n/ui.ts";
+import { findFrenchTypographyIssues } from "../src/lib/rehype-french-typography.mjs";
 
 /**
  * Build-output smoke tests for the bilingual Astro site.
@@ -1286,6 +1287,25 @@ for (const [file] of cases) {
     if (size > MAX_SCRIPT_BYTES) {
       failed.push(file + ": client script is " + size + " bytes (> 20 KB)");
     }
+  }
+}
+
+// French pages read as French: every visible text outside code follows the
+// typography rules (Markdown bodies via the rehype plugin, UI strings and
+// data via validate-portfolio).
+for (const file of new Set(
+  cases.map(([file]) => file).filter((file) => file.startsWith("fr/")),
+)) {
+  const html = read(file);
+  if (!html) continue;
+  const body = parse(html).querySelector("body");
+  for (const skipped of body.querySelectorAll(
+    "script, style, code, pre, kbd, samp, svg, template",
+  )) {
+    skipped.remove();
+  }
+  for (const issue of new Set(findFrenchTypographyIssues(body.text))) {
+    failed.push(file + ": French typography: " + issue);
   }
 }
 

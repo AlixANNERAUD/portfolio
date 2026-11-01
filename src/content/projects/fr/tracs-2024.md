@@ -9,7 +9,7 @@ description: "Participation au challenge TRACS de la DGSE, avec une 36e place au
 
 ## Présentation
 
-Équipe "Les Schtroumpfs" : <a href="https://tracs.viarezo.fr/edition_results/show_student_ranking/2024/">36ème place au classement général</a>.
+Équipe « Les Schtroumpfs » : <a href="https://tracs.viarezo.fr/edition_results/show_student_ranking/2024/">36ème place au classement général</a>.
 
 ## Démarche technique
 

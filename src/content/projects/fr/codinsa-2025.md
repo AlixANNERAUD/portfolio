@@ -1,6 +1,6 @@
 ---
-title: "Cod'INSA"
-description: "Première place au concours de programmation compétitive Cod'INSA 2025."
+title: "Cod’INSA"
+description: "Première place au concours de programmation compétitive Cod’INSA 2025."
 ---
 
 # Cod'INSA

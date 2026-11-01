@@ -1,6 +1,6 @@
 ---
 title: "nanoaudio"
-description: "Bibliothèque audio embarquée sans allocation : traitement PCM, mixage, buffers circulaires et codecs avec buffers fournis par l'appelant."
+description: "Bibliothèque audio embarquée sans allocation : traitement PCM, mixage, buffers circulaires et codecs avec buffers fournis par l’appelant."
 ---
 
 # nanoaudio

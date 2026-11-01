@@ -9,6 +9,10 @@ import {
 } from "../src/data/projects.ts";
 import { technologies } from "../src/data/technologies.ts";
 import { experiences } from "../src/data/experiences.ts";
+import { skillDomains, spokenLanguages } from "../src/data/skills.ts";
+import { site } from "../src/data/site.ts";
+import { ui } from "../src/i18n/ui.ts";
+import { findFrenchTypographyIssues } from "../src/lib/rehype-french-typography.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -251,5 +255,82 @@ if (
 ) {
   throw new Error(
     "Exactly four professional roles must be flagged `homepage`.",
+  );
+}
+
+// French typography. Markdown bodies are typeset at build time by
+// src/lib/rehype-french-typography.mjs (verify:static checks the result), but
+// plain strings never go through it: the UI dictionary, data `Localized.fr`
+// values and frontmatter must already be correct. Bodies must still use « »
+// rather than English quotes, whose pairing the plugin can only guess.
+const typographyIssues = [];
+function checkFrench(where, text) {
+  for (const issue of findFrenchTypographyIssues(text)) {
+    typographyIssues.push(`${where}: ${issue} in ${JSON.stringify(text)}`);
+  }
+}
+
+for (const [key, value] of Object.entries(ui.fr))
+  checkFrench(`ui.fr.${key}`, value);
+
+/** Visits every `{ en, fr }` value in the data and checks its French strings. */
+function checkLocalized(where, value) {
+  if (typeof value !== "object" || value === null) return;
+  const keys = Object.keys(value);
+  if (
+    !Array.isArray(value) &&
+    keys.length === 2 &&
+    "en" in value &&
+    "fr" in value
+  ) {
+    for (const text of [value.fr].flat(Infinity)) {
+      if (typeof text === "string") checkFrench(where + ".fr", text);
+    }
+    return;
+  }
+  for (const key of keys) checkLocalized(`${where}.${key}`, value[key]);
+}
+checkLocalized("projects", projects);
+checkLocalized("experiences", experiences);
+checkLocalized("skillDomains", skillDomains);
+checkLocalized("spokenLanguages", spokenLanguages);
+checkLocalized("site", site);
+
+const frenchMarkdown = [
+  ...readdirSync(join(root, "src", "content", "projects", "fr")).map((file) =>
+    join("src", "content", "projects", "fr", file),
+  ),
+  join("src", "content", "legal", "fr.md"),
+].filter((file) => /\.mdx?$/.test(file));
+for (const file of frenchMarkdown) {
+  const source = readFileSync(join(root, file), "utf8");
+  const [, frontmatter = "", body = source] =
+    source.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/) ?? [];
+  for (const [, key, raw] of frontmatter.matchAll(
+    /^(title|description): (.*)$/gm,
+  )) {
+    const quoted = raw.match(/^"(.*)"$/) ?? raw.match(/^'(.*)'$/);
+    const value = quoted
+      ? quoted[1].replace(/\\"/g, '"').replace(/''/g, "'")
+      : raw;
+    checkFrench(`${file} ${key}`, value);
+  }
+  // Prose only: no code, MDX imports, HTML/JSX tags or link targets.
+  const prose = body
+    .replace(/^(```|~~~)[\s\S]*?^\1/gm, "")
+    .replace(/`[^`\n]*`/g, "")
+    .replace(/^(?:import|export) .*$/gm, "")
+    .replace(/<[^>]*>/g, "")
+    .replace(/\]\([^)]*\)/g, "]");
+  for (const [line] of prose.matchAll(/^.*["“”].*$/gm)) {
+    typographyIssues.push(
+      `${file}: use « » instead of English quotes in ${JSON.stringify(line.trim())}`,
+    );
+  }
+}
+if (typographyIssues.length > 0) {
+  throw new Error(
+    "French typography (U+202F before ; ! ?, U+00A0 before : and inside « », 1re/3e ordinals):\n" +
+      typographyIssues.join("\n"),
   );
 }

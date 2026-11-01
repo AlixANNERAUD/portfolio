@@ -1,6 +1,6 @@
 ---
 title: "Enceinte connectée"
-description: "Commande Wi-Fi d'un amplificateur hi-fi avec microcontrôleur ESP32 et interface web."
+description: "Commande Wi-Fi d’un amplificateur hi-fi avec microcontrôleur ESP32 et interface web."
 ---
 
 # Enceinte connectée

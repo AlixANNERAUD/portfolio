@@ -1,6 +1,6 @@
 ---
-title: "Jeanne d'Hack CTF (Université de Rouen)"
-description: "Troisième place au classement général du CTF Jeanne d'Hack 2025."
+title: "Jeanne d’Hack CTF (Université de Rouen)"
+description: "Troisième place au classement général du CTF Jeanne d’Hack 2025."
 ---
 
 # Jeanne d'Hack CTF (Université de Rouen)
@@ -9,7 +9,7 @@ description: "Troisième place au classement général du CTF Jeanne d'Hack 2025
 
 ## Présentation
 
-Équipe "Les Schtroumpfs" : <a href="https://www.jeanne-hack-ctf.org/post/2025/">3ème place au classement général</a>.
+Équipe « Les Schtroumpfs » : <a href="https://www.jeanne-hack-ctf.org/post/2025/">3ème place au classement général</a>.
 
 ## Démarche technique
 
