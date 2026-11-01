@@ -1,3 +1,0 @@
-# [alix.anneraud.fr](https://alix.anneraud.fr)
-
-This repository contains the source code of my personal website. It is built with [VitePress](https://vitepress.dev/). This website is continuously deployed on GitHub Pages using GitHub Actions. When the deployment occur, it also compile the PDF version of [my resume](https://github.com/AlixANNERAUD/Resume).

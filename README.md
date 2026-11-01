@@ -1,6 +1,6 @@
 # Alix ANNERAUD - Portfolio
 
-**From kernel to browser.** Software engineering · Rust systems · Embedded software · Security
+**Software, systems & security.** Software engineering · Systems · Security
 
 [Live portfolio](https://alix.anneraud.fr/) · [Projects](https://alix.anneraud.fr/projects) · [Français](./README.fr.md)
 
@@ -10,8 +10,8 @@ A bilingual, statically generated engineering portfolio built entirely with **As
 
 - **Astro 7** generates static HTML, page layouts, routes and localized metadata.
 - **Astro components + TypeScript** render the whole UI. Small module `<script>`s add the project filters, the earlier-roles toggle, the logo fallback, the opt-in Xila browser demo and the optional WebGL architecture visualization; without JavaScript, all content stays visible. There is no client framework.
-- **MDX** embeds Astro components (architecture diagrams, the Xila demo) in the three detailed engineering case studies.
-- **Scoped Astro CSS** on top of shared design tokens in `src/styles/` provides the responsive editorial UI.
+- **MDX** embeds Astro components (architecture diagrams, the Xila demo) in the Xila, Infrastructure and Mini Train Store case studies.
+- **Scoped Astro CSS** on top of the design tokens in `src/styles/tokens.css` provides the responsive editorial UI. There is no CSS framework.
 - **`src/i18n/ui.ts`** is the typed EN/FR dictionary for every UI string.
 - **GitHub Pages** serves `dist/`; no backend or runtime server is required.
 
@@ -19,54 +19,65 @@ A bilingual, statically generated engineering portfolio built entirely with **As
 
 ```sh
 npm ci
-npm run dev              # Astro development server
-npm run validate:portfolio
-npm run build            # Static output: dist/
-npm run verify:static    # Route / SEO / content smoke tests
-npm run preview
+npm run dev       # Astro development server
+npm run check     # format, types, unit tests, validation, build, static checks, snapshot
+npm run preview   # serve the built dist/
 ```
 
-Run `npm run check` (format, types, validation, build and static verification) before merging.
+`npm run check` runs, in order: `format:check` (Prettier), `check:types` (`astro check`), `test:unit`, `validate:portfolio`, `build`, `verify:static` and the comparison of the built pages and sitemap with `scripts/reference/dist-snapshot.json`. Run it before every commit; CI runs the same command.
+
+The optional browser smoke test (Playwright) lives in `tools/browser-checks/`: run `npm run preview`, then `npm install` and `TEST_BASE_URL=<preview URL> npm test` in that folder.
 
 ## Project structure
 
 ```text
-astro.config.mjs          Static site, .html routes, MDX/sitemap integrations, fonts
+astro.config.mjs          Static output with .html files, MDX, sitemap, fonts, Markdown plugins
 src/
+  pages/
+    [...lang]/            Every page once, generated for / (English) and /fr/ (French):
+                          index, projects, experiences, skills, resume, legal-notice, projects/[slug]
+    404.astro
+  layouts/
+    BaseLayout.astro      HTML shell: head, header, footer, JSON-LD
+    ProjectLayout.astro   Project page: breadcrumb, title, meta line, body, related and next projects
   components/
     ui/                   Editorial primitives: Hero, SectionHeading, Card, Tags, NextLink, Eyebrow
-    home/                 Homepage hero, experience overview, featured projects
+    home/                 Homepage introduction, experience overview, featured projects
     experience/           ExperienceCard and ExperienceTimeline
-    projects/             ProjectCard and the filterable ProjectCatalogue
-    skills/ xila/ mdx/ resume/ site/   Page sections, MDX components, site shell
-  content.config.ts       Typed Astro content collection
+    projects/             ProjectCard, ProjectCatalogue (filterable), Breadcrumb, RelatedProjects
+    resume/               ResumeSummary (HTML summary) and PdfEmbed
+    skills/ xila/ mdx/    Page sections and MDX components
+    site/                 SiteHead, SiteHeader, SiteFooter, ThemeToggle, JsonLd
+  content.config.ts       Typed project collection
   content/
-    projects/en/          26 English Markdown / MDX case studies
-    projects/fr/          26 French Markdown / MDX case studies
-    legal/                Bilingual legal notice + third-party logo credits
-  data/
-    projects.ts           Project metadata and derived rankings
-    experiences.ts        Work and education timeline
-    skills.ts             Evidence-backed skills and languages
+    projects/{en,fr}/     27 projects, one Markdown / MDX page per locale
+    legal/{en,fr}.md      Legal notice and logo credits
+  data/                   projects, experiences, skills, technologies (tags), site identity, shared types
   i18n/                   Locales and the typed UI dictionary (ui.ts)
-  lib/                    Formatting (periods, plurals) and the Xila topology
-  layouts/BaseLayout.astro  HTML shell, navigation, theme, SEO and language alternates
-  pages/                 English routes at /, French routes under /fr/
-  styles/                Design tokens, base styles, prose and motion
-public/                  Images, CNAME and robots.txt
-scripts/                 Content and generated-HTML validation
+  lib/                    seo.ts (JSON-LD), Markdown plugins (project title, French typography),
+                          formatting, Xila topology
+  styles/                 tokens.css (design tokens), base, prose and motion styles
+public/                   Images (including self-hosted logos), CNAME, robots.txt
+scripts/                  Source validation, built-HTML checks, snapshot, unit tests
+tools/browser-checks/     Playwright smoke test
 ```
 
-**Routes:** English pages appear at the root; French pages under `/fr/`. Existing `/projects/<id>` URLs and the generated `/projects/<id>.html` files remain stable with `build.format = "preserve"`. Every project has a dedicated page in both languages. Removed archive routes stay removed.
+**Routes:** English pages are at the root and French pages under `/fr/`. `build.format = "preserve"` writes `dist/<page>.html`, so `/projects/<id>` URLs stay stable. Every project has a page in both languages, with canonical and `hreflang` links.
 
-**Homepage:** lead with a professional overview (Memo Bank, Linkt, Amazon, NYU), then the selected Xila / Infrastructure / Mini Train Store projects; keep the Xila architecture diagram as an explicitly labelled technical deep dive below the portfolio cards. This section is statically rendered: a static SVG is always present, and a module script swaps in the WebGL animation once it is in view, when WebGL2 is available and motion is allowed.
+**Structured data:** every indexable page has a single JSON-LD `@graph` built by `src/lib/seo.ts`; the Person and WebSite nodes keep the same `@id` in both languages.
 
-**Content editing:** Add metadata to [`projects.ts`](./src/data/projects.ts) and one file per locale under `src/content/projects/{en,fr}/`. Use `.mdx` only when a component is needed (`ArchitectureFlow`, `XilaBrowserDemo`); both are Astro components, and the demo only loads its iframe after a click. Links and project ranking remain data-driven.
+**French typography:** French Markdown is typeset at build time by `src/lib/rehype-french-typography.mjs` (no-break spaces, « » quotes, ordinals). UI strings and data are not processed, so `validate:portfolio` checks that they are already correct.
 
-**UI editing:** Reuse the primitives in `src/components/ui/` (`Hero`, `SectionHeading`, `Card`, `Tags`, `NextLink`, `Eyebrow`) rather than duplicating their styles. Add every UI string to `src/i18n/ui.ts` in both languages. Interactivity is a progressive-enhancement `<script>` inside the component; do not add a client framework.
+**Content editing:** add metadata to [`projects.ts`](./src/data/projects.ts) and one page per locale under `src/content/projects/{en,fr}/`, with a `title`, a `description` of 120 to 160 characters and one H1. Use `.mdx` only when a component is needed (`ArchitectureFlow`, `XilaBrowserDemo`). Tags come from `technologies.ts`.
 
-**Deployment:** `.github/workflows/ci.yml` checks content/build/SEO, and `.github/workflows/deploy.yml` publishes `dist/` to GitHub Pages on pushes to `main`.
+**UI editing:** reuse the primitives in `src/components/ui/` and the tokens in `src/styles/tokens.css`. Add every UI string to `src/i18n/ui.ts` in both languages. Interactivity is a progressive-enhancement `<script>` inside the component; do not add a client framework.
+
+**Deployment:** `.github/workflows/ci.yml` runs `npm run check`, and `.github/workflows/deploy.yml` publishes `dist/` to GitHub Pages on pushes to `main`.
 
 ## External services
 
-The main site is fully static. Umami analytics is loaded from `s.anneraud.fr`; the Xila browser demo is on a separate origin and only mounted after a click. Third-party logos remain attributed in the legal notices and may fall back to readable initials.
+The site is fully static. Umami analytics is loaded from `s.anneraud.fr`; the Xila browser demo is served from another origin and only loads after a click. Logos with a compatible licence are self-hosted; the others are loaded from the organizations' websites. All are credited in the legal notice and fall back to readable initials.
+
+## License
+
+The source code is released under the [MIT License](./License).
