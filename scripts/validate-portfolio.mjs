@@ -289,14 +289,7 @@ function readProjectPage(lang, id) {
 // limitations" section, and a team size for every academic project.
 // Projects not yet rewritten are listed in PENDING_EDITORIAL; each content
 // batch removes its ids until the list is empty. `--strict` ignores the list.
-const PENDING_EDITORIAL = new Set([
-  "huffman",
-  "robot-mouche",
-  "music-danceability",
-  "linear-equations",
-  "odor-localization",
-  "medical-image-deep-learning",
-]);
+const PENDING_EDITORIAL = new Set([]);
 const SCOPE_HEADING_ALLOWED = new Set([
   "odor-localization",
   "music-danceability",

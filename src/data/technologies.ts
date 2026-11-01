@@ -68,6 +68,7 @@ const technologyLabels: Partial<Record<Technology, Localized>> = {
   Algorithmique: { en: "Algorithms", fr: "Algorithmique" },
   Battery: { en: "Battery", fr: "Batterie" },
   Capteurs: { en: "Sensors", fr: "Capteurs" },
+  "Deep Learning": { en: "Deep learning", fr: "Apprentissage profond" },
   CLI: { en: "CLI", fr: "Ligne de commande" },
   Électronique: { en: "Electronics", fr: "Électronique" },
   Parser: { en: "Parser", fr: "Analyseur syntaxique" },
