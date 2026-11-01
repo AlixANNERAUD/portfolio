@@ -1,20 +1,23 @@
 ---
-title: "ITI Aventure"
-description: "Jeu de rôle textuel Java appliquant programmation objet et patrons de conception."
+title: "ITI Aventure : un jeu d’aventure en Java"
+description: "Un jeu d’aventure textuel en Java 21, réalisé à deux à l’INSA Rouen Normandie : pièces, portes verrouillées, clés et monstres, avec des mondes décrits en texte."
 ---
 
-# ITI Aventure
-
-> Jeu de rôle textuel Java appliquant programmation objet et patrons de conception.
+# ITI Aventure : un jeu d’aventure textuel orienté objet en Java
 
 ## Présentation
 
-Un jeu de rôle textuel développé en Java, appliquant les principes de la POO à travers des hiérarchies d'héritage pour les personnages et les objets, un système d'événements modulaire et des patrons de conception tels que Strategy et Observer.
+ITI Aventure est un jeu d’aventure textuel qui se joue dans le terminal. Nous l’avons écrit en Java, en binôme, pour le cours « Programmation avancée et Java » de l’INSA Rouen Normandie, en 2024. Le joueur parcourt un monde de pièces reliées par des portes, dont certaines sont verrouillées, prend et pose des objets, ouvre des portes et des coffres, tandis que des monstres errent de pièce en pièce. La partie se termine par une victoire ou une défaite dès qu’une de ses conditions de fin est remplie.
 
-## Démarche technique
+## Choix techniques
 
-L'intérêt pédagogique est la décomposition d'un jeu textuel en objets, événements et responsabilités cohérentes. Les patrons Strategy et Observer permettent de faire évoluer les règles sans concentrer toute la logique dans une unique classe.
+- **Une hiérarchie de classes pour le monde.** Chaque élément du monde est une entité au nom unique : objets (clés, serrures, coffres, pied-de-biche), éléments de structure (pièces et portes) et êtres vivants (le joueur humain et les monstres). Des interfaces ajoutent des comportements : `Activable` pour ce qui s’ouvre, éventuellement avec un objet, et `Executable` pour ce qui agit à chaque tour.
+- **Des commandes résolues par réflexion.** Une commande saisie par le joueur, comme `Franchir Porte1`, est associée par réflexion Java à la méthode du joueur qui porte le même nom, `commandeFranchir`. Ajouter une commande revient à ajouter une méthode, sans table de correspondance à maintenir.
+- **Une simulation au tour par tour.** À chaque tour, le simulateur recueille la commande du joueur, puis exécute toutes les entités actives : le joueur applique sa commande, et chaque monstre franchit une porte ouverte au hasard, perd un point de vie et échange ses objets contre ceux de la pièce.
+- **Des mondes décrits dans un fichier texte.** Un fichier de description liste les pièces, les portes, les serrures, les clés, le joueur et les conditions de fin, et le simulateur construit le monde à partir de lui. Les conditions de fin, comme atteindre une pièce, posséder certains objets, mourir ou une combinaison de plusieurs d’entre elles, sont des sous-classes d’une même classe abstraite.
+- **Sauvegarde et reprise.** Le monde et ses conditions de fin sont enregistrés par sérialisation Java, et le menu principal permet de les recharger.
+- **Des erreurs sous forme d’exceptions, testées avec JUnit.** Une action impossible, comme franchir une porte fermée ou utiliser un objet que le joueur ne possède pas, lève une exception dédiée. Une suite JUnit couvre chaque paquetage.
 
-## Portée et limites
+## Explorer le projet
 
-Travail réalisé dans un cadre académique ou de recherche, pouvant être collectif. Il illustre une démarche d'ingénierie ou une expérimentation et n'est pas présenté comme un produit commercial déployé.
+- [Code source](https://github.com/AlixANNERAUD/iti_aventure) : sources Java, tests JUnit et scripts de compilation.

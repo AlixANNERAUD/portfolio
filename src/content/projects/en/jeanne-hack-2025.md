@@ -1,20 +1,20 @@
 ---
-title: "Jeanne d'Hack CTF (University of Rouen)"
-description: "Third place in the overall ranking of the 2025 Jeanne d'Hack CTF."
+title: "Jeanne d'Hack CTF 2025: third place"
+description: "Third place in the overall ranking of the 2025 Jeanne d'Hack CTF, a cybersecurity competition at the University of Rouen, with the team Les Schtroumpfs."
 ---
 
-# Jeanne d'Hack CTF (University of Rouen)
-
-> Third place in the overall ranking of the 2025 Jeanne d'Hack CTF.
+# Jeanne d'Hack CTF 2025: third place overall
 
 ## Overview
 
-Team "Les Schtroumpfs": <a href="https://www.jeanne-hack-ctf.org/post/2025/">3rd place in the general ranking</a>.
+At the 2025 Jeanne d'Hack CTF, a cybersecurity competition held at the University of Rouen, our team "Les Schtroumpfs" finished third in the overall ranking.
 
-## Engineering approach
+## Context
 
-This entry documents progress in security challenges through problem analysis, practical exercises and teamwork. The cited placement belongs to the 2025 CTF edition.
+In a capture the flag (CTF) competition, teams solve computer security challenges. Each solved challenge reveals a secret string, the flag, which earns points. The ranking rewards the whole team, so this placement is a collective result.
 
-## Scope and limitations
+I came back for the next edition under the team name "#JeSuisAlix", which tied for first place.
 
-Team competition entry: the collective result is reported as published by the organizer. This page does not assume which challenges were individually solved.
+## Explore the result
+
+- [Results of the 2025 edition](https://www.jeanne-hack-ctf.org/post/2025/) on the organizers' site

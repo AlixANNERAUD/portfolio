@@ -29,7 +29,7 @@ const programmingLanguages: Partial<Record<Technology, string>> = {
   C: "C",
   C99: "C",
   "C++": "C++",
-  "Free pascal": "Free Pascal",
+  "Free Pascal": "Free Pascal",
   Java: "Java",
   JavaScript: "JavaScript",
   Python: "Python",

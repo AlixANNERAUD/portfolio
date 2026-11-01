@@ -290,15 +290,9 @@ function readProjectPage(lang, id) {
 // Projects not yet rewritten are listed in PENDING_EDITORIAL; each content
 // batch removes its ids until the list is empty. `--strict` ignores the list.
 const PENDING_EDITORIAL = new Set([
-  "jeanne-hack-2026",
-  "codinsa-2025",
-  "jeanne-hack-2025",
-  "tracs-2024",
-  "iti-adventure",
   "huffman",
   "robot-mouche",
   "music-danceability",
-  "insatram",
   "linear-equations",
   "odor-localization",
   "medical-image-deep-learning",

@@ -1,20 +1,18 @@
 ---
-title: "Cod’INSA"
-description: "Première place au concours de programmation compétitive Cod’INSA 2025."
+title: "Cod’INSA 2025 : victoire de l’INSA Rouen"
+description: "Première place au classement général de Cod’INSA 2025, un concours de programmation par équipes qui récompense des solutions algorithmiques rapides et justes."
 ---
 
-# Cod'INSA
-
-> Première place au concours de programmation compétitive Cod'INSA 2025.
+# Cod’INSA 2025 : première place au classement général
 
 ## Présentation
 
-Équipe INSA Rouen : <a href="https://codinsa.org/static/past">1ère place au classement général</a>.
+J’ai fait partie de l’équipe de l’INSA Rouen qui a remporté Cod’INSA 2025, à la première place du classement général.
 
-## Démarche technique
+## Contexte
 
-Ce concours mesure la capacité d'une équipe à concevoir rapidement des solutions algorithmiques correctes. Le résultat témoigne de compétences en raisonnement, programmation et collaboration plutôt que d'un produit logiciel exploité.
+Cod’INSA est un concours de programmation par équipes : il mesure la capacité d’une équipe à concevoir rapidement des solutions algorithmiques correctes et à les programmer. Comme pour les autres compétitions de cette rubrique, ce classement est un résultat collectif.
 
-## Portée et limites
+## Consulter le résultat
 
-Participation en équipe à une compétition : le résultat collectif est cité tel qu'il est publié par l'organisateur. Cette fiche ne présume pas du détail des épreuves résolues individuellement.
+- [Éditions passées de Cod’INSA et leurs résultats](https://codinsa.org/static/past)

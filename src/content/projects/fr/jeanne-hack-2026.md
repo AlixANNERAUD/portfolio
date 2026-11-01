@@ -1,20 +1,20 @@
 ---
-title: "Jeanne d’Hack CTF (Université de Rouen)"
-description: "Première place ex æquo au classement général du CTF Jeanne d’Hack 2026."
+title: "Jeanne d’Hack CTF 2026 : 1re place ex æquo"
+description: "Première place ex æquo avec deux autres équipes au classement général du CTF Jeanne d’Hack 2026, une compétition de cybersécurité à l’Université de Rouen."
 ---
 
-# Jeanne d'Hack CTF (Université de Rouen)
-
-> Première place ex æquo au classement général du CTF Jeanne d'Hack 2026.
+# Jeanne d’Hack CTF 2026 : première place ex æquo au classement général
 
 ## Présentation
 
-Équipe « #JeSuisAlix » : <a href="https://www.jeanne-hack-ctf.org/post/2026/">1ère place au classement général (égalité avec 2 autres équipes)</a>.
+Au CTF Jeanne d’Hack 2026, une compétition de cybersécurité organisée à l’Université de Rouen, notre équipe « #JeSuisAlix » a terminé première du classement général, à égalité avec deux autres équipes.
 
-## Démarche technique
+## Contexte
 
-L'objectif était de résoudre, en équipe et sous contrainte de temps, des épreuves de sécurité informatique. Le classement est un résultat collectif vérifiable ; il ne représente pas un logiciel distribué ou une bibliothèque réutilisable.
+Dans un CTF (« capture the flag », la capture du drapeau), les équipes résolvent des épreuves de sécurité informatique en temps limité. Chaque épreuve résolue révèle une chaîne secrète, le drapeau, qui rapporte des points. Le classement récompense l’équipe entière : cette place est un résultat collectif.
 
-## Portée et limites
+Un an plus tôt, avec l’équipe « Les Schtroumpfs », j’avais terminé troisième.
 
-Participation en équipe à une compétition : le résultat collectif est cité tel qu'il est publié par l'organisateur. Cette fiche ne présume pas du détail des épreuves résolues individuellement.
+## Consulter le résultat
+
+- [Résultats de l’édition 2026](https://www.jeanne-hack-ctf.org/post/2026/) sur le site des organisateurs
