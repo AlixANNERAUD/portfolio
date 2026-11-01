@@ -9,7 +9,7 @@ description: "Macros procédurales pour décrire des interfaces CLI en Rust emba
 
 ## Présentation
 
-Macros procédurales Rust pour décrire des interfaces en ligne de commande avec une syntaxe proche de Clap, tout en ciblant `no_std`. L'analyse des arguments et la génération des messages d'aide peuvent fonctionner sans allocation dynamique. [Code et exemples](https://github.com/AlixANNERAUD/getargs-derive).
+Macros procédurales Rust pour décrire des interfaces en ligne de commande avec une syntaxe proche de Clap, tout en ciblant `no_std`. L'analyse des arguments et la génération des messages d'aide peuvent fonctionner sans allocation dynamique. [Code et exemples](https://github.com/AlixANNERAUD/getargs_derive).
 
 ## Démarche technique
 

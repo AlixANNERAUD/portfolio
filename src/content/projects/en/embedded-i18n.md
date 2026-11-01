@@ -9,7 +9,7 @@ description: "Compile-time localization for embedded Rust: translations stored i
 
 ## Overview
 
-Localization for Rust firmware with translations resolved at compile time and stored in ROM rather than parsed at runtime. Its macros validate translation keys and formatting arguments, support plural rules, and read several established translation file formats. [Source and guide](https://github.com/AlixANNERAUD/embedded-i18n).
+Localization for Rust firmware with translations resolved at compile time and stored in ROM rather than parsed at runtime. Its macros validate translation keys and formatting arguments, support plural rules, and read several established translation file formats. [Source and guide](https://github.com/AlixANNERAUD/embedded_i18n).
 
 ## Engineering approach
 

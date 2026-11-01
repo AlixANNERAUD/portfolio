@@ -9,7 +9,7 @@ description: "Internationalisation compilée dans le firmware Rust : traduction
 
 ## Présentation
 
-Outil d'internationalisation pour firmware Rust : les traductions sont résolues à la compilation et intégrées en ROM, sans parseur ni allocation au runtime. Les macros vérifient les clés et les paramètres de format, avec gestion des pluriels et plusieurs formats de fichiers. [Code et guide](https://github.com/AlixANNERAUD/embedded-i18n).
+Outil d'internationalisation pour firmware Rust : les traductions sont résolues à la compilation et intégrées en ROM, sans parseur ni allocation au runtime. Les macros vérifient les clés et les paramètres de format, avec gestion des pluriels et plusieurs formats de fichiers. [Code et guide](https://github.com/AlixANNERAUD/embedded_i18n).
 
 ## Démarche technique
 

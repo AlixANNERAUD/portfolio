@@ -9,7 +9,7 @@ description: "Histopathology tissue and cell segmentation/classification experim
 
 ## Overview
 
-An academic histopathology image segmentation and cell classification project. The repository includes data preparation and training scripts for nnU-Net, CellViT++, and HoVer-Net, including SLURM-based workflows. The work focuses on integrating and experimenting with established deep-learning architectures rather than claiming a new model designed from scratch. [Source and workflow](https://github.com/AlixANNERAUD/Deep_learning_project).
+An academic histopathology image segmentation and cell classification project. The repository includes data preparation and training scripts for nnU-Net, CellViT++, and HoVer-Net, including SLURM-based workflows. The work focuses on integrating and experimenting with established deep-learning architectures rather than claiming a new model designed from scratch. [Source and workflow](https://github.com/AlixANNERAUD/deep_learning_project).
 
 ## Engineering approach
 

@@ -9,7 +9,7 @@ description: "Prototype de collecte de mesures de capteurs MQ via ESP32 et MQTT 
 
 ## Présentation
 
-Travail exploratoire lié à mon stage de recherche à NYU sur la localisation de sources de gaz. Le dépôt présente notamment une architecture associant capteurs MQ, ESP32, publication MQTT et traitement côté serveur. La documentation reste partielle : il s'agit d'un prototype de recherche, et non d'un produit finalisé. [Dépôt de recherche](https://github.com/AlixANNERAUD/Odor_localization).
+Travail exploratoire lié à mon stage de recherche à NYU sur la localisation de sources de gaz. Le dépôt présente notamment une architecture associant capteurs MQ, ESP32, publication MQTT et traitement côté serveur. La documentation reste partielle : il s'agit d'un prototype de recherche, et non d'un produit finalisé. [Dépôt de recherche](https://github.com/AlixANNERAUD/odor_localization).
 
 ## Démarche technique
 

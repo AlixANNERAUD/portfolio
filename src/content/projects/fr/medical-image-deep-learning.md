@@ -9,7 +9,7 @@ description: "Expérimentation de segmentation et classification de tissus et ce
 
 ## Présentation
 
-Projet de segmentation et de classification d'images histopathologiques. Le dépôt regroupe des scripts de préparation de données et d'entraînement pour nnU-Net, CellViT++ et HoVer-Net, notamment avec orchestration SLURM. Ce travail illustre l'intégration et l'expérimentation de plusieurs architectures de deep learning plutôt que le développement d'un nouveau modèle à partir de zéro. [Code et protocole](https://github.com/AlixANNERAUD/Deep_learning_project).
+Projet de segmentation et de classification d'images histopathologiques. Le dépôt regroupe des scripts de préparation de données et d'entraînement pour nnU-Net, CellViT++ et HoVer-Net, notamment avec orchestration SLURM. Ce travail illustre l'intégration et l'expérimentation de plusieurs architectures de deep learning plutôt que le développement d'un nouveau modèle à partir de zéro. [Code et protocole](https://github.com/AlixANNERAUD/deep_learning_project).
 
 ## Démarche technique
 

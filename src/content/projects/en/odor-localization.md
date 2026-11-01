@@ -9,7 +9,7 @@ description: "ESP32/MQ sensor acquisition and MQTT pipeline prototype for explor
 
 ## Overview
 
-Exploratory work associated with my NYU research internship on gas source localization. The repository documents an acquisition architecture linking MQ gas sensors, an ESP32, MQTT transport, and backend processing. Documentation is still limited: this is a research prototype rather than a finished product. [Research repository](https://github.com/AlixANNERAUD/Odor_localization).
+Exploratory work associated with my NYU research internship on gas source localization. The repository documents an acquisition architecture linking MQ gas sensors, an ESP32, MQTT transport, and backend processing. Documentation is still limited: this is a research prototype rather than a finished product. [Research repository](https://github.com/AlixANNERAUD/odor_localization).
 
 ## Engineering approach
 

@@ -71,7 +71,7 @@ export const projects = [
       practicalImpact: 5,
       evidence: 4.5,
     },
-    externalUrl: "https://github.com/AlixANNERAUD/Infrastructure",
+    externalUrl: "https://github.com/AlixANNERAUD/infrastructure",
   },
   {
     id: "mini-train-store",
@@ -91,7 +91,7 @@ export const projects = [
       practicalImpact: 5,
       evidence: 4.6,
     },
-    externalUrl: "https://github.com/AlixANNERAUD/MiniTrainStore",
+    externalUrl: "https://github.com/AlixANNERAUD/mini_train_store",
   },
   {
     id: "model-railway",
@@ -111,7 +111,7 @@ export const projects = [
       practicalImpact: 3.7,
       evidence: 3.5,
     },
-    externalUrl: "https://github.com/AlixANNERAUD/S88-Wireless-Feedback-System",
+    externalUrl: "https://github.com/AlixANNERAUD/s88_wireless_feedback_system",
   },
   {
     id: "connected-speaker",
@@ -131,7 +131,7 @@ export const projects = [
       practicalImpact: 3.4,
       evidence: 3.7,
     },
-    externalUrl: "https://github.com/AlixANNERAUD/Connected_speaker",
+    externalUrl: "https://github.com/AlixANNERAUD/connected_speaker",
   },
   {
     id: "dera",
@@ -231,7 +231,7 @@ export const projects = [
       practicalImpact: 3.2,
       evidence: 4.2,
     },
-    externalUrl: "https://github.com/AlixANNERAUD/embedded-i18n",
+    externalUrl: "https://github.com/AlixANNERAUD/embedded_i18n",
   },
   {
     id: "getargs-derive",
@@ -251,7 +251,7 @@ export const projects = [
       practicalImpact: 3,
       evidence: 4.3,
     },
-    externalUrl: "https://github.com/AlixANNERAUD/getargs-derive",
+    externalUrl: "https://github.com/AlixANNERAUD/getargs_derive",
   },
   {
     id: "battery-percent",
@@ -378,7 +378,7 @@ export const projects = [
       practicalImpact: 3.7,
       evidence: 4.8,
     },
-    externalUrl: "https://github.com/AlixANNERAUD/Deez_Nalyzer",
+    externalUrl: "https://github.com/AlixANNERAUD/deez_nalyzer",
   },
   {
     id: "eogm",
@@ -421,7 +421,7 @@ export const projects = [
       practicalImpact: 2.2,
       evidence: 2.8,
     },
-    externalUrl: "https://github.com/AlixANNERAUD/ITI_aventure",
+    externalUrl: "https://github.com/AlixANNERAUD/iti_aventure",
   },
   {
     id: "huffman",
@@ -444,7 +444,7 @@ export const projects = [
       practicalImpact: 2.5,
       evidence: 3.7,
     },
-    externalUrl: "https://github.com/AlixANNERAUD/Huffman_compressor",
+    externalUrl: "https://github.com/AlixANNERAUD/huffman_compressor",
   },
   {
     id: "robot-mouche",
@@ -464,7 +464,7 @@ export const projects = [
       practicalImpact: 2.7,
       evidence: 3.3,
     },
-    externalUrl: "https://github.com/AlixANNERAUD/Robot_Mouche",
+    externalUrl: "https://github.com/AlixANNERAUD/robot_mouche",
   },
   {
     id: "music-danceability",
@@ -488,7 +488,7 @@ export const projects = [
       evidence: 3,
     },
     externalUrl:
-      "https://github.com/AlixANNERAUD/Music_danceability_prediction",
+      "https://github.com/AlixANNERAUD/music_danceability_prediction",
   },
   {
     id: "insatram",
@@ -508,7 +508,7 @@ export const projects = [
       practicalImpact: 2.5,
       evidence: 2.7,
     },
-    externalUrl: "https://github.com/AlixANNERAUD/INSAtram",
+    externalUrl: "https://github.com/AlixANNERAUD/insatram",
   },
   {
     id: "linear-equations",
@@ -532,7 +532,7 @@ export const projects = [
       evidence: 3.1,
     },
     externalUrl:
-      "https://github.com/AlixANNERAUD/System_of_linear_equations_solver",
+      "https://github.com/AlixANNERAUD/system_of_linear_equations_solver",
   },
   {
     id: "odor-localization",
@@ -555,7 +555,7 @@ export const projects = [
       practicalImpact: 3.4,
       evidence: 3,
     },
-    externalUrl: "https://github.com/AlixANNERAUD/Odor_localization",
+    externalUrl: "https://github.com/AlixANNERAUD/odor_localization",
   },
   {
     id: "medical-image-deep-learning",
@@ -578,7 +578,7 @@ export const projects = [
       practicalImpact: 3.3,
       evidence: 3.6,
     },
-    externalUrl: "https://github.com/AlixANNERAUD/Deep_learning_project",
+    externalUrl: "https://github.com/AlixANNERAUD/deep_learning_project",
   },
 ] as const satisfies readonly Project[];
 

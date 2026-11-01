@@ -9,7 +9,7 @@ description: "Procedural macros for embedded Rust command-line interfaces, with 
 
 ## Overview
 
-Rust procedural macros for declaring command-line parsers using Clap-like syntax while targeting `no_std`. Parsing and help text generation are designed to work without heap allocation. [Code and examples](https://github.com/AlixANNERAUD/getargs-derive).
+Rust procedural macros for declaring command-line parsers using Clap-like syntax while targeting `no_std`. Parsing and help text generation are designed to work without heap allocation. [Code and examples](https://github.com/AlixANNERAUD/getargs_derive).
 
 ## Engineering approach
 

@@ -236,7 +236,7 @@ export const skillDomains: readonly SkillDomain[] = [
     examples: [
       {
         kind: "link",
-        href: "https://github.com/AlixANNERAUD/Web_site/blob/main/AGENTS.md",
+        href: "https://github.com/AlixANNERAUD/portfolio/blob/main/AGENTS.md",
         label: {
           fr: "Instructions multi-agents",
           en: "Shared agent guidelines",
