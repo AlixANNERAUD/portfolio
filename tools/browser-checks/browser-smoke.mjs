@@ -14,6 +14,8 @@ const targets = [
   "/fr/projects",
   "/projects/xila",
   "/fr/projects/xila",
+  "/projects/huffman",
+  "/fr/projects/huffman",
   "/experiences",
   "/fr/experiences",
   "/skills",
@@ -208,6 +210,128 @@ for (const [engineName, engine] of [
       }
     }
 
+    // Grid/list view toggle: aria-pressed buttons, a single-column list, the
+    // choice remembered across reloads, and no overflow at 390px.
+    for (const [path, gridName, listName] of [
+      ["/projects", "Grid", "List"],
+      ["/fr/projects", "Grille", "Liste"],
+    ]) {
+      try {
+        await page.setViewportSize({ width: 1440, height: 900 });
+        await page.goto(base + path, {
+          waitUntil: "domcontentloaded",
+          timeout: 10000,
+        });
+        await page.evaluate(() => localStorage.clear());
+        await page.reload({ waitUntil: "domcontentloaded" });
+        const gridButton = page.getByRole("button", {
+          name: gridName,
+          exact: true,
+        });
+        const listButton = page.getByRole("button", {
+          name: listName,
+          exact: true,
+        });
+        const grid = page.locator("[data-catalogue-grid]");
+        await listButton.waitFor({ timeout: 10000 });
+        // The index list is the default way to browse the catalogue.
+        assert.equal(await listButton.getAttribute("aria-pressed"), "true");
+        assert.equal(await gridButton.getAttribute("aria-pressed"), "false");
+        assert.equal(await grid.getAttribute("data-view"), "list");
+        const rects = () =>
+          page
+            .locator(".showcase-card")
+            .evaluateAll((cards) =>
+              cards.slice(0, 2).map((card) => card.getBoundingClientRect()),
+            );
+        let [first, second] = await rects();
+        assert.ok(
+          Math.abs(first.left - second.left) < 1 && second.top > first.top,
+          path + " list view should stack cards in one column",
+        );
+
+        await gridButton.click();
+        assert.equal(await gridButton.getAttribute("aria-pressed"), "true");
+        assert.equal(await listButton.getAttribute("aria-pressed"), "false");
+        assert.equal(await grid.getAttribute("data-view"), "grid");
+        // Move the pointer off the cards: a hovered card lifts a few pixels.
+        await page.mouse.move(0, 0);
+        await page.waitForTimeout(400);
+        [first, second] = await rects();
+        assert.ok(
+          Math.abs(first.top - second.top) < 1 && second.left > first.left,
+          path + " grid view should place cards side by side",
+        );
+
+        await page.reload({ waitUntil: "domcontentloaded" });
+        await gridButton.waitFor({ timeout: 10000 });
+        assert.equal(
+          await gridButton.getAttribute("aria-pressed"),
+          "true",
+          path + " should remember the grid view",
+        );
+        assert.equal(await grid.getAttribute("data-view"), "grid");
+
+        await page.setViewportSize({ width: 390, height: 844 });
+        await page.waitForTimeout(60);
+        for (const view of [gridButton, listButton]) {
+          await view.click();
+          assert.equal(
+            await page.evaluate(
+              () =>
+                document.documentElement.scrollWidth > window.innerWidth + 2,
+            ),
+            false,
+            path + " catalogue overflows at 390px",
+          );
+        }
+        assert.equal(await grid.getAttribute("data-view"), "list");
+        await page.evaluate(() => localStorage.clear());
+        checked++;
+      } catch (error) {
+        failures.push(engineName + " " + path + " view toggle: " + error);
+      }
+    }
+
+    // Blocked storage must not break the catalogue script.
+    {
+      const blocked = await browser.newContext({
+        viewport: { width: 1440, height: 900 },
+      });
+      try {
+        await blocked.addInitScript(() => {
+          Object.defineProperty(window, "localStorage", {
+            get() {
+              throw new DOMException("blocked", "SecurityError");
+            },
+          });
+        });
+        const blockedPage = await blocked.newPage();
+        await blockedPage.goto(base + "/projects", {
+          waitUntil: "domcontentloaded",
+          timeout: 10000,
+        });
+        const gridView = blockedPage.getByRole("button", {
+          name: "Grid",
+          exact: true,
+        });
+        await gridView.waitFor({ timeout: 10000 });
+        await gridView.click();
+        assert.equal(await gridView.getAttribute("aria-pressed"), "true");
+        assert.equal(
+          await blockedPage
+            .locator("[data-catalogue-grid]")
+            .getAttribute("data-view"),
+          "grid",
+        );
+        checked++;
+      } catch (error) {
+        failures.push(engineName + " blocked storage view toggle: " + error);
+      } finally {
+        await blocked.close();
+      }
+    }
+
     // Immersive typographic homepage, keyboard-friendly scroll navigation and
     // reduced-motion fallback. The intro is static Astro HTML.
     for (const path of ["/", "/fr/"]) {
@@ -241,6 +365,40 @@ for (const [engineName, engine] of [
             path + " should not load the removed pixel portrait",
           );
           assert.equal(await intro.locator(".home-hero-title-mask").count(), 2);
+          assert.match(
+            await title.innerText(),
+            /Alix ANNERAUD/,
+            path + " H1 should name its owner",
+          );
+          const accent = await title
+            .locator("em")
+            .evaluate((node) => getComputedStyle(node).fontStyle);
+          assert.equal(accent, "italic", path + " accent line is italic");
+          const scrollLink = intro.locator(".home-hero-scroll");
+          const scrollLabel = await scrollLink.getAttribute("aria-label");
+          if (scrollLabel) {
+            const visible = (
+              await scrollLink.locator("span:not([aria-hidden])").innerText()
+            ).trim();
+            assert.ok(
+              scrollLabel.includes(visible),
+              path + " scroll aria-label should contain its visible text",
+            );
+          }
+          // The hero fills exactly what the sticky header leaves.
+          const fill = await page.evaluate(() => {
+            const header = document.querySelector(".site-header");
+            const hero = document.querySelector(".home-hero");
+            return (
+              (header?.getBoundingClientRect().height ?? 0) +
+              (hero?.getBoundingClientRect().height ?? 0) -
+              window.innerHeight
+            );
+          });
+          assert.ok(
+            fill >= -2,
+            path + " header + hero should fill the viewport (gap " + fill + ")",
+          );
           assert.equal(
             await intro.locator(".home-hero-scroll").getAttribute("href"),
             "#career-highlights",
@@ -487,19 +645,19 @@ for (const [engineName, engine] of [
       [
         "/experiences",
         [
-          "Show earlier experience",
-          "Hide earlier experience",
-          "Show earlier education",
-          "Hide earlier education",
+          "Show 3 earlier roles",
+          "Hide 3 earlier roles",
+          "Show 2 earlier milestones",
+          "Hide 2 earlier milestones",
         ],
       ],
       [
         "/fr/experiences",
         [
-          "Voir les expériences précédentes",
-          "Masquer les expériences précédentes",
-          "Voir les formations précédentes",
-          "Masquer les formations précédentes",
+          "Afficher 3 postes précédents",
+          "Masquer 3 postes précédents",
+          "Afficher 2 étapes précédentes",
+          "Masquer 2 étapes précédentes",
         ],
       ],
     ]) {
@@ -642,6 +800,274 @@ for (const [engineName, engine] of [
       }
     }
 
+    // Timeline dates and section numbers are machine metadata: JetBrains
+    // Mono with tabular figures, in the rail at 1440 and inside the card at
+    // 390 (where the rail hides). The earlier-roles toggle keeps the
+    // "NN — Label" overline format while it updates the count.
+    for (const [path, width, selector] of [
+      ["/experiences", 1440, ".career-timeline-date"],
+      ["/fr/experiences", 390, ".career-period"],
+      ["/", 1440, ".home-experience-period"],
+      ["/fr/", 1440, "[data-section-index] .eyebrow__index"],
+    ]) {
+      try {
+        await page.setViewportSize({ width, height: 900 });
+        await page.goto(base + path, {
+          waitUntil: "load",
+          timeout: 10000,
+        });
+        const date = page.locator(selector).first();
+        assert.equal(await date.isVisible(), true, selector + " hidden");
+        const style = await date.evaluate((node) => {
+          const computed = getComputedStyle(node);
+          return {
+            family: computed.fontFamily,
+            numeric: computed.fontVariantNumeric,
+          };
+        });
+        assert.match(style.family, /JetBrains Mono/, selector + " font");
+        assert.match(style.numeric, /tabular-nums/, selector + " figures");
+        if (path.endsWith("experiences")) {
+          // The overline is a label ("01 — Experience"); the count lives in
+          // the toggle, which names the number of earlier roles.
+          const numbered = page.locator("#professional [data-section-index]");
+          const overline = (await numbered.textContent()).replace(/\s+/g, " ");
+          assert.match(overline, /^01 — \D/, "overline " + overline);
+          const toggle = page.locator("#professional .career-earlier-toggle");
+          assert.match(await toggle.innerText(), /\d/, "toggle needs a count");
+        }
+        checked++;
+      } catch (error) {
+        failures.push(
+          engineName + " " + path + " " + width + " mono metadata: " + error,
+        );
+      }
+    }
+
+    // Project cards: the whole card opens the project page through one
+    // stretched title link, keyboard focus rings the card, hovering dims the
+    // neighbours' art panels (motion allowed only), and numbers are stable
+    // ranks.
+    for (const [path, filter] of [
+      ["/", null],
+      ["/fr/projects", "Bibliothèques"],
+    ]) {
+      try {
+        await page.setViewportSize({ width: 1440, height: 900 });
+        await page.emulateMedia({ reducedMotion: "no-preference" });
+        await page.goto(base + path, {
+          waitUntil: "load",
+          timeout: 10000,
+        });
+        const cards = page.locator(".showcase-card");
+        const [first, second] = [cards.nth(0), cards.nth(1)];
+        // Only the art panel dims: the neighbours' text keeps its contrast.
+        const opacity = (card) =>
+          card
+            .locator(".showcase-art")
+            .evaluate((node) => Number(getComputedStyle(node).opacity));
+        await first.scrollIntoViewIfNeeded();
+        // Let the homepage entry animation finish first.
+        await page.waitForTimeout(1000);
+        await first.hover();
+        await page.waitForTimeout(450);
+        // Dimming is reserved to hover-capable pointers (headless Firefox
+        // reports none): elsewhere every card keeps full opacity.
+        const canHover = await page.evaluate(
+          () => matchMedia("(hover: hover)").matches,
+        );
+        assert.equal(await opacity(first), 1, path + " hovered card dimmed");
+        if (canHover) {
+          assert.ok(
+            (await opacity(second)) < 0.8,
+            path + " neighbours should dim while a card is hovered",
+          );
+        } else {
+          assert.equal(
+            await opacity(second),
+            1,
+            path + " dimmed without hover",
+          );
+        }
+
+        const link = first.locator(".showcase-card-link");
+        await link.focus();
+        assert.notEqual(
+          await first.evaluate((node) => getComputedStyle(node).outlineStyle),
+          "none",
+          path + " focusing the card link should ring the card",
+        );
+
+        if (filter) {
+          const target = cards.filter({ hasText: "nanoexpr" });
+          const rank = () =>
+            target.locator(".showcase-art-position").innerText();
+          const before = await rank();
+          await page.getByRole("button", { name: filter, exact: true }).click();
+          assert.equal(
+            await rank(),
+            before,
+            path + " card numbers must not change when filtering",
+          );
+        }
+
+        // A click anywhere on a visible card opens its project page.
+        const clicked = cards.filter({ visible: true }).first();
+        const href = await clicked
+          .locator(".showcase-card-link")
+          .getAttribute("href");
+        await clicked.click();
+        await page.waitForURL((url) => url.pathname === href, {
+          timeout: 5000,
+        });
+
+        await page.emulateMedia({ reducedMotion: "reduce" });
+        await page.goto(base + path, { waitUntil: "load", timeout: 10000 });
+        await first.hover();
+        await page.waitForTimeout(300);
+        assert.equal(
+          await opacity(second),
+          1,
+          path + " reduced motion: neighbours must not dim",
+        );
+        assert.equal(
+          await first.evaluate((node) => getComputedStyle(node).transform),
+          "none",
+          path + " reduced motion: hovered card must not move",
+        );
+        checked++;
+      } catch (error) {
+        failures.push(engineName + " " + path + " project cards: " + error);
+      }
+      await page.emulateMedia({ reducedMotion: "no-preference" });
+    }
+
+    // Motion audit: with reduced motion requested, nothing animates, hovered
+    // cards, buttons and their arrows do not move, and the Xila topology keeps
+    // its static drawing instead of the WebGL animation.
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    for (const path of [
+      "/",
+      "/fr/",
+      "/projects",
+      "/projects/xila",
+      "/experiences",
+      "/skills",
+      "/resume",
+    ]) {
+      try {
+        await page.setViewportSize({ width: 1440, height: 900 });
+        await page.goto(base + path, { waitUntil: "load", timeout: 10000 });
+        const animated = await page.evaluate(() =>
+          [...document.querySelectorAll("*")]
+            .filter((node) => getComputedStyle(node).animationName !== "none")
+            .map((node) => node.tagName.toLowerCase() + "." + node.className)
+            .slice(0, 5),
+        );
+        assert.deepEqual(animated, [], path + " animates under reduced motion");
+        if (path === "/" || path === "/fr/") {
+          assert.equal(
+            await page
+              .locator(".home-hero-title-line")
+              .first()
+              .evaluate((node) => getComputedStyle(node).animationName),
+            "none",
+            path + " hero lines must not animate",
+          );
+          assert.equal(
+            await page.locator(".xila-topology canvas.is-ready").count(),
+            0,
+            path + " Xila topology must stay static",
+          );
+        }
+        for (const selector of [
+          ".showcase-card",
+          ".home-experience-card",
+          ".home-action",
+          ".showcase-all-link",
+          ".editorial-next a",
+          ".resume-action",
+        ]) {
+          const target = page.locator(selector).filter({ visible: true });
+          if ((await target.count()) === 0) continue;
+          await target.first().scrollIntoViewIfNeeded();
+          await target.first().hover();
+          await page.waitForTimeout(80);
+          const moved = await target.first().evaluate((node) =>
+            [node, ...node.querySelectorAll("*")]
+              .filter((el) => {
+                const style = getComputedStyle(el);
+                return (
+                  style.transform !== "none" ||
+                  (style.translate !== "none" && style.translate !== "")
+                );
+              })
+              .map((el) => el.tagName.toLowerCase() + "." + el.className),
+          );
+          assert.deepEqual(
+            moved,
+            [],
+            path + " " + selector + " moves on hover under reduced motion",
+          );
+        }
+        checked++;
+      } catch (error) {
+        failures.push(engineName + " " + path + " reduced motion: " + error);
+      }
+    }
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+
+    // Resume: the PDF preview only appears on wide screens; the download and
+    // open buttons and the site footer are always there.
+    for (const path of ["/resume", "/fr/resume"]) {
+      try {
+        await page.setViewportSize({ width: 1440, height: 900 });
+        await page.goto(base + path, {
+          waitUntil: "domcontentloaded",
+          timeout: 10000,
+        });
+        // Firefox reports <object> as hidden to isVisible(): read its box.
+        const preview = page.locator("object.resume-preview");
+        const shown = () =>
+          preview.evaluate((node) =>
+            getComputedStyle(node).display === "none"
+              ? 0
+              : node.getBoundingClientRect().height,
+          );
+        // Firefox sizes the <object> once it has resolved it, after DOM load.
+        await page.waitForFunction(
+          () => {
+            const node = document.querySelector("object.resume-preview");
+            return node && node.getBoundingClientRect().height >= 600;
+          },
+          null,
+          { timeout: 5000 },
+        );
+        await page.setViewportSize({ width: 390, height: 844 });
+        await page.waitForTimeout(60);
+        assert.equal(
+          await shown(),
+          0,
+          path + " preview must be hidden on narrow screens",
+        );
+        const actions = page.locator(".resume-action");
+        assert.equal(await actions.count(), 2);
+        for (const action of await actions.all()) {
+          assert.equal(await action.isVisible(), true);
+          const actionBox = await action.boundingBox();
+          assert.ok(actionBox.height >= 44, path + " action under 44px");
+        }
+        assert.equal(
+          await page.locator("footer.site-footer").isVisible(),
+          true,
+          path + " footer missing",
+        );
+        checked++;
+      } catch (error) {
+        failures.push(engineName + " " + path + " resume layout: " + error);
+      }
+    }
+
     await context.close();
 
     // Without JavaScript every card stays visible and the navigation works:
@@ -718,6 +1144,281 @@ for (const [engineName, engine] of [
         }
       }
       await staticContext.close();
+    }
+
+    // Theme switch: auto, light and dark radios. Each choice survives a
+    // reload, auto follows the emulated system scheme live, and the arrow
+    // keys move the choice like any radio group.
+    for (const systemScheme of ["light", "dark"]) {
+      const themeContext = await browser.newContext({
+        viewport: { width: 1440, height: 900 },
+        colorScheme: systemScheme,
+      });
+      const themePage = await themeContext.newPage();
+      const path = systemScheme === "light" ? "/" : "/fr/projects";
+      try {
+        await themePage.goto(base + path, { waitUntil: "load" });
+        const group = themePage.locator(
+          ".site-header-tools [data-theme-switch]",
+        );
+        await group.waitFor({ state: "visible", timeout: 5000 });
+        const state = () =>
+          themePage.evaluate(() => {
+            const root = document.documentElement;
+            const checked = document.querySelector(
+              ".site-header-tools [data-theme-switch] input:checked",
+            );
+            return {
+              checked: checked && checked.value,
+              stored: localStorage.getItem("portfolio-theme"),
+              scheme: getComputedStyle(root).colorScheme,
+              dark: matchMedia("(prefers-color-scheme: dark)").matches,
+              classes: root.className,
+              // Schemes of the theme-color metas the browser would apply.
+              meta: [...document.querySelectorAll("meta[data-theme-color]")]
+                .filter((meta) => matchMedia(meta.media || "all").matches)
+                .map((meta) => meta.dataset.themeColor),
+            };
+          });
+        const expectScheme = (actual, scheme, label) => {
+          assert.equal(actual.scheme, scheme, path + " " + label);
+          const expected =
+            scheme === "light dark" ? (actual.dark ? "dark" : "light") : scheme;
+          assert.deepEqual(
+            actual.meta,
+            [expected],
+            path + " " + label + ": active theme-color",
+          );
+        };
+
+        // Same 44px targets as the other header controls.
+        for (const option of await group.locator("label").all()) {
+          const box = await option.boundingBox();
+          assert.ok(
+            box && Math.round(box.height) >= 44 && Math.round(box.width) >= 44,
+            path + " header theme option is " + box?.width + "x" + box?.height,
+          );
+        }
+
+        let current = await state();
+        assert.equal(current.checked, "auto", path + " default choice");
+        assert.equal(current.stored, null);
+        assert.equal(current.classes, "", path + " auto adds no class");
+        expectScheme(current, "light dark", "auto by default");
+
+        for (const choice of ["light", "dark", "auto"]) {
+          await group
+            .locator("label", {
+              has: themePage.locator('input[value="' + choice + '"]'),
+            })
+            .click();
+          current = await state();
+          assert.equal(current.stored, choice, path + " stores " + choice);
+          const scheme = choice === "auto" ? "light dark" : choice;
+          expectScheme(current, scheme, choice + " applies");
+          await themePage.reload({ waitUntil: "load" });
+          await group.waitFor({ state: "visible", timeout: 5000 });
+          current = await state();
+          assert.equal(
+            current.checked,
+            choice,
+            path + " " + choice + " reload",
+          );
+          expectScheme(current, scheme, choice + " survives a reload");
+        }
+
+        // Auto follows the system scheme live, without a reload.
+        const background = () =>
+          themePage.evaluate(
+            () => getComputedStyle(document.body).backgroundColor,
+          );
+        await themePage.emulateMedia({ colorScheme: "light" });
+        const lightBackground = await background();
+        await themePage.emulateMedia({ colorScheme: "dark" });
+        const darkBackground = await background();
+        assert.notEqual(
+          lightBackground,
+          darkBackground,
+          path + " auto must follow the system scheme",
+        );
+        current = await state();
+        expectScheme(current, "light dark", "auto with a dark system");
+        // An explicit choice ignores the system scheme.
+        await group
+          .locator("label", { has: themePage.locator('input[value="light"]') })
+          .click();
+        assert.equal(await background(), lightBackground, path + " light");
+        await themePage.emulateMedia({ colorScheme: "light" });
+        assert.equal(await background(), lightBackground);
+
+        // Keyboard: Tab reaches the checked radio, arrows move the choice.
+        await group.locator('input[value="light"]').focus();
+        await themePage.keyboard.press("ArrowRight");
+        current = await state();
+        assert.equal(current.checked, "dark", path + " ArrowRight to dark");
+        assert.equal(current.stored, "dark");
+        assert.equal(await background(), darkBackground, path + " dark");
+        await themePage.keyboard.press("ArrowRight");
+        current = await state();
+        assert.equal(current.checked, "auto", path + " arrows wrap to auto");
+        const focusRing = await themePage.evaluate(() => {
+          const label = document.activeElement?.closest("label");
+          return label ? getComputedStyle(label).outlineStyle : "none";
+        });
+        assert.notEqual(focusRing, "none", path + " focused option ring");
+        checked++;
+      } catch (error) {
+        failures.push(
+          engineName + " " + path + " theme (" + systemScheme + "): " + error,
+        );
+      }
+      await themeContext.close();
+    }
+
+    // Mobile header: one row with a menu button that opens and closes with
+    // the keyboard, returns focus on Escape and exposes 44px nav targets.
+    // The theme switch moves into the menu panel.
+    const mobileContext = await browser.newContext({
+      viewport: { width: 390, height: 844 },
+    });
+    const mobilePage = await mobileContext.newPage();
+    for (const path of ["/", "/fr/projects", "/projects/xila"]) {
+      try {
+        await mobilePage.goto(base + path, {
+          waitUntil: "load",
+          timeout: 10000,
+        });
+        const menuButton = mobilePage.locator(".site-menu-button");
+        await menuButton.waitFor({ state: "visible", timeout: 5000 });
+        const controls = await menuButton.getAttribute("aria-controls");
+        assert.ok(controls, path + " menu button needs aria-controls");
+        const nav = mobilePage.locator("#" + controls);
+        const navLinks = nav.locator("a[href]");
+        assert.equal(await menuButton.getAttribute("aria-expanded"), "false");
+        assert.equal(
+          await navLinks.first().isVisible(),
+          false,
+          path + " nav links must be hidden while the menu is closed",
+        );
+        const header = await mobilePage.locator(".site-header").boundingBox();
+        const button = await menuButton.boundingBox();
+        assert.ok(
+          header && button && button.y + button.height <= header.y + 80,
+          path + " brand, locale, theme and menu must share one row",
+        );
+
+        await menuButton.focus();
+        await mobilePage.keyboard.press("Enter");
+        assert.equal(await menuButton.getAttribute("aria-expanded"), "true");
+        assert.ok((await navLinks.count()) >= 4, path + " nav links missing");
+        for (const link of await navLinks.all()) {
+          assert.equal(await link.isVisible(), true, path + " nav link hidden");
+          const box = await link.boundingBox();
+          assert.ok(
+            box && Math.round(box.height) >= 44,
+            path + " nav link target is " + box?.height + "px high",
+          );
+        }
+        // Tab from the open button lands on the first link it revealed,
+        // and the menu stays open (WCAG 2.4.3).
+        await mobilePage.keyboard.press("Tab");
+        assert.equal(
+          await navLinks
+            .first()
+            .evaluate((node) => node === document.activeElement),
+          true,
+          path + " Tab from the open menu button must reach the first link",
+        );
+        assert.equal(await menuButton.getAttribute("aria-expanded"), "true");
+        await mobilePage.keyboard.press("Escape");
+        assert.equal(await menuButton.getAttribute("aria-expanded"), "false");
+        assert.equal(
+          await menuButton.evaluate((node) => node === document.activeElement),
+          true,
+          path + " Escape must return focus to the menu button",
+        );
+        assert.equal(await navLinks.first().isVisible(), false);
+        await mobilePage.keyboard.press("Space");
+        assert.equal(await menuButton.getAttribute("aria-expanded"), "true");
+        await mobilePage.keyboard.press("Space");
+        assert.equal(await menuButton.getAttribute("aria-expanded"), "false");
+
+        // The theme radios join the open menu panel on narrow screens.
+        await menuButton.click();
+        const menuTheme = nav.locator("[data-theme-switch]");
+        await menuTheme.waitFor({ state: "visible", timeout: 5000 });
+        for (const option of await menuTheme.locator("label").all()) {
+          const box = await option.boundingBox();
+          assert.ok(
+            box && Math.round(box.height) >= 44 && Math.round(box.width) >= 44,
+            path + " menu theme option is " + box?.width + "x" + box?.height,
+          );
+        }
+        assert.equal(
+          await menuTheme.evaluate((node) => node.closest("nav") === null),
+          true,
+          path + " the theme switch must sit outside the navigation landmark",
+        );
+        // The longer French labels must still fit the 390px panel.
+        assert.equal(
+          await mobilePage.evaluate(
+            () =>
+              document.documentElement.scrollWidth <=
+              document.documentElement.clientWidth,
+          ),
+          true,
+          path + " the open menu overflows horizontally at 390px",
+        );
+        assert.equal(
+          await mobilePage
+            .locator(".site-header-tools [data-theme-switch]")
+            .isVisible(),
+          false,
+          path + " the header theme switch must hide on narrow screens",
+        );
+        await mobilePage.keyboard.press("Escape");
+        checked++;
+      } catch (error) {
+        failures.push(
+          engineName + " " + path + " at 390px mobile header: " + error,
+        );
+      }
+    }
+    await mobileContext.close();
+
+    // Either side of the header breakpoint (960px), in the longer French
+    // labels: one row that fits, with the menu button only when narrow.
+    for (const width of [961, 960]) {
+      const edgeContext = await browser.newContext({
+        viewport: { width, height: 700 },
+      });
+      const edgePage = await edgeContext.newPage();
+      try {
+        await edgePage.goto(base + "/fr/projects", { waitUntil: "load" });
+        await edgePage
+          .locator("[data-theme-switch][data-ready]")
+          .first()
+          .waitFor({ state: "attached", timeout: 5000 });
+        const layout = await edgePage.evaluate(() => {
+          const header = document.querySelector(".site-header");
+          return {
+            overflow:
+              document.documentElement.scrollWidth >
+              document.documentElement.clientWidth,
+            height: header.getBoundingClientRect().height,
+            menu:
+              getComputedStyle(header.querySelector(".site-menu-button"))
+                .display !== "none",
+          };
+        });
+        assert.equal(layout.overflow, false, width + "px header overflows");
+        assert.ok(layout.height <= 80, width + "px header wraps");
+        assert.equal(layout.menu, width <= 960, width + "px menu button");
+        checked++;
+      } catch (error) {
+        failures.push(engineName + " header at " + width + "px: " + error);
+      }
+      await edgeContext.close();
     }
   } finally {
     await browser.close();

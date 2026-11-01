@@ -1,30 +1,25 @@
 ---
-title: "nanoexpr"
-description: "Parseur et évaluateur d'expressions mathématiques pour Rust embarqué, sans allocation dynamique et avec taille de pile bornée."
+title: "nanoexpr : évaluateur d’expressions embarqué"
+description: "Une bibliothèque Rust no_std, avec liaisons C, qui analyse et évalue des formules mathématiques saisies à l’exécution sur microcontrôleur, sans allocation."
 ---
 
-[← Tous les projets](/fr/projects)
-
-# nanoexpr
-
-**Rust · no_std · Parser · C ABI** · 2026 - présent
-
-> Parseur et évaluateur d'expressions mathématiques pour Rust embarqué, sans allocation dynamique et avec taille de pile bornée.
+# nanoexpr : évaluer des formules mathématiques sans allocation
 
 ## Présentation
 
-Évaluateur d'expressions mathématiques `no_std` pour microcontrôleurs, fonctionnant sans allocation dynamique. Son analyseur traite les expressions sans construire d'arbre syntaxique sur le tas ; il limite la profondeur d'imbrication et signale les erreurs précisément. La bibliothèque prend en charge différents types numériques, des fonctions et des variables. [Code et documentation](https://github.com/AlixANNERAUD/nanoexpr).
+`nanoexpr` analyse et évalue des formules mathématiques saisies à l’exécution, comme `raw * 0.0125 - 40`, sur un microcontrôleur et sans allocation dynamique. C’est une crate Rust `no_std` publiée sur crates.io, avec des liaisons C et C++ compilées via CMake.
 
-## Démarche technique
+Laisser l’utilisateur saisir une formule est courant : une calculatrice, une conversion de capteur réglée sur le terrain, un seuil d’alarme stocké dans un fichier de configuration. La plupart des crates d’expressions visent les ordinateurs de bureau. Elles exigent `std`, allouent un arbre syntaxique à chaque appel et transforment une saisie erronée en `NaN` ou en panique. Sur un microcontrôleur, cela signifie fragmentation du tas, consommation mémoire imprévisible et plantages.
 
-Le parseur évalue des expressions sans construire d'arbre sur le tas, une décision particulièrement adaptée aux MCU où RAM et pile sont limitées. Les bornes de profondeur, la remontée d'erreurs et l'interface Rust/C permettent de le réutiliser comme brique indépendante.
+## Choix techniques
 
-## Portée et limites
-
-Bibliothèque conçue pour être réutilisée indépendamment d'une application. Les API et exemples à jour figurent dans le dépôt source ; les contraintes d'environnement et les versions supportées doivent y être vérifiées.
+- **Évaluer pendant l’analyse.** Ni arbre syntaxique ni tampon de jetons : le résultat est calculé au fil de la lecture du texte. Un test avec un allocateur instrumenté vérifie qu’aucune allocation n’a lieu.
+- **Une pile bornée.** L’imbrication est limitée à 32 niveaux par défaut, si bien qu’une saisie malveillante ne peut pas faire déborder la pile, et les arguments d’appel tiennent dans un tableau de taille fixe. L’évaluateur et les liaisons C sont testés par fuzzing avec `cargo-fuzz`.
+- **N’importe quel type numérique.** `f32`, `f64`, des entiers qui signalent les dépassements au lieu de boucler, ou un type personnalisé via un trait. Les types optionnels `Decimal` et `Fraction` calculent comme une calculatrice de poche : `0.1 + 0.2` vaut exactement `0.3`.
+- **Des erreurs faites pour être affichées.** Chaque erreur porte un type et la plage d’octets fautive dans la saisie. Division par zéro et erreurs de domaine sont signalées, jamais changées en `NaN` silencieux.
+- **Variables et fonctions fournies par l’application.** L’évaluateur interroge un contexte pour chaque nom rencontré. Une formule peut aussi être compilée une fois dans un tampon fourni par l’appelant, puis réévaluée avec de nouvelles valeurs, toujours sans allocation.
 
 ## Explorer le projet
 
-[Dépôt, documentation ou résultat officiel](https://github.com/AlixANNERAUD/nanoexpr) ↗
-
-**Dans le même domaine :** [Xila](/fr/projects/xila) · [getargs-derive](/fr/projects/getargs-derive)
+- [Code source, syntaxe et mesures de performance](https://github.com/AlixANNERAUD/nanoexpr)
+- [Documentation de l’API sur docs.rs](https://docs.rs/nanoexpr)

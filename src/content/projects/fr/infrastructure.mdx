@@ -1,47 +1,44 @@
 ---
-title: Infrastructure - auto-hébergement et automatisation
-description: Étude de cas sur l'exploitation de services auto-hébergés avec TrueNAS, Docker Compose, Ansible et supervision.
+title: Services auto-hébergés déployés par Ansible
+description: Playbooks Ansible et piles Docker Compose qui déploient et supervisent des services auto-hébergés sur un serveur TrueNAS et un VPS, derrière Traefik.
 ---
 
 import ArchitectureFlow from "../../../components/mdx/ArchitectureFlow.astro";
 
-# Infrastructure : rendre l'auto-hébergement exploitable
-
-**Linux · TrueNAS · Docker Compose · Ansible · Monitoring** · Depuis 2020
-
-> Exploiter de vrais services pour ma famille et mes proches, avec une préférence pour l'autonomie, la reproductibilité et la souveraineté des données.
+# Infrastructure : des services auto-hébergés décrits dans le code
 
 ## Le problème
 
-Héberger quelques applications sur une machine est assez simple. Les maintenir dans la durée demande en revanche de gérer les mises à jour, la configuration, les accès, la disponibilité et les incidents.
+J’héberge des services pour ma famille et mes proches : stockage en ligne, gestionnaire de mots de passe, messagerie, médiathèque, domotique, gestion documentaire et logiciels de gestion. Installer une application sur un serveur est simple ; maintenir plusieurs dizaines de services à jour, accessibles et sécurisés pendant des années l’est beaucoup moins.
 
-L'infrastructure a progressivement évolué vers un ensemble de services : cloud personnel, messagerie, outils collaboratifs, médiathèque, surveillance et applications métier.
+L’objectif est de pouvoir **reconstruire chaque service à partir d’un dépôt Git**, sur plusieurs machines, sans garder de secrets dans des fichiers publics.
 
 ## Architecture
 
-<ArchitectureFlow title="De la configuration aux services" steps={[{ title: 'Inventaire et secrets', detail: 'Inventaire Ansible et fichiers de configuration ; secrets gérés séparément.' }, { title: 'Provisionnement', detail: 'Playbooks Ansible et déploiements sur les hôtes.' }, { title: 'Exécution', detail: 'TrueNAS Apps et services déployés via Compose.' }, { title: 'Supervision', detail: 'Statuts de service, métriques et alertes.' }]} />
+<ArchitectureFlow title="De la configuration aux services en production" steps={[{ title: 'Inventaire', detail: 'Les hôtes, et un groupe par service qui désigne l’hôte qui l’exécute.' }, { title: 'Playbooks', detail: 'Un playbook Ansible et un fichier Compose par service, plus des playbooks pour les hôtes et le DNS.' }, { title: 'Hôtes', detail: 'Un serveur TrueNAS et un VPS, chacun derrière son propre proxy Traefik.' }, { title: 'Supervision', detail: 'VictoriaMetrics, alertes Grafana et page d’état publique.' }]} />
 
-Le dépôt contient les **playbooks Ansible**, les fichiers **Docker Compose** des services gérés de cette manière, ainsi que l'inventaire et la documentation de déploiement. Certains services sont exécutés comme **applications TrueNAS**, d'autres sont gérés par Ansible.
+L’infrastructure repose sur deux serveurs principaux : un serveur **TrueNAS** et un **VPS**. L’inventaire attribue chaque service à un hôte : déplacer un service revient à changer un groupe. Chaque service a son propre dossier, avec un playbook Ansible, un fichier Docker Compose et les modèles qu’il copie. D’autres playbooks préparent les hôtes et gèrent chacun une zone DNS **Cloudflare**.
 
-Une pile de supervision documentée dans le dépôt utilise notamment **Prometheus, Grafana et Alertmanager** pour suivre l'état des services et faciliter la détection de problèmes.
+La supervision tourne sur le VPS : **VictoriaMetrics** collecte les métriques des deux instances Traefik, le serveur TrueNAS étant joint par le VPN **Netbird**, et **Grafana** déclenche des alertes en cas d’erreurs serveur, de latence élevée ou de cible injoignable.
 
-## Choix et compromis
+## Choix techniques
 
-- **Automatiser plutôt qu'accumuler les installations manuelles.** Chaque service déployé par Ansible dispose de fichiers permettant de retrouver sa configuration.
-- **Séparer les secrets.** Le dépôt documente un coffre distinct pour les éléments sensibles, plutôt que de les intégrer aux playbooks publics.
-- **Composer avec plusieurs modes de déploiement.** TrueNAS Apps et Ansible ne sont pas identiques ; cette hétérogénéité reste un coût de maintenance.
-- **Superviser l'existant.** Les indicateurs et alertes aident à détecter les erreurs, sans remplacer les tests de restauration et de reprise après incident.
+- **Des secrets hors du dépôt public.** Les valeurs sensibles sont dans un sous-module privé chiffré avec Ansible Vault.
+- **Un accès Ansible restreint.** Ansible se connecte avec un compte dédié qui n’accepte qu’une clé SSH, depuis des réseaux autorisés. Le playbook d’initialisation désactive la connexion par mot de passe et la connexion root, et refuse de s’exécuter depuis un autre réseau.
+- **Authentification unique.** **Zitadel** sert de fournisseur d’identité ; les applications OIDC des services gérés hors d’Ansible sont déclarées et provisionnées avec OpenTofu.
+- **Des droits de réplication limités.** Chaque client de réplication dispose d’un compte limité à une seule commande, qui lance une tâche de réplication TrueNAS : la clé d’API TrueNAS ne quitte jamais le serveur.
+- **Vérifier avant de modifier.** Des tâches communes valident le YAML, les playbooks et les fichiers Compose, testent les rôles avec Molecule et prévisualisent les changements sans les appliquer.
 
-## Services et résultats
+## Résultats
 
-L'infrastructure héberge notamment des services tels que **Nextcloud, Vaultwarden, Matrix, Jellyfin et Gitea**, en plus de projets personnels. L'inventaire évolue continuellement ; les liens et le statut de ces services sont documentés dans le dépôt.
+Le dépôt recense plus de quarante services, dont Nextcloud, Vaultwarden, Jellyfin, Home Assistant, Paperless-ngx, Matrix Synapse, Gitea et l’instance Odoo de Mini Train Store. L’infrastructure héberge aussi des outils pour mes autres projets, comme la plateforme de traduction Tolgee utilisée par Xila.
 
-L'intérêt du projet n'est pas un nombre de conteneurs, mais la capacité à **déployer, diagnostiquer et faire évoluer** des services réels.
+## Limites
+
+Deux modes de déploiement coexistent : certains services tournent comme applications TrueNAS, d’autres sont déployés par Ansible, et leurs cycles de vie diffèrent. TrueNAS gère aussi lui-même ses utilisateurs et sa configuration SSH : les playbooks ne peuvent que les vérifier. La supervision détecte les pannes, mais ne remplace pas des tests de restauration.
 
 ## Explorer le projet
 
-- [Dépôt Infrastructure](https://github.com/AlixANNERAUD/Infrastructure)
-- [Organisation des services et déploiements](https://github.com/AlixANNERAUD/Infrastructure#structure)
-- [Pile de supervision Vigie](https://github.com/AlixANNERAUD/Infrastructure/blob/main/services/vigie/readme.md)
-
-[← Tous les projets](/fr/projects)
+- [Dépôt Infrastructure](https://github.com/AlixANNERAUD/infrastructure)
+- [Structure du dépôt](https://github.com/AlixANNERAUD/infrastructure#structure)
+- [Pile de supervision Vigie](https://github.com/AlixANNERAUD/infrastructure/tree/main/services/vigie)

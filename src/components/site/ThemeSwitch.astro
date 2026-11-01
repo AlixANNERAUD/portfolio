@@ -1,0 +1,262 @@
+---
+import { Contrast, Moon, Sun } from "@lucide/astro";
+import type { Locale } from "../../i18n/locales.ts";
+import { useTranslations } from "../../i18n/ui.ts";
+
+export interface Props {
+  lang: Locale;
+  /**
+   * "header": an icon-only segmented control in the header row (wide
+   * screens). "menu": a labelled row in the mobile menu panel, where the
+   * header row has no room for three 44px options next to the brand.
+   */
+  placement: "header" | "menu";
+}
+const { lang, placement } = Astro.props;
+const t = useTranslations(lang);
+const options = [
+  // A half-filled circle: both schemes, unlike SunMoon which reads as a
+  // second sun at icon size.
+  { value: "auto", icon: Contrast },
+  { value: "light", icon: Sun },
+  { value: "dark", icon: Moon },
+] as const;
+const labelId = "theme-label-" + placement;
+const iconOnly = placement === "header";
+---
+
+<!--
+  Auto / Light / Dark as native radios: arrow keys move the choice and
+  assistive technologies announce a group of three. Auto is checked in the
+  HTML, matching the CSS default (color-scheme: light dark). The switch stays
+  hidden until its script runs, since it cannot work without JavaScript; in
+  the header it keeps its place meanwhile, so nothing shifts when it shows.
+  Icon-only options show their name as a tooltip on hover and focus.
+-->
+<div
+  class={"theme-switch theme-switch--" + placement}
+  role="radiogroup"
+  aria-labelledby={labelId}
+  data-theme-switch
+>
+  <span
+    id={labelId}
+    class:list={["theme-switch-label", { "visually-hidden": iconOnly }]}
+  >
+    {t("theme.label")}
+  </span>
+  <span class="theme-switch-options">
+    {options.map(({ value, icon: Icon }) => (
+      <label class="theme-switch-option">
+        <input
+          class="visually-hidden"
+          type="radio"
+          name={"theme-" + placement}
+          value={value}
+          checked={value === "auto"}
+          autocomplete="off"
+        />
+        <Icon size={20} stroke-width={1.75} aria-hidden="true" />
+        <span class:list={{ "theme-switch-tip": iconOnly }}>
+          {t(`theme.${value}`)}
+        </span>
+      </label>
+    ))}
+  </span>
+</div>
+
+<script>
+  /*
+   * The head script in SiteHead.astro already applied the stored choice
+   * before paint; this keeps the radios, the html class and the
+   * theme-color metas in sync with later choices, other tabs included.
+   * Auto needs no listener: the CSS follows the system scheme live.
+   */
+  type Choice = "auto" | "light" | "dark";
+  const key = "portfolio-theme";
+  const root = document.documentElement;
+  const isChoice = (value: unknown): value is Choice =>
+    value === "auto" || value === "light" || value === "dark";
+  const stored = (): Choice => {
+    try {
+      const value = localStorage.getItem(key);
+      return isChoice(value) ? value : "auto";
+    } catch {
+      return "auto";
+    }
+  };
+  const apply = (choice: Choice) => {
+    root.classList.toggle("light", choice === "light");
+    root.classList.toggle("dark", choice === "dark");
+    for (const meta of document.querySelectorAll<HTMLMetaElement>(
+      "meta[data-theme-color]",
+    )) {
+      const scheme = meta.dataset.themeColor;
+      meta.media =
+        choice === "auto"
+          ? "(prefers-color-scheme: " + scheme + ")"
+          : scheme === choice
+            ? "all"
+            : "not all";
+    }
+    for (const input of document.querySelectorAll<HTMLInputElement>(
+      "[data-theme-switch] input",
+    )) {
+      input.checked = input.value === choice;
+    }
+  };
+
+  apply(stored());
+  for (const group of document.querySelectorAll<HTMLElement>(
+    "[data-theme-switch]",
+  )) {
+    group.addEventListener("change", (event) => {
+      const choice = (event.target as HTMLInputElement).value;
+      if (!isChoice(choice)) return;
+      apply(choice);
+      try {
+        localStorage.setItem(key, choice);
+      } catch {}
+    });
+    group.dataset.ready = "";
+  }
+  addEventListener("storage", (event) => {
+    if (event.key === key || event.key === null) apply(stored());
+  });
+  // A page restored from the back/forward cache may hold an older choice.
+  addEventListener("pageshow", (event) => {
+    if (event.persisted) apply(stored());
+  });
+</script>
+
+<style>
+  .theme-switch--menu:not([data-ready]) {
+    display: none;
+  }
+
+  /* Hidden (and out of the tab order) yet keeping its width. */
+  .theme-switch--header:not([data-ready]) {
+    visibility: hidden;
+  }
+
+  .theme-switch-options {
+    display: flex;
+  }
+
+  .theme-switch-option {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3xs);
+    min-width: var(--control-size);
+    min-height: var(--control-size);
+    border-radius: var(--radius-m);
+    color: var(--color-text-muted);
+    font-size: var(--step--1);
+    font-weight: 550;
+    cursor: pointer;
+    transition:
+      color var(--dur-fast) var(--ease-out),
+      background-color var(--dur-fast) var(--ease-out);
+  }
+
+  /*
+   * The checked option also gets an inset ring, so the choice does not rest
+   * on color alone; forced-colors mode drops both, hence the outline below.
+   */
+  .theme-switch-option:has(input:checked) {
+    background: var(--color-accent-soft);
+    box-shadow: inset 0 0 0 1px var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  @media (forced-colors: active) {
+    .theme-switch-option:has(input:checked) {
+      outline: 2px solid Highlight;
+      outline-offset: -2px;
+    }
+  }
+
+  /* The radio itself is visually hidden: its label carries the ring. */
+  .theme-switch-option:has(input:focus-visible) {
+    z-index: 1;
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  @media (hover: hover) {
+    .theme-switch-option:not(:has(input:checked)):hover {
+      background: var(--color-surface-2);
+      color: var(--color-text);
+    }
+  }
+
+  /*
+   * Header row, wide screens only: three borderless 44px icon buttons, like
+   * the locale switch beside them; only the checked one is filled.
+   */
+  .theme-switch-tip {
+    position: absolute;
+    top: calc(100% + var(--space-3xs));
+    left: 50%;
+    z-index: 2;
+    padding: var(--space-3xs) var(--space-2xs);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-s);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-size: var(--step--2);
+    white-space: nowrap;
+    translate: -50% 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--dur-fast) var(--ease-out);
+  }
+
+  .theme-switch-option:has(input:focus-visible) .theme-switch-tip {
+    opacity: 1;
+  }
+
+  @media (hover: hover) {
+    .theme-switch-option:hover .theme-switch-tip {
+      opacity: 1;
+    }
+  }
+
+  @media (max-width: 960px) {
+    .theme-switch--header {
+      display: none;
+    }
+  }
+
+  /* Menu panel row: visible label, then the three labelled options. */
+  .theme-switch--menu {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3xs) var(--space-xs);
+    padding-top: var(--space-2xs);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .theme-switch--menu .theme-switch-label {
+    color: var(--color-text);
+    font-size: var(--step-0);
+  }
+
+  .theme-switch--menu .theme-switch-options {
+    gap: var(--space-3xs);
+  }
+
+  .theme-switch--menu .theme-switch-option {
+    padding-inline: var(--space-xs);
+  }
+
+  @media (width > 960px) {
+    .theme-switch--menu {
+      display: none;
+    }
+  }
+</style>

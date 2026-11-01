@@ -1,45 +1,42 @@
 ---
-title: Mini Train Store - e-commerce and automation
-description: A case study about self-hosted Odoo and a Vue/WXT browser extension for Leboncoin listings.
+title: "Mini Train Store: Odoo shop and extension"
+description: A self-hosted Odoo shop for a family model railway business, with a WXT and Vue 3 browser extension that collects and sorts Leboncoin listings.
 ---
 
 import ArchitectureFlow from "../../../components/mdx/ArchitectureFlow.astro";
 
-# Mini Train Store: connecting a storefront to listing management
+# Mini Train Store: an online shop connected to Leboncoin listings
 
-**Odoo · Vue 3 · WXT · TypeScript · Docker** · Since 2026
+## The problem
 
-> Turning a real family business need into software: an online storefront, catalogue management and automation around existing listings.
+My father's model railway business sold partly through listings on Leboncoin. An independent online shop needed the same products, without retyping every listing by hand and keeping two inventories in sync.
 
-## The challenge
-
-My father's model railway business relied in part on listings published on Leboncoin. Building an independent shop required a way to display products while reducing repetitive inventory and listing management.
-
-I deployed **self-hosted Odoo** and developed a **browser extension** tailored to the Leboncoin workflow. The goal was to make daily operations easier without rebuilding an entire e-commerce platform.
+Rather than build a store from scratch, I deployed **Odoo** on my own servers and wrote a **browser extension** for the part that is specific to the business: getting listings out of Leboncoin and into the catalog.
 
 ## Architecture
 
-<ArchitectureFlow title="From listing to online catalogue" steps={[{ title: 'Leboncoin', detail: 'Product listings viewed in the browser.' }, { title: 'WXT extension', detail: 'Content script, listing extraction and profile-based local storage.' }, { title: 'Vue interface', detail: 'Review, sorting and preparation of collected data.' }, { title: 'Odoo', detail: 'Product API, categories, pricing and storefront publishing.' }]} />
+<ArchitectureFlow title="From listing to online catalog" steps={[{ title: 'Leboncoin', detail: 'Seller profile pages opened in the browser.' }, { title: 'Content script', detail: 'Detects profile pages and extracts their listings.' }, { title: 'Background script', detail: 'Stores listings in local storage and merges them per profile.' }, { title: 'Vue 3 interface', detail: 'Review, sorting and filtering before work in Odoo.' }]} />
 
-The extension separates **content scripts** for reading listings, a **background script** managing collected data and a **Vue 3 popup** for browsing that data. Its Odoo integration contains the product models and API requests needed to handle catalogue items.
+The extension is built with **WXT**, **Vue 3**, Tailwind CSS and TypeScript. When a Leboncoin profile page opens, the **content script** extracts the listings without any click. The **background script** saves them in the browser's local storage, separately for each profile, and merges new results with the ones already saved. The **popup** lets the user switch profiles, sort listings by date or price, filter them by status (active, sold, removed) and open any of them in a new tab. A separate module talks to the Odoo API to handle products.
 
-The shop runs on my own hosting infrastructure rather than relying entirely on a hosted SaaS.
+The shop itself runs as an Odoo instance on my self-hosted infrastructure.
 
-## Technical trade-offs
+## Technical choices
 
-- **Reuse Odoo instead of rebuilding commerce features.** Existing software covers core store operations; custom code handles the business-specific workflow.
-- **Isolate extraction in an extension.** It operates on pages visited by the user, stores listings by profile and provides a review interface.
-- **Reconcile two data models.** Listings and store products need mapping between price, status, description, categories and images.
-- **Account for third-party markup changes.** HTML selectors can break when the external website changes, so the scraper must remain testable and maintainable.
+- **Reuse Odoo rather than rebuild a store.** Odoo covers the catalog, prices and the storefront; custom code only covers the workflow specific to the business.
+- **Extract in the browser.** The extension only reads pages the user opens and keeps the listings in the browser, with no separate scraping server.
+- **Map two data models.** A listing and a store product do not have the same fields: price, status, description, categories and images need a mapping step before publication.
 
-## Outcome and next steps
+## Results
 
-The shop is available at **[minitrainstore.fr](https://www.minitrainstore.fr/)**, and the repository contains the extension. The implemented features include collection, sorting, filtering and Odoo integration. I do not claim sales or time savings without measurements.
+The shop is live at **[minitrainstore.fr](https://www.minitrainstore.fr/)**. The repository holds the extension and the shop's assets, such as its business cards.
+
+## Limitations
+
+The extraction depends on Leboncoin's HTML: a change on their side can break the selectors, so the parsing code has to stay small and easy to fix. The listings are stored in one browser's local storage and are not shared between devices.
 
 ## Explore the project
 
 - [Mini Train Store](https://www.minitrainstore.fr/)
-- [Source code and assets](https://github.com/AlixANNERAUD/MiniTrainStore)
-- [Extension architecture](https://github.com/AlixANNERAUD/MiniTrainStore/blob/main/code/extension/README.md)
-
-[← All projects](/projects)
+- [Source code and assets](https://github.com/AlixANNERAUD/mini_train_store)
+- [Extension architecture](https://github.com/AlixANNERAUD/mini_train_store/blob/main/code/extension/README.md)

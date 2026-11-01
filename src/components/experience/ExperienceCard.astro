@@ -3,6 +3,7 @@ import { ArrowUpRight, MapPin } from "@lucide/astro";
 import Card from "../ui/Card.astro";
 import Tags from "../ui/Tags.astro";
 import type { Experience } from "../../data/experiences.ts";
+import { localize } from "../../data/types.ts";
 import { localizePath, type Locale } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
 
@@ -20,7 +21,9 @@ const { experience: entry, lang, variant = "full" } = Astro.props;
 const t = useTranslations(lang);
 const titleId = `${entry.id}-title`;
 const role = entry.role[lang];
+const company = localize(entry.company, lang);
 const location = entry.location[lang];
+const tags = entry.technologies.map((tag) => localize(tag, lang));
 ---
 
 {variant === "compact" ? (
@@ -34,21 +37,21 @@ const location = entry.location[lang];
       </span>
       <span class="home-experience-period">{entry.period[lang]}</span>
     </div>
-    <p class="home-experience-organization">{entry.company}</p>
+    <p class="home-experience-organization">{company}</p>
     <h3 id={`home-experience-${entry.id}`}>
       <a
         href={`${localizePath("/experiences", lang)}#${titleId}`}
         aria-label={t("experience.compactLinkLabel", {
           role,
-          company: entry.company,
+          company,
         })}
       >
-        {role} <span aria-hidden="true">↗</span>
+        {role} <span aria-hidden="true">→</span>
       </a>
     </h3>
     <p class="home-experience-summary">{entry.summary[lang]}</p>
     <ul class="home-experience-tags" aria-label={t("experience.areas")}>
-      {entry.technologies.slice(0, 2).map((tag) => (
+      {tags.slice(0, 2).map((tag) => (
         <li>{tag}</li>
       ))}
     </ul>
@@ -93,11 +96,12 @@ const location = entry.location[lang];
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {entry.company}
+                {company}
                 <ArrowUpRight size={15} aria-hidden="true" />
+                <span class="visually-hidden"> {t("a11y.newTab")}</span>
               </a>
             ) : (
-              <span>{entry.company}</span>
+              <span>{company}</span>
             )}
           </p>
           {entry.ongoing && (
@@ -127,9 +131,9 @@ const location = entry.location[lang];
       </ul>
     )}
 
-    {entry.technologies.length > 0 && (
+    {tags.length > 0 && (
       <Tags
-        tags={entry.technologies}
+        tags={tags}
         label={t("experience.technologies")}
         density="timeline"
       />
@@ -163,45 +167,55 @@ const location = entry.location[lang];
     height: 100%;
     display: flex;
     flex-direction: column;
-    padding: clamp(1.15rem, 2.3vw, 1.55rem);
+    padding: var(--space-m);
   }
   .home-experience-card-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.75rem;
-    margin-bottom: 1.1rem;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-s);
   }
   .home-experience-monogram {
     display: grid;
     place-items: center;
     width: 2.6rem;
     height: 2.6rem;
-    padding: 0 0.3rem;
-    border-radius: 0.55rem;
+    padding: 0 var(--space-3xs);
+    border-radius: var(--radius-m);
     border: 1px solid var(--color-border);
     color: var(--color-accent);
     background: var(--color-surface);
-    font:
-      650 0.85rem/1 ui-monospace,
-      monospace;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    font-weight: 600;
+    line-height: 1;
+    /* Monograms are initials: "a" for Amazon reads as "A". */
+    text-transform: uppercase;
   }
   .home-experience-period {
     color: var(--color-text-muted);
-    font-size: 0.77rem;
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: var(--tracking-tight);
     text-align: right;
   }
   .home-experience-organization {
-    margin: 0 0 0.3rem;
+    margin: 0 0 var(--space-3xs);
     color: var(--color-text-muted);
-    font-size: 0.81rem;
+    font-size: var(--step--1);
     font-weight: 600;
   }
+  /* Card titles share the serif display face with the project cards. */
   .experience-compact h3 {
-    margin: 0 0 0.65rem;
-    font-size: clamp(1.12rem, 1.8vw, 1.4rem);
-    line-height: 1.3;
-    letter-spacing: -0.02em;
+    margin: 0 0 var(--space-2xs);
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    font-weight: 500;
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-heading);
+    text-wrap: balance;
   }
   .experience-compact h3 a {
     color: var(--color-text);
@@ -215,25 +229,25 @@ const location = entry.location[lang];
     font-size: 0.83em;
   }
   .home-experience-summary {
-    margin: 0 0 1rem;
+    margin: 0 0 var(--space-s);
     color: var(--color-text-muted);
-    font-size: 0.87rem;
-    line-height: 1.6;
+    font-size: var(--step--1);
+    line-height: var(--leading-body);
   }
   .home-experience-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.35rem;
+    gap: var(--space-3xs);
     margin: auto 0 0;
     padding: 0;
     list-style: none;
   }
   .home-experience-tags li {
-    padding: 0.28rem 0.55rem;
-    border-radius: 0.35rem;
+    padding: var(--space-3xs) var(--space-2xs);
+    border-radius: var(--radius-s);
     background: var(--color-surface);
     color: var(--color-text-muted);
-    font-size: 0.71rem;
+    font-size: var(--step--2);
   }
 
   /* Full (timeline) card. */
@@ -261,10 +275,11 @@ const location = entry.location[lang];
   }
   .career-company-fallback,
   .career-company-logo::after {
-    font-family: ui-monospace, monospace;
-    font-size: 1.18rem;
+    font-family: var(--font-mono);
+    font-size: var(--step-1);
     font-weight: 700;
-    letter-spacing: -0.06em;
+    letter-spacing: var(--tracking-display);
+    text-transform: uppercase;
   }
   .career-company-logo {
     position: absolute;
@@ -319,9 +334,12 @@ const location = entry.location[lang];
     margin: 0;
     padding: 0;
     border: 0;
-    font-size: clamp(1.19rem, 2.2vw, 1.55rem);
-    line-height: 1.3;
-    letter-spacing: -0.025em;
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    font-weight: 500;
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-heading);
+    text-wrap: balance;
   }
   .career-current-label {
     display: inline-flex;
@@ -352,7 +370,9 @@ const location = entry.location[lang];
     overflow: hidden;
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
-    font-weight: 600;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: var(--tracking-tight);
   }
   .career-location {
     display: inline-flex;

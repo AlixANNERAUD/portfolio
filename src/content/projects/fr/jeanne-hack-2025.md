@@ -1,30 +1,20 @@
 ---
-title: "Jeanne d'Hack CTF (Université de Rouen)"
-description: "Troisième place au classement général du CTF Jeanne d'Hack 2025."
+title: "Jeanne d’Hack CTF 2025 : troisième place"
+description: "Troisième place au classement général du CTF Jeanne d’Hack 2025, une compétition de cybersécurité à l’Université de Rouen, avec l’équipe Les Schtroumpfs."
 ---
 
-[← Tous les projets](/fr/projects)
-
-# Jeanne d'Hack CTF (Université de Rouen)
-
-**CTF** · 2025
-
-> Troisième place au classement général du CTF Jeanne d'Hack 2025.
+# Jeanne d’Hack CTF 2025 : troisième place au classement général
 
 ## Présentation
 
-Équipe "Les Schtroumpfs" : <a href="https://www.jeanne-hack-ctf.org/post/2025/">3ème place au classement général</a>.
+Au CTF Jeanne d’Hack 2025, une compétition de cybersécurité organisée à l’Université de Rouen Normandie, notre équipe « Les Schtroumpfs » a terminé à la troisième place du classement général.
 
-## Démarche technique
+## Contexte
 
-Cette participation est un jalon du parcours en sécurité : analyse d'énoncés, résolution d'épreuves et collaboration en équipe. Le classement cité appartient à l'édition 2025 du CTF.
+Dans un CTF (« capture the flag », la capture du drapeau), les équipes résolvent des épreuves de sécurité informatique. Chaque épreuve résolue révèle une chaîne secrète, le drapeau, qui rapporte des points. Le classement récompense l’équipe entière : cette place est un résultat collectif.
 
-## Portée et limites
+J’ai participé à l’édition suivante sous le nom d’équipe « #JeSuisAlix », qui a terminé première ex æquo.
 
-Participation en équipe à une compétition : le résultat collectif est cité tel qu'il est publié par l'organisateur. Cette fiche ne présume pas du détail des épreuves résolues individuellement.
+## Consulter le résultat
 
-## Explorer le projet
-
-[Dépôt, documentation ou résultat officiel](https://www.jeanne-hack-ctf.org/post/2025/) ↗
-
-**Dans le même domaine :** [Jeanne d'Hack CTF (Université de Rouen)](/fr/projects/jeanne-hack-2026) · [TRACS (DGSE)](/fr/projects/tracs-2024)
+- [Résultats de l’édition 2025](https://www.jeanne-hack-ctf.org/post/2025/) sur le site des organisateurs

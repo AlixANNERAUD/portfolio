@@ -1,51 +1,48 @@
 ---
-title: Xila - système d'exploitation embarqué en Rust
-description: Architecture et choix techniques du système Xila, avec noyau Rust, modules, pilotes, WebAssembly et LVGL.
+title: "Xila : un OS Rust modulaire pour l’embarqué"
+description: "Xila est un système d’exploitation libre en Rust pour microcontrôleurs : applications WebAssembly sur Wasmi, interface LVGL et démo dans le navigateur."
 ---
 
 import ArchitectureFlow from "../../../components/mdx/ArchitectureFlow.astro";
 import XilaBrowserDemo from "../../../components/xila/XilaBrowserDemo.astro";
 
-# Xila : construire un OS modulaire pour l'embarqué
-
-**Rust · WebAssembly · LVGL · systèmes embarqués** · Depuis 2019
-
-> Un projet open source de longue durée : faire cohabiter des services système portables et des applications isolées sur des machines aux ressources limitées.
+# Xila : un système d’exploitation embarqué modulaire en Rust
 
 ## Le problème
 
-Sur un microcontrôleur, la mémoire, le stockage et le budget CPU limitent rapidement la complexité des logiciels. Pourtant, je voulais retrouver une expérience de développement modulaire : pilotes séparés, abstraction des périphériques, stockage, tâches, interface graphique et possibilité d'exécuter des applications sans les intégrer systématiquement au noyau.
+Sur un microcontrôleur, la mémoire, le stockage et le processeur sont comptés, et la plupart des micrologiciels finissent en un seul programme conçu pour une seule carte. Je voulais retrouver sur ces machines le confort d’un système modulaire : des pilotes séparés, un système de fichiers, des tâches, une interface graphique et des applications qui ne sont pas compilées dans l’image du système.
 
-L'enjeu n'était donc pas simplement d'afficher une interface sur un ESP32, mais de **définir des contrats réutilisables** entre services système, matériels et programmes.
+L’essentiel du travail consiste donc à **définir des contrats réutilisables** entre les services du système, le matériel et les programmes, plutôt qu’à viser une carte en particulier.
 
 ## Architecture
 
-<ArchitectureFlow title="Couches principales de Xila" steps={[{ title: 'Pilotes', detail: 'Adaptation aux cibles matérielles, à Linux natif et au navigateur.' }, { title: 'Modules Rust', detail: 'Tâches, utilisateurs, VFS, réseau, graphique et services du système.' }, { title: 'Frontière d’exécution', detail: 'Contrats ABI, liaison hôte/invité et machine virtuelle WebAssembly.' }, { title: 'Applications', detail: 'Programmes embarqués, shell et applications Wasm.' }]} />
+<ArchitectureFlow title="Couches principales de Xila" steps={[{ title: 'Pilotes', detail: 'Cibles Linux natif, navigateur et matériel, assemblées dans le dépôt Platforms.' }, { title: 'Sous-systèmes', detail: 'Tâches, VFS, réseau, graphisme, mémoire et temps, écrits en Rust.' }, { title: 'Frontière d’exécution', detail: 'Moteur Wasmi et liaisons entre invité et hôte.' }, { title: 'Applications', detail: 'Invités WebAssembly comme Calculator et Weather, et le shell graphique.' }]} />
 
-Le dépôt sépare notamment les **modules** qui pilotent l'état du système, les **crates** contenant contrats et utilitaires, les **drivers** propres à une cible et les **exécutables**. Un appel fichier d'une application passe par le VFS et ses règles d'accès avant d'atteindre un backend comme LittleFS ou un périphérique.
+Le code est réparti entre trois dépôts. **Core** regroupe les crates portables, **Applications** les programmes officiels et le moteur Wasmi, et **Platforms** les pilotes concrets et l’assemblage final pour chaque cible. Chaque crate a l’un de ces quatre rôles : un **sous-système** gère un service d’exécution, une **bibliothèque** définit des contrats ou des implémentations, un **pilote** adapte une fonction à une plateforme, et un **exécutable** est un programme qui utilise les services assemblés.
 
-Côté applications invitées, Xila utilise un runtime **Wasmi** : les appels exposés aux programmes WebAssembly rejoignent les mêmes services que ceux utilisés par les composants natifs. L'interface graphique s'appuie notamment sur **LVGL**.
+Une requête de fichier passe par le VFS, puis par les contrats du système de fichiers, avant d’atteindre une instance LittleFS montée ou un pilote de périphérique. Un invité WebAssembly suit le même chemin à travers les liaisons du moteur : il atteint les mêmes gestionnaires de sous-systèmes que les programmes natifs.
 
-## Décisions d'ingénierie
+## Choix techniques
 
-- **Cœur en Rust, applications WebAssembly.** Les services système sont développés en Rust, tandis que le format Wasm ouvre la porte à des programmes séparés du système hôte, avec une frontière d'exécution explicite.
-- **Abstractions avant portages.** Les interfaces des périphériques et du système de fichiers sont réutilisables ; les pilotes réalisent l'adaptation aux différentes cibles.
-- **Développement natif et navigateur.** Un environnement Linux et un exemple dans le navigateur permettent d'itérer plus facilement avant de confronter les composants au matériel embarqué. Le stockage navigateur s'appuie sur une image disque et OPFS.
-- **Compromis assumés.** L'interpréteur WebAssembly, les abstractions et l'interface graphique ont un coût en mémoire et en performances qui doit être mesuré selon la carte et le cas d'usage.
+- **Système en Rust, applications en WebAssembly.** Les services sont écrits en Rust ; les applications sont des binaires Wasm séparés, exécutés par l’interpréteur **Wasmi** derrière une frontière d’exécution explicite.
+- **Ordonnancement coopératif par carburant.** L’exécution d’un invité consomme du carburant ; quand il est épuisé, ou quand l’invité cède la main, le contrôle revient à l’exécuteur. Les fonctions sont traduites avant l’exécution pour qu’une pause n’interrompe jamais une traduction, au prix d’un démarrage plus long.
+- **Thème d’interface partagé.** La couche graphique utilise **LVGL** avec [lvgl_theme_shadcn](/fr/projects/lvgl-theme-shadcn), un thème que je maintiens aussi comme bibliothèque indépendante.
+- **Langues intégrées au binaire.** Chaque langue est intégrée à la compilation, avec l’anglais en repli et des catalogues pour le français, l’espagnol, l’allemand, le portugais du Brésil, l’italien et le polonais.
+- **Développer d’abord sous Linux et dans le navigateur.** La cible native permet d’observer plus facilement l’usage du processeur et de la mémoire avant de tester le code commun sur une carte embarquée.
 
-## Essayer Xila en WebAssembly
+## Résultats
+
+Xila est un logiciel libre sous licence Apache 2.0, documenté sur [xila.dev](https://www.xila.dev/docs/) avec des tutoriels et une carte des composants. La démo dans le navigateur exécute le système compilé en WebAssembly, avec des applications WASI séparées : Calculator, Clock, Pixel Painter, Text Editor, Synth et Weather. Elle enregistre son disque dans le navigateur grâce à OPFS.
 
 <XilaBrowserDemo lang="fr" />
 
-## État et limites
+## Limites
 
-Xila est **en développement actif**. La présence d'un exemple natif ou navigateur ne garantit pas qu'une carte particulière dispose de tous les pilotes requis. Je n'avance pas de ratio de performance face au natif sans mesure reproductible.
+Xila est en développement actif, et la prise en charge du matériel varie selon la cible. Les exemples natif et navigateur sont des environnements de développement : ils ne prouvent pas qu’une carte donnée soit prise en charge, et les vérifications lancées sur l’hôte Linux ne prouvent pas que le code soit correct sur ESP32, nRF ou STM32. L’interpréteur Wasm, les couches d’abstraction et LVGL coûtent de la mémoire et du temps de calcul, à mesurer sur l’appareil visé.
 
 ## Explorer le projet
 
 - [Code source de Xila Core](https://github.com/xila-project/core)
-- [Documentation et carte des composants](https://www.xila.dev/explanation/architecture/components)
-- [Tutoriel du portage navigateur](https://www.xila.dev/tutorials/browser)
-- [Tutoriel d'exécution native](https://www.xila.dev/tutorials/native)
-
-[← Tous les projets](/fr/projects)
+- [Documentation](https://www.xila.dev/docs/) et [carte des composants](https://www.xila.dev/explanation/architecture/components)
+- [Démo dans le navigateur](https://platforms.xila.dev/demonstrations/wasm/fr/)
+- [Tutoriel d’exécution native](https://www.xila.dev/tutorials/native)

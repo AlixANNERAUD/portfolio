@@ -26,8 +26,18 @@ const t = useTranslations(lang);
 
 const recent = entries.filter((entry) => !entry.earlier);
 const earlier = entries.filter((entry) => entry.earlier);
-const eyebrow = (count: number) =>
-  `${String(index).padStart(2, "0")} / ${formatCount(count, "milestone", lang)}`;
+// "3 earlier roles": the toggle says how many cards it reveals.
+const earlierItems = formatCount(
+  earlier.length,
+  group === "professional" ? "earlierRole" : "earlierMilestone",
+  lang,
+);
+const showLabel = t(`experiences.${group}.showEarlier`, {
+  items: earlierItems,
+});
+const hideLabel = t(`experiences.${group}.hideEarlier`, {
+  items: earlierItems,
+});
 const headingId = `${group}-heading`;
 const earlierId = `earlier-${group}`;
 const Icon = group === "professional" ? BriefcaseBusiness : GraduationCap;
@@ -36,7 +46,8 @@ const Icon = group === "professional" ? BriefcaseBusiness : GraduationCap;
 <section id={group} class="career-group" aria-labelledby={headingId}>
   <SectionHeading
     headingId={headingId}
-    eyebrow={eyebrow(entries.length)}
+    eyebrow={t(`experiences.${group}.eyebrow`)}
+    index={index}
     title={t(`experiences.${group}.title`)}
     description={t(`experiences.${group}.description`)}
   >
@@ -64,13 +75,11 @@ const Icon = group === "professional" ? BriefcaseBusiness : GraduationCap;
         class="career-earlier-toggle"
         aria-expanded="false"
         aria-controls={earlierId}
-        data-label-show={t(`experiences.${group}.showEarlier`)}
-        data-label-hide={t(`experiences.${group}.hideEarlier`)}
-        data-eyebrow-collapsed={eyebrow(recent.length)}
-        data-eyebrow-expanded={eyebrow(entries.length)}
+        data-label-show={showLabel}
+        data-label-hide={hideLabel}
         hidden
       >
-        <span>{t(`experiences.${group}.showEarlier`)}</span>
+        <span>{showLabel}</span>
         <ChevronDown size={17} aria-hidden="true" />
       </button>
       <ol id={earlierId} class="career-timeline career-timeline--earlier">
@@ -96,21 +105,13 @@ const Icon = group === "professional" ? BriefcaseBusiness : GraduationCap;
       button.getAttribute("aria-controls") ?? "",
     );
     const label = button.querySelector("span");
-    const eyebrow = button
-      .closest(".career-group")
-      ?.querySelector(".editorial-section-heading__eyebrow");
     if (!list || !label) continue;
 
     const render = (expanded: boolean) => {
       button.setAttribute("aria-expanded", String(expanded));
       list.hidden = !expanded;
-      const { labelShow, labelHide, eyebrowCollapsed, eyebrowExpanded } =
-        button.dataset;
+      const { labelShow, labelHide } = button.dataset;
       label.textContent = (expanded ? labelHide : labelShow) ?? "";
-      if (eyebrow) {
-        eyebrow.textContent =
-          (expanded ? eyebrowExpanded : eyebrowCollapsed) ?? "";
-      }
     };
 
     render(false);
@@ -123,7 +124,7 @@ const Icon = group === "professional" ? BriefcaseBusiness : GraduationCap;
 
 <style>
   .career-group {
-    margin: 0 0 4.5rem;
+    margin: 0 0 var(--space-2xl);
   }
   .career-timeline {
     margin: 0;
@@ -131,7 +132,7 @@ const Icon = group === "professional" ? BriefcaseBusiness : GraduationCap;
     list-style: none;
   }
   .career-timeline--earlier {
-    margin-bottom: 0.3rem;
+    margin-bottom: var(--space-3xs);
   }
   .career-timeline[hidden] {
     display: none;
@@ -139,14 +140,14 @@ const Icon = group === "professional" ? BriefcaseBusiness : GraduationCap;
   .career-timeline-item {
     display: grid;
     grid-template-columns: 11rem minmax(0, 1fr);
-    gap: 1.5rem;
+    gap: var(--space-m);
   }
   .career-timeline-rail {
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    padding: 1.7rem 1.5rem 0 0;
+    padding: var(--space-l) var(--space-m) 0 0;
     border-right: 1px solid var(--color-border);
   }
   .career-timeline-item:last-child .career-timeline-rail {
@@ -155,7 +156,8 @@ const Icon = group === "professional" ? BriefcaseBusiness : GraduationCap;
   .career-timeline-dot {
     position: absolute;
     z-index: 1;
-    top: 2.1rem;
+    /* Level with the first line of the date. */
+    top: calc(var(--space-l) + 0.4rem);
     right: -0.34rem;
     width: 0.68rem;
     height: 0.68rem;
@@ -165,30 +167,42 @@ const Icon = group === "professional" ? BriefcaseBusiness : GraduationCap;
   }
   .career-timeline-date {
     color: var(--color-text-muted);
-    font-size: 0.76rem;
-    line-height: 1.5;
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: var(--tracking-tight);
+    line-height: var(--leading-body);
     text-align: right;
   }
+  /*
+   * The toggle reads as an editorial link on the rail (accent text, chevron,
+   * underline on hover) rather than a grey box. It aligns with the cards.
+   */
   .career-earlier-toggle {
     display: inline-flex;
+    min-height: var(--control-size);
     align-items: center;
-    justify-content: center;
-    gap: 0.55rem;
-    margin: 0.25rem 0 1.5rem 12.5rem;
-    padding: 0.7rem 0.95rem;
-    border: 1px solid var(--color-border);
-    border-radius: 0.55rem;
-    background: var(--color-surface);
+    gap: var(--space-2xs);
+    margin: 0 0 var(--space-m) calc(11rem + var(--space-m));
+    padding: 0 var(--space-s);
+    border: 1px dashed var(--color-border-strong);
+    border-radius: var(--radius-full);
+    background: transparent;
     color: var(--color-accent);
-    font-size: 0.88rem;
-    font-weight: 650;
+    font-size: var(--step--1);
+    font-weight: 600;
     cursor: pointer;
+    transition:
+      border-color var(--dur-fast) var(--ease-out),
+      background-color var(--dur-fast) var(--ease-out);
   }
   .career-earlier-toggle[hidden] {
     display: none;
   }
   .career-earlier-toggle:hover {
+    border-style: solid;
     border-color: var(--color-accent);
+    background: var(--color-accent-soft);
   }
   .career-earlier-toggle > span {
     min-width: 0;
@@ -196,7 +210,8 @@ const Icon = group === "professional" ? BriefcaseBusiness : GraduationCap;
     text-align: left;
   }
   .career-earlier-toggle svg {
-    transition: transform 160ms ease;
+    flex: none;
+    transition: transform var(--dur-fast) var(--ease-out);
   }
   .career-earlier-toggle[aria-expanded="true"] svg {
     transform: rotate(180deg);
@@ -204,7 +219,7 @@ const Icon = group === "professional" ? BriefcaseBusiness : GraduationCap;
   @media (max-width: 680px) {
     .career-timeline-item {
       grid-template-columns: 1.1rem minmax(0, 1fr);
-      gap: 0.65rem;
+      gap: var(--space-2xs);
     }
     .career-timeline-rail {
       padding: 0;
@@ -217,9 +232,8 @@ const Icon = group === "professional" ? BriefcaseBusiness : GraduationCap;
       top: 1.4rem;
     }
     .career-earlier-toggle {
-      margin-left: 1.75rem;
-      max-width: calc(100% - 1.75rem);
-      white-space: normal;
+      max-width: calc(100% - 1.1rem - var(--space-2xs));
+      margin-left: calc(1.1rem + var(--space-2xs));
     }
   }
 </style>

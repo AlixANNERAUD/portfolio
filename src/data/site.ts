@@ -1,17 +1,53 @@
 import type { Locale } from "../i18n/locales.ts";
 
+const social = {
+  github: "https://github.com/AlixANNERAUD",
+  linkedin: "https://www.linkedin.com/in/alix-anneraud/",
+  matrix: "https://matrix.to/#/@alix:anneraud.fr",
+} as const;
+
 /** Public identity and external endpoints shared by the layout, footer and SEO. */
 export const site = {
   url: "https://alix.anneraud.fr",
   name: "Alix ANNERAUD",
   email: "alix@anneraud.fr",
-  /** Default social preview image, relative to `url`. */
+  /** Portrait used as the Person image in structured data, relative to `url`. */
   image: "/images/alix.webp",
-  social: {
-    github: "https://github.com/AlixANNERAUD",
-    linkedin: "https://www.linkedin.com/in/alix-anneraud/",
-    matrix: "https://matrix.to/#/@alix:anneraud.fr",
+  /**
+   * Social card per locale (the tagline is translated), relative to `url`.
+   * Generated with `npm run images`, see scripts/generate-images.mjs.
+   */
+  ogImage: {
+    src: { en: "/images/og-default.png", fr: "/images/og-default.fr.png" },
+    width: 1200,
+    height: 630,
+    type: "image/png",
+  } satisfies {
+    src: Record<Locale, string>;
+    width: number;
+    height: number;
+    type: string;
   },
+  /** Browser chrome colors: hex equivalents of the --color-bg token. */
+  themeColor: { light: "#fdfdff", dark: "#1a1a1e" },
+  social,
+  /**
+   * Person `sameAs` in structured data: the social profiles, plus the
+   * crates.io profile and the Xila GitHub organization, not shown as links.
+   */
+  sameAs: [
+    ...Object.values(social),
+    "https://crates.io/users/AlixANNERAUD",
+    "https://github.com/xila-project",
+  ],
+  /** Profiles listed in the footer, in display order (brand names). */
+  profiles: [
+    { label: "GitHub", href: social.github },
+    { label: "LinkedIn", href: social.linkedin },
+    { label: "Matrix", href: social.matrix },
+  ],
+  /** Public repository of this website, released under the MIT license. */
+  source: "https://github.com/AlixANNERAUD/portfolio",
   resumePdf: {
     en: "https://resume.alix.anneraud.fr/Resume.english.pdf",
     fr: "https://resume.alix.anneraud.fr/Resume.français.pdf",

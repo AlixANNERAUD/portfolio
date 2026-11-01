@@ -1,30 +1,24 @@
 ---
-title: "Robot mouche"
-description: "Robot C++ pilotable en Wi-Fi ou autonome avec suivi de ligne et détection d'obstacles."
+title: "Robot mouche : un robot Raspberry Pi en C++"
+description: "Un robot Raspberry Pi 4 programmé en C++ à quatre à l’INSA Rouen, piloté en Wi-Fi depuis une page web ou suivant une ligne repérée par sa caméra."
 ---
 
-[← Tous les projets](/fr/projects)
-
-# Robot mouche
-
-**C++** · 2023
-
-> Robot C++ pilotable en Wi-Fi ou autonome avec suivi de ligne et détection d'obstacles.
+# Robot mouche : un robot télécommandé et suiveur de ligne
 
 ## Présentation
 
-Conception et programmation en C++ d'un robot polyvalent : il peut être piloté à distance via WiFi ou fonctionner de manière autonome en suivant une ligne et en évitant les obstacles grâce à un capteur LiDAR et une caméra.
+Pour le cours « Électronique pour les systèmes embarqués » de l’INSA Rouen Normandie, en 2023, notre équipe de quatre a construit un robot à deux modes : piloté librement en Wi-Fi depuis un panneau de commande web, ou suivant une ligne au sol grâce à sa caméra tout en surveillant les obstacles avec un capteur LiDAR.
 
-## Démarche technique
+Le robot s’articule autour d’un Raspberry Pi 4, avec un pilote L293D pour ses deux moteurs, un LiDAR courte portée Benewake TF-Luna, un module caméra à capteur OV5647, un écran LCD 16×2 relié par un extenseur I²C et un amplificateur MAX98357A pour jouer des sons.
 
-Le robot combine deux modes de commande : contrôle distant sur Wi-Fi et comportement autonome fondé sur des capteurs. L'intégration logicielle doit relier moteurs, caméra et télémètre tout en conservant des interactions pilotables.
+## Choix techniques
 
-## Portée et limites
-
-Travail réalisé dans un cadre académique ou de recherche, pouvant être collectif. Il illustre une démarche d'ingénierie ou une expérimentation et n'est pas présenté comme un produit commercial déployé.
+- **Un programme C++ sous Linux.** Le programme principal, compilé avec PlatformIO, utilise WiringPi pour accéder aux GPIO et cpp-httplib pour son serveur HTTP.
+- **Un panneau de commande web.** Une page web statique pilote le robot par une petite API HTTP : direction et vitesse du joystick, réglages comme le mode actif, et sons à jouer. Le programme convertit la direction en une vitesse pour chaque moteur.
+- **La détection de ligne dans un processus séparé.** Au passage en mode suiveur de ligne, le programme C++ lance un script Python qui capture les images de la caméra avec Picamera2 et réduit les premières lignes de chaque image à un profil de luminosité de 640 valeurs. Le programme C++ lit ce profil, repère la ligne d’après les pixels qui dépassent un seuil et convertit sa position en angle de braquage. Quand la ligne est perdue, le robot tourne du côté où il l’a vue en dernier.
+- **Un arrêt devant les obstacles.** En mode suiveur de ligne, le robot s’arrête tant que le LiDAR mesure un obstacle à moins de 5 cm. L’écran affiche la distance mesurée ou une alerte, et un son est joué.
+- **Testable sans le robot.** L’accès aux GPIO passe par une interface d’abstraction des broches, avec une implémentation pour le Raspberry Pi 4 et une implémentation native : le code se compile ainsi hors du robot. GitHub Actions exécute un test Unity du régulateur PID, que la version finale du suivi de ligne n’utilise pas.
 
 ## Explorer le projet
 
-[Dépôt, documentation ou résultat officiel](https://github.com/AlixANNERAUD/Robot_Mouche) ↗
-
-**Dans le même domaine :** [Réseau ferroviaire miniature](/fr/projects/model-railway) · [Enceinte connectée](/fr/projects/connected-speaker)
+- [Code source](https://github.com/AlixANNERAUD/robot_mouche) : programme C++, script Python de la caméra et panneau de commande web.

@@ -1,30 +1,21 @@
 ---
-title: "Connected speaker"
-description: "An ESP32-powered Wi-Fi control interface for a hi-fi amplifier."
+title: "Connected speaker: Wi-Fi amplifier control"
+description: "An ESP32 that controls a TDA7294 hi-fi amplifier over Wi-Fi or with infrared remotes: volume, mute and power, from a web interface served by the board."
 ---
 
-[← All projects](/projects)
-
-# Connected speaker
-
-**C++ · JavaScript** · 2023
-
-> An ESP32-powered Wi-Fi control interface for a hi-fi amplifier.
+# Connected speaker: Wi-Fi and infrared control for a hi-fi amplifier
 
 ## Overview
 
-Built a wireless remote control system for a TDA7294-based hi-fi amplifier using an ESP32 and off-the-shelf components. The ESP32 hosts a web interface to control volume, input selection, and power from any device on the local network.
+For parties at home, I wanted a speaker I could control over Wi-Fi or with an infrared remote. I built a control system for a TDA7294-based amplifier board, using an ESP32 and off-the-shelf components. The ESP32 serves a web interface from which any device on the local network can set the volume, mute the amplifier or switch it off.
 
-## Engineering approach
+## Technical choices
 
-An ESP32 provides local control: a browser acts as the interface while the microcontroller manages the amplifier's input selection and volume. The project illustrates integration between hardware and an embedded web interface.
-
-## Scope and limitations
-
-Personal project: design choices and long-term maintenance shape its evolution. This page describes documented capabilities rather than unmeasured results.
+- **Closed-loop volume.** The ESP32 drives the volume potentiometer up or down until the position it reads on an analog input matches the requested level. The amplifier is switched off when the volume is at zero or muted.
+- **Remotes learned from the browser.** The web interface records the power, volume and mute codes of up to five infrared remotes, so any existing remote can be reused.
+- **Web server on the microcontroller.** An asynchronous web server serves the HTML, CSS and JavaScript pages from the ESP32's flash memory, behind a login whose sessions expire after five minutes.
+- **No cable needed for setup.** The board joins the home Wi-Fi network or, if it cannot, opens its own access point. It announces itself with mDNS, accepts firmware updates over Wi-Fi, and an RGB LED shows its state.
 
 ## Explore the project
 
-[Source repository, documentation or official result](https://github.com/AlixANNERAUD/Connected_speaker) ↗
-
-**Related work:** [Model railway network](/projects/model-railway) · [lvgl_theme_shadcn](/projects/lvgl-theme-shadcn)
+- [Source code](https://github.com/AlixANNERAUD/connected_speaker): C++ firmware built with PlatformIO, and the web interface.

@@ -26,7 +26,8 @@ const creditsHref = `${localizePath("/legal-notice", lang)}#${t("legal.logoCredi
 <BaseLayout
   lang={lang}
   path="/experiences"
-  title={t("nav.experiences")}
+  title={t("experiences.metaTitle")}
+  trail={[{ name: t("nav.experiences"), path: "/experiences" }]}
   description={t("experiences.description")}
 >
   <div class="career-showcase editorial-page">
@@ -48,7 +49,7 @@ const creditsHref = `${localizePath("/legal-notice", lang)}#${t("legal.logoCredi
     ))}
 
     <NextLink
-      eyebrow={t("next.eyebrow")}
+      lang={lang}
       title={t("experiences.nextTitle")}
       description={t("experiences.nextDescription")}
       href={localizePath("/projects", lang)}
@@ -56,7 +57,7 @@ const creditsHref = `${localizePath("/legal-notice", lang)}#${t("legal.logoCredi
     />
     <p class="career-logo-credits">
       <a href={creditsHref}>
-        {t("experiences.logoCredits")} <span aria-hidden="true">↗</span>
+        {t("experiences.logoCredits")} <span aria-hidden="true">→</span>
       </a>
     </p>
   </div>

@@ -1,5 +1,4 @@
 ---
-import { Languages } from "@lucide/astro";
 import SectionHeading from "../ui/SectionHeading.astro";
 import { spokenLanguages } from "../../data/skills.ts";
 import type { Locale } from "../../i18n/locales.ts";
@@ -8,9 +7,11 @@ import { useTranslations } from "../../i18n/ui.ts";
 /** Spoken languages and their proficiency. */
 interface Props {
   lang: Locale;
+  /** Position of the section on the page, numbering its overline. */
+  index: number;
 }
 
-const { lang } = Astro.props;
+const { lang, index } = Astro.props;
 const t = useTranslations(lang);
 const languages = spokenLanguages;
 ---
@@ -23,13 +24,11 @@ const languages = spokenLanguages;
   <SectionHeading
     headingId="skills-languages-heading"
     eyebrow={t("skills.languages.eyebrow")}
+    index={index}
     title={t("skills.languages.title")}
     description={t("skills.languages.intro")}
-  >
-    <span slot="aside" class="skills-language-icon" aria-hidden="true">
-      <Languages size={26} stroke-width={1.75} />
-    </span>
-  </SectionHeading>
+    count={{ value: languages.length, label: t("skills.languages.count") }}
+  />
 
   <ul class="skills-language-grid">
     {languages.map((language) => (
@@ -48,23 +47,12 @@ const languages = spokenLanguages;
 
 <style>
   .skills-languages {
-    margin-bottom: 4rem;
-  }
-  .skills-language-icon {
-    display: grid;
-    flex: 0 0 auto;
-    place-items: center;
-    width: 3.25rem;
-    height: 3.25rem;
-    border: 1px solid var(--color-border);
-    border-radius: 0.75rem;
-    background: var(--color-surface);
-    color: var(--color-accent);
+    margin-bottom: var(--space-2xl);
   }
   .skills-language-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.8rem;
+    gap: var(--space-xs);
     padding: 0;
     margin: 0;
     list-style: none;
@@ -72,28 +60,31 @@ const languages = spokenLanguages;
   .skills-language-grid li {
     display: flex;
     flex-direction: column;
-    gap: 0.55rem;
+    gap: var(--space-2xs);
     min-width: 0;
     min-height: 8rem;
-    padding: 1.3rem;
+    padding: var(--space-m);
     border: 1px solid var(--color-border);
-    border-radius: 0.75rem;
+    border-radius: var(--radius-l);
     background: var(--color-surface);
   }
   .skills-language-grid strong {
     color: var(--color-text);
-    font-size: 1.03rem;
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-weight: 500;
   }
   .skills-language-proficiency {
     color: var(--color-text-muted);
-    font-size: 0.85rem;
+    font-size: var(--step--1);
   }
   .skills-language-detail {
     margin-top: auto;
     color: var(--color-accent);
-    font-size: 0.74rem;
-    font-weight: 650;
-    letter-spacing: 0.02em;
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    font-weight: 600;
+    letter-spacing: var(--tracking-mono);
   }
   @media (max-width: 720px) {
     .skills-language-grid {
@@ -102,10 +93,7 @@ const languages = spokenLanguages;
   }
   @media (max-width: 560px) {
     .skills-language-grid li {
-      padding: 1rem;
-    }
-    .skills-language-icon {
-      display: none;
+      padding: var(--space-s);
     }
   }
 </style>

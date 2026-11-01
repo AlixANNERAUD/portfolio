@@ -1,45 +1,42 @@
 ---
-title: Mini Train Store - commerce et automatisation
-description: Une étude de cas autour d'Odoo auto-hébergé et d'une extension Vue/WXT pour gérer les annonces Leboncoin.
+title: "Mini Train Store : boutique et extension"
+description: "Une boutique Odoo auto-hébergée pour un commerce familial de trains miniatures, avec une extension WXT et Vue 3 qui collecte et trie les annonces Leboncoin."
 ---
 
 import ArchitectureFlow from "../../../components/mdx/ArchitectureFlow.astro";
 
-# Mini Train Store : relier une boutique en ligne à la gestion des annonces
-
-**Odoo · Vue 3 · WXT · TypeScript · Docker** · Depuis 2026
-
-> Transformer un besoin familial concret en outils logiciels : boutique, gestion du catalogue et automatisation autour des annonces existantes.
+# Mini Train Store : une boutique en ligne reliée aux annonces Leboncoin
 
 ## Le problème
 
-Le commerce de trains miniatures de mon père reposait notamment sur des annonces publiées sur Leboncoin. Pour disposer d'une boutique indépendante, il fallait une solution permettant de présenter les produits tout en réduisant la ressaisie et les manipulations de stock.
+Le commerce de trains miniatures de mon père vendait en partie par des annonces publiées sur Leboncoin. Une boutique en ligne indépendante devait proposer les mêmes produits, sans ressaisir chaque annonce à la main ni tenir deux stocks en parallèle.
 
-J'ai déployé **Odoo en auto-hébergement** et développé une **extension de navigateur** dédiée aux annonces Leboncoin. L'objectif est de rendre le travail quotidien plus simple, sans construire de zéro un moteur e-commerce.
+Plutôt que de développer une boutique de zéro, j’ai déployé **Odoo** sur mes propres serveurs et écrit une **extension de navigateur** pour la partie propre au commerce : sortir les annonces de Leboncoin pour alimenter le catalogue.
 
 ## Architecture
 
-<ArchitectureFlow title="De l'annonce au catalogue e-commerce" steps={[{ title: 'Leboncoin', detail: 'Annonces consultées dans le navigateur.' }, { title: 'Extension WXT', detail: 'Content script, collecte des fiches et stockage local par profil.' }, { title: 'Interface Vue', detail: 'Vérification, tri et préparation des informations.' }, { title: 'Odoo', detail: 'API produits, catégories, prix et publication de la boutique.' }]} />
+<ArchitectureFlow title="De l’annonce au catalogue en ligne" steps={[{ title: 'Leboncoin', detail: 'Pages de profil vendeur ouvertes dans le navigateur.' }, { title: 'Script de contenu', detail: 'Détecte les pages de profil et en extrait les annonces.' }, { title: 'Script d’arrière-plan', detail: 'Enregistre les annonces dans le stockage local et les fusionne par profil.' }, { title: 'Interface Vue 3', detail: 'Vérification, tri et filtrage avant le travail dans Odoo.' }]} />
 
-L'extension associe des **content scripts** pour lire les annonces, un **background script** pour gérer les données et un **popup Vue 3** pour consulter les éléments collectés. La couche d'intégration Odoo possède ses propres modèles de données et requêtes API pour la gestion des produits.
+L’extension est construite avec **WXT**, **Vue 3**, Tailwind CSS et TypeScript. À l’ouverture d’une page de profil Leboncoin, le **script de contenu** extrait les annonces sans aucun clic. Le **script d’arrière-plan** les enregistre dans le stockage local du navigateur, séparément pour chaque profil, et fusionne les nouveaux résultats avec ceux déjà enregistrés. La **fenêtre de l’extension** permet de changer de profil, de trier les annonces par date ou par prix, de les filtrer par statut (active, vendue, retirée) et d’en ouvrir une dans un nouvel onglet. Un module distinct dialogue avec l’API d’Odoo pour gérer les produits.
 
-La boutique est déployée sur mon infrastructure, au lieu de déléguer toute la gestion à un fournisseur SaaS.
+La boutique elle-même est une instance Odoo hébergée sur mon infrastructure personnelle.
 
-## Arbitrages techniques
+## Choix techniques
 
-- **Réutiliser Odoo plutôt que recoder un commerce complet.** Le cœur métier bénéficie d'un logiciel établi ; l'extension se concentre sur les opérations propres au commerce.
-- **Isoler l'extraction dans une extension.** Elle travaille sur les pages que l'utilisateur consulte, stocke les annonces par profil et fournit une interface de vérification.
-- **Contrôler les données avant publication.** Les annonces et les produits ne partagent pas nécessairement tous leurs champs : prix, statut, description, catégories et images exigent une étape de correspondance.
-- **Assumer la fragilité des sélecteurs externes.** Les changements HTML du site tiers peuvent casser l'extraction ; l'extension doit donc rester testable et maintenable.
+- **Réutiliser Odoo plutôt que recréer une boutique.** Odoo gère le catalogue, les prix et la vitrine ; le code spécifique ne couvre que le fonctionnement propre au commerce.
+- **Extraire dans le navigateur.** L’extension ne lit que les pages ouvertes par l’utilisateur et garde les annonces dans le navigateur, sans serveur de collecte séparé.
+- **Faire correspondre deux modèles de données.** Une annonce et un produit n’ont pas les mêmes champs : prix, statut, description, catégories et images demandent une étape de correspondance avant publication.
 
-## Résultat et perspectives
+## Résultats
 
-La boutique est accessible sur **[minitrainstore.fr](https://www.minitrainstore.fr/)** et le dépôt contient le code de l'extension. Les fonctions couvrent notamment la collecte, le tri, le filtrage et l'intégration avec Odoo. Je ne publie pas de chiffres de vente ni de gain de temps sans mesure établie.
+La boutique est en ligne sur **[minitrainstore.fr](https://www.minitrainstore.fr/)**. Le dépôt contient l’extension et les ressources de la boutique, comme ses cartes de visite.
+
+## Limites
+
+L’extraction dépend du HTML de Leboncoin : un changement de son côté peut casser les sélecteurs, donc le code d’analyse doit rester court et facile à corriger. Les annonces sont stockées dans le stockage local d’un seul navigateur et ne sont pas partagées entre appareils.
 
 ## Explorer le projet
 
 - [Boutique Mini Train Store](https://www.minitrainstore.fr/)
-- [Code source et ressources](https://github.com/AlixANNERAUD/MiniTrainStore)
-- [Architecture de l'extension](https://github.com/AlixANNERAUD/MiniTrainStore/blob/main/code/extension/README.md)
-
-[← Tous les projets](/fr/projects)
+- [Code source et ressources](https://github.com/AlixANNERAUD/mini_train_store)
+- [Architecture de l’extension](https://github.com/AlixANNERAUD/mini_train_store/blob/main/code/extension/README.md)

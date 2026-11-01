@@ -1,47 +1,44 @@
 ---
-title: Infrastructure - self-hosting and automation
-description: A case study on running self-hosted services with TrueNAS, Docker Compose, Ansible and observability.
+title: Self-hosted homelab as code with Ansible
+description: Ansible playbooks and Docker Compose stacks that deploy and monitor self-hosted services across a TrueNAS server and a VPS, behind Traefik.
 ---
 
 import ArchitectureFlow from "../../../components/mdx/ArchitectureFlow.astro";
 
-# Infrastructure: making self-hosting maintainable
+# Infrastructure: self-hosted services managed as code
 
-**Linux · TrueNAS · Docker Compose · Ansible · Monitoring** · Since 2020
+## The problem
 
-> Running real services for family and friends, prioritizing autonomy, reproducibility and control over data.
+I host services for my family and friends: cloud storage, a password manager, messaging, a media server, home automation, document management and business software. Installing an application on a server is easy; keeping several dozen of them up to date, reachable and secure over the years is the hard part.
 
-## The challenge
-
-Running a few applications on a server is straightforward. Maintaining them over years requires managing updates, configuration, access, availability and incidents.
-
-This project has grown into a collection of services including cloud storage, messaging, collaboration tools, media applications, monitoring and business software.
+The goal is to make every service **reproducible from a Git repository**, on more than one machine, without keeping secrets in public files.
 
 ## Architecture
 
-<ArchitectureFlow title="From configuration to operating services" steps={[{ title: 'Inventory and secrets', detail: 'Ansible inventory and configuration files; separate secret storage.' }, { title: 'Provisioning', detail: 'Ansible playbooks and deployments across hosts.' }, { title: 'Runtime', detail: 'TrueNAS Apps and services deployed with Compose.' }, { title: 'Observability', detail: 'Service status, metrics and alerts.' }]} />
+<ArchitectureFlow title="From configuration to running services" steps={[{ title: 'Inventory', detail: 'Hosts, and a group per service naming the host it runs on.' }, { title: 'Playbooks', detail: 'One Ansible playbook and Compose file per service, plus host and DNS playbooks.' }, { title: 'Hosts', detail: 'A TrueNAS server and a cloud VPS, each behind its own Traefik proxy.' }, { title: 'Monitoring', detail: 'VictoriaMetrics, Grafana alerts and a public status page.' }]} />
 
-The repository contains **Ansible playbooks**, **Docker Compose** definitions for services deployed that way, plus an inventory and deployment documentation. Some services run as **TrueNAS Apps**, while others are deployed through Ansible.
+The infrastructure runs on two main servers: a **TrueNAS** server and a **cloud VPS**. The inventory assigns each service to a host, so moving a service means changing one group. Each service has its own folder with an Ansible playbook, a Docker Compose file and the templates it copies. Other playbooks prepare the hosts and manage one **Cloudflare** DNS zone each.
 
-The documented monitoring stack uses **Prometheus, Grafana and Alertmanager** to monitor services and help detect incidents.
+Monitoring runs on the VPS: **VictoriaMetrics** collects metrics from both Traefik instances, the TrueNAS server being reached over the **Netbird** VPN, and **Grafana** raises alerts on server errors, high latency and unreachable targets.
 
-## Decisions and trade-offs
+## Technical choices
 
-- **Automate instead of accumulating manual installs.** Services managed with Ansible keep their configuration in version-controlled deployment files.
-- **Separate secrets.** The repository documents a distinct vault for sensitive values rather than embedding them into public playbooks.
-- **Manage multiple deployment models.** TrueNAS Apps and Ansible do not share identical lifecycles; this adds maintenance complexity.
-- **Make observability actionable.** Monitoring can detect errors, but it is not a substitute for restoring backups or testing recovery procedures.
+- **Secrets outside the public repository.** Sensitive values live in a private submodule encrypted with Ansible Vault.
+- **Hardened Ansible access.** Ansible connects with a dedicated account that only accepts an SSH key from allowed networks. The bootstrap playbook disables password and root logins, and refuses to run from any other network.
+- **Single sign-on.** **Zitadel** is the identity provider; the OIDC applications of services managed outside Ansible are declared and provisioned with OpenTofu.
+- **Narrow replication rights.** Each replication client gets an account limited to one command that starts a TrueNAS replication task, so the TrueNAS API key never leaves the server.
+- **Checks before changes.** Common tasks lint the YAML, the playbooks and the Compose files, test roles with Molecule, and preview changes without applying them.
 
-## Services and outcome
+## Results
 
-The environment runs services such as **Nextcloud, Vaultwarden, Matrix, Jellyfin and Gitea**, alongside personal applications. The service inventory evolves over time and is documented in the repository.
+The repository lists more than forty services, including Nextcloud, Vaultwarden, Jellyfin, Home Assistant, Paperless-ngx, Matrix Synapse, Gitea and the Mini Train Store Odoo instance. It also hosts tools for my other projects, such as the Tolgee translation platform used by Xila.
 
-What matters is not the number of containers but the ability to **deploy, troubleshoot and evolve** real services.
+## Limitations
+
+Two deployment models coexist: some services run as TrueNAS Apps, others are deployed by Ansible, and the two do not share the same lifecycle. TrueNAS also manages its own users and SSH settings, so the playbooks can only check them there. Monitoring detects failures, but it does not replace testing restores.
 
 ## Explore the project
 
-- [Infrastructure repository](https://github.com/AlixANNERAUD/Infrastructure)
-- [Service organization and deployments](https://github.com/AlixANNERAUD/Infrastructure#structure)
-- [Vigie monitoring stack](https://github.com/AlixANNERAUD/Infrastructure/blob/main/services/vigie/readme.md)
-
-[← All projects](/projects)
+- [Infrastructure repository](https://github.com/AlixANNERAUD/infrastructure)
+- [Repository structure](https://github.com/AlixANNERAUD/infrastructure#structure)
+- [Vigie monitoring stack](https://github.com/AlixANNERAUD/infrastructure/tree/main/services/vigie)

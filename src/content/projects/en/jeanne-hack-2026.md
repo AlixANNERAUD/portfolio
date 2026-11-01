@@ -1,30 +1,20 @@
 ---
-title: "Jeanne d'Hack CTF (University of Rouen)"
-description: "Joint first place in the overall ranking of the 2026 Jeanne d'Hack CTF."
+title: "Jeanne d'Hack CTF 2026: joint first place"
+description: "Joint first place, tied with two other teams, in the overall ranking of the 2026 Jeanne d'Hack CTF, a cybersecurity competition at the University of Rouen."
 ---
 
-[← All projects](/projects)
-
-# Jeanne d'Hack CTF (University of Rouen)
-
-**CTF** · 2026
-
-> Joint first place in the overall ranking of the 2026 Jeanne d'Hack CTF.
+# Jeanne d'Hack CTF 2026: joint first place overall
 
 ## Overview
 
-Team "#JeSuisAlix": <a href="https://www.jeanne-hack-ctf.org/post/2026/">1st place in the general ranking (tie with 2 other teams)</a>.
+At the 2026 Jeanne d'Hack CTF, a cybersecurity competition held at the University of Rouen, our team "#JeSuisAlix" finished first in the overall ranking, tied with two other teams.
 
-## Engineering approach
+## Context
 
-The team solved cybersecurity challenges under time pressure. The recorded result is a verifiable team achievement rather than a distributed software product or reusable library.
+In a capture the flag (CTF) competition, teams solve computer security challenges against the clock. Each solved challenge reveals a secret string, the flag, which earns points. The ranking rewards the whole team, so this placement is a collective result.
 
-## Scope and limitations
+A year earlier, with the team "Les Schtroumpfs", I had finished third.
 
-Team competition entry: the collective result is reported as published by the organizer. This page does not assume which challenges were individually solved.
+## Explore the result
 
-## Explore the project
-
-[Source repository, documentation or official result](https://www.jeanne-hack-ctf.org/post/2026/) ↗
-
-**Related work:** [Jeanne d'Hack CTF (University of Rouen)](/projects/jeanne-hack-2025) · [TRACS (DGSE)](/projects/tracs-2024)
+- [Results of the 2026 edition](https://www.jeanne-hack-ctf.org/post/2026/) on the organizers' site

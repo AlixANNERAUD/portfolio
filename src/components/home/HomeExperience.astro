@@ -1,4 +1,5 @@
 ---
+import Eyebrow from "../ui/Eyebrow.astro";
 import ExperienceCard from "../experience/ExperienceCard.astro";
 import { homepageExperiences } from "../../data/experiences.ts";
 import { localizePath, type Locale } from "../../i18n/locales.ts";
@@ -6,8 +7,10 @@ import { useTranslations } from "../../i18n/ui.ts";
 
 interface Props {
   lang: Locale;
+  /** Position of the section on the page, numbering its overline. */
+  index: number;
 }
-const { lang } = Astro.props;
+const { lang, index } = Astro.props;
 const t = useTranslations(lang);
 ---
 
@@ -18,7 +21,9 @@ const t = useTranslations(lang);
 >
   <div class="home-experience-heading">
     <div>
-      <p class="home-experience-eyebrow">{t("home.experience.eyebrow")}</p>
+      <Eyebrow class="home-experience-eyebrow" index={index}>
+        {t("home.experience.eyebrow")}
+      </Eyebrow>
       <h2 id="home-experience-heading">{t("home.experience.title")}</h2>
     </div>
     <p class="home-experience-intro">{t("home.experience.intro")}</p>
@@ -33,15 +38,13 @@ const t = useTranslations(lang);
   </ol>
 
   <a class="home-experience-more" href={localizePath("/experiences", lang)}>
-    {t("home.experience.more")} <span aria-hidden="true">↗</span>
+    {t("home.experience.more")} <span aria-hidden="true">→</span>
   </a>
 </section>
 
 <style>
   .home-experience {
-    width: min(100%, 1160px);
-    margin: 3.25rem auto 4.25rem;
-    padding: 0 1.5rem;
+    margin-block: var(--space-xl) var(--space-2xl);
     color: var(--color-text);
   }
   .home-experience-heading {
@@ -49,35 +52,30 @@ const t = useTranslations(lang);
     flex-wrap: wrap;
     align-items: end;
     justify-content: space-between;
-    gap: 1.25rem 2rem;
-    padding-bottom: 1.65rem;
-    margin-bottom: 1.15rem;
+    gap: var(--space-s) var(--space-l);
+    padding-bottom: var(--space-m);
+    margin-bottom: var(--space-s);
     border-bottom: 1px solid var(--color-border);
-  }
-  .home-experience-eyebrow {
-    margin: 0 0 0.65rem;
-    font-size: 0.74rem;
-    font-weight: 650;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
   }
   .home-experience-heading h2 {
     margin: 0;
-    font: 400 clamp(2rem, 3.8vw, 3.4rem)/1.14 var(--font-display);
-    letter-spacing: -0.04em;
+    font-family: var(--font-display);
+    font-size: var(--step-4);
+    font-weight: 400;
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-display);
   }
   .home-experience-intro {
     flex: 0 1 28rem;
     margin: 0;
     color: var(--color-text-muted);
-    font-size: 0.92rem;
-    line-height: 1.65;
+    font-size: var(--step--1);
+    line-height: var(--leading-body);
   }
   .home-experience-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.9rem;
+    gap: var(--space-s);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -85,41 +83,41 @@ const t = useTranslations(lang);
   .home-experience-card {
     min-width: 0;
     border: 1px solid var(--color-border);
-    border-radius: 0.85rem;
+    border-radius: var(--radius-l);
     background: var(--color-bg);
     transition:
-      border-color 170ms ease,
-      transform 170ms ease;
+      border-color var(--dur-base) var(--ease-out),
+      transform var(--dur-base) var(--ease-out);
   }
   .home-experience-card:hover {
     border-color: var(--color-accent);
-    transform: translateY(-2px);
+  }
+  /* Lift only for a pointer that hovers, with motion allowed. */
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .home-experience-card:hover {
+      transform: translateY(var(--lift));
+    }
   }
   .home-experience-more {
     display: inline-flex;
-    gap: 0.4rem;
+    gap: var(--space-3xs);
     align-items: center;
-    margin-top: 1.3rem;
+    margin-top: var(--space-m);
     color: var(--color-accent);
     text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 650;
+    font-size: var(--step--1);
+    font-weight: 600;
   }
   .home-experience-more:hover {
     text-decoration: underline;
+    text-underline-offset: 0.2em;
   }
   @media (max-width: 680px) {
     .home-experience {
-      margin: 2.5rem auto 3rem;
-      padding: 0 1rem;
+      margin-block: var(--space-l) var(--space-xl);
     }
     .home-experience-grid {
       grid-template-columns: 1fr;
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .home-experience-card:hover {
-      transform: none;
     }
   }
 </style>

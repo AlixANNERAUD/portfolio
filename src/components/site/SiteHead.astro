@@ -9,6 +9,7 @@ import {
   type Locale,
 } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
+import { breadcrumbLd, type JsonLdNode } from "../../lib/seo.ts";
 
 export interface Props {
   lang: Locale;
@@ -20,7 +21,13 @@ export interface Props {
   home?: boolean;
   noindex?: boolean;
   ogType?: "website" | "article";
-  jsonLd?: object[];
+  /** Page-specific JSON-LD nodes (the breadcrumb is added here). */
+  jsonLd?: JsonLdNode[];
+  /**
+   * Breadcrumb after Home, as English paths; defaults to the page itself.
+   * Not emitted on the home page nor on a noindex page.
+   */
+  trail?: readonly { name: string; path: string }[];
 }
 const {
   lang,
@@ -31,6 +38,7 @@ const {
   noindex = false,
   ogType = "website",
   jsonLd = [],
+  trail,
 } = Astro.props;
 const t = useTranslations(lang);
 if (!home && !title) throw new Error(`Missing page title for ${path}`);
@@ -38,13 +46,45 @@ const titleText = home
   ? t("meta.homeTitle")
   : t("meta.pageTitle", { title: title! });
 const canonical = site.url + localizePath(path, lang);
-const image = site.url + site.image;
+const ogImage = site.ogImage;
+const image = site.url + ogImage.src[lang];
 const hreflang = Object.entries(alternates(path));
 const ogLocale: Record<Locale, string> = { en: "en_US", fr: "fr_FR" };
+const crumbs = [
+  { name: t("nav.home"), path: "/" },
+  ...(trail ?? [{ name: title!, path }]),
+];
+const graph =
+  home || noindex
+    ? jsonLd
+    : [
+        ...jsonLd,
+        breadcrumbLd(
+          crumbs.map((crumb) => ({
+            name: crumb.name,
+            url: site.url + localizePath(crumb.path, lang),
+          })),
+        ),
+      ];
 ---
 
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="color-scheme" content="light dark" />
+{/* The analytics script is the only third-party request on every page. */}
+<link rel="preconnect" href={new URL(site.analytics.src).origin} />
+<meta
+  name="theme-color"
+  media="(prefers-color-scheme: light)"
+  data-theme-color="light"
+  content={site.themeColor.light}
+/>
+<meta
+  name="theme-color"
+  media="(prefers-color-scheme: dark)"
+  data-theme-color="dark"
+  content={site.themeColor.dark}
+/>
 <Font
   cssVariable="--font-display"
   preload={[{ style: "normal", subset: "latin" }]}
@@ -66,11 +106,15 @@ const ogLocale: Record<Locale, string> = { en: "en_US", fr: "fr_FR" };
 <meta property="og:description" content={description} />
 {!noindex && <meta property="og:url" content={canonical} />}
 <meta property="og:image" content={image} />
+<meta property="og:image:width" content={String(ogImage.width)} />
+<meta property="og:image:height" content={String(ogImage.height)} />
+<meta property="og:image:type" content={ogImage.type} />
 <meta property="og:image:alt" content={t("meta.ogImageAlt")} />
-<meta name="twitter:card" content="summary" />
+<meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content={titleText} />
 <meta name="twitter:description" content={description} />
 <meta name="twitter:image" content={image} />
+<meta name="twitter:image:alt" content={t("meta.ogImageAlt")} />
 {!noindex && (
   <>
     <link rel="canonical" href={canonical} />
@@ -79,19 +123,23 @@ const ogLocale: Record<Locale, string> = { en: "en_US", fr: "fr_FR" };
     ))}
   </>
 )}
-<link rel="icon" href="/images/icon.png" type="image/png" />
+{/* ICO first for clients without SVG icons; the others pick the SVG. */}
+<link rel="icon" href="/favicon.ico" sizes="32x32" />
+<link rel="icon" href="/images/favicon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png" />
 <link rel="sitemap" href="/sitemap-index.xml" />
-{jsonLd.map((data) => (
-  <JsonLd data={data} />
-))}
+<JsonLd nodes={graph} />
 <script is:inline>
+  // Before paint: pin an explicit light or dark choice (auto needs nothing,
+  // the CSS follows the system), and make the browser chrome use only the
+  // matching theme-color meta. ThemeSwitch.astro keeps both in sync after.
   try {
-    const stored = localStorage.getItem("portfolio-theme");
-    if (
-      stored === "dark" ||
-      (stored !== "light" && matchMedia("(prefers-color-scheme: dark)").matches)
-    ) {
-      document.documentElement.classList.add("dark");
+    const choice = localStorage.getItem("portfolio-theme");
+    if (choice === "light" || choice === "dark") {
+      document.documentElement.classList.add(choice);
+      for (const meta of document.querySelectorAll("meta[data-theme-color]")) {
+        meta.media = meta.dataset.themeColor === choice ? "all" : "not all";
+      }
     }
   } catch {}
 </script>

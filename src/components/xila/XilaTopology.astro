@@ -1,4 +1,5 @@
 ---
+import Eyebrow from "../ui/Eyebrow.astro";
 import { localizePath, type Locale } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
 import {
@@ -15,9 +16,11 @@ import {
  */
 interface Props {
   lang: Locale;
+  /** Position of the section on the page, numbering its overline. */
+  index: number;
 }
 
-const { lang } = Astro.props;
+const { lang, index } = Astro.props;
 const t = useTranslations(lang);
 
 const toSvg = ([x, y]: Point) => ({
@@ -30,41 +33,41 @@ const svgNodes = NODES.map((node) => toSvg(node.position));
 <section class="xila-topology" aria-label={t("xila.topology.title")}>
   <div class="xila-topology-heading">
     <div>
-      <p class="xila-topology-kicker">{t("xila.topology.eyebrow")}</p>
+      <Eyebrow class="xila-topology-kicker" index={index}>
+        {t("xila.topology.eyebrow")}
+      </Eyebrow>
       <h2>{t("xila.topology.title")}</h2>
     </div>
     <p class="xila-topology-intro">{t("xila.topology.intro")}</p>
   </div>
 
   <figure class="xila-topology-scene" data-xila-topology>
-    <svg
-      class="xila-topology-static"
-      viewBox="0 0 1000 400"
-      preserveAspectRatio="none"
-      aria-hidden="true"
-    >
-      <defs>
-        <linearGradient id="xila-topology-ink" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="#47b9ab"></stop>
-          <stop offset="1" stop-color="#8ecad9"></stop>
-        </linearGradient>
-      </defs>
-      <g fill="none" stroke="#5faaa5" stroke-opacity=".68" stroke-width="2">
-        {EDGES.map(([from, to]) => (
-          <line
-            x1={svgNodes[from].x}
-            y1={svgNodes[from].y}
-            x2={svgNodes[to].x}
-            y2={svgNodes[to].y}
-          />
-        ))}
-      </g>
-      <g fill="url(#xila-topology-ink)" stroke="#152d32" stroke-width="5">
-        {svgNodes.map(({ x, y }) => (
-          <circle cx={x} cy={y} r="11" />
-        ))}
-      </g>
-    </svg>
+    {/*
+      Static fallback. The edges stretch with the box (strokes keep their
+      width); the nodes are HTML dots placed by percentage, like the labels,
+      so they stay round at every aspect ratio.
+    */}
+    <div class="xila-topology-static" aria-hidden="true">
+      <svg viewBox="0 0 1000 400" preserveAspectRatio="none">
+        <g class="xila-topology-edges">
+          {EDGES.map(([from, to]) => (
+            <line
+              x1={svgNodes[from].x}
+              y1={svgNodes[from].y}
+              x2={svgNodes[to].x}
+              y2={svgNodes[to].y}
+              vector-effect="non-scaling-stroke"
+            />
+          ))}
+        </g>
+      </svg>
+      {NODES.map((node) => {
+        const { left, top } = toPercent(node.position);
+        return (
+          <span class="xila-node-dot" style={`left: ${left}%; top: ${top}%`} />
+        );
+      })}
+    </div>
 
     <canvas class="xila-topology-canvas" aria-hidden="true"></canvas>
 
@@ -84,7 +87,7 @@ const svgNodes = NODES.map((node) => toSvg(node.position));
   </figure>
 
   <a class="xila-topology-link" href={localizePath("/projects/xila", lang)}>
-    {t("xila.topology.link")} <span aria-hidden="true">↗</span>
+    {t("xila.topology.link")} <span aria-hidden="true">→</span>
   </a>
 </section>
 
@@ -95,7 +98,7 @@ const svgNodes = NODES.map((node) => toSvg(node.position));
     "[data-xila-topology]",
   )) {
     const canvas = scene.querySelector<HTMLCanvasElement>("canvas");
-    const fallback = scene.querySelector<SVGElement>(".xila-topology-static");
+    const fallback = scene.querySelector<HTMLElement>(".xila-topology-static");
     if (!canvas || !fallback) continue;
 
     const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
@@ -183,10 +186,25 @@ const svgNodes = NODES.map((node) => toSvg(node.position));
 </script>
 
 <style>
+  /*
+   * The scene is always dark (it mirrors the WebGL render), so its colours
+   * are component-local tokens rather than theme tokens.
+   */
   .xila-topology {
-    max-width: 1160px;
-    margin: 3rem auto;
-    padding: 0 1.5rem;
+    --xila-ink: #47b9ab;
+    --xila-ink-2: #8ecad9;
+    --xila-edge: #5faaa5ad;
+    --xila-node-ring: #152d32;
+    --xila-scene-glow: #335f5733;
+    --xila-scene-1: #0c1e25;
+    --xila-scene-2: #162c32;
+    --xila-scene-3: #172c3b;
+    --xila-grid: #ffffff0b;
+    --xila-label-bg: #10252cd9;
+    --xila-label-border: #ffffff26;
+    --xila-label-text: #f2f9f9;
+
+    margin-block: var(--space-xl);
     color: var(--color-text);
   }
   .xila-topology-heading {
@@ -194,33 +212,28 @@ const svgNodes = NODES.map((node) => toSvg(node.position));
     flex-wrap: wrap;
     align-items: end;
     justify-content: space-between;
-    gap: 1rem 2rem;
-    margin-bottom: 1.75rem;
+    gap: var(--space-s) var(--space-l);
+    margin-bottom: var(--space-m);
   }
   .xila-topology-heading > div {
     flex: 1 1 20rem;
-  }
-  .xila-topology-kicker {
-    margin: 0 0 0.65rem;
-    color: var(--color-text-muted);
-    text-transform: uppercase;
-    font-size: 0.74rem;
-    letter-spacing: 0.15em;
-    font-weight: 600;
   }
   .xila-topology-heading h2 {
     margin: 0;
     padding: 0;
     border: 0;
-    font: normal clamp(2rem, 3.6vw, 3.2rem) / 1.14 var(--font-display);
+    font-family: var(--font-display);
+    font-size: var(--step-4);
+    font-weight: 400;
+    line-height: var(--leading-tight);
     letter-spacing: var(--tracking-display);
   }
   .xila-topology-intro {
     flex: 0 1 22rem;
     margin: 0;
     color: var(--color-text-muted);
-    font-size: 0.93rem;
-    line-height: 1.65;
+    font-size: var(--step--1);
+    line-height: var(--leading-body);
   }
   .xila-topology-scene {
     position: relative;
@@ -229,18 +242,27 @@ const svgNodes = NODES.map((node) => toSvg(node.position));
     overflow: hidden;
     isolation: isolate;
     border: 1px solid var(--color-border);
-    border-radius: 1rem;
+    border-radius: var(--radius-l);
     background:
-      radial-gradient(ellipse at 50% 50%, #335f5733 0%, transparent 65%),
-      linear-gradient(135deg, #0c1e25, #162c32 64%, #172c3b);
+      radial-gradient(
+        ellipse at 50% 50%,
+        var(--xila-scene-glow) 0%,
+        transparent 65%
+      ),
+      linear-gradient(
+        135deg,
+        var(--xila-scene-1),
+        var(--xila-scene-2) 64%,
+        var(--xila-scene-3)
+      );
   }
   .xila-topology-scene::before {
     content: "";
     position: absolute;
     inset: 0;
     background-image:
-      linear-gradient(#ffffff0b 1px, transparent 1px),
-      linear-gradient(90deg, #ffffff0b 1px, transparent 1px);
+      linear-gradient(var(--xila-grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--xila-grid) 1px, transparent 1px);
     background-size: 28px 28px;
     pointer-events: none;
   }
@@ -252,6 +274,25 @@ const svgNodes = NODES.map((node) => toSvg(node.position));
     width: 100%;
     height: 100%;
     pointer-events: none;
+  }
+  .xila-topology-static svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .xila-topology-edges {
+    fill: none;
+    stroke: var(--xila-edge);
+    stroke-width: 2;
+  }
+  .xila-node-dot {
+    position: absolute;
+    width: 1.375rem;
+    aspect-ratio: 1;
+    border: 4px solid var(--xila-node-ring);
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--xila-ink), var(--xila-ink-2));
+    transform: translate(-50%, -50%);
   }
   .xila-topology-canvas {
     opacity: 0;
@@ -266,34 +307,35 @@ const svgNodes = NODES.map((node) => toSvg(node.position));
   }
   .xila-node-label {
     position: absolute;
-    transform: translate(-50%, 0.95rem);
-    padding: 0.25rem 0.55rem;
-    border: 1px solid #ffffff26;
-    border-radius: 0.35rem;
-    color: #f2f9f9;
-    background: #10252cd9;
-    font:
-      600 clamp(0.67rem, 1.2vw, 0.83rem) / 1.3 ui-monospace,
-      monospace;
+    transform: translate(-50%, var(--space-s));
+    padding: var(--space-3xs) var(--space-2xs);
+    border: 1px solid var(--xila-label-border);
+    border-radius: var(--radius-s);
+    color: var(--xila-label-text);
+    background: var(--xila-label-bg);
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    font-weight: 600;
+    line-height: var(--leading-snug);
     white-space: nowrap;
   }
   .xila-topology-link {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
-    margin-top: 1.25rem;
+    gap: var(--space-3xs);
+    margin-top: var(--space-m);
     color: var(--color-accent);
-    font-size: 0.92rem;
-    font-weight: 650;
+    font-size: var(--step--1);
+    font-weight: 600;
     text-decoration: none;
   }
   .xila-topology-link:hover {
     text-decoration: underline;
+    text-underline-offset: 0.2em;
   }
   @media (max-width: 720px) {
     .xila-topology {
-      margin: 2rem auto;
-      padding: 0 1rem;
+      margin-block: var(--space-l);
     }
     .xila-topology-scene {
       height: 310px;
@@ -301,17 +343,17 @@ const svgNodes = NODES.map((node) => toSvg(node.position));
     .xila-topology-heading {
       align-items: start;
     }
+    .xila-node-dot {
+      width: 1.125rem;
+      border-width: 3px;
+    }
     .xila-node-label {
-      font-size: 0.65rem;
-      padding: 0.2rem 0.35rem;
+      padding: var(--space-3xs) var(--space-3xs);
     }
   }
   @media (max-width: 420px) {
     .xila-topology-scene {
       height: 270px;
-    }
-    .xila-node-label {
-      font-size: 0.58rem;
     }
   }
 </style>

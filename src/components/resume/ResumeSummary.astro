@@ -1,0 +1,138 @@
+---
+import { experiences, type ExperienceGroup } from "../../data/experiences.ts";
+import { skillDomains } from "../../data/skills.ts";
+import { localize } from "../../data/types.ts";
+import type { Locale } from "../../i18n/locales.ts";
+import { useTranslations } from "../../i18n/ui.ts";
+
+/**
+ * HTML summary of the resume, built from the same data as the experience and
+ * skills pages: every role, every degree, and the skill domains.
+ */
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const sections: readonly { group: ExperienceGroup; title: string }[] = [
+  { group: "professional", title: t("resume.experience") },
+  { group: "education", title: t("resume.education") },
+];
+---
+
+<div class="resume-summary" role="region" aria-label={t("resume.summary")}>
+  {sections.map(({ group, title }) => (
+    <section aria-labelledby={`resume-${group}`}>
+      <h2 id={`resume-${group}`}>{title}</h2>
+      <ol class="resume-list">
+        {experiences
+          .filter((entry) => entry.group === group)
+          .map((entry) => (
+            <li>
+              <p class="resume-list__title">{entry.role[lang]}</p>
+              <p class="resume-list__meta">
+                <span>{localize(entry.company, lang)}</span>
+                <span class="resume-list__period">{entry.period[lang]}</span>
+              </p>
+            </li>
+          ))}
+      </ol>
+    </section>
+  ))}
+  <section aria-labelledby="resume-skills">
+    <h2 id="resume-skills">{t("resume.skills")}</h2>
+    <ul class="resume-list">
+      {skillDomains.map((domain) => (
+        <li>
+          <p class="resume-list__title">{domain.title[lang]}</p>
+          <div class="resume-list__meta">
+            <ul class="resume-inline">
+              {domain.technologies.map((tag) => (
+                <li>{localize(tag, lang)}</li>
+              ))}
+            </ul>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </section>
+</div>
+
+<style>
+  .resume-summary {
+    display: grid;
+    gap: var(--space-l);
+  }
+  h2 {
+    margin: 0 0 var(--space-2xs);
+    padding-top: var(--space-2xs);
+    border-top: 1px solid var(--color-border);
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    font-weight: 400;
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-heading);
+  }
+  .resume-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .resume-list > li {
+    padding: var(--space-2xs) 0;
+  }
+  .resume-list > li + li {
+    border-top: 1px solid var(--color-border);
+  }
+  .resume-list p {
+    margin: 0;
+  }
+  .resume-list__title {
+    color: var(--color-text);
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-weight: 500;
+    line-height: var(--leading-snug);
+  }
+  .resume-list__meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0 var(--space-xs);
+    margin-top: var(--space-3xs);
+    color: var(--color-text-muted);
+    font-size: var(--step--1);
+  }
+  /*
+   * Skills as an inline list: each item carries its "·" separator, and the
+   * negative margin pushes a line-leading separator into the clipped area,
+   * so no line starts with "·".
+   */
+  .resume-list__meta:has(.resume-inline) {
+    display: block;
+    overflow: hidden;
+  }
+  .resume-inline {
+    --separator: var(--space-s);
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 0 0 calc(-1 * var(--separator));
+    padding: 0;
+    list-style: none;
+  }
+  .resume-inline li::before {
+    content: "·";
+    display: inline-block;
+    width: var(--separator);
+    color: var(--color-border-strong);
+    text-align: center;
+  }
+  .resume-list__period {
+    color: var(--color-text-subtle);
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+</style>

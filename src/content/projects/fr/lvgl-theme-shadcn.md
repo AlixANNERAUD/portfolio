@@ -1,30 +1,25 @@
 ---
-title: "lvgl_theme_shadcn"
-description: "Un thème inspiré de shadcn/ui pour LVGL 9 : widgets, palettes claires/sombres et personnalisation sur microcontrôleurs."
+title: "lvgl_theme_shadcn : thème LVGL façon shadcn"
+description: "Un thème C99 qui habille chaque widget de LVGL 9 dans le style shadcn/ui, avec des palettes claires et sombres modifiables à l’exécution et des liaisons Rust."
 ---
 
-[← Tous les projets](/fr/projects)
-
-# lvgl_theme_shadcn
-
-**C99 · LVGL · Rust · UI** · 2026 - présent
-
-> Un thème inspiré de shadcn/ui pour LVGL 9 : widgets, palettes claires/sombres et personnalisation sur microcontrôleurs.
+# lvgl_theme_shadcn : le style shadcn/ui sur LVGL 9
 
 ## Présentation
 
-Bibliothèque C99 compatible avec LVGL 9 proposant une identité visuelle inspirée de shadcn/ui pour les interfaces embarquées. Elle définit des palettes claires et sombres, des styles de composants et des variantes adaptées aux petits écrans et aux contrôles tactiles. Des bindings Rust `no_std` et des exemples de rendu accompagnent la bibliothèque. [Code et galerie](https://github.com/AlixANNERAUD/lvgl_theme_shadcn).
+`lvgl_theme_shadcn` donne à une interface LVGL l’apparence de shadcn/ui en un seul appel de fonction. Il habille chaque widget de base, des boutons et curseurs jusqu’aux tableaux, calendriers et claviers, dans ses états normal, appuyé, coché, sélectionné au clavier (focus) et désactivé : les applications continuent d’écrire du code LVGL ordinaire au lieu de redéfinir elles-mêmes le style de chaque widget.
 
-## Démarche technique
+C’est une bibliothèque C99 pour LVGL 9.6 ou plus récent, sans autre dépendance, accompagnée de liaisons Rust `no_std` publiées sur crates.io. Le dépôt fournit les fichiers d’intégration pour CMake, ESP-IDF, Zephyr, PlatformIO et Arduino.
 
-Le thème abstrait une identité visuelle cohérente au-dessus des widgets LVGL 9, au lieu de redéfinir chaque état de composant dans chaque application. Le dépôt contient des captures de rendu et une bibliothèque C99 utilisable depuis des projets embarqués, y compris Rust.
+## Choix techniques
 
-## Portée et limites
-
-Bibliothèque conçue pour être réutilisée indépendamment d'une application. Les API et exemples à jour figurent dans le dépôt source ; les contraintes d'environnement et les versions supportées doivent y être vérifiées.
+- **Des palettes modifiables à l’exécution.** Les 9 couleurs de base de shadcn/ui se combinent avec 18 couleurs d’accent, en clair et en sombre. Changer de palette met à jour les widgets existants sur place, sans reconstruire l’écran. Un script importe un thème créé avec l’éditeur de thèmes de shadcn/ui, et une palette complète peut être dérivée d’une seule couleur de marque.
+- **Un rendu peu coûteux.** Ni ombres, ni flou, ni dégradés : des aplats et des bordures de 1 dp, qui restent rapides sur des microcontrôleurs aux tampons de dessin réduits et aux écrans RGB565.
+- **Pensé pour le tactile.** Les contrôles mesurent 40 dp de haut avec des zones tactiles de 48 dp, et un contour de focus visible accompagne la navigation au clavier ou à l’encodeur rotatif. Une option compacte resserre l’ensemble pour les petits écrans.
+- **Les rôles de composants de shadcn.** Variantes et tailles de boutons, rôles de texte de `h1` à `muted`, badges, alertes, cartes et squelettes de chargement s’appliquent en un appel sur un objet LVGL ordinaire. Les squelettes cessent de pulser quand la réduction des animations est demandée.
+- **Des tests par captures d’écran.** Les images de la galerie du dépôt servent de références aux tests de non-régression visuelle, rendues en 480 × 320 à partir des scènes d’exemple.
 
 ## Explorer le projet
 
-[Dépôt, documentation ou résultat officiel](https://github.com/AlixANNERAUD/lvgl_theme_shadcn) ↗
-
-**Dans le même domaine :** [Réseau ferroviaire miniature](/fr/projects/model-railway) · [Enceinte connectée](/fr/projects/connected-speaker)
+- [Code source et galerie](https://github.com/AlixANNERAUD/lvgl_theme_shadcn)
+- [Liaisons Rust sur crates.io](https://crates.io/crates/lvgl_theme_shadcn)

@@ -1,5 +1,6 @@
 ---
 import {
+  ArrowRight,
   ArrowUpRight,
   Bot,
   CodeXml,
@@ -24,9 +25,11 @@ import { useTranslations } from "../../i18n/ui.ts";
 /** Technical domains, each backed by links to the projects that show it. */
 interface Props {
   lang: Locale;
+  /** Position of the section on the page, numbering its overline. */
+  index: number;
 }
 
-const { lang } = Astro.props;
+const { lang, index } = Astro.props;
 const t = useTranslations(lang);
 const domains = skillDomains;
 
@@ -67,14 +70,11 @@ const pad = (n: number) => String(n).padStart(2, "0");
   <SectionHeading
     headingId="skills-domains-heading"
     eyebrow={t("skills.domains.eyebrow")}
+    index={index}
     title={t("skills.domains.title")}
     description={t("skills.domains.intro")}
-  >
-    <span slot="aside" class="skills-count">
-      <strong>{pad(domains.length)}</strong>
-      <span>{t("skills.domains.count")}</span>
-    </span>
-  </SectionHeading>
+    count={{ value: domains.length, label: t("skills.domains.count") }}
+  />
 
   <div class="skills-domain-grid">
     {domains.map((domain, index) => {
@@ -99,7 +99,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
           <p class="skills-domain-description">{domain.description[lang]}</p>
 
           <Tags
-            tags={domain.technologies}
+            tags={domain.technologies.map((tag) => localize(tag, lang))}
             label={t("skills.technologies")}
             density="skill"
           />
@@ -117,7 +117,17 @@ const pad = (n: number) => String(n).padStart(2, "0");
                       rel={link.external ? "noopener noreferrer" : undefined}
                     >
                       <span class="skills-evidence-name">{link.title}</span>
-                      <ArrowUpRight size={16} aria-hidden="true" />
+                      {link.external ? (
+                        <>
+                          <ArrowUpRight size={16} aria-hidden="true" />
+                          <span class="visually-hidden">
+                            {" "}
+                            {t("a11y.newTab")}
+                          </span>
+                        </>
+                      ) : (
+                        <ArrowRight size={16} aria-hidden="true" />
+                      )}
                     </a>
                     <p>{evidence.detail[lang]}</p>
                   </li>
@@ -133,38 +143,18 @@ const pad = (n: number) => String(n).padStart(2, "0");
 
 <style>
   .skills-section {
-    margin-bottom: 4.5rem;
-  }
-  .skills-count {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.1rem;
-    flex: 0 0 auto;
-    color: var(--color-text-muted);
-  }
-  .skills-count strong {
-    font-family: var(--font-display);
-    color: var(--color-accent);
-    font-size: 2.8rem;
-    font-weight: 400;
-    line-height: 1;
-  }
-  .skills-count span {
-    font-size: 0.7rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    margin-bottom: var(--space-2xl);
   }
   .skills-domain-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
+    gap: var(--space-s);
   }
   .skills-card-top {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 1.2rem;
+    margin-bottom: var(--space-s);
   }
   .skills-domain-icon {
     display: grid;
@@ -173,47 +163,51 @@ const pad = (n: number) => String(n).padStart(2, "0");
     width: 3.25rem;
     height: 3.25rem;
     border: 1px solid var(--color-border);
-    border-radius: 0.75rem;
+    border-radius: var(--radius-l);
     background: var(--color-surface);
     color: var(--color-accent);
   }
   .skills-card-index {
     color: var(--color-text-subtle);
-    font:
-      500 0.8rem/1.4 ui-monospace,
-      monospace;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    font-variant-numeric: tabular-nums;
   }
+  /* Card titles share the serif display face with the project cards. */
   .skills-domain-card h3 {
-    margin: 0 0 0.6rem;
+    margin: 0 0 var(--space-2xs);
     border: 0;
     padding: 0;
-    font-size: clamp(1.2rem, 2.1vw, 1.5rem);
-    letter-spacing: -0.025em;
-    line-height: 1.3;
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    font-weight: 500;
+    letter-spacing: var(--tracking-heading);
+    line-height: var(--leading-snug);
+    text-wrap: balance;
   }
   .skills-domain-description {
-    margin: 0 0 1.1rem;
+    margin: 0 0 var(--space-s);
     color: var(--color-text-muted);
-    font-size: 0.92rem;
-    line-height: 1.7;
+    font-size: var(--step--1);
+    line-height: var(--leading-body);
   }
   .skills-evidence {
     margin-top: auto;
-    padding-top: 1.1rem;
+    padding-top: var(--space-s);
     border-top: 1px solid var(--color-border);
   }
   .skills-evidence h4 {
-    margin: 0 0 0.75rem;
-    font-size: 0.72rem;
-    font-weight: 600;
+    margin: 0 0 var(--space-xs);
     color: var(--color-text-muted);
+    font-size: var(--step--2);
+    font-weight: 600;
+    letter-spacing: var(--tracking-overline);
     text-transform: uppercase;
-    letter-spacing: 0.1em;
   }
   .skills-evidence ul {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 175px), 1fr));
-    gap: 0.85rem;
+    gap: var(--space-xs);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -221,36 +215,30 @@ const pad = (n: number) => String(n).padStart(2, "0");
   .skills-evidence li {
     min-width: 0;
   }
+  /* Inline, so the arrow follows the last word even when the title wraps. */
   .skills-evidence a {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 0.35rem;
     color: var(--color-text);
-    font-size: 0.86rem;
-    font-weight: 650;
+    font-size: var(--step--1);
+    font-weight: 600;
     text-decoration: none;
   }
   .skills-evidence a:hover {
     color: var(--color-accent);
   }
   .skills-evidence a svg {
-    flex: 0 0 auto;
+    margin-left: var(--space-3xs);
     color: var(--color-accent);
+    vertical-align: -0.15em;
   }
   .skills-evidence p {
-    margin: 0.28rem 0 0;
+    margin: var(--space-3xs) 0 0;
     color: var(--color-text-muted);
-    font-size: 0.78rem;
-    line-height: 1.55;
+    font-size: var(--step--2);
+    line-height: var(--leading-body);
   }
   @media (max-width: 720px) {
     .skills-domain-grid {
       grid-template-columns: 1fr;
-    }
-  }
-  @media (max-width: 560px) {
-    .skills-count strong {
-      font-size: 2.2rem;
     }
   }
 </style>

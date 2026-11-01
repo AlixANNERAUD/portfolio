@@ -1,5 +1,7 @@
 ---
-import ThemeToggle from "./ThemeToggle.astro";
+import { Menu, X } from "@lucide/astro";
+import ThemeSwitch from "./ThemeSwitch.astro";
+import Monogram from "../../assets/monogram.svg";
 import { localizePath, locales, type Locale } from "../../i18n/locales.ts";
 import { useTranslations, type UIKey } from "../../i18n/ui.ts";
 import { site } from "../../data/site.ts";
@@ -17,6 +19,13 @@ const other = locales.find((locale) => locale !== lang)!;
 const tOther = useTranslations(other);
 const localeHref = Astro.props.localeHref ?? localizePath(path, other);
 const current = localizePath(path, lang);
+/*
+ * Same breakpoint as the @media (max-width: 960px) rules below, in tokens.css
+ * and in ThemeSwitch.astro. Wider than the 720px page breakpoint: the brand
+ * and its monogram, four links, the locale switch and the three theme options
+ * need about 920px in French, so below 960px they would overflow one row.
+ */
+const narrowQuery = "(max-width: 960px)";
 const links: { key: UIKey; path: string }[] = [
   { key: "nav.experiences", path: "/experiences" },
   { key: "nav.projects", path: "/projects" },
@@ -25,42 +34,328 @@ const links: { key: UIKey; path: string }[] = [
 ];
 ---
 
-<header class="site-header">
-  <div class="site-header-inner">
+<!--
+  Without JavaScript the navigation stays visible (a second row on narrow
+  screens). The inline script below marks the header with data-menu, which
+  collapses the narrow-screen navigation behind the menu button.
+-->
+<header class="site-header" data-site-header data-narrow={narrowQuery}>
+  <div class="site-header-inner container">
     <a
       class="site-brand"
       href={localizePath("/", lang)}
       aria-label={t("nav.home")}
     >
+      {/* The favicon and social card monogram, drawn with the theme tokens. */}
+      <span class="site-brand-mark" aria-hidden="true">
+        <Monogram width={20} height={20} />
+      </span>
       {site.name}
     </a>
-    <nav class="site-main-nav" aria-label={t("nav.main")}>
-      {links.map((link) => {
-        const href = localizePath(link.path, lang);
-        return (
-          <a
-            href={href}
-            aria-current={
-              current === href || current.startsWith(href + "/")
-                ? "page"
-                : undefined
-            }
-          >
-            {t(link.key)}
-          </a>
-        );
-      })}
-    </nav>
+    {/*
+      The menu button precedes the navigation it opens, so Tab goes from the
+      open button straight into the links. CSS places it at the row's end.
+    */}
+    <button
+      class="site-menu-button site-control"
+      type="button"
+      aria-expanded="false"
+      aria-controls="site-menu-panel"
+    >
+      <span class="site-menu-icon site-menu-icon-open" aria-hidden="true">
+        <Menu size={20} />
+      </span>
+      <span class="site-menu-icon site-menu-icon-close" aria-hidden="true">
+        <X size={20} />
+      </span>
+      <span class="visually-hidden">{t("nav.menu")}</span>
+    </button>
+    {/*
+      The panel the menu button opens on narrow screens: the navigation,
+      then the theme switch as a sibling, outside the navigation landmark.
+    */}
+    <div id="site-menu-panel" class="site-menu-panel">
+      <nav class="site-main-nav" aria-label={t("nav.main")}>
+        {links.map((link) => {
+          const href = localizePath(link.path, lang);
+          return (
+            <a
+              href={href}
+              aria-current={
+                current === href || current.startsWith(href + "/")
+                  ? "page"
+                  : undefined
+              }
+            >
+              {t(link.key)}
+            </a>
+          );
+        })}
+      </nav>
+      <ThemeSwitch lang={lang} placement="menu" />
+    </div>
     <div class="site-header-tools">
       <a
-        class="site-locale"
+        class="site-locale site-control"
         href={localeHref}
         lang={other}
         aria-label={tOther("locale.switchTo")}
       >
         {tOther("locale.short")}
       </a>
-      <ThemeToggle lang={lang} />
+      <ThemeSwitch lang={lang} placement="header" />
     </div>
   </div>
 </header>
+<script is:inline>
+  {
+    const header = document.querySelector("[data-site-header]");
+    const button = header && header.querySelector(".site-menu-button");
+    const nav =
+      button && document.getElementById(button.getAttribute("aria-controls"));
+    if (header && button && nav && header.dataset.narrow) {
+      const narrow = matchMedia(header.dataset.narrow);
+      const isOpen = () => header.dataset.menu === "open";
+      const setOpen = (open) => {
+        header.dataset.menu = open ? "open" : "closed";
+        button.setAttribute("aria-expanded", String(open));
+      };
+      setOpen(false);
+      button.addEventListener("click", () => setOpen(!isOpen()));
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && isOpen()) {
+          setOpen(false);
+          button.focus();
+        }
+      });
+      document.addEventListener("click", (event) => {
+        if (isOpen() && !header.contains(event.target)) setOpen(false);
+      });
+      header.addEventListener("focusout", (event) => {
+        if (
+          isOpen() &&
+          event.relatedTarget &&
+          !header.contains(event.relatedTarget)
+        ) {
+          setOpen(false);
+        }
+      });
+      narrow.addEventListener("change", () => setOpen(false));
+    }
+  }
+</script>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg);
+  }
+
+  .site-header-inner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3xs) var(--space-m);
+    padding-block: var(--space-2xs);
+  }
+
+  .site-brand {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-size);
+    color: var(--color-text);
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-weight: 600;
+    letter-spacing: var(--tracking-heading);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .site-brand:hover {
+    color: var(--color-accent);
+  }
+
+  .site-brand-mark {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    margin-right: var(--space-2xs);
+    border-radius: var(--radius-s);
+    background: var(--color-accent);
+    color: var(--color-bg);
+  }
+
+  /* Wide screens: the panel is not a box, the navigation sits in the row. */
+  .site-menu-panel {
+    display: contents;
+  }
+
+  .site-main-nav {
+    display: flex;
+    gap: var(--space-3xs);
+    margin-left: auto;
+  }
+
+  .site-main-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-size);
+    padding-inline: var(--space-xs);
+    color: var(--color-text-muted);
+    font-size: var(--step--1);
+    font-weight: 550;
+    text-decoration: none;
+    text-underline-offset: 0.45em;
+    text-decoration-thickness: 1px;
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  .site-main-nav a:hover {
+    color: var(--color-accent);
+  }
+
+  .site-main-nav a[aria-current] {
+    color: var(--color-text);
+    text-decoration-line: underline;
+    text-decoration-color: var(--color-accent);
+  }
+
+  .site-header-tools {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3xs);
+    padding-left: var(--space-xs);
+    border-left: 1px solid var(--color-border);
+  }
+
+  /* Square header controls: locale switch and menu button. */
+  .site-header-inner :global(.site-control) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--control-size);
+    min-height: var(--control-size);
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: var(--radius-m);
+    background: transparent;
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      color var(--dur-fast) var(--ease-out),
+      background-color var(--dur-fast) var(--ease-out),
+      border-color var(--dur-fast) var(--ease-out);
+  }
+
+  .site-menu-button[aria-expanded="true"] {
+    border-color: var(--color-border);
+    background: var(--color-surface-2);
+    color: var(--color-text);
+  }
+
+  @media (hover: hover) {
+    .site-header-inner :global(.site-control:hover) {
+      border-color: var(--color-border);
+      background: var(--color-surface-2);
+      color: var(--color-text);
+    }
+  }
+
+  /* Outranks the shared control rule; shown once the script runs. */
+  .site-header-inner .site-menu-button {
+    display: none;
+    order: 4;
+  }
+
+  .site-menu-button[aria-expanded="true"] .site-menu-icon-open,
+  .site-menu-button[aria-expanded="false"] .site-menu-icon-close {
+    display: none;
+  }
+
+  .site-menu-icon {
+    display: inline-flex;
+  }
+
+  @media (max-width: 960px) {
+    .site-header-inner {
+      flex-wrap: wrap;
+      gap: var(--space-3xs);
+    }
+
+    .site-header-tools {
+      margin-left: auto;
+      padding-left: 0;
+      border-left: 0;
+    }
+
+    /* No-JS fallback: the navigation takes its own full-width row. */
+    .site-menu-panel {
+      display: block;
+      order: 3;
+      width: 100%;
+    }
+
+    .site-main-nav {
+      justify-content: space-between;
+      margin-left: 0;
+    }
+
+    .site-main-nav a {
+      justify-content: center;
+      min-width: var(--control-size);
+      padding-inline: var(--space-3xs);
+    }
+
+    /* Enhanced: one row, the navigation opens below it as a panel. */
+    .site-header[data-menu] .site-menu-button {
+      display: inline-flex;
+    }
+
+    .site-header[data-menu] .site-menu-panel {
+      display: none;
+    }
+
+    .site-header[data-menu="open"] .site-menu-panel {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      left: 0;
+      display: block;
+      /* Same gutter as the header row, so the links align with the brand. */
+      padding: 0 var(--page-inline) var(--space-xs);
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-bg);
+    }
+
+    .site-header[data-menu="open"] .site-main-nav {
+      flex-direction: column;
+      gap: 0;
+    }
+
+    /* Links and the theme label share the panel's left edge. */
+    .site-header[data-menu="open"] .site-main-nav a {
+      justify-content: flex-start;
+      padding-inline: 0;
+      color: var(--color-text);
+      font-size: var(--step-0);
+    }
+
+    .site-header[data-menu="open"] .site-main-nav a + a {
+      border-top: 1px solid var(--color-border);
+    }
+
+    .site-header[data-menu="open"] .site-main-nav a[aria-current] {
+      color: var(--color-accent);
+    }
+  }
+</style>

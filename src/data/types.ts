@@ -3,6 +3,9 @@ import { locales, type Locale } from "../i18n/locales.ts";
 /** A value written once per locale. */
 export type Localized<T = string> = Record<Locale, T>;
 
+/** A proper noun written once, or a label written once per locale. */
+export type Label = string | Localized;
+
 function isLocalized<T>(value: T | Localized<T>): value is Localized<T> {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     return false;

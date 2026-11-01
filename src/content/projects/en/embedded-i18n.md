@@ -1,30 +1,25 @@
 ---
-title: "embedded-i18n"
-description: "Compile-time localization for embedded Rust: translations stored in firmware, compile-time checks and allocator-free operation."
+title: "embedded-i18n: compile-time i18n for Rust"
+description: "A localization library for no_std Rust firmware: translations are compiled into flash as plain strings, and a missing translation fails the build."
 ---
 
-[← All projects](/projects)
-
-# embedded-i18n
-
-**Rust · Macros · no_std · i18n** · 2026 - present
-
-> Compile-time localization for embedded Rust: translations stored in firmware, compile-time checks and allocator-free operation.
+# embedded-i18n: translations resolved at compile time
 
 ## Overview
 
-Localization for Rust firmware with translations resolved at compile time and stored in ROM rather than parsed at runtime. Its macros validate translation keys and formatting arguments, support plural rules, and read several established translation file formats. [Source and guide](https://github.com/AlixANNERAUD/embedded-i18n).
+`embedded-i18n` translates the strings of a Rust firmware at build time. Translations from JSON, YAML, TOML, gettext PO and MO, or Fluent files become plain `&'static str` literals stored in flash. There is no runtime parser, no allocator, no file system and no heap, and the firmware only contains the strings it uses, in the language it is built for. The crate is published on crates.io.
 
-## Engineering approach
+## Technical choices
 
-Translations become static strings at build time and reside in firmware ROM. Macros validate keys and formatting placeholders, turning potential runtime translation failures into build-time errors.
+- **Compile errors instead of blank screens.** Missing keys, missing plural forms, invalid locale files and format placeholders that do not match their arguments are reported at the call site. An optional strict mode forbids falling back to another language.
+- **The formats translators already use.** Every locale format is parsed by the procedural macros, so supporting one adds no code and no dependency to the firmware.
+- **Real-world linguistics.** CLDR plural rules for 40 languages, gettext `Plural-Forms`, message context, select variants such as gender, fallback chains like `fr-CA` → `fr` → `en`, right-to-left isolation and localized dates without `libc`.
+- **Formatting without allocation.** Translated messages are written to any `core::fmt::Write` target, such as a display driver, with placeholders checked at compile time in every language.
+- **Runtime switching when needed.** Several locales can be embedded and switched with a single atomic, still without allocation.
 
-## Scope and limitations
-
-Designed as a reusable library independent of one application. Refer to the upstream repository for current APIs, examples, platform constraints and supported versions.
+The set of languages has to be known at build time. For applications that download language packs, a runtime library such as Fluent remains the better fit.
 
 ## Explore the project
 
-[Source repository, documentation or official result](https://github.com/AlixANNERAUD/embedded-i18n) ↗
-
-**Related work:** [Model railway network](/projects/model-railway) · [Connected speaker](/projects/connected-speaker)
+- [Source code and guide](https://github.com/AlixANNERAUD/embedded_i18n)
+- [API documentation on docs.rs](https://docs.rs/embedded-i18n)

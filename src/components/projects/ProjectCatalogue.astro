@@ -1,4 +1,5 @@
 ---
+import { LayoutGrid, List, Search } from "@lucide/astro";
 import Hero from "../ui/Hero.astro";
 import ProjectCard from "./ProjectCard.astro";
 import {
@@ -9,15 +10,17 @@ import {
   type ProjectCategory,
   type ProjectGroup,
 } from "../../data/projects.ts";
+import { technologyLabel } from "../../data/technologies.ts";
 import { localize } from "../../data/types.ts";
 import type { Locale } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
 import { formatCount } from "../../lib/format.ts";
 
 /**
- * Every project card is server-rendered in relevance order. A module script
- * reveals the filter, search and sort controls and toggles `hidden` on the
- * cards; without JavaScript the full list stays visible.
+ * Every project card is server-rendered in relevance order, as an index list
+ * (the art-panel grid is an option). A module script reveals the filter,
+ * search, sort and grid/list controls and toggles `hidden` on the cards;
+ * without JavaScript the full list stays visible.
  */
 interface Props {
   lang: Locale;
@@ -49,7 +52,11 @@ const categoryLabel = (id: (typeof categories)[number]) =>
 
 const sorted = [...projects].sort(byScore);
 const searchText = (project: Project) =>
-  [localize(project.title, lang), project.description[lang], ...project.tags]
+  [
+    localize(project.title, lang),
+    project.description[lang],
+    ...project.tags.map((tag) => technologyLabel(tag, lang)),
+  ]
     .join(" ")
     .toLocaleLowerCase(lang);
 ---
@@ -70,7 +77,7 @@ const searchText = (project: Project) =>
 
   <div class="showcase-toolbar" hidden>
     <div class="showcase-controls">
-      <div>
+      <div class="showcase-control">
         <span class="showcase-control-label" aria-hidden="true">
           {t("projects.kind")}
         </span>
@@ -91,7 +98,7 @@ const searchText = (project: Project) =>
           ))}
         </div>
       </div>
-      <div>
+      <div class="showcase-control">
         <span class="showcase-control-label" aria-hidden="true">
           {t("projects.area")}
         </span>
@@ -114,23 +121,37 @@ const searchText = (project: Project) =>
       </div>
     </div>
     <div class="showcase-toolbar-actions">
-      <label class="showcase-sort">
-        <span>{t("projects.sortLabel")}</span>
-        <select data-catalogue-sort>
-          <option value="recommended">{t("projects.sort.recommended")}</option>
-          <option value="alphabetical">
-            {t("projects.sort.alphabetical")}
-          </option>
-        </select>
-      </label>
       <label class="showcase-search">
         <span class="visually-hidden">{t("projects.search")}</span>
+        <Search class="showcase-search-icon" size={16} aria-hidden="true" />
         <input
           type="search"
           placeholder={t("projects.search")}
           data-catalogue-search
         />
       </label>
+      <label class="showcase-sort">
+        <span>{t("projects.sortLabel")}</span>
+        <select data-catalogue-sort>
+          <option value="relevance">{t("projects.sort.relevance")}</option>
+          <option value="name">{t("projects.sort.name")}</option>
+        </select>
+      </label>
+      <div
+        class="showcase-view"
+        role="group"
+        aria-label={t("projects.view")}
+        data-catalogue-view
+      >
+        <button type="button" value="grid" aria-pressed="false">
+          <LayoutGrid size={16} aria-hidden="true" />
+          {t("projects.view.grid")}
+        </button>
+        <button type="button" value="list" aria-pressed="true">
+          <List size={16} aria-hidden="true" />
+          {t("projects.view.list")}
+        </button>
+      </div>
     </div>
   </div>
 
@@ -143,12 +164,12 @@ const searchText = (project: Project) =>
     {formatCount(sorted.length, "project", lang)}
   </p>
 
-  <div class="showcase-grid" data-catalogue-grid>
-    {sorted.map((project, index) => (
+  <div class="showcase-grid" data-catalogue-grid data-view="list">
+    {sorted.map((project) => (
       <ProjectCard
         project={project}
         lang={lang}
-        position={index + 1}
+        headingLevel="h2"
         data-group={project.group}
         data-category={project.category}
         data-search={searchText(project)}
@@ -167,6 +188,8 @@ const searchText = (project: Project) =>
   import { formatPlural } from "../../lib/plural.ts";
   import type { Locale } from "../../i18n/locales.ts";
 
+  const VIEW_KEY = "portfolio-catalogue-view";
+
   for (const root of document.querySelectorAll<HTMLElement>(
     "[data-catalogue]",
   )) {
@@ -179,6 +202,11 @@ const searchText = (project: Project) =>
       "[data-catalogue-search]",
     );
     const sort = root.querySelector<HTMLSelectElement>("[data-catalogue-sort]");
+    const viewButtons = [
+      ...root.querySelectorAll<HTMLButtonElement>(
+        "[data-catalogue-view] button",
+      ),
+    ];
     const { countOne, countOther } = status?.dataset ?? {};
     // Broken markup leaves the server-rendered list untouched.
     if (
@@ -190,11 +218,12 @@ const searchText = (project: Project) =>
       !status ||
       !empty ||
       !search ||
-      !sort
+      !sort ||
+      viewButtons.length === 0
     )
       continue;
 
-    // Server order is the relevance ranking; keep it for "recommended".
+    // Server order is the relevance ranking; keep it for "relevance".
     const cards = [...grid.querySelectorAll<HTMLElement>(".showcase-card")];
     const collator = new Intl.Collator(lang);
     const byTitle = [...cards].sort((a, b) =>
@@ -205,7 +234,7 @@ const searchText = (project: Project) =>
 
     const update = () => {
       const term = search.value.trim().toLocaleLowerCase(lang);
-      const ordered = sort.value === "alphabetical" ? byTitle : cards;
+      const ordered = sort.value === "name" ? byTitle : cards;
       let shown = 0;
       for (const card of ordered) {
         const visible =
@@ -215,10 +244,7 @@ const searchText = (project: Project) =>
           (!term || (card.dataset.search ?? "").includes(term));
         card.hidden = !visible;
         grid.append(card);
-        if (!visible) continue;
-        shown++;
-        const position = card.querySelector(".showcase-art-position");
-        if (position) position.textContent = String(shown).padStart(2, "0");
+        if (visible) shown++;
       }
       status.textContent = formatPlural(shown, forms, lang);
       empty.hidden = shown > 0;
@@ -237,6 +263,33 @@ const searchText = (project: Project) =>
         });
       }
     }
+    // The layout choice is a per-visitor convenience: storage may be blocked.
+    const setView = (view: string) => {
+      grid.dataset.view = view;
+      for (const button of viewButtons) {
+        button.setAttribute("aria-pressed", String(button.value === view));
+      }
+    };
+    let storedView: string | null = null;
+    try {
+      storedView = localStorage.getItem(VIEW_KEY);
+    } catch {
+      // Keep the default list.
+    }
+    if (viewButtons.some((button) => button.value === storedView)) {
+      setView(storedView!);
+    }
+    for (const button of viewButtons) {
+      button.addEventListener("click", () => {
+        setView(button.value);
+        try {
+          localStorage.setItem(VIEW_KEY, button.value);
+        } catch {
+          // Not remembered; the choice still applies to this page.
+        }
+      });
+    }
+
     search.addEventListener("input", update);
     sort.addEventListener("change", update);
     toolbar.hidden = false;
@@ -246,15 +299,14 @@ const searchText = (project: Project) =>
 
 <style>
   .portfolio-showcase {
-    margin-block: 4.25rem 5rem;
+    margin-block: var(--space-xl) var(--space-2xl);
   }
   .showcase-toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    margin: 0 0 1.5rem;
+    display: grid;
+    gap: var(--space-s);
+    margin: 0 0 var(--space-s);
+    padding-bottom: var(--space-s);
+    border-bottom: 1px solid var(--color-border);
   }
   .showcase-toolbar[hidden],
   .showcase-empty[hidden],
@@ -262,107 +314,183 @@ const searchText = (project: Project) =>
     display: none;
   }
   .showcase-controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.7rem 1.25rem;
+    display: grid;
+    gap: var(--space-xs);
   }
-  .showcase-control-label {
-    display: block;
-    margin: 0 0 0.35rem;
-    font-size: 0.73rem;
-    color: var(--color-text-muted);
+  .showcase-control {
+    display: grid;
+    grid-template-columns: 7rem minmax(0, 1fr);
+    align-items: baseline;
+    gap: var(--space-2xs) var(--space-s);
+  }
+  .showcase-control-label,
+  .showcase-sort > span {
+    color: var(--color-text-subtle);
+    font-size: var(--step--2);
+    font-weight: 600;
+    letter-spacing: var(--tracking-overline);
+    text-transform: uppercase;
   }
   .showcase-filters {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.4rem;
+    gap: var(--space-3xs) var(--space-2xs);
   }
-  .showcase-filters button {
-    padding: 0.52rem 0.82rem;
-    border: 1px solid var(--color-border);
-    border-radius: 2rem;
-    background: var(--color-bg);
+  .showcase-filters button,
+  .showcase-view button {
+    display: inline-flex;
+    min-height: var(--control-size);
+    align-items: center;
+    gap: var(--space-3xs);
+    padding: 0 var(--space-xs);
+    border: 0;
+    border-radius: var(--radius-full);
+    background: var(--color-surface-2);
     color: var(--color-text-muted);
-    font-size: 0.8rem;
+    font: inherit;
+    font-size: var(--step--1);
+    font-weight: 500;
     cursor: pointer;
     transition:
-      border-color 160ms ease,
-      background-color 160ms ease;
+      background-color var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out);
   }
   .showcase-filters button:hover,
-  .showcase-filters button[aria-pressed="true"] {
-    background: var(--color-surface);
-    border-color: var(--color-accent);
+  .showcase-view button:hover {
     color: var(--color-text);
+  }
+  /*
+   * Pressed: a solid accent fill with heavier text, so the state does not
+   * rely on hue alone (the fill is far darker or lighter than surface-2).
+   */
+  .showcase-filters button[aria-pressed="true"],
+  .showcase-view button[aria-pressed="true"] {
+    background: var(--color-accent);
+    color: var(--color-bg);
+    font-weight: 600;
   }
   .showcase-toolbar-actions {
     display: flex;
     flex-wrap: wrap;
-    align-items: end;
-    gap: 0.75rem;
+    align-items: center;
+    gap: var(--space-xs) var(--space-s);
+  }
+  .showcase-search {
+    position: relative;
+    flex: 1 1 16rem;
+    max-width: 22rem;
+  }
+  .showcase-search :global(.showcase-search-icon) {
+    position: absolute;
+    top: 50%;
+    left: var(--space-xs);
+    color: var(--color-text-subtle);
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+  .showcase-search input,
+  .showcase-sort select {
+    box-sizing: border-box;
+    min-height: var(--control-size);
+    /* A control boundary: at least 3:1 against the page (WCAG 1.4.11). */
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-m);
+    background: var(--color-bg);
+    color: var(--color-text);
+    font: inherit;
+    font-size: var(--step--1);
+  }
+  .showcase-search input {
+    width: 100%;
+    padding: 0 var(--space-xs) 0 calc(var(--space-xs) + 1.5rem);
+  }
+  .showcase-search input:hover,
+  .showcase-sort select:hover {
+    border-color: var(--color-accent);
   }
   .showcase-sort {
     display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-  }
-  .showcase-sort > span {
-    color: var(--color-text-muted);
-    font-size: 0.73rem;
+    align-items: center;
+    gap: var(--space-2xs);
+    margin-left: auto;
   }
   .showcase-sort select {
-    min-height: 2.35rem;
-    padding: 0.49rem 1.5rem 0.49rem 0.6rem;
-    border: 1px solid var(--color-border);
-    border-radius: 0.5rem;
-    background: var(--color-bg);
-    color: var(--color-text);
-    font: inherit;
-    font-size: 0.82rem;
+    padding: 0 var(--space-xs);
     cursor: pointer;
   }
-  .showcase-search input {
-    box-sizing: border-box;
-    width: min(100%, 15rem);
-    padding: 0.62rem 0.85rem;
-    border: 1px solid var(--color-border);
-    border-radius: 0.5rem;
-    background: var(--color-bg);
-    color: var(--color-text);
-    font: inherit;
-    font-size: 0.82rem;
+  .showcase-view {
+    display: flex;
+    gap: var(--space-3xs);
   }
   .showcase-count {
-    margin: 0.1rem 0 1rem;
-    color: var(--color-text-muted);
-    font-size: 0.85rem;
+    margin: 0 0 var(--space-s);
+    color: var(--color-text-subtle);
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: var(--tracking-mono);
   }
   .showcase-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
+    gap: var(--space-s);
+  }
+  .showcase-grid[data-view="list"] {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-xs);
   }
   .showcase-empty {
-    padding: 2rem;
-    text-align: center;
+    padding: var(--space-l);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-l);
     color: var(--color-text-muted);
+    text-align: center;
   }
   @media (max-width: 600px) {
     .portfolio-showcase {
-      margin-block: 2rem 3rem;
+      margin-block: var(--space-l) var(--space-xl);
     }
     .showcase-grid {
       grid-template-columns: minmax(0, 1fr);
     }
-    .showcase-toolbar-actions {
-      width: 100%;
+    .showcase-control {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-3xs);
+    }
+    /*
+     * Each chip group is one row that scrolls sideways, so the filters take
+     * two short rows instead of the whole first screen.
+     */
+    .showcase-filters {
+      flex-wrap: nowrap;
+      margin-inline: calc(-1 * var(--page-inline));
+      /* Room for the focus outline, which the scroller would clip. */
+      padding: var(--space-2xs) var(--page-inline);
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+    }
+    .showcase-filters button {
+      flex: none;
     }
     .showcase-search {
-      flex: 1 1 100%;
+      flex-basis: 100%;
+      max-width: none;
     }
-    .showcase-search,
-    .showcase-search input {
-      width: 100%;
+    .showcase-sort {
+      margin-left: 0;
+    }
+    /* The select names its own options; keep the label for screen readers. */
+    .showcase-sort > span {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+    }
+    .showcase-view {
+      margin-left: auto;
     }
   }
 </style>

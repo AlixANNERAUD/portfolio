@@ -1,30 +1,20 @@
 ---
-title: "Cod'INSA"
-description: "First place in the 2025 Cod'INSA competitive programming contest."
+title: "Cod'INSA 2025: first place for INSA Rouen"
+description: "First place at Cod'INSA 2025 with the INSA Rouen team: an inter-INSA contest where each school's team builds an AI that plays a game made for the event."
 ---
 
-[← All projects](/projects)
-
-# Cod'INSA
-
-**Algorithmique** · 2025
-
-> First place in the 2025 Cod'INSA competitive programming contest.
+# Cod'INSA 2025: first place overall
 
 ## Overview
 
-Team INSA Rouen : <a href="https://codinsa.org/static/past">1st place in the general ranking</a>.
+I was part of the INSA Rouen Normandie team that won Cod'INSA 2025, finishing first in the overall ranking.
 
-## Engineering approach
+## Context
 
-This contest tests how quickly a team can design correct algorithmic solutions. The outcome demonstrates reasoning, programming and collaboration rather than a deployed product.
+Cod'INSA is a programming contest run by students for the INSA schools. Qualification rounds take place in each school, and the best five students form that school's team for the final. There, each team builds an AI for a video game designed for the event, and the AIs play against those of the other teams. A jury of partners also assesses the teams.
 
-## Scope and limitations
+As with the other competitions in this section, the placement is a collective result.
 
-Team competition entry: the collective result is reported as published by the organizer. This page does not assume which challenges were individually solved.
+## Explore the result
 
-## Explore the project
-
-[Source repository, documentation or official result](https://codinsa.org/static/past) ↗
-
-**Related work:** [Xila](/projects/xila) · [nanoexpr](/projects/nanoexpr)
+- [Official Cod'INSA website](https://codinsa.org/)

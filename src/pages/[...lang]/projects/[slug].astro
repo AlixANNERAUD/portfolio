@@ -1,7 +1,8 @@
 ---
 import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
 import { getCollection, getEntry, render } from "astro:content";
-import BaseLayout from "../../../layouts/BaseLayout.astro";
+import ProjectLayout from "../../../layouts/ProjectLayout.astro";
+import { getProject, isProjectId } from "../../../data/projects.ts";
 import { locales, toParam, type Locale } from "../../../i18n/locales.ts";
 
 export const getStaticPaths = (async () => {
@@ -24,17 +25,21 @@ for (const other of locales.filter((locale) => locale !== lang)) {
     throw new Error(`Project "${entry.id}" has no ${other} counterpart`);
   }
 }
-const { Content } = await render(entry);
+if (!isProjectId(slug)) {
+  throw new Error(`Project page "${entry.id}" has no metadata`);
+}
+const project = getProject(slug);
+// remark-project-title lifts the Markdown H1 into the layout header.
+const { Content, remarkPluginFrontmatter } = await render(entry);
+const heading: string = remarkPluginFrontmatter.pageTitle ?? entry.data.title;
 ---
 
-<BaseLayout
+<ProjectLayout
   lang={lang}
-  path={`/projects/${slug}`}
+  project={project}
+  heading={heading}
   title={entry.data.title}
   description={entry.data.description}
-  ogType="article"
 >
-  <article class="prose project-article">
-    <Content />
-  </article>
-</BaseLayout>
+  <Content />
+</ProjectLayout>

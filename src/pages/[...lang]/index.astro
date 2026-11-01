@@ -5,9 +5,9 @@ import HomeHero from "../../components/home/HomeHero.astro";
 import HomeExperience from "../../components/home/HomeExperience.astro";
 import FeaturedProjects from "../../components/home/FeaturedProjects.astro";
 import XilaTopology from "../../components/xila/XilaTopology.astro";
-import { personJsonLd } from "../../data/jsonLd.ts";
 import { localeStaticPaths } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
+import { personLd, profilePageLd, websiteLd } from "../../lib/seo.ts";
 
 export const getStaticPaths = (() =>
   localeStaticPaths()) satisfies GetStaticPaths;
@@ -15,6 +15,9 @@ type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 
 const { lang } = Astro.props;
 const t = useTranslations(lang);
+
+// Page order is the single source of the section numbers (00, 01, …).
+const sections = [HomeHero, HomeExperience, FeaturedProjects, XilaTopology];
 ---
 
 <BaseLayout
@@ -22,10 +25,9 @@ const t = useTranslations(lang);
   path="/"
   description={t("home.description")}
   home
-  jsonLd={[personJsonLd]}
+  jsonLd={[personLd(lang), websiteLd(), profilePageLd(lang)]}
 >
-  <HomeHero lang={lang} />
-  <HomeExperience lang={lang} />
-  <FeaturedProjects lang={lang} />
-  <XilaTopology lang={lang} />
+  {sections.map((Section, index) => (
+    <Section lang={lang} index={index} />
+  ))}
 </BaseLayout>

@@ -1,7 +1,10 @@
 ---
 import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
+import { Download } from "@lucide/astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import Hero from "../../components/ui/Hero.astro";
 import PdfEmbed from "../../components/resume/PdfEmbed.astro";
+import ResumeSummary from "../../components/resume/ResumeSummary.astro";
 import { site } from "../../data/site.ts";
 import { localeStaticPaths } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
@@ -12,18 +15,99 @@ type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 
 const { lang } = Astro.props;
 const t = useTranslations(lang);
+const pdf = site.resumePdf[lang];
 ---
 
 <BaseLayout
   lang={lang}
   path="/resume"
-  title={t("nav.resume")}
+  title={t("resume.metaTitle")}
+  trail={[{ name: t("nav.resume"), path: "/resume" }]}
   description={t("resume.description")}
-  noFooter
 >
-  <PdfEmbed
-    src={site.resumePdf[lang]}
-    title={t("resume.pdfTitle")}
-    openLabel={t("resume.openPdf")}
-  />
+  <div class="resume-page editorial-page">
+    <Hero
+      variant="compact"
+      eyebrow={t("resume.eyebrow")}
+      title={t("resume.title")}
+      accent={t("resume.accent")}
+      intro={t("resume.intro")}
+    />
+    <div class="resume-layout">
+      <div class="resume-side">
+        <section class="resume-card" aria-labelledby="resume-actions">
+          <h2 id="resume-actions">{t("resume.actions")}</h2>
+          <div class="resume-actions">
+            <a
+              class="resume-action button-link button-link--primary"
+              href={pdf}
+              download
+            >
+              <Download size={17} aria-hidden="true" />
+              {t("resume.download")}
+            </a>
+            <a
+              class="resume-action button-link"
+              href={pdf}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t("resume.openPdf")}
+              <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+        </section>
+        <ResumeSummary lang={lang} />
+      </div>
+      <PdfEmbed
+        src={pdf}
+        title={t("resume.pdfTitle")}
+        fallback={t("resume.fallback")}
+        openLabel={t("resume.openFallback")}
+        newTabLabel={t("a11y.newTab")}
+      />
+    </div>
+  </div>
 </BaseLayout>
+
+<style>
+  .resume-layout {
+    display: grid;
+    gap: var(--space-xl);
+    align-items: start;
+  }
+  @media (min-width: 900px) {
+    .resume-layout {
+      grid-template-columns: minmax(18rem, 22rem) minmax(0, 1fr);
+      gap: var(--space-m-xl);
+    }
+  }
+  .resume-side {
+    display: grid;
+    gap: var(--space-l);
+    min-width: 0;
+  }
+  .resume-card {
+    padding: var(--space-m);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-l);
+    background: var(--color-surface);
+  }
+  .resume-card h2 {
+    margin: 0 0 var(--space-s);
+    color: var(--color-text-muted);
+    font-size: var(--step--1);
+    font-weight: 600;
+    letter-spacing: var(--tracking-overline);
+    text-transform: uppercase;
+  }
+  .resume-actions {
+    display: grid;
+    gap: var(--space-2xs);
+  }
+  @media (min-width: 560px) and (max-width: 899px) {
+    .resume-actions {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

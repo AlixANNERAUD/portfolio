@@ -1,30 +1,18 @@
 ---
-title: "TRACS (DGSE)"
-description: "Participated in the DGSE TRACS challenge, placing 36th in the student ranking."
+title: "TRACS 2024: DGSE cybersecurity competition"
+description: "With Les Schtroumpfs, 36th place in the student ranking of TRACS 2024, the cybersecurity competition of the DGSE, France's foreign intelligence service."
 ---
 
-[← All projects](/projects)
-
-# TRACS (DGSE)
-
-**CTF** · 2024
-
-> Participated in the DGSE TRACS challenge, placing 36th in the student ranking.
+# TRACS 2024: 36th place in the student ranking
 
 ## Overview
 
-Team "Les Schtroumpfs": <a href="https://tracs.viarezo.fr/edition_results/show_student_ranking/2024/">36th place in the general ranking</a>.
+In 2024, our team "Les Schtroumpfs" took part in TRACS, the cybersecurity competition run by the DGSE, and placed 36th in the student ranking.
 
-## Engineering approach
+## Context
 
-TRACS is documented as a cybersecurity competition with a verifiable student placement. The account does not attribute all of a team's work to a single participant.
+As in a CTF, teams solve computer security challenges to score points. TRACS publishes a ranking of student teams, from which this placement comes. Like every result in this section, it belongs to the whole team.
 
-## Scope and limitations
+## Explore the result
 
-Team competition entry: the collective result is reported as published by the organizer. This page does not assume which challenges were individually solved.
-
-## Explore the project
-
-[Source repository, documentation or official result](https://tracs.viarezo.fr/edition_results/show_student_ranking/2024/) ↗
-
-**Related work:** [Jeanne d'Hack CTF (University of Rouen)](/projects/jeanne-hack-2026) · [Jeanne d'Hack CTF (University of Rouen)](/projects/jeanne-hack-2025)
+- [TRACS 2024 student ranking](https://tracs.viarezo.fr/edition_results/show_student_ranking/2024/)

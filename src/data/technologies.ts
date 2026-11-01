@@ -1,9 +1,13 @@
+import type { Locale } from "../i18n/locales.ts";
+import type { Localized } from "./types.ts";
+
 /**
  * Canonical project tags. A project tag outside this list is a type error.
- * Values are kept as currently published; spelling and translation of the
- * thematic labels are revised with the content.
+ * Proper nouns are shown as written; thematic tags are translated by
+ * `technologyLabel`.
  */
 export const technologies = [
+  "3D printing",
   "Algèbre linéaire",
   "Algorithmique",
   "Ansible",
@@ -25,12 +29,13 @@ export const technologies = [
   "DSP",
   "Électronique",
   "ESP32",
-  "Free pascal",
+  "Free Pascal",
+  "G-code",
   "i18n",
   "Java",
   "JavaScript",
+  "JUnit",
   "LVGL",
-  "Macros",
   "MCU",
   "ML",
   "MQTT",
@@ -45,11 +50,34 @@ export const technologies = [
   "ROS",
   "Rust",
   "S88",
+  "SDL",
   "Tailwind",
+  "TrueNAS",
   "UI",
   "Vue.js",
   "WebAssembly",
-  "Wxt",
+  "WXT",
 ] as const;
 
 export type Technology = (typeof technologies)[number];
+
+/** Translations of the thematic (non-proper-noun) tags. */
+const technologyLabels: Partial<Record<Technology, Localized>> = {
+  "3D printing": { en: "3D printing", fr: "Impression 3D" },
+  "Algèbre linéaire": { en: "Linear algebra", fr: "Algèbre linéaire" },
+  Algorithmique: { en: "Algorithms", fr: "Algorithmique" },
+  Battery: { en: "Battery", fr: "Batterie" },
+  Capteurs: { en: "Sensors", fr: "Capteurs" },
+  "Deep Learning": { en: "Deep learning", fr: "Apprentissage profond" },
+  CLI: { en: "CLI", fr: "Ligne de commande" },
+  Électronique: { en: "Electronics", fr: "Électronique" },
+  Parser: { en: "Parser", fr: "Analyseur syntaxique" },
+  "Proc macros": { en: "Proc macros", fr: "Macros procédurales" },
+  Recherche: { en: "Research", fr: "Recherche" },
+  UI: { en: "UI", fr: "Interface graphique" },
+};
+
+/** The tag as shown in `lang`. */
+export function technologyLabel(tag: Technology, lang: Locale): string {
+  return technologyLabels[tag]?.[lang] ?? tag;
+}

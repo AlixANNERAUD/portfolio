@@ -12,13 +12,21 @@
  */
 
 :root {
-  color-scheme: light;
+  /*
+   * Auto theme: light-dark() follows the system preference, live and
+   * without JavaScript. An explicit choice adds html.light or html.dark.
+   */
+  color-scheme: light dark;
 
   /* Typography */
   --font-body: system-ui, -apple-system, "Segoe UI", sans-serif;
 
   --tracking-display: -0.035em;
   --tracking-heading: -0.02em;
+  /* Mono dates and small headings: a hair tighter than the body. */
+  --tracking-tight: -0.01em;
+  /* Mono figures next to uppercase overlines and small labels. */
+  --tracking-mono: 0.02em;
   --tracking-overline: 0.14em;
 
   /* Fluid type scale (Utopia, 360-1240px viewport, 16-18px base). */
@@ -31,6 +39,8 @@
   --step-4: clamp(2.074rem, 1.7987rem + 1.2236vw, 2.747rem);
   --step-5: clamp(2.488rem, 2.1014rem + 1.7182vw, 3.433rem);
   --step-display: clamp(3rem, 1.3636rem + 7.2727vw, 7rem);
+  /* Hero title on phones: the display step would overflow 18-character lines. */
+  --step-display-narrow: clamp(2.5rem, 11.5vw, 4.75rem);
 
   --leading-tight: 1.1;
   --leading-snug: 1.25;
@@ -58,9 +68,14 @@
   --container: 1180px;
   --container-prose: 850px;
   --gutter: var(--space-s-l);
-  /* Header controls set the header row height, so --header-h follows them. */
-  --control-size: 2.2rem;
-  --header-h: calc(var(--control-size) + 2 * var(--space-xs) + 1px);
+  /* Inline padding of the page column (header, footer, sections, pages). */
+  --page-inline: var(--space-m);
+  /*
+   * Header controls and nav links are 44px targets; they set the header row
+   * height, so --header-h follows them.
+   */
+  --control-size: 2.75rem;
+  --header-h: calc(var(--control-size) + 2 * var(--space-2xs) + 1px);
 
   /* Radius */
   --radius-s: 0.375rem;
@@ -70,7 +85,7 @@
 
   /*
    * Semantic colors: light value first, dark value second. light-dark()
-   * follows color-scheme, which the html.dark class switches below.
+   * follows color-scheme, which the html.light and html.dark classes pin.
    */
   --color-bg: light-dark(oklch(0.995 0.003 270), oklch(0.22 0.008 285));
   --color-surface: light-dark(oklch(0.975 0.006 270), oklch(0.245 0.01 280));
@@ -111,12 +126,24 @@
   --category-embedded: light-dark(oklch(0.411 0.04 77), oklch(0.451 0.04 77));
   --category-security: light-dark(oklch(0.37 0.045 25), oklch(0.41 0.045 25));
   --category-data: light-dark(oklch(0.36 0.04 150), oklch(0.4 0.04 150));
+  /* Text and rules on a category panel (light on dark in both themes). */
+  --color-on-category: oklch(0.97 0.005 270);
 
   /* Motion */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --dur-fast: 150ms;
   --dur-base: 220ms;
   --dur-slow: 540ms;
+  /* Hover idioms: an arrow slides by --nudge-x, a clickable card lifts. */
+  --nudge-x: 3px;
+  --lift: -3px;
+}
+
+/* Narrow screens: the page column keeps a smaller gutter. */
+@media (max-width: 720px) {
+  :root {
+    --page-inline: var(--space-s);
+  }
 }
 
 :root.light {
@@ -127,12 +154,15 @@
   color-scheme: dark;
 }
 
-/* The header wraps its navigation onto a second row on narrow screens. */
-@media (max-width: 720px) {
-  :root {
+/*
+ * Without JavaScript (no data-menu on the header), narrow screens wrap the
+ * navigation onto a second row of controls. Header breakpoint: see
+ * SiteHeader.astro.
+ */
+@media (max-width: 960px) {
+  :root:not(:has(.site-header[data-menu])) {
     --header-h: calc(
-      var(--control-size) + var(--step--1) * var(--leading-body) + 3 *
-        var(--space-2xs) + 2 * var(--space-3xs) + 1px
+      2 * var(--control-size) + var(--space-3xs) + 2 * var(--space-2xs) + 1px
     );
   }
 }

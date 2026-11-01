@@ -1,6 +1,6 @@
 /** Public, bilingual technical skills grounded in actual portfolio projects. */
 import type { ProjectId } from "./projects.ts";
-import type { Localized } from "./types.ts";
+import type { Label, Localized } from "./types.ts";
 
 /**
  * Links to a dedicated EN/FR project page, or to an explicit resource
@@ -16,7 +16,7 @@ export interface SkillDomain {
   icon: "cpu" | "database" | "code" | "server" | "shield" | "bot";
   title: Localized;
   description: Localized;
-  technologies: readonly string[];
+  technologies: readonly Label[];
   examples: readonly SkillEvidence[];
 }
 
@@ -26,7 +26,7 @@ export const skillDomains: readonly SkillDomain[] = [
     icon: "cpu",
     title: { fr: "Systèmes, Rust et embarqué", en: "Systems, Rust & embedded" },
     description: {
-      fr: "Du matériel aux applications : pilotes, abstractions, mémoire, tâches et exécution WebAssembly sur des machines aux ressources limitées.",
+      fr: "Du matériel aux applications : pilotes, abstractions, mémoire, tâches et exécution WebAssembly sur des machines aux ressources limitées.",
       en: "From hardware to applications: drivers, abstractions, memory, tasks and WebAssembly on resource-constrained systems.",
     },
     technologies: ["Rust", "C / C++", "WebAssembly", "ESP32", "LVGL", "Linux"],
@@ -35,8 +35,8 @@ export const skillDomains: readonly SkillDomain[] = [
         kind: "project",
         projectId: "xila",
         detail: {
-          fr: "Noyau, pilotes, VFS et runtime WebAssembly.",
-          en: "Kernel, drivers, VFS and WebAssembly runtime.",
+          fr: "Services système, pilotes, VFS et exécution WebAssembly.",
+          en: "System services, drivers, VFS and WebAssembly runtime.",
         },
       },
       {
@@ -65,7 +65,7 @@ export const skillDomains: readonly SkillDomain[] = [
       en: "Backend, APIs & data",
     },
     description: {
-      fr: "Conception d'API, intégration de données et pipelines de traitement. J'aime relier le modèle métier à une implémentation simple et maintenable.",
+      fr: "Conception d’API, intégration de données et pipelines de traitement. J’aime relier le modèle métier à une implémentation simple et maintenable.",
       en: "API design, data integration and processing pipelines. I focus on connecting domain needs to simple, maintainable implementations.",
     },
     technologies: [
@@ -104,7 +104,7 @@ export const skillDomains: readonly SkillDomain[] = [
       en: "Web interfaces & applications",
     },
     description: {
-      fr: "Interfaces Vue et React, applications web interactives et extensions navigateur. Le design doit servir l'usage autant que le code.",
+      fr: "Interfaces Vue et React, applications web interactives et extensions navigateur. Le design doit servir l’usage autant que le code.",
       en: "Vue and React interfaces, interactive web applications and browser extensions. Design should serve the user as much as the code.",
     },
     technologies: [
@@ -153,7 +153,7 @@ export const skillDomains: readonly SkillDomain[] = [
       "AWS",
       "GitHub Actions",
       "Git",
-      "Networking",
+      { en: "Networking", fr: "Réseaux" },
     ],
     examples: [
       {
@@ -182,7 +182,7 @@ export const skillDomains: readonly SkillDomain[] = [
       en: "Networking & security",
     },
     description: {
-      fr: "Diagnostic réseau L2/L3, téléphonie IP et cybersécurité. Une pratique nourrie par l'exploitation télécom et les CTF en équipe.",
+      fr: "Diagnostic réseau L2/L3, téléphonie IP et cybersécurité. Une pratique nourrie par l’exploitation télécom et les CTF en équipe.",
       en: "L2/L3 network diagnostics, IP telephony and cybersecurity, informed by telecom operations and team-based CTFs.",
     },
     technologies: [
@@ -222,7 +222,7 @@ export const skillDomains: readonly SkillDomain[] = [
       en: "Agent-assisted development",
     },
     description: {
-      fr: "J'utilise les agents de code pour explorer, implémenter et relire, sans déléguer la validation : tests, revues Git et CI restent essentiels.",
+      fr: "J’utilise les agents de code pour explorer, implémenter et relire, sans déléguer la validation : tests, revues Git et CI restent essentiels.",
       en: "I use coding agents to explore, implement and review, while keeping validation in the loop through tests, Git reviews and CI.",
     },
     technologies: [
@@ -230,13 +230,13 @@ export const skillDomains: readonly SkillDomain[] = [
       "Claude Code",
       "Codex",
       "MCP",
-      "Testing",
+      { en: "Testing", fr: "Tests" },
       "Git / CI",
     ],
     examples: [
       {
         kind: "link",
-        href: "https://github.com/AlixANNERAUD/Web_site/blob/main/AGENTS.md",
+        href: "https://github.com/AlixANNERAUD/portfolio/blob/main/AGENTS.md",
         label: {
           fr: "Instructions multi-agents",
           en: "Shared agent guidelines",

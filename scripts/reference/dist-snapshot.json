@@ -127,6 +127,20 @@
       "ogType": "article"
     },
     {
+      "file": "fr/projects/covid3d.html",
+      "lang": "fr",
+      "title": "Covid3D : visières imprimées en 3D (2020) | Alix ANNERAUD",
+      "canonical": "https://alix.anneraud.fr/fr/projects/covid3d",
+      "hreflang": {
+        "en": "https://alix.anneraud.fr/projects/covid3d",
+        "fr": "https://alix.anneraud.fr/fr/projects/covid3d",
+        "x-default": "https://alix.anneraud.fr/projects/covid3d"
+      },
+      "robots": null,
+      "h1Count": 1,
+      "ogType": "article"
+    },
+    {
       "file": "fr/projects/deez-nalyzer.html",
       "lang": "fr",
       "title": "Deez'Nalyzer | Alix ANNERAUD",
@@ -561,6 +575,20 @@
       "ogType": "article"
     },
     {
+      "file": "projects/covid3d.html",
+      "lang": "en",
+      "title": "Covid3D: 3D-printed face shields in 2020 | Alix ANNERAUD",
+      "canonical": "https://alix.anneraud.fr/projects/covid3d",
+      "hreflang": {
+        "en": "https://alix.anneraud.fr/projects/covid3d",
+        "fr": "https://alix.anneraud.fr/fr/projects/covid3d",
+        "x-default": "https://alix.anneraud.fr/projects/covid3d"
+      },
+      "robots": null,
+      "h1Count": 1,
+      "ogType": "article"
+    },
+    {
       "file": "projects/deez-nalyzer.html",
       "lang": "en",
       "title": "Deez'Nalyzer | Alix ANNERAUD",
@@ -921,6 +949,7 @@
     "https://alix.anneraud.fr/fr/projects/battery-percent",
     "https://alix.anneraud.fr/fr/projects/codinsa-2025",
     "https://alix.anneraud.fr/fr/projects/connected-speaker",
+    "https://alix.anneraud.fr/fr/projects/covid3d",
     "https://alix.anneraud.fr/fr/projects/deez-nalyzer",
     "https://alix.anneraud.fr/fr/projects/dera",
     "https://alix.anneraud.fr/fr/projects/embedded-i18n",
@@ -951,6 +980,7 @@
     "https://alix.anneraud.fr/projects/battery-percent",
     "https://alix.anneraud.fr/projects/codinsa-2025",
     "https://alix.anneraud.fr/projects/connected-speaker",
+    "https://alix.anneraud.fr/projects/covid3d",
     "https://alix.anneraud.fr/projects/deez-nalyzer",
     "https://alix.anneraud.fr/projects/dera",
     "https://alix.anneraud.fr/projects/embedded-i18n",

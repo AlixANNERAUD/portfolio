@@ -1,30 +1,20 @@
 ---
-title: "Cod'INSA"
-description: "Première place au concours de programmation compétitive Cod'INSA 2025."
+title: "Cod’INSA 2025 : victoire de l’INSA Rouen"
+description: "Première place à Cod’INSA 2025 avec l’INSA Rouen : un concours inter-INSA où chaque équipe programme une IA pour un jeu conçu pour l’événement."
 ---
 
-[← Tous les projets](/fr/projects)
-
-# Cod'INSA
-
-**Algorithmique** · 2025
-
-> Première place au concours de programmation compétitive Cod'INSA 2025.
+# Cod’INSA 2025 : première place au classement général
 
 ## Présentation
 
-Équipe INSA Rouen : <a href="https://codinsa.org/static/past">1ère place au classement général</a>.
+J’ai fait partie de l’équipe de l’INSA Rouen Normandie qui a remporté Cod’INSA 2025, en terminant première du classement général.
 
-## Démarche technique
+## Contexte
 
-Ce concours mesure la capacité d'une équipe à concevoir rapidement des solutions algorithmiques correctes. Le résultat témoigne de compétences en raisonnement, programmation et collaboration plutôt que d'un produit logiciel exploité.
+Cod’INSA est un concours de programmation organisé par des étudiants pour les écoles du Groupe INSA. Des qualifications ont lieu dans chaque école, et les cinq meilleurs forment l’équipe de leur INSA pour la finale. Chaque équipe y programme une IA pour un jeu vidéo conçu pour l’événement, et les IA s’affrontent entre elles. Un jury de partenaires évalue aussi les équipes.
 
-## Portée et limites
+Comme pour les autres compétitions de cette rubrique, ce classement est un résultat collectif.
 
-Participation en équipe à une compétition : le résultat collectif est cité tel qu'il est publié par l'organisateur. Cette fiche ne présume pas du détail des épreuves résolues individuellement.
+## Consulter le résultat
 
-## Explorer le projet
-
-[Dépôt, documentation ou résultat officiel](https://codinsa.org/static/past) ↗
-
-**Dans le même domaine :** [Xila](/fr/projects/xila) · [nanoexpr](/fr/projects/nanoexpr)
+- [Site officiel de Cod’INSA](https://codinsa.org/)

@@ -1,30 +1,18 @@
 ---
-title: "TRACS (DGSE)"
-description: "Participation au challenge TRACS de la DGSE, avec une 36e place au classement étudiant."
+title: "TRACS 2024 : compétition de cybersécurité"
+description: "Avec Les Schtroumpfs, 36e du classement étudiant de TRACS 2024, la compétition de cybersécurité de la DGSE, le service de renseignement extérieur français."
 ---
 
-[← Tous les projets](/fr/projects)
-
-# TRACS (DGSE)
-
-**CTF** · 2024
-
-> Participation au challenge TRACS de la DGSE, avec une 36e place au classement étudiant.
+# TRACS 2024 : 36e place au classement étudiant
 
 ## Présentation
 
-Équipe "Les Schtroumpfs" : <a href="https://tracs.viarezo.fr/edition_results/show_student_ranking/2024/">36ème place au classement général</a>.
+En 2024, notre équipe « Les Schtroumpfs » a participé à TRACS, la compétition de cybersécurité organisée par la DGSE, et a terminé 36e du classement étudiant.
 
-## Démarche technique
+## Contexte
 
-Le challenge TRACS est présenté comme une expérience de compétition en cybersécurité, avec un rang étudiant vérifiable. Le contexte et le score sont mentionnés sans attribuer à un participant individuel l'ensemble des travaux de l'équipe.
+Comme dans un CTF, les équipes résolvent des épreuves de sécurité informatique pour marquer des points. Cette place provient du classement des équipes étudiantes publié par TRACS. Comme tous les résultats de cette rubrique, elle revient à l’équipe entière.
 
-## Portée et limites
+## Consulter le résultat
 
-Participation en équipe à une compétition : le résultat collectif est cité tel qu'il est publié par l'organisateur. Cette fiche ne présume pas du détail des épreuves résolues individuellement.
-
-## Explorer le projet
-
-[Dépôt, documentation ou résultat officiel](https://tracs.viarezo.fr/edition_results/show_student_ranking/2024/) ↗
-
-**Dans le même domaine :** [Jeanne d'Hack CTF (Université de Rouen)](/fr/projects/jeanne-hack-2026) · [Jeanne d'Hack CTF (Université de Rouen)](/fr/projects/jeanne-hack-2025)
+- [Classement étudiant de TRACS 2024](https://tracs.viarezo.fr/edition_results/show_student_ranking/2024/)

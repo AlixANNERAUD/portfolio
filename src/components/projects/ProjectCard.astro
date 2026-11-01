@@ -2,59 +2,95 @@
 import type { HTMLAttributes } from "astro/types";
 import Card from "../ui/Card.astro";
 import Tags from "../ui/Tags.astro";
-import { projectUrl, type CatalogueProject } from "../../data/projects.ts";
+import {
+  projectRank,
+  projectUrl,
+  projectExternalUrl,
+  type CatalogueProject,
+} from "../../data/projects.ts";
+import { technologyLabel } from "../../data/technologies.ts";
 import { localize } from "../../data/types.ts";
 import type { Locale } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
 import { formatPeriod } from "../../lib/format.ts";
 
+/**
+ * A project card. The title link is the card's only link to the project page
+ * and is stretched over the whole card; an external link, when present, sits
+ * above it. The number is the stable relevance rank, whatever the filters.
+ */
 type Props = HTMLAttributes<"article"> & {
   project: CatalogueProject;
   lang: Locale;
-  /** Position in the list, from 1, shown on the artwork. */
-  position: number;
+  /** Follows the surrounding outline: h2 under the catalogue H1. */
+  headingLevel?: "h2" | "h3";
+  /** The catalogue rank means nothing outside the catalogue and the home. */
+  showRank?: boolean;
 };
 
-const { project, lang, position, class: className, ...rest } = Astro.props;
+const {
+  project,
+  lang,
+  headingLevel: Heading = "h3",
+  showRank = true,
+  class: className,
+  ...rest
+} = Astro.props;
 const t = useTranslations(lang);
+const rank = String(projectRank(project.id)).padStart(2, "0");
+const externalUrl = projectExternalUrl(project);
 ---
 
 <Card class:list={["showcase-card", className]} variant="project" {...rest}>
   <div
-    class:list={["showcase-art", `showcase-art--${project.category}`]}
+    class="showcase-art"
+    style={`--art-bg: var(--category-${project.category})`}
     aria-hidden="true"
   >
     <span class="showcase-art-symbol">{project.symbol}</span>
     <span class="showcase-art-index">
-      <span class="showcase-art-position">
-        {String(position).padStart(2, "0")}
-      </span>{" "}
-      / {formatPeriod(project.period, lang)}
+      {showRank && (
+        <>
+          <span class="showcase-art-position">{rank}</span>
+          <span class="showcase-art-separator"> / </span>
+        </>
+      )}
+      <span class="showcase-art-period">
+        {formatPeriod(project.period, lang)}
+      </span>
     </span>
   </div>
   <div class="showcase-card-body">
     <p class="showcase-card-category">{t(`category.${project.category}`)}</p>
-    <h3>{localize(project.title, lang)}</h3>
+    <Heading class="showcase-card-title">
+      <a class="showcase-card-link" href={projectUrl(project.id, lang)}>
+        {localize(project.title, lang)}
+      </a>
+    </Heading>
     <p class="showcase-card-description">{project.description[lang]}</p>
     {project.tags.length > 0 && (
       <Tags
-        tags={project.tags}
+        tags={project.tags.map((tag) => technologyLabel(tag, lang))}
         label={t("project.technologies")}
         density="project"
       />
     )}
     <div class="showcase-card-actions">
-      <a href={projectUrl(project.id, lang)}>
-        {t("project.details")} <span aria-hidden="true">→</span>
-      </a>
-      {project.externalUrl && (
+      <span class="showcase-card-cta" aria-hidden="true">
+        {t("project.details")} <span class="showcase-card-arrow">→</span>
+      </span>
+      {externalUrl && (
         <a
           class="showcase-external-link"
-          href={project.externalUrl}
+          href={externalUrl}
           target="_blank"
           rel="noopener noreferrer"
         >
-          {t("project.external")} <span aria-hidden="true">↗</span>
+          {t("project.external")}
+          <span class="visually-hidden">
+            {` ${t("project.externalOf", { title: localize(project.title, lang) })} ${t("a11y.newTab")}`}
+          </span>
+          <span aria-hidden="true">↗</span>
         </a>
       )}
     </div>
@@ -62,6 +98,10 @@ const t = useTranslations(lang);
 </Card>
 
 <style>
+  .showcase-card {
+    display: flex;
+    flex-direction: column;
+  }
   .showcase-art {
     position: relative;
     display: flex;
@@ -69,106 +109,223 @@ const t = useTranslations(lang);
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    background-color: #16212d;
+    background-color: var(--art-bg);
     background-image:
-      linear-gradient(115deg, transparent 48%, #ffffff0a 49%, transparent 50%),
-      radial-gradient(circle at 68% 30%, #ffffff22, transparent 45%);
-    color: #f7f8fa;
+      linear-gradient(
+        115deg,
+        transparent 48%,
+        color-mix(in oklch, var(--color-on-category) 4%, transparent) 49%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 68% 30%,
+        color-mix(in oklch, var(--color-on-category) 13%, transparent),
+        transparent 45%
+      );
+    color: var(--color-on-category);
   }
   .showcase-art::before {
     position: absolute;
     inset: 0;
     content: "";
+    --rule: color-mix(in oklch, var(--color-on-category) 9%, transparent);
     background-image:
-      linear-gradient(#ffffff16 1px, transparent 1px),
-      linear-gradient(90deg, #ffffff16 1px, transparent 1px);
+      linear-gradient(var(--rule) 1px, transparent 1px),
+      linear-gradient(90deg, var(--rule) 1px, transparent 1px);
     background-size: 28px 28px;
     mask-image: linear-gradient(to bottom, #000, transparent 90%);
-  }
-  .showcase-art--systems {
-    background-color: #233b40;
-  }
-  .showcase-art--web,
-  .showcase-art--software {
-    background-color: #473b53;
-  }
-  .showcase-art--infrastructure {
-    background-color: #304354;
-  }
-  .showcase-art--embedded {
-    background-color: #574832;
   }
   .showcase-art-symbol {
     position: relative;
     font-family: var(--font-display);
-    font-size: clamp(4rem, 7vw, 6rem);
+    font-size: calc(1.75 * var(--step-5));
     font-weight: 400;
-    letter-spacing: -0.07em;
+    letter-spacing: var(--tracking-display);
     line-height: 1;
   }
   .showcase-art-index {
     position: absolute;
-    right: 1.15rem;
-    bottom: 0.9rem;
-    font-family: ui-monospace, monospace;
-    font-size: 0.7rem;
-    opacity: 0.78;
+    right: var(--space-s);
+    bottom: var(--space-xs);
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    font-variant-numeric: tabular-nums;
+    opacity: 0.85;
   }
   .showcase-card-body {
     display: flex;
+    flex: 1;
     flex-direction: column;
-    min-height: 17rem;
-    padding: 1.4rem;
+    padding: var(--space-m);
   }
   .showcase-card-category {
-    margin: 0 0 0.45rem;
+    margin: 0 0 var(--space-2xs);
     color: var(--color-text-muted);
-    font-size: 0.73rem;
+    font-size: var(--step--2);
     font-weight: 600;
-    letter-spacing: 0.15em;
+    letter-spacing: var(--tracking-overline);
     text-transform: uppercase;
   }
-  .showcase-card h3 {
-    margin: 0 0 0.7rem;
+  .showcase-card-title {
+    margin: 0 0 var(--space-xs);
     border: 0;
     padding: 0;
-    font-size: clamp(1.25rem, 1.8vw, 1.6rem);
-    line-height: 1.2;
-    letter-spacing: -0.025em;
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    font-weight: 500;
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-heading);
+    text-wrap: balance;
+  }
+  .showcase-card-link {
+    color: inherit;
+    text-decoration: none;
+  }
+  /* Stretched link: the whole card is the title link's hit area. */
+  .showcase-card-link::after {
+    position: absolute;
+    inset: 0;
+    content: "";
+  }
+  /* The card shows the focus ring, not the title text. */
+  .showcase-card-link:focus-visible {
+    outline: none;
+  }
+  .showcase-card:focus-within:has(.showcase-card-link:focus-visible) {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
   }
   .showcase-card-description {
     flex-grow: 1;
-    margin: 0 0 1.25rem;
+    margin: 0 0 var(--space-s);
     color: var(--color-text-muted);
-    font-size: 0.88rem;
-    line-height: 1.65;
+    font-size: var(--step--1);
+    line-height: var(--leading-body);
+    text-wrap: pretty;
   }
   .showcase-card-actions {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 0.7rem 1rem;
-  }
-  .showcase-card-actions > a {
-    align-self: flex-start;
-    color: var(--color-accent);
-    font-size: 0.86rem;
+    justify-content: space-between;
+    gap: var(--space-2xs) var(--space-s);
+    margin-top: auto;
+    font-size: var(--step--1);
     font-weight: 600;
+  }
+  .showcase-card-cta {
+    color: var(--color-accent);
+  }
+  .showcase-card-arrow {
+    display: inline-block;
+  }
+  /* Raised above the stretched link so it stays its own target. */
+  .showcase-external-link {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    min-height: 1.5rem;
+    align-items: center;
+    gap: 0.3em;
+    color: var(--color-text-muted);
     text-decoration: none;
   }
-  .showcase-card-actions > a:hover {
-    text-decoration: underline;
+  /* A 44px-high target around the compact text link, without a taller row. */
+  .showcase-external-link::before {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    left: 0;
+    height: var(--control-size);
+    content: "";
+    translate: 0 -50%;
   }
-  .showcase-card-actions .showcase-external-link {
-    color: var(--color-text-muted);
-    font-size: 0.79rem;
+  .showcase-external-link:hover {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  /*
+   * Dim the neighbours of the hovered card, pointer and motion only. Only the
+   * art panel fades: the neighbours' text keeps its AA contrast.
+   */
+  .showcase-art {
+    transition: opacity var(--dur-base) var(--ease-out);
+  }
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    :global(.showcase-grid:has(> .showcase-card:hover))
+      > .showcase-card:not(:hover)
+      .showcase-art {
+      opacity: 0.55;
+    }
+    .showcase-card-arrow {
+      transition: transform var(--dur-fast) var(--ease-out);
+    }
+    .showcase-card:hover .showcase-card-arrow {
+      transform: translateX(var(--nudge-x));
+    }
   }
   @media (max-width: 600px) {
     .showcase-art {
       min-height: 9.5rem;
     }
-    .showcase-card-body {
-      min-height: 0;
+  }
+
+  /*
+   * List view (catalogue index, related projects): a row with a narrow
+   * symbol column; the body keeps the card's order, actions last.
+   */
+  /* :not([hidden]) leaves filtered-out cards to the catalogue's rule. */
+  :global([data-view="list"]) > .showcase-card:not([hidden]) {
+    display: grid;
+    grid-template-columns: 7rem minmax(0, 1fr);
+  }
+  :global([data-view="list"]) > .showcase-card .showcase-art {
+    min-height: 0;
+    flex-direction: column;
+    gap: var(--space-2xs);
+    padding: var(--space-s) var(--space-2xs);
+  }
+  :global([data-view="list"]) > .showcase-card .showcase-art-symbol {
+    font-size: var(--step-4);
+  }
+  :global([data-view="list"]) > .showcase-card .showcase-art-index {
+    position: relative;
+    inset: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  :global([data-view="list"]) > .showcase-card .showcase-art-separator {
+    display: none;
+  }
+  :global([data-view="list"]) > .showcase-card .showcase-art-period {
+    white-space: nowrap;
+  }
+  :global([data-view="list"]) > .showcase-card .showcase-card-body {
+    padding: var(--space-s) var(--space-m);
+  }
+  :global([data-view="list"]) > .showcase-card .showcase-card-title {
+    margin-bottom: var(--space-3xs);
+    font-size: var(--step-1);
+  }
+  :global([data-view="list"]) > .showcase-card .showcase-card-description {
+    margin-bottom: var(--space-xs);
+  }
+  :global([data-view="list"]) > .showcase-card :global(.editorial-tags) {
+    margin-bottom: var(--space-xs);
+  }
+  @media (max-width: 600px) {
+    /* Wide enough for "Depuis 2019" on one line. */
+    :global([data-view="list"]) > .showcase-card {
+      grid-template-columns: 6rem minmax(0, 1fr);
+    }
+    :global([data-view="list"]) > .showcase-card .showcase-art-symbol {
+      font-size: var(--step-3);
+    }
+    :global([data-view="list"]) > .showcase-card .showcase-card-body {
+      padding: var(--space-xs) var(--space-s);
     }
   }
 </style>

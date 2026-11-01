@@ -1,16 +1,18 @@
 ---
 import Hero from "../ui/Hero.astro";
 import ProjectCard from "../projects/ProjectCard.astro";
-import { featuredProjects } from "../../data/projects.ts";
+import { featuredProjects, projects } from "../../data/projects.ts";
 import { localizePath, type Locale } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
 
 /** Homepage selection: the top-ranked projects, then a link to the catalogue. */
 interface Props {
   lang: Locale;
+  /** Position of the section on the page, numbering its overline. */
+  index: number;
 }
 
-const { lang } = Astro.props;
+const { lang, index } = Astro.props;
 const t = useTranslations(lang);
 ---
 
@@ -19,40 +21,54 @@ const t = useTranslations(lang);
     variant="compact"
     headingLevel="h2"
     eyebrow={t("home.projects.eyebrow")}
+    index={index}
     title={t("home.projects.title")}
     accent={t("home.projects.accent")}
     intro={t("home.projects.intro")}
   />
 
   <div class="showcase-grid">
-    {featuredProjects.map((project, index) => (
-      <ProjectCard project={project} lang={lang} position={index + 1} />
+    {featuredProjects.map((project) => (
+      <ProjectCard project={project} lang={lang} />
     ))}
   </div>
 
   <a class="showcase-all-link" href={localizePath("/projects", lang)}>
-    {t("home.projects.viewAll")} <span aria-hidden="true">↗</span>
+    {t("home.projects.viewAll", { count: projects.length })}{" "}
+    <span aria-hidden="true">→</span>
   </a>
 </section>
 
 <style>
   .portfolio-showcase {
-    margin-block: 2.5rem 5rem;
+    margin-block: var(--space-l) var(--space-2xl);
   }
   .showcase-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1rem;
+    gap: var(--space-s);
   }
   .showcase-all-link {
-    display: inline-block;
-    margin-top: 1.7rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    margin-top: var(--space-m);
     color: var(--color-accent);
-    font-size: 0.92rem;
+    font-size: var(--step--1);
     font-weight: 600;
+    text-decoration: none;
   }
   .showcase-all-link:hover {
     text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .showcase-all-link span {
+      transition: transform var(--dur-fast) var(--ease-out);
+    }
+    .showcase-all-link:hover span {
+      transform: translateX(var(--nudge-x));
+    }
   }
   @media (max-width: 850px) {
     .showcase-grid {
@@ -61,7 +77,7 @@ const t = useTranslations(lang);
   }
   @media (max-width: 600px) {
     .portfolio-showcase {
-      margin-block: 2rem 3rem;
+      margin-block: var(--space-l) var(--space-xl);
     }
     .showcase-grid {
       grid-template-columns: minmax(0, 1fr);

@@ -11,10 +11,17 @@ import {
 import { ui, useTranslations } from "../src/i18n/ui.ts";
 import { site } from "../src/data/site.ts";
 import { localize } from "../src/data/types.ts";
-import { formatCount, formatPeriod } from "../src/lib/format.ts";
+import {
+  formatCount,
+  formatPeriod,
+  periodParts,
+  sectionLabel,
+} from "../src/lib/format.ts";
 import {
   RANK_WEIGHTS,
+  byScore,
   featuredProjects,
+  nextProject,
   projectScore,
   projectUrl,
   projects,
@@ -151,6 +158,33 @@ test("formatPeriod renders ongoing, single-year and closed periods", () => {
   }
 });
 
+test("periodParts splits the formatted period around its years", () => {
+  assert.deepEqual(periodParts({ start: "2019", end: "present" }, "fr"), [
+    "Depuis ",
+    { year: "2019" },
+  ]);
+  assert.deepEqual(periodParts({ start: "2022", end: "2023" }, "en"), [
+    { year: "2022" },
+    "\u2013",
+    { year: "2023" },
+  ]);
+  assert.deepEqual(periodParts({ start: "2023", end: "2023" }, "en"), [
+    { year: "2023" },
+  ]);
+  for (const lang of locales) {
+    for (const period of [
+      { start: "2019", end: "present" },
+      { start: "2022", end: "2023" },
+      { start: "2024" },
+    ]) {
+      const text = periodParts(period, lang)
+        .map((part) => (typeof part === "string" ? part : part.year))
+        .join("");
+      assert.equal(text, formatPeriod(period, lang));
+    }
+  }
+});
+
 test("formatCount pluralizes with Intl.PluralRules", () => {
   assert.equal(formatCount(1, "project", "fr"), "1 projet");
   assert.equal(formatCount(12, "project", "fr"), "12 projets");
@@ -161,6 +195,12 @@ test("formatCount pluralizes with Intl.PluralRules", () => {
   assert.equal(formatCount(1, "role", "fr"), "1 poste");
   assert.equal(formatCount(4, "milestone", "en"), "4 milestones");
   assert.equal(formatCount(1, "milestone", "fr"), "1 étape");
+});
+
+test("sectionLabel numbers sections as NN — Label", () => {
+  assert.equal(sectionLabel(0, "Introduction"), "00\u00a0— Introduction");
+  assert.equal(sectionLabel(3, "Xila"), "03\u00a0— Xila");
+  assert.equal(sectionLabel(12, "Projets"), "12\u00a0— Projets");
 });
 
 test("ranking weights total 100 and drive the featured selection", () => {
@@ -188,6 +228,47 @@ test("relatedProjects excludes the project itself", () => {
   assert.ok(related.every((project) => project.id !== "xila"));
   assert.equal(new Set(related.map((project) => project.id)).size, 3);
   assert.equal(relatedProjects("xila", 5).length, 5);
+});
+
+test("relatedProjects lists only real matches, at most n", () => {
+  for (const project of projects) {
+    const related = relatedProjects(project.id);
+    assert.ok(related.length >= 1 && related.length <= 3, project.id);
+    for (const other of related) {
+      assert.ok(
+        other.category === project.category ||
+          other.tags.some((tag) => project.tags.includes(tag)),
+        project.id + " → " + other.id + " is not related",
+      );
+    }
+  }
+});
+
+test("project art glyphs are unique", () => {
+  const symbols = projects.map((project) => project.symbol);
+  assert.equal(new Set(symbols).size, symbols.length);
+});
+
+test("experience dates and titles use dashes, not spaced hyphens", () => {
+  for (const entry of experiences) {
+    for (const lang of locales) {
+      for (const value of [entry.period[lang], entry.role[lang]]) {
+        assert.ok(!/ - /.test(value), entry.id + ": " + JSON.stringify(value));
+      }
+      // Numeric ranges take an unspaced en dash, like formatPeriod.
+      assert.ok(!/\d\s+–\s*\d/.test(entry.period[lang]), entry.id);
+    }
+  }
+});
+
+test("nextProject follows relevance order, wraps and skips", () => {
+  const ranked = [...projects].sort(byScore);
+  assert.equal(nextProject(ranked[0].id).id, ranked[1].id);
+  assert.equal(nextProject(ranked.at(-1).id).id, ranked[0].id);
+  assert.equal(nextProject(ranked[0].id, [ranked[1].id]).id, ranked[2].id);
+  const skip = relatedProjects("xila").map((project) => project.id);
+  const next = nextProject("xila", skip);
+  assert.ok(next.id !== "xila" && !skip.includes(next.id));
 });
 
 test("project tags come from the canonical technology list", () => {

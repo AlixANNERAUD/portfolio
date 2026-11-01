@@ -9,6 +9,10 @@ import {
 } from "../src/data/projects.ts";
 import { technologies } from "../src/data/technologies.ts";
 import { experiences } from "../src/data/experiences.ts";
+import { skillDomains, spokenLanguages } from "../src/data/skills.ts";
+import { site } from "../src/data/site.ts";
+import { ui } from "../src/i18n/ui.ts";
+import { findFrenchTypographyIssues } from "../src/lib/rehype-french-typography.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -251,5 +255,166 @@ if (
 ) {
   throw new Error(
     "Exactly four professional roles must be flagged `homepage`.",
+  );
+}
+
+/** Splits a page into its `title`/`description` frontmatter and its body. */
+function parseFrontmatter(source) {
+  const [, frontmatter = "", body = source] =
+    source.replace(/\r\n?/g, "\n").match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/) ??
+    [];
+  const fields = {};
+  for (const [, key, raw] of frontmatter.matchAll(
+    /^(title|description): (.*)$/gm,
+  )) {
+    const quoted = raw.match(/^"(.*)"$/) ?? raw.match(/^'(.*)'$/);
+    fields[key] = quoted
+      ? quoted[1].replace(/\\"/g, '"').replace(/''/g, "'")
+      : raw;
+  }
+  return { fields, body };
+}
+
+/** Reads the single `.md` or `.mdx` page of a project. */
+function readProjectPage(lang, id) {
+  const base = join(root, "src", "content", "projects", lang, id);
+  return readFileSync(
+    existsSync(base + ".mdx") ? base + ".mdx" : base + ".md",
+    "utf8",
+  );
+}
+
+// Editorial rules for project pages: a meta description of 120-160
+// characters, a unique title per locale, a <title> of 50-60 characters
+// (a target, reported as a warning), no generic defensive "Scope and
+// limitations" section, and a team size for every academic project.
+const SCOPE_HEADING_ALLOWED = new Set([
+  "odor-localization",
+  "music-danceability",
+]);
+const editorialIssues = [];
+const editorialWarnings = [];
+const charCount = (text) => [...text].length;
+
+for (const lang of locales) {
+  const seenTitles = new Map();
+  for (const project of projects) {
+    const where = `${lang}/${project.id}`;
+    const { fields, body } = parseFrontmatter(
+      readProjectPage(lang, project.id),
+    );
+    // Only single-line `title:` and `description:` values are read.
+    const missing = ["title", "description"].filter(
+      (key) => typeof fields[key] !== "string" || !fields[key].trim(),
+    );
+    if (missing.length) {
+      editorialIssues.push(
+        `${where}: frontmatter needs single-line ${missing.join(" and ")}`,
+      );
+      continue;
+    }
+    const title = fields.title.trim();
+    const duplicate = seenTitles.get(title.toLowerCase());
+    if (duplicate) {
+      editorialIssues.push(`${where}: title duplicates ${lang}/${duplicate}`);
+    }
+    seenTitles.set(title.toLowerCase(), project.id);
+
+    const description = charCount(fields.description.trim());
+    if (description < 120 || description > 160) {
+      editorialIssues.push(
+        `${where}: description is ${description} characters (expected 120-160)`,
+      );
+    }
+    const pageTitle = charCount(
+      ui[lang]["meta.pageTitle"].replace("{title}", title),
+    );
+    if (pageTitle < 50 || pageTitle > 60) {
+      editorialWarnings.push(
+        `${where}: <title> is ${pageTitle} characters (target 50-60)`,
+      );
+    }
+    if (
+      !SCOPE_HEADING_ALLOWED.has(project.id) &&
+      /^#{2,6} +(?:Scope and limitations|Portée et limites)\s*$/im.test(body)
+    ) {
+      editorialIssues.push(`${where}: generic "Scope and limitations" section`);
+    }
+    if (lang === "en" && project.group === "academic" && !project.team) {
+      editorialIssues.push(`${project.id}: academic project without team size`);
+    }
+  }
+}
+for (const warning of editorialWarnings) console.warn("Warning: " + warning);
+if (editorialIssues.length > 0) {
+  throw new Error("Project editorial rules:\n" + editorialIssues.join("\n"));
+}
+
+// French typography. Markdown bodies are typeset at build time by
+// src/lib/rehype-french-typography.mjs (verify:static checks the result), but
+// plain strings never go through it: the UI dictionary, data `Localized.fr`
+// values and frontmatter must already be correct. Bodies must still use « »
+// rather than English quotes, whose pairing the plugin can only guess.
+const typographyIssues = [];
+function checkFrench(where, text) {
+  for (const issue of findFrenchTypographyIssues(text)) {
+    typographyIssues.push(`${where}: ${issue} in ${JSON.stringify(text)}`);
+  }
+}
+
+for (const [key, value] of Object.entries(ui.fr))
+  checkFrench(`ui.fr.${key}`, value);
+
+/** Visits every `{ en, fr }` value in the data and checks its French strings. */
+function checkLocalized(where, value) {
+  if (typeof value !== "object" || value === null) return;
+  const keys = Object.keys(value);
+  if (
+    !Array.isArray(value) &&
+    keys.length === 2 &&
+    "en" in value &&
+    "fr" in value
+  ) {
+    for (const text of [value.fr].flat(Infinity)) {
+      if (typeof text === "string") checkFrench(where + ".fr", text);
+    }
+    return;
+  }
+  for (const key of keys) checkLocalized(`${where}.${key}`, value[key]);
+}
+checkLocalized("projects", projects);
+checkLocalized("experiences", experiences);
+checkLocalized("skillDomains", skillDomains);
+checkLocalized("spokenLanguages", spokenLanguages);
+checkLocalized("site", site);
+
+const frenchMarkdown = [
+  ...readdirSync(join(root, "src", "content", "projects", "fr")).map((file) =>
+    join("src", "content", "projects", "fr", file),
+  ),
+  join("src", "content", "legal", "fr.md"),
+].filter((file) => /\.mdx?$/.test(file));
+for (const file of frenchMarkdown) {
+  const source = readFileSync(join(root, file), "utf8");
+  const { fields, body } = parseFrontmatter(source);
+  for (const [key, value] of Object.entries(fields))
+    checkFrench(`${file} ${key}`, value);
+  // Prose only: no code, MDX imports, HTML/JSX tags or link targets.
+  const prose = body
+    .replace(/^(```|~~~)[\s\S]*?^\1/gm, "")
+    .replace(/`[^`\n]*`/g, "")
+    .replace(/^(?:import|export) .*$/gm, "")
+    .replace(/<[^>]*>/g, "")
+    .replace(/\]\([^)]*\)/g, "]");
+  for (const [line] of prose.matchAll(/^.*["“”].*$/gm)) {
+    typographyIssues.push(
+      `${file}: use « » instead of English quotes in ${JSON.stringify(line.trim())}`,
+    );
+  }
+}
+if (typographyIssues.length > 0) {
+  throw new Error(
+    "French typography (U+202F before ; ! ?, U+00A0 before : and inside « », 1re/3e ordinals):\n" +
+      typographyIssues.join("\n"),
   );
 }
