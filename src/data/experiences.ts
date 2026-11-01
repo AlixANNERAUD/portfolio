@@ -11,9 +11,8 @@ export interface Experience {
   companyUrl?: string;
   monogram: string;
   /**
-   * Self-hosted path under /images/logos/ when the logo's licence allows it
-   * (credited in the legal notice), otherwise a verified public URL. Only
-   * shown alongside the organization name.
+   * Self-hosted path under /images/logos/, credited in the legal notice.
+   * Only shown alongside the organization name.
    */
   logo?: string;
   /** Logo whose artwork is intentionally white (on a dark card). */
@@ -35,7 +34,7 @@ export const experiences: readonly Experience[] = [
   {
     id: "memo-bank",
     homepage: true,
-    logo: "https://memo.bank/logo-footer.svg",
+    logo: "/images/logos/memo-bank.svg",
     logoOnDark: true,
     group: "professional",
     company: "Memo Bank",
@@ -58,7 +57,7 @@ export const experiences: readonly Experience[] = [
   {
     id: "linkt",
     homepage: true,
-    logo: "https://www.linkt.fr/wp-content/uploads/2026/05/logo-linkt-bleu-marine.svg",
+    logo: "/images/logos/linkt.svg",
     group: "professional",
     company: "Linkt",
     companyUrl: "https://linkt.fr/",
@@ -195,7 +194,7 @@ export const experiences: readonly Experience[] = [
   },
   {
     id: "therapic",
-    logo: "https://www.becquerel.fr/wp-content/uploads/2022/10/logo-becquerel-blanc_tournant.jpg",
+    logo: "/images/logos/becquerel.webp",
     group: "education",
     company: "INSA Rouen × Centre Henri Becquerel",
     companyUrl: "https://www.becquerel.fr/",

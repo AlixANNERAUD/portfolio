@@ -32,7 +32,6 @@ To measure interest in the projects shown, the site loads **Umami**, an open-sou
 
 ### Third-party content
 
-- Some organization logos in the experience timeline are loaded from the organizations' own websites (see section 5), without sending the referring page.
 - The interactive Xila demonstration is served from `platforms.xila.dev` and only loads after you click to start it.
 
 ## 4. Intellectual property
@@ -53,8 +52,8 @@ Copies hosted on this website, taken from Wikimedia Commons:
 - **New York University**: [Nyu_short_color.svg](https://commons.wikimedia.org/wiki/File:Nyu_short_color.svg), by New York University, public domain on Wikimedia Commons, trademark; unmodified. See also the [NYU Tandon identity guide](https://engineering.nyu.edu/marketing-and-communications/identity-guide/logos-lockups).
 - **INSA Rouen Normandie**: [Logo_INSA_RN.jpg](https://commons.wikimedia.org/wiki/File:Logo_INSA_RN.jpg), by Service communication INSA Rouen Normandie, licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0); resized and converted to WebP. This adapted copy is shared under the same licence.
 
-Logos loaded from the organizations' websites:
+Copies hosted on this website, taken from the organizations' own websites:
 
-- **Memo Bank**: [logo file](https://memo.bank/logo-footer.svg), [organization website](https://memo.bank/).
-- **Linkt**: [logo file](https://www.linkt.fr/wp-content/uploads/2026/05/logo-linkt-bleu-marine.svg), [organization website](https://www.linkt.fr/).
-- **Centre Henri Becquerel**: [logo file](https://www.becquerel.fr/wp-content/uploads/2022/10/logo-becquerel-blanc_tournant.jpg), [press resources](https://www.becquerel.fr/le-centre/decouvrir-le-centre/espace-presse/).
+- **Memo Bank**: [original logo file](https://memo.bank/logo-footer.svg), unmodified, [organization website](https://memo.bank/).
+- **Linkt**: [original logo file](https://www.linkt.fr/wp-content/uploads/2026/05/logo-linkt-bleu-marine.svg), unmodified, [organization website](https://www.linkt.fr/).
+- **Centre Henri Becquerel**: [original logo file](https://www.becquerel.fr/wp-content/uploads/2022/10/logo-becquerel-blanc_tournant.jpg), resized and converted to WebP, [press resources](https://www.becquerel.fr/le-centre/decouvrir-le-centre/espace-presse/).

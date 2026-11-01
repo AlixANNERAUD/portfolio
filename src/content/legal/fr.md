@@ -32,7 +32,6 @@ Pour mesurer l’intérêt des projets présentés, le site charge **Umami**, un
 
 ### Contenus tiers
 
-- Certains logos d’organismes, dans le parcours, sont chargés depuis les sites de ces organismes (voir la section 5), sans transmettre l’adresse de la page consultée (en-tête Referer).
 - La démonstration interactive de Xila est servie depuis `platforms.xila.dev` et ne se charge qu’après un clic pour la lancer.
 
 ## 4. Propriété intellectuelle
@@ -53,8 +52,8 @@ Copies hébergées sur ce site, issues de Wikimedia Commons :
 - **New York University :** [Nyu_short_color.svg](https://commons.wikimedia.org/wiki/File:Nyu_short_color.svg), par New York University, domaine public sur Wikimedia Commons, marque déposée ; sans modification. Voir aussi le [guide d’identité visuelle de NYU Tandon](https://engineering.nyu.edu/marketing-and-communications/identity-guide/logos-lockups).
 - **INSA Rouen Normandie :** [Logo_INSA_RN.jpg](https://commons.wikimedia.org/wiki/File:Logo_INSA_RN.jpg), par le Service communication INSA Rouen Normandie, sous licence [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) ; redimensionné et converti en WebP. Cette copie adaptée est partagée sous la même licence.
 
-Logos chargés depuis les sites des organismes :
+Copies hébergées sur ce site, issues des sites des organismes :
 
-- **Memo Bank :** [fichier du logo](https://memo.bank/logo-footer.svg), [site de l’organisme](https://memo.bank/).
-- **Linkt :** [fichier du logo](https://www.linkt.fr/wp-content/uploads/2026/05/logo-linkt-bleu-marine.svg), [site de l’organisme](https://www.linkt.fr/).
-- **Centre Henri Becquerel :** [fichier du logo](https://www.becquerel.fr/wp-content/uploads/2022/10/logo-becquerel-blanc_tournant.jpg), [espace presse](https://www.becquerel.fr/le-centre/decouvrir-le-centre/espace-presse/).
+- **Memo Bank :** [fichier d’origine](https://memo.bank/logo-footer.svg), sans modification, [site de l’organisme](https://memo.bank/).
+- **Linkt :** [fichier d’origine](https://www.linkt.fr/wp-content/uploads/2026/05/logo-linkt-bleu-marine.svg), sans modification, [site de l’organisme](https://www.linkt.fr/).
+- **Centre Henri Becquerel :** [fichier d’origine](https://www.becquerel.fr/wp-content/uploads/2022/10/logo-becquerel-blanc_tournant.jpg), redimensionné et converti en WebP, [espace presse](https://www.becquerel.fr/le-centre/decouvrir-le-centre/espace-presse/).
