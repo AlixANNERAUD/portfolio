@@ -133,7 +133,7 @@ const en = {
   "home.projects.title": "From ideas to",
   "home.projects.accent": "systems.",
   "home.projects.intro":
-    "From a Rust kernel to practical business software: selected projects I design, build and maintain.",
+    "From a Rust operating system to practical business software: selected projects I design, build and maintain.",
   "home.projects.viewAll": "See all {count} projects",
   "project.details": "Read details",
   "project.external": "External link",
@@ -178,7 +178,7 @@ const en = {
     "Drivers → Rust services → WebAssembly execution boundary → applications. Services also manage storage/VFS and LVGL graphics.",
   "xila.topology.link": "Read the Xila case study",
   "xila.topology.node.drivers": "Drivers",
-  "xila.topology.node.kernel": "Rust kernel",
+  "xila.topology.node.services": "Rust services",
   "xila.topology.node.abi": "WASM ABI",
   "xila.topology.node.apps": "Apps",
   "xila.topology.node.vfs": "VFS",
@@ -186,7 +186,7 @@ const en = {
   "xila.demo.title": "Try Xila in the browser",
   "xila.demo.subtitle":
     "A real OS and WebAssembly application demo, hosted independently from this portfolio.",
-  "xila.demo.start": "Try embedded (experimental)",
+  "xila.demo.start": "Run it here (experimental)",
   "xila.demo.external": "Open the demo in a new tab",
   "xila.demo.close": "Close embedded demo",
   "xila.demo.warning":
@@ -350,7 +350,7 @@ const fr: Record<UIKey, string> = {
   "home.projects.title": "Des idées aux",
   "home.projects.accent": "systèmes.",
   "home.projects.intro":
-    "Du noyau Rust aux outils métiers : quelques projets que je conçois, développe et maintiens.",
+    "D’un OS Rust aux outils métiers : quelques projets que je conçois, développe et maintiens.",
   "home.projects.viewAll": "Voir les {count} projets",
   "project.details": "Lire la fiche",
   "project.external": "Lien externe",
@@ -395,7 +395,7 @@ const fr: Record<UIKey, string> = {
     "Pilotes → services Rust → frontières d’exécution WebAssembly → applications. Les services gèrent également le stockage/VFS et l’interface LVGL.",
   "xila.topology.link": "Lire l’étude de cas Xila",
   "xila.topology.node.drivers": "Pilotes",
-  "xila.topology.node.kernel": "Noyau Rust",
+  "xila.topology.node.services": "Services Rust",
   "xila.topology.node.abi": "ABI Wasm",
   "xila.topology.node.apps": "Applications",
   "xila.topology.node.vfs": "VFS",

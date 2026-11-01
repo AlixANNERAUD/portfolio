@@ -7,6 +7,7 @@ import type { Localized } from "./types.ts";
  * `technologyLabel`.
  */
 export const technologies = [
+  "3D printing",
   "Algèbre linéaire",
   "Algorithmique",
   "Ansible",
@@ -29,6 +30,7 @@ export const technologies = [
   "Électronique",
   "ESP32",
   "Free pascal",
+  "G-code",
   "i18n",
   "Java",
   "JavaScript",
@@ -49,16 +51,18 @@ export const technologies = [
   "Rust",
   "S88",
   "Tailwind",
+  "TrueNAS",
   "UI",
   "Vue.js",
   "WebAssembly",
-  "Wxt",
+  "WXT",
 ] as const;
 
 export type Technology = (typeof technologies)[number];
 
 /** Translations of the thematic (non-proper-noun) tags. */
 const technologyLabels: Partial<Record<Technology, Localized>> = {
+  "3D printing": { en: "3D printing", fr: "Impression 3D" },
   "Algèbre linéaire": { en: "Linear algebra", fr: "Algèbre linéaire" },
   Algorithmique: { en: "Algorithms", fr: "Algorithmique" },
   Battery: { en: "Battery", fr: "Batterie" },

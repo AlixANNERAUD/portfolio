@@ -1,47 +1,48 @@
 ---
-title: Xila - Rust embedded operating system
-description: Engineering decisions behind the Xila operating system, including Rust modules, drivers, WebAssembly and LVGL.
+title: "Xila: a modular Rust OS for microcontrollers"
+description: Xila is an open-source operating system in Rust for microcontrollers, running WebAssembly apps on Wasmi with an LVGL interface and a browser demo.
 ---
 
 import ArchitectureFlow from "../../../components/mdx/ArchitectureFlow.astro";
 import XilaBrowserDemo from "../../../components/xila/XilaBrowserDemo.astro";
 
-# Xila: building a modular embedded operating system
+# Xila: a modular embedded operating system in Rust
 
-> A long-running open-source project combining portable operating-system services with isolated applications on resource-constrained devices.
+## The problem
 
-## The challenge
+Microcontrollers impose tight memory, storage and CPU budgets, and most firmware ends up as a single program built for one board. I wanted the comforts of a modular system on these devices: separate drivers, a filesystem, tasks, a graphical interface and applications that are not compiled into the system image.
 
-Microcontrollers impose tight memory, storage and CPU budgets. I wanted to build a modular development environment nonetheless: separate drivers, hardware abstraction, storage, tasks, graphics and applications that do not always need to be compiled into the host system.
-
-The central challenge is to **define reusable contracts** between operating-system services, hardware and programs rather than targeting just one board.
+The core of the work is therefore to **define reusable contracts** between system services, hardware and programs, rather than to target one board.
 
 ## Architecture
 
-<ArchitectureFlow title="Main layers of Xila" steps={[{ title: 'Drivers', detail: 'Adaptation to hardware, native Linux and browser targets.' }, { title: 'Rust modules', detail: 'Tasks, users, VFS, networking, graphics and OS services.' }, { title: 'Execution boundary', detail: 'ABI contracts, guest/host bindings and the WebAssembly virtual machine.' }, { title: 'Applications', detail: 'Bundled programs, shell and Wasm applications.' }]} />
+<ArchitectureFlow title="Main layers of Xila" steps={[{ title: 'Drivers', detail: 'Native Linux, browser and hardware targets, assembled in the Platforms repository.' }, { title: 'Subsystems', detail: 'Tasks, VFS, networking, graphics, memory and time, written in Rust.' }, { title: 'Execution boundary', detail: 'Wasmi runtime and guest/host bindings.' }, { title: 'Applications', detail: 'WebAssembly guests such as Calculator and Weather, plus the graphical shell.' }]} />
 
-The repository distinguishes **modules** holding runtime behavior, **crates** defining contracts and utilities, **drivers** adapting to a platform, and **executables**. A file request goes through the VFS for namespace and access checks before reaching a LittleFS backend or a device endpoint.
+The code is split across three repositories. **Core** holds the portable crates, **Applications** the official programs and the Wasmi runtime, and **Platforms** the concrete drivers and the final assembly for each target. Every crate has one of four roles: a **subsystem** owns a runtime service, a **library** defines contracts or implementations, a **driver** adapts a capability to a platform, and an **executable** is a program that uses the assembled services.
 
-Guest applications currently use the **Wasmi** runtime; guest calls cross an explicit binding layer before reaching the same Xila services available to native programs. The graphics stack uses **LVGL**.
+A file request from a program goes through the VFS, then the filesystem contracts, before reaching a mounted LittleFS instance or a device driver. A WebAssembly guest takes the same path through the runtime bindings: it reaches the same subsystem managers as native programs.
 
-## Engineering decisions
+## Technical choices
 
-- **Rust host, WebAssembly guests.** Rust implements the operating-system services, while Wasm provides a separate application format and an explicit execution boundary.
-- **Portable contracts, target-specific drivers.** The filesystem and device interfaces can be reused while each driver handles its target environment.
-- **Native and browser development environments.** Linux and browser examples enable iteration before hardware validation. Browser persistence combines an image-based disk and OPFS.
-- **Explicit costs.** The Wasm interpreter, abstraction layers and graphics stack all have memory and performance implications that need to be measured on the intended device.
+- **Rust system, WebAssembly applications.** The services are written in Rust; applications are separate Wasm binaries run by the **Wasmi** interpreter, behind an explicit execution boundary.
+- **Cooperative scheduling with fuel.** Guest execution consumes fuel; when it runs out, or when the guest yields, control returns to the executor. Functions are translated before execution so that a pause never interrupts a translation, at the cost of more startup work.
+- **Shared interface theme.** The graphical layer uses **LVGL** with [lvgl_theme_shadcn](/projects/lvgl-theme-shadcn), a theme I also maintain as a separate library.
+- **Languages built into the binary.** Each language is embedded at compile time, with English as the fallback and catalogs for French, Spanish, German, Brazilian Portuguese, Italian and Polish.
+- **Develop on Linux and in the browser first.** The native target makes it easier to inspect CPU and memory use before testing shared code on an embedded board.
 
-## Try Xila in WebAssembly
+## Results
+
+Xila is open source under the Apache 2.0 license and documented on [xila.dev](https://www.xila.dev/docs/), with tutorials and a component map. The browser demo runs the system compiled to WebAssembly, with separate WASI applications: Calculator, Clock, Pixel Painter, Text Editor, Synth and Weather. It stores its disk in the browser through OPFS.
 
 <XilaBrowserDemo lang="en" />
 
-## Status and limitations
+## Limitations
 
-Xila is **actively developed**. Running a native or browser example does not establish compatibility with a particular board. I avoid claiming near-native execution performance without reproducible benchmarks.
+Xila is under active development, and hardware support varies by target. The native and browser examples are development environments: they do not prove that a given board is supported, and checks run on the Linux host do not prove that the code is correct on ESP32, nRF or STM32 hardware. The Wasm interpreter, the abstraction layers and LVGL all cost memory and CPU time, which has to be measured on the target device.
 
 ## Explore the project
 
 - [Xila Core source code](https://github.com/xila-project/core)
-- [Documentation and component map](https://www.xila.dev/explanation/architecture/components)
-- [Browser tutorial](https://www.xila.dev/tutorials/browser)
+- [Documentation](https://www.xila.dev/docs/) and [component map](https://www.xila.dev/explanation/architecture/components)
+- [Browser demo](https://platforms.xila.dev/)
 - [Native tutorial](https://www.xila.dev/tutorials/native)

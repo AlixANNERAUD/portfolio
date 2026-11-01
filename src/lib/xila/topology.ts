@@ -15,7 +15,7 @@ export interface TopologyNode {
 
 export const NODES: readonly TopologyNode[] = [
   { position: [-0.76, -0.47], label: "xila.topology.node.drivers" },
-  { position: [-0.33, 0.12], label: "xila.topology.node.kernel" },
+  { position: [-0.33, 0.12], label: "xila.topology.node.services" },
   { position: [0.22, 0.12], label: "xila.topology.node.abi" },
   { position: [0.78, 0.4], label: "xila.topology.node.apps" },
   { position: [0.2, -0.57], label: "xila.topology.node.vfs" },

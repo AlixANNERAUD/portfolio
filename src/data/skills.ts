@@ -35,8 +35,8 @@ export const skillDomains: readonly SkillDomain[] = [
         kind: "project",
         projectId: "xila",
         detail: {
-          fr: "Noyau, pilotes, VFS et runtime WebAssembly.",
-          en: "Kernel, drivers, VFS and WebAssembly runtime.",
+          fr: "Services système, pilotes, VFS et exécution WebAssembly.",
+          en: "System services, drivers, VFS and WebAssembly runtime.",
         },
       },
       {

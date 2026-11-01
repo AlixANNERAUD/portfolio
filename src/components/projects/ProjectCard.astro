@@ -6,6 +6,7 @@ import {
   projectRank,
   projectUrl,
   type CatalogueProject,
+  type Project,
 } from "../../data/projects.ts";
 import { technologyLabel } from "../../data/technologies.ts";
 import { localize } from "../../data/types.ts";
@@ -37,6 +38,8 @@ const {
 } = Astro.props;
 const t = useTranslations(lang);
 const rank = String(projectRank(project.id)).padStart(2, "0");
+// Widened to Project: optional fields absent from some entries stay typed.
+const { externalUrl }: Project = project;
 ---
 
 <Card class:list={["showcase-card", className]} variant="project" {...rest}>
@@ -77,10 +80,10 @@ const rank = String(projectRank(project.id)).padStart(2, "0");
       <span class="showcase-card-cta" aria-hidden="true">
         {t("project.details")} <span class="showcase-card-arrow">→</span>
       </span>
-      {project.externalUrl && (
+      {externalUrl && (
         <a
           class="showcase-external-link"
-          href={project.externalUrl}
+          href={externalUrl}
           target="_blank"
           rel="noopener noreferrer"
         >

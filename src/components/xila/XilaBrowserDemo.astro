@@ -13,7 +13,8 @@ interface Props {
 
 const { lang } = Astro.props;
 const t = useTranslations(lang);
-const DEMO_URL = "https://documentation.xila.dev/demonstrations/wasm/en/";
+// The demo is published by Xila Platforms in each supported locale.
+const DEMO_URL = `https://platforms.xila.dev/demonstrations/wasm/${lang}/`;
 ---
 
 <section class="xila-demo" aria-label={t("xila.demo.title")}>
