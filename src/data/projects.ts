@@ -370,7 +370,7 @@ export const projects = [
     period: { start: "2024" },
     group: "academic",
     category: "data",
-    symbol: "♫",
+    symbol: "∿",
     tags: ["Django", "Vue.js", "ML"],
     ranking: {
       technicalDepth: 4.4,
@@ -586,6 +586,11 @@ export const projects = [
 export type CatalogueProject = (typeof projects)[number];
 export type ProjectId = CatalogueProject["id"];
 
+/** Narrows a route parameter or other string to a known project id. */
+export function isProjectId(id: string | undefined): id is ProjectId {
+  return projects.some((project) => project.id === id);
+}
+
 /** The project with this id; throws on an unknown id. */
 export function getProject(id: ProjectId): CatalogueProject {
   const project = projects.find((p) => p.id === id);
@@ -633,18 +638,26 @@ export function projectUrl(id: ProjectId, lang: Locale): string {
   return localizePath(`/projects/${id}`, lang);
 }
 
-/** Same category first, then most shared tags, then score. */
+/**
+ * Up to `n` projects that share the category or at least one tag: same
+ * category first, then most shared tags, then score. Unrelated projects are
+ * never used as padding, so the list can be shorter than `n`.
+ */
 export function relatedProjects(id: ProjectId, n = 3): CatalogueProject[] {
   const current = getProject(id);
   const tags = new Set<string>(current.tags);
   const shared = (project: Project) =>
     project.tags.filter((tag) => tags.has(tag)).length;
+  const sameCategory = (project: Project) =>
+    project.category === current.category;
   return projects
-    .filter((project) => project.id !== id)
+    .filter(
+      (project) =>
+        project.id !== id && (sameCategory(project) || shared(project) > 0),
+    )
     .sort(
       (a, b) =>
-        Number(b.category === current.category) -
-          Number(a.category === current.category) ||
+        Number(sameCategory(b)) - Number(sameCategory(a)) ||
         shared(b) - shared(a) ||
         byScore(a, b),
     )

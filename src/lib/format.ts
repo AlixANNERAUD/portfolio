@@ -13,7 +13,8 @@ export function formatPeriod(period: Period, lang: Locale): string {
   return t("period.range", { start: period.start, end: period.end });
 }
 
-export type CountKey = "project" | "role" | "milestone";
+export type CountKey =
+  "project" | "role" | "milestone" | "earlierRole" | "earlierMilestone";
 
 /** `1 projet`, `12 projets`: the noun follows the locale's plural rules. */
 export function formatCount(n: number, key: CountKey, lang: Locale): string {

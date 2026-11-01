@@ -23,7 +23,12 @@ const t = useTranslations(lang);
     <p class="project-related__intro">{t("project.relatedIntro")}</p>
     <div class="project-related__list showcase-grid" data-view="list">
       {projects.map((project) => (
-        <ProjectCard project={project} lang={lang} headingLevel="h3" />
+        <ProjectCard
+          project={project}
+          lang={lang}
+          headingLevel="h3"
+          showRank={false}
+        />
       ))}
     </div>
   </section>

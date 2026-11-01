@@ -9,6 +9,7 @@ import {
   relatedProjects,
 } from "../src/data/projects.ts";
 import { experiences } from "../src/data/experiences.ts";
+import { technologies, technologyLabel } from "../src/data/technologies.ts";
 import { site as siteData } from "../src/data/site.ts";
 import { skillDomains } from "../src/data/skills.ts";
 import { formatPeriod } from "../src/lib/format.ts";
@@ -540,12 +541,13 @@ for (const [file, projectPrefix] of [
 // Older experiences are complete cards, hidden by one toggle per section.
 // All content is SSR-rendered and visible without JavaScript: a module script
 // reveals the toggles and collapses the earlier lists. No framework island.
+// The toggle labels give the real number of earlier cards.
 for (const [file, professionalLabel, educationLabel] of [
-  ["experiences.html", "Show earlier experience", "Show earlier education"],
+  ["experiences.html", "Show 3 earlier roles", "Show 2 earlier milestones"],
   [
     "fr/experiences.html",
-    "Voir les expériences précédentes",
-    "Voir les formations précédentes",
+    "Afficher 3 postes précédents",
+    "Afficher 2 étapes précédentes",
   ],
 ]) {
   const html = read(file);
@@ -665,8 +667,9 @@ for (const file of ["experiences.html", "fr/experiences.html"]) {
 
 // Catalogue polish: the home and catalogue pages never skip a heading level;
 // sort options read "Relevance"/"Name"; the grid/list view toggle is a pair
-// of aria-pressed buttons inside the script-revealed toolbar; the homepage
-// link to the catalogue gives the real project count.
+// of aria-pressed buttons inside the script-revealed toolbar, with the index
+// list as the default view; the homepage link to the catalogue gives the real
+// project count.
 {
   for (const file of [
     "index.html",
@@ -717,10 +720,12 @@ for (const file of ["experiences.html", "fr/experiences.html"]) {
         "grid|list" ||
       view.map((button) => button.text.trim()).join("|") !==
         viewLabels.join("|") ||
-      view[0].getAttribute("aria-pressed") !== "true" ||
-      view[1].getAttribute("aria-pressed") !== "false"
+      view[0].getAttribute("aria-pressed") !== "false" ||
+      view[1].getAttribute("aria-pressed") !== "true" ||
+      root.querySelector("[data-catalogue-grid]")?.getAttribute("data-view") !==
+        "list"
     ) {
-      failed.push(file + ": missing grid/list view toggle (grid pressed)");
+      failed.push(file + ": missing grid/list view toggle (list by default)");
     }
   }
   for (const [file, label] of [
@@ -898,7 +903,8 @@ for (const file of ["experiences.html", "fr/experiences.html"]) {
       const tags = header
         ?.querySelectorAll(".editorial-tags li")
         .map((tag) => text(tag));
-      if ((tags ?? []).join("|") !== project.tags.join("|")) {
+      const tagLabels = project.tags.map((tag) => technologyLabel(tag, lang));
+      if ((tags ?? []).join("|") !== tagLabels.join("|")) {
         failed.push(file + ": meta tags must be the project's data tags");
       }
       const external = header?.querySelectorAll(".project-external");
@@ -1011,6 +1017,43 @@ for (const [file, lang] of [
   }
   if (!root.querySelector("footer.site-footer")) {
     failed.push(file + ": resume must show the site footer");
+  }
+}
+
+// Tags speak the page language: an English page shows no French-only tag
+// (nor an accented French word) and a French page no English-only tag. The
+// translated pairs come from the data, so a new localized tag is covered.
+{
+  const pairs = [
+    ...technologies.map((tag) => ({
+      en: technologyLabel(tag, "en"),
+      fr: technologyLabel(tag, "fr"),
+    })),
+    ...[...experiences, ...skillDomains]
+      .flatMap((entry) => entry.technologies)
+      .filter((tag) => typeof tag === "object"),
+  ].filter((pair) => pair.en !== pair.fr);
+  const foreign = {
+    en: new Set(pairs.map((pair) => pair.fr)),
+    fr: new Set(pairs.map((pair) => pair.en)),
+  };
+  for (const [file] of cases) {
+    const html = read(file);
+    if (!html) continue;
+    const lang = file.startsWith("fr/") ? "fr" : "en";
+    for (const tag of parse(html).querySelectorAll(
+      "main .editorial-tags li, main .home-experience-tags li, main .resume-inline li",
+    )) {
+      const text = tag.text.replace(/\s+/g, " ").trim();
+      if (
+        foreign[lang].has(text) ||
+        (lang === "en" && /[àâçéèêëîïôûùüÿœæ]/i.test(text))
+      ) {
+        failed.push(
+          file + ": tag in the wrong language " + JSON.stringify(text),
+        );
+      }
+    }
   }
 }
 

@@ -3,8 +3,9 @@ import type { HTMLAttributes } from "astro/types";
 import Eyebrow from "./Eyebrow.astro";
 
 /**
- * Section header: eyebrow, H2 and description, with optional `icon`
- * (decorative, left of the text) and `aside` (right-aligned) slots.
+ * Section header: eyebrow, H2 and description, with an optional `icon` slot
+ * (decorative, left of the text) and an optional `count` shown on the right
+ * ("06 areas"), the single adornment pattern for counted sections.
  */
 type Props = HTMLAttributes<"header"> & {
   eyebrow: string;
@@ -13,6 +14,8 @@ type Props = HTMLAttributes<"header"> & {
   title: string;
   description: string;
   headingId: string;
+  /** A count of the section's items, e.g. `{ value: 6, label: "areas" }`. */
+  count?: { value: number; label: string };
 };
 
 const {
@@ -21,11 +24,12 @@ const {
   title,
   description,
   headingId,
+  count,
   class: className,
   ...rest
 } = Astro.props;
 const hasIcon = Astro.slots.has("icon");
-const hasAside = Astro.slots.has("aside");
+const pad = (n: number) => String(n).padStart(2, "0");
 ---
 
 <header
@@ -50,10 +54,11 @@ const hasAside = Astro.slots.has("aside");
       <p class="editorial-section-heading__description">{description}</p>
     </div>
   </div>
-  {hasAside && (
-    <div class="editorial-section-heading__aside">
-      <slot name="aside" />
-    </div>
+  {count && (
+    <p class="editorial-section-heading__count">
+      <strong>{pad(count.value)}</strong>
+      <span>{count.label}</span>
+    </p>
   )}
 </header>
 
@@ -62,17 +67,17 @@ const hasAside = Astro.slots.has("aside");
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
-    gap: 1.25rem;
-    margin-bottom: 1.75rem;
+    gap: var(--space-s);
+    margin-bottom: var(--space-m);
   }
   .editorial-section-heading--icon {
-    padding-bottom: 1.5rem;
+    padding-bottom: var(--space-m);
     margin-bottom: 0;
   }
   .editorial-section-heading__main {
     display: flex;
     align-items: flex-start;
-    gap: 1.15rem;
+    gap: var(--space-s);
     min-width: 0;
   }
   .editorial-section-heading__icon {
@@ -83,32 +88,50 @@ const hasAside = Astro.slots.has("aside");
     width: 3.1rem;
     height: 3.1rem;
     border: 1px solid var(--color-border);
-    border-radius: 0.75rem;
+    border-radius: var(--radius-l);
     background: var(--color-surface);
     color: var(--color-accent);
   }
   .editorial-section-heading__eyebrow {
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--space-2xs);
   }
   .editorial-section-heading h2 {
     margin: 0;
     padding: 0;
     border: 0;
     font-family: var(--font-display);
-    font-size: clamp(2rem, 3.6vw, 3.2rem);
+    font-size: var(--step-4);
     font-weight: 400;
     letter-spacing: var(--tracking-display);
-    line-height: 1.15;
+    line-height: var(--leading-tight);
   }
   .editorial-section-heading__description {
-    margin: 0.65rem 0 0;
+    margin: var(--space-2xs) 0 0;
     max-width: 38rem;
     color: var(--color-text-muted);
-    font-size: 0.92rem;
-    line-height: 1.7;
+    font-size: var(--step--1);
+    line-height: var(--leading-body);
   }
-  .editorial-section-heading--icon .editorial-section-heading__description {
-    margin-top: 0.45rem;
-    font-size: 0.9rem;
+  .editorial-section-heading__count {
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--space-3xs);
+    margin: 0;
+    color: var(--color-text-muted);
+  }
+  .editorial-section-heading__count strong {
+    color: var(--color-accent);
+    font-family: var(--font-display);
+    font-size: var(--step-5);
+    font-weight: 400;
+    line-height: 1;
+  }
+  .editorial-section-heading__count span {
+    font-size: var(--step--2);
+    font-weight: 600;
+    letter-spacing: var(--tracking-overline);
+    text-transform: uppercase;
   }
 </style>

@@ -1,6 +1,7 @@
 ---
 import { experiences, type ExperienceGroup } from "../../data/experiences.ts";
 import { skillDomains } from "../../data/skills.ts";
+import { localize } from "../../data/types.ts";
 import type { Locale } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
 
@@ -31,7 +32,7 @@ const sections: readonly { group: ExperienceGroup; title: string }[] = [
             <li>
               <p class="resume-list__title">{entry.role[lang]}</p>
               <p class="resume-list__meta">
-                <span>{entry.company}</span>
+                <span>{localize(entry.company, lang)}</span>
                 <span class="resume-list__period">{entry.period[lang]}</span>
               </p>
             </li>
@@ -45,7 +46,13 @@ const sections: readonly { group: ExperienceGroup; title: string }[] = [
       {skillDomains.map((domain) => (
         <li>
           <p class="resume-list__title">{domain.title[lang]}</p>
-          <p class="resume-list__meta">{domain.technologies.join(" · ")}</p>
+          <div class="resume-list__meta">
+            <ul class="resume-inline">
+              {domain.technologies.map((tag) => (
+                <li>{localize(tag, lang)}</li>
+              ))}
+            </ul>
+          </div>
         </li>
       ))}
     </ul>
@@ -72,10 +79,10 @@ const sections: readonly { group: ExperienceGroup; title: string }[] = [
     padding: 0;
     list-style: none;
   }
-  .resume-list li {
+  .resume-list > li {
     padding: var(--space-2xs) 0;
   }
-  .resume-list li + li {
+  .resume-list > li + li {
     border-top: 1px solid var(--color-border);
   }
   .resume-list p {
@@ -83,7 +90,9 @@ const sections: readonly { group: ExperienceGroup; title: string }[] = [
   }
   .resume-list__title {
     color: var(--color-text);
-    font-weight: 600;
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-weight: 500;
     line-height: var(--leading-snug);
   }
   .resume-list__meta {
@@ -94,6 +103,30 @@ const sections: readonly { group: ExperienceGroup; title: string }[] = [
     margin-top: var(--space-3xs);
     color: var(--color-text-muted);
     font-size: var(--step--1);
+  }
+  /*
+   * Skills as an inline list: each item carries its "·" separator, and the
+   * negative margin pushes a line-leading separator into the clipped area,
+   * so no line starts with "·".
+   */
+  .resume-list__meta:has(.resume-inline) {
+    display: block;
+    overflow: hidden;
+  }
+  .resume-inline {
+    --separator: var(--space-s);
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 0 0 calc(-1 * var(--separator));
+    padding: 0;
+    list-style: none;
+  }
+  .resume-inline li::before {
+    content: "·";
+    display: inline-block;
+    width: var(--separator);
+    color: var(--color-border-strong);
+    text-align: center;
   }
   .resume-list__period {
     color: var(--color-text-subtle);

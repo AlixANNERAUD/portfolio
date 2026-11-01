@@ -7,6 +7,7 @@ import {
   projectUrl,
   type CatalogueProject,
 } from "../../data/projects.ts";
+import { technologyLabel } from "../../data/technologies.ts";
 import { localize } from "../../data/types.ts";
 import type { Locale } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
@@ -22,12 +23,15 @@ type Props = HTMLAttributes<"article"> & {
   lang: Locale;
   /** Follows the surrounding outline: h2 under the catalogue H1. */
   headingLevel?: "h2" | "h3";
+  /** The catalogue rank means nothing outside the catalogue and the home. */
+  showRank?: boolean;
 };
 
 const {
   project,
   lang,
   headingLevel: Heading = "h3",
+  showRank = true,
   class: className,
   ...rest
 } = Astro.props;
@@ -43,8 +47,12 @@ const rank = String(projectRank(project.id)).padStart(2, "0");
   >
     <span class="showcase-art-symbol">{project.symbol}</span>
     <span class="showcase-art-index">
-      <span class="showcase-art-position">{rank}</span>
-      <span class="showcase-art-separator"> / </span>
+      {showRank && (
+        <>
+          <span class="showcase-art-position">{rank}</span>
+          <span class="showcase-art-separator"> / </span>
+        </>
+      )}
       <span class="showcase-art-period">
         {formatPeriod(project.period, lang)}
       </span>
@@ -60,7 +68,7 @@ const rank = String(projectRank(project.id)).padStart(2, "0");
     <p class="showcase-card-description">{project.description[lang]}</p>
     {project.tags.length > 0 && (
       <Tags
-        tags={project.tags}
+        tags={project.tags.map((tag) => technologyLabel(tag, lang))}
         label={t("project.technologies")}
         density="project"
       />
@@ -223,17 +231,24 @@ const rank = String(projectRank(project.id)).padStart(2, "0");
     text-decoration: underline;
     text-underline-offset: 0.2em;
   }
-  /* Dim the neighbours of the hovered card; pointer and motion only. */
+  /*
+   * Dim the neighbours of the hovered card, pointer and motion only. Only the
+   * art panel fades: the neighbours' text keeps its AA contrast.
+   */
+  .showcase-art {
+    transition: opacity var(--dur-base) var(--ease-out);
+  }
   @media (hover: hover) and (prefers-reduced-motion: no-preference) {
     :global(.showcase-grid:has(> .showcase-card:hover))
-      > .showcase-card:not(:hover) {
+      > .showcase-card:not(:hover)
+      .showcase-art {
       opacity: 0.55;
     }
     .showcase-card-arrow {
       transition: transform var(--dur-fast) var(--ease-out);
     }
     .showcase-card:hover .showcase-card-arrow {
-      transform: translateX(3px);
+      transform: translateX(var(--nudge-x));
     }
   }
   @media (max-width: 600px) {
@@ -242,8 +257,12 @@ const rank = String(projectRank(project.id)).padStart(2, "0");
     }
   }
 
-  /* Catalogue list view: an index row with a narrow symbol column. */
-  :global([data-view="list"]) > .showcase-card {
+  /*
+   * List view (catalogue index, related projects): a row with a narrow
+   * symbol column; the body keeps the card's order, actions last.
+   */
+  /* :not([hidden]) leaves filtered-out cards to the catalogue's rule. */
+  :global([data-view="list"]) > .showcase-card:not([hidden]) {
     display: grid;
     grid-template-columns: 7rem minmax(0, 1fr);
   }
@@ -267,59 +286,32 @@ const rank = String(projectRank(project.id)).padStart(2, "0");
   :global([data-view="list"]) > .showcase-card .showcase-art-separator {
     display: none;
   }
-  /* Title, pitch and tags on the left; the external link on the right. */
+  :global([data-view="list"]) > .showcase-card .showcase-art-period {
+    white-space: nowrap;
+  }
   :global([data-view="list"]) > .showcase-card .showcase-card-body {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-content: center;
-    column-gap: var(--space-m);
     padding: var(--space-s) var(--space-m);
   }
-  :global([data-view="list"]) > .showcase-card .showcase-card-body > * {
-    grid-column: 1;
-  }
-  :global([data-view="list"])
-    > .showcase-card
-    .showcase-card-body
-    > .showcase-card-actions {
-    grid-column: 2;
-    grid-row: 1 / span 2;
-    align-self: start;
-    margin: 0;
-  }
   :global([data-view="list"]) > .showcase-card .showcase-card-title {
+    margin-bottom: var(--space-3xs);
     font-size: var(--step-1);
   }
   :global([data-view="list"]) > .showcase-card .showcase-card-description {
     margin-bottom: var(--space-xs);
   }
-  :global([data-view="list"]) > .showcase-card .showcase-card-title {
-    margin-bottom: var(--space-3xs);
-  }
   :global([data-view="list"]) > .showcase-card :global(.editorial-tags) {
-    margin-bottom: 0;
-  }
-  :global([data-view="list"]) > .showcase-card .showcase-card-cta {
-    display: none;
+    margin-bottom: var(--space-xs);
   }
   @media (max-width: 600px) {
+    /* Wide enough for "Depuis 2019" on one line. */
     :global([data-view="list"]) > .showcase-card {
-      grid-template-columns: 5rem minmax(0, 1fr);
+      grid-template-columns: 6rem minmax(0, 1fr);
     }
     :global([data-view="list"]) > .showcase-card .showcase-art-symbol {
       font-size: var(--step-3);
     }
     :global([data-view="list"]) > .showcase-card .showcase-card-body {
-      grid-template-columns: minmax(0, 1fr);
       padding: var(--space-xs) var(--space-s);
-    }
-    :global([data-view="list"])
-      > .showcase-card
-      .showcase-card-body
-      > .showcase-card-actions {
-      grid-column: 1;
-      grid-row: auto;
-      margin-top: var(--space-2xs);
     }
   }
 </style>

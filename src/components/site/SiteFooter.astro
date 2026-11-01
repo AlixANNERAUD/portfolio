@@ -12,7 +12,7 @@ const year = new Date().getFullYear();
 ---
 
 <footer class="site-footer">
-  <div class="site-footer-inner">
+  <div class="site-footer-inner container">
     <p class="site-footer-credits">
       <span class="site-footer-name">
         © {year} {site.name}
@@ -40,7 +40,7 @@ const year = new Date().getFullYear();
               <span class="site-footer-external" aria-hidden="true">
                 ↗
               </span>
-              <span class="visually-hidden">{t("a11y.newTab")}</span>
+              <span class="visually-hidden"> {t("a11y.newTab")}</span>
             </a>
           </li>
         ))}
@@ -65,9 +65,7 @@ const year = new Date().getFullYear();
     align-items: center;
     justify-content: space-between;
     gap: var(--space-2xs) var(--space-l);
-    max-width: var(--container);
-    margin: 0 auto;
-    padding: var(--space-m);
+    padding-block: var(--space-m);
   }
 
   .site-footer-credits {
@@ -115,20 +113,41 @@ const year = new Date().getFullYear();
     font-size: 0.85em;
   }
 
+  /*
+   * Narrow screens: two deliberate groups. The credits wrap as one line of
+   * smaller text whose separators never start a line (the negative margin
+   * pushes a line-leading separator into the clipped strip); the links form
+   * an evenly spaced two-column grid.
+   */
   @media (max-width: 720px) {
     .site-footer-inner {
       flex-direction: column;
-      align-items: flex-start;
-      padding: var(--space-s) var(--space-s) var(--space-m);
+      align-items: stretch;
+      gap: var(--space-xs);
+      padding-block: var(--space-s) var(--space-m);
     }
 
-    /* Credits wrap here, so plain gaps replace the separators. */
     .site-footer-credits {
-      gap: 0 var(--space-s);
+      --separator: var(--space-s);
+      margin-left: calc(-1 * var(--separator));
+      clip-path: inset(0 0 0 var(--separator));
+      font-size: var(--step--2);
     }
 
+    .site-footer-credits > *::before,
     .site-footer-credits > * + *::before {
-      content: none;
+      content: "·";
+      display: inline-block;
+      width: var(--separator);
+      margin: 0;
+      color: var(--color-border-strong);
+      text-align: center;
+    }
+
+    .site-footer-nav ul {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0 var(--space-s);
     }
   }
 </style>

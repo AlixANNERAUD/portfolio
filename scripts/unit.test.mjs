@@ -198,6 +198,37 @@ test("relatedProjects excludes the project itself", () => {
   assert.equal(relatedProjects("xila", 5).length, 5);
 });
 
+test("relatedProjects lists only real matches, at most n", () => {
+  for (const project of projects) {
+    const related = relatedProjects(project.id);
+    assert.ok(related.length >= 1 && related.length <= 3, project.id);
+    for (const other of related) {
+      assert.ok(
+        other.category === project.category ||
+          other.tags.some((tag) => project.tags.includes(tag)),
+        project.id + " → " + other.id + " is not related",
+      );
+    }
+  }
+});
+
+test("project art glyphs are unique", () => {
+  const symbols = projects.map((project) => project.symbol);
+  assert.equal(new Set(symbols).size, symbols.length);
+});
+
+test("experience dates and titles use dashes, not spaced hyphens", () => {
+  for (const entry of experiences) {
+    for (const lang of locales) {
+      for (const value of [entry.period[lang], entry.role[lang]]) {
+        assert.ok(!/ - /.test(value), entry.id + ": " + JSON.stringify(value));
+      }
+      // Numeric ranges take an unspaced en dash, like formatPeriod.
+      assert.ok(!/\d\s+–\s*\d/.test(entry.period[lang]), entry.id);
+    }
+  }
+});
+
 test("nextProject follows relevance order, wraps and skips", () => {
   const ranked = [...projects].sort(byScore);
   assert.equal(nextProject(ranked[0].id).id, ranked[1].id);

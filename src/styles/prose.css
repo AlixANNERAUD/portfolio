@@ -21,9 +21,10 @@
   letter-spacing: var(--tracking-display);
 }
 
+/* The rule, the space under it and the heading read as one unit. */
 .prose h2 {
   margin: var(--space-l) 0 var(--space-s);
-  padding-top: var(--space-3xs);
+  padding-top: var(--space-s);
   border-top: 1px solid var(--color-border);
   font-family: var(--font-display);
   font-size: var(--step-2);
@@ -56,6 +57,10 @@
 .prose a {
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+.prose .button-link {
+  text-decoration: none;
 }
 
 .prose code {

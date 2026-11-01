@@ -10,15 +10,17 @@ import {
   type ProjectCategory,
   type ProjectGroup,
 } from "../../data/projects.ts";
+import { technologyLabel } from "../../data/technologies.ts";
 import { localize } from "../../data/types.ts";
 import type { Locale } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
 import { formatCount } from "../../lib/format.ts";
 
 /**
- * Every project card is server-rendered in relevance order. A module script
- * reveals the filter, search, sort and grid/list controls and toggles
- * `hidden` on the cards; without JavaScript the full grid stays visible.
+ * Every project card is server-rendered in relevance order, as an index list
+ * (the art-panel grid is an option). A module script reveals the filter,
+ * search, sort and grid/list controls and toggles `hidden` on the cards;
+ * without JavaScript the full list stays visible.
  */
 interface Props {
   lang: Locale;
@@ -50,7 +52,11 @@ const categoryLabel = (id: (typeof categories)[number]) =>
 
 const sorted = [...projects].sort(byScore);
 const searchText = (project: Project) =>
-  [localize(project.title, lang), project.description[lang], ...project.tags]
+  [
+    localize(project.title, lang),
+    project.description[lang],
+    ...project.tags.map((tag) => technologyLabel(tag, lang)),
+  ]
     .join(" ")
     .toLocaleLowerCase(lang);
 ---
@@ -137,11 +143,11 @@ const searchText = (project: Project) =>
         aria-label={t("projects.view")}
         data-catalogue-view
       >
-        <button type="button" value="grid" aria-pressed="true">
+        <button type="button" value="grid" aria-pressed="false">
           <LayoutGrid size={16} aria-hidden="true" />
           {t("projects.view.grid")}
         </button>
-        <button type="button" value="list" aria-pressed="false">
+        <button type="button" value="list" aria-pressed="true">
           <List size={16} aria-hidden="true" />
           {t("projects.view.list")}
         </button>
@@ -158,7 +164,7 @@ const searchText = (project: Project) =>
     {formatCount(sorted.length, "project", lang)}
   </p>
 
-  <div class="showcase-grid" data-catalogue-grid data-view="grid">
+  <div class="showcase-grid" data-catalogue-grid data-view="list">
     {sorted.map((project) => (
       <ProjectCard
         project={project}
@@ -217,7 +223,7 @@ const searchText = (project: Project) =>
     )
       continue;
 
-    // Server order is the relevance ranking; keep it for "recommended".
+    // Server order is the relevance ranking; keep it for "relevance".
     const cards = [...grid.querySelectorAll<HTMLElement>(".showcase-card")];
     const collator = new Intl.Collator(lang);
     const byTitle = [...cards].sort((a, b) =>
@@ -268,7 +274,7 @@ const searchText = (project: Project) =>
     try {
       storedView = localStorage.getItem(VIEW_KEY);
     } catch {
-      // Keep the default grid.
+      // Keep the default list.
     }
     if (viewButtons.some((button) => button.value === storedView)) {
       setView(storedView!);
@@ -353,10 +359,15 @@ const searchText = (project: Project) =>
   .showcase-view button:hover {
     color: var(--color-text);
   }
+  /*
+   * Pressed: a solid accent fill with heavier text, so the state does not
+   * rely on hue alone (the fill is far darker or lighter than surface-2).
+   */
   .showcase-filters button[aria-pressed="true"],
   .showcase-view button[aria-pressed="true"] {
-    background: var(--color-accent-soft);
-    color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-bg);
+    font-weight: 600;
   }
   .showcase-toolbar-actions {
     display: flex;
@@ -381,7 +392,8 @@ const searchText = (project: Project) =>
   .showcase-sort select {
     box-sizing: border-box;
     min-height: 2.5rem;
-    border: 1px solid var(--color-border);
+    /* A control boundary: at least 3:1 against the page (WCAG 1.4.11). */
+    border: 1px solid var(--color-border-strong);
     border-radius: var(--radius-m);
     background: var(--color-bg);
     color: var(--color-text);
@@ -394,7 +406,7 @@ const searchText = (project: Project) =>
   }
   .showcase-search input:hover,
   .showcase-sort select:hover {
-    border-color: var(--color-border-strong);
+    border-color: var(--color-accent);
   }
   .showcase-sort {
     display: flex;
@@ -416,7 +428,7 @@ const searchText = (project: Project) =>
     font-family: var(--font-mono);
     font-size: var(--step--2);
     font-variant-numeric: tabular-nums;
-    letter-spacing: 0.02em;
+    letter-spacing: var(--tracking-mono);
   }
   .showcase-grid {
     display: grid;
@@ -443,6 +455,23 @@ const searchText = (project: Project) =>
     }
     .showcase-control {
       grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-3xs);
+    }
+    /*
+     * Each chip group is one row that scrolls sideways, so the filters take
+     * two short rows instead of the whole first screen.
+     */
+    .showcase-filters {
+      flex-wrap: nowrap;
+      margin-inline: calc(-1 * var(--page-inline));
+      /* Room for the focus outline, which the scroller would clip. */
+      padding: var(--space-2xs) var(--page-inline);
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+    }
+    .showcase-filters button {
+      flex: none;
     }
     .showcase-search {
       flex-basis: 100%;

@@ -119,13 +119,18 @@ const {
     grid-column: 1;
     grid-row: 1;
     margin-bottom: 0.75rem;
-    letter-spacing: 0.15em;
+    letter-spacing: var(--tracking-overline);
   }
   .editorial-hero--compact .editorial-hero__title {
     grid-column: 1;
     grid-row: 2;
     font-size: clamp(2.3rem, 4.8vw, 4.7rem);
     letter-spacing: var(--tracking-display);
+  }
+  /* As a section heading (homepage), the title follows the section scale. */
+  .editorial-hero--compact h2.editorial-hero__title {
+    font-size: var(--step-4);
+    line-height: var(--leading-tight);
   }
   .editorial-hero--compact .editorial-hero__intro {
     grid-column: 2;

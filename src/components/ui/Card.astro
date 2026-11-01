@@ -49,7 +49,7 @@ const {
   /* Only clickable cards lift, and only for a pointer with motion allowed. */
   @media (hover: hover) and (prefers-reduced-motion: no-preference) {
     .editorial-card--project:hover {
-      transform: translateY(-3px);
+      transform: translateY(var(--lift));
     }
   }
   .editorial-card--timeline {

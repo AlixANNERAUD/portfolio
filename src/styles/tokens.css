@@ -19,6 +19,10 @@
 
   --tracking-display: -0.035em;
   --tracking-heading: -0.02em;
+  /* Mono dates and small headings: a hair tighter than the body. */
+  --tracking-tight: -0.01em;
+  /* Mono figures next to uppercase overlines and small labels. */
+  --tracking-mono: 0.02em;
   --tracking-overline: 0.14em;
 
   /* Fluid type scale (Utopia, 360-1240px viewport, 16-18px base). */
@@ -31,6 +35,8 @@
   --step-4: clamp(2.074rem, 1.7987rem + 1.2236vw, 2.747rem);
   --step-5: clamp(2.488rem, 2.1014rem + 1.7182vw, 3.433rem);
   --step-display: clamp(3rem, 1.3636rem + 7.2727vw, 7rem);
+  /* Hero title on phones: the display step would overflow 18-character lines. */
+  --step-display-narrow: clamp(2.5rem, 11.5vw, 4.75rem);
 
   --leading-tight: 1.1;
   --leading-snug: 1.25;
@@ -58,6 +64,8 @@
   --container: 1180px;
   --container-prose: 850px;
   --gutter: var(--space-s-l);
+  /* Inline padding of the page column (header, footer, sections, pages). */
+  --page-inline: var(--space-m);
   /*
    * Header controls and nav links are 44px targets; they set the header row
    * height, so --header-h follows them.
@@ -122,6 +130,16 @@
   --dur-fast: 150ms;
   --dur-base: 220ms;
   --dur-slow: 540ms;
+  /* Hover idioms: an arrow slides by --nudge-x, a clickable card lifts. */
+  --nudge-x: 3px;
+  --lift: -3px;
+}
+
+/* Narrow screens: the page column keeps a smaller gutter. */
+@media (max-width: 720px) {
+  :root {
+    --page-inline: var(--space-s);
+  }
 }
 
 :root.light {

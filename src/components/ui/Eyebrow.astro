@@ -33,11 +33,11 @@ const number = index === undefined ? undefined : sectionNumber(index);
 <style>
   /* Low specificity so callers can adjust spacing with their own class. */
   :where(.eyebrow) {
-    margin: 0 0 0.9rem;
+    margin: 0 0 var(--space-xs);
     color: var(--color-text-muted);
-    font-size: 0.73rem;
+    font-size: var(--step--2);
     font-weight: 600;
-    letter-spacing: 0.13em;
+    letter-spacing: var(--tracking-overline);
     text-transform: uppercase;
   }
   .eyebrow__index {
@@ -48,6 +48,6 @@ const number = index === undefined ? undefined : sectionNumber(index);
     font-variant-numeric: tabular-nums;
     font-weight: 500;
     line-height: 1;
-    letter-spacing: 0.02em;
+    letter-spacing: var(--tracking-mono);
   }
 </style>

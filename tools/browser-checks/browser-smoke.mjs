@@ -234,44 +234,58 @@ for (const [engineName, engine] of [
         });
         const grid = page.locator("[data-catalogue-grid]");
         await listButton.waitFor({ timeout: 10000 });
-        assert.equal(await gridButton.getAttribute("aria-pressed"), "true");
-        assert.equal(await listButton.getAttribute("aria-pressed"), "false");
-
-        await listButton.click();
+        // The index list is the default way to browse the catalogue.
         assert.equal(await listButton.getAttribute("aria-pressed"), "true");
         assert.equal(await gridButton.getAttribute("aria-pressed"), "false");
         assert.equal(await grid.getAttribute("data-view"), "list");
-        const [first, second] = await page
-          .locator(".showcase-card")
-          .evaluateAll((cards) =>
-            cards.slice(0, 2).map((card) => card.getBoundingClientRect()),
-          );
+        const rects = () =>
+          page
+            .locator(".showcase-card")
+            .evaluateAll((cards) =>
+              cards.slice(0, 2).map((card) => card.getBoundingClientRect()),
+            );
+        let [first, second] = await rects();
         assert.ok(
           Math.abs(first.left - second.left) < 1 && second.top > first.top,
           path + " list view should stack cards in one column",
         );
 
-        await page.reload({ waitUntil: "domcontentloaded" });
-        await listButton.waitFor({ timeout: 10000 });
-        assert.equal(
-          await listButton.getAttribute("aria-pressed"),
-          "true",
-          path + " should remember the list view",
+        await gridButton.click();
+        assert.equal(await gridButton.getAttribute("aria-pressed"), "true");
+        assert.equal(await listButton.getAttribute("aria-pressed"), "false");
+        assert.equal(await grid.getAttribute("data-view"), "grid");
+        // Move the pointer off the cards: a hovered card lifts a few pixels.
+        await page.mouse.move(0, 0);
+        await page.waitForTimeout(400);
+        [first, second] = await rects();
+        assert.ok(
+          Math.abs(first.top - second.top) < 1 && second.left > first.left,
+          path + " grid view should place cards side by side",
         );
-        assert.equal(await grid.getAttribute("data-view"), "list");
+
+        await page.reload({ waitUntil: "domcontentloaded" });
+        await gridButton.waitFor({ timeout: 10000 });
+        assert.equal(
+          await gridButton.getAttribute("aria-pressed"),
+          "true",
+          path + " should remember the grid view",
+        );
+        assert.equal(await grid.getAttribute("data-view"), "grid");
 
         await page.setViewportSize({ width: 390, height: 844 });
         await page.waitForTimeout(60);
-        assert.equal(
-          await page.evaluate(
-            () => document.documentElement.scrollWidth > window.innerWidth + 2,
-          ),
-          false,
-          path + " list view overflows at 390px",
-        );
-
-        await gridButton.click();
-        assert.equal(await grid.getAttribute("data-view"), "grid");
+        for (const view of [gridButton, listButton]) {
+          await view.click();
+          assert.equal(
+            await page.evaluate(
+              () =>
+                document.documentElement.scrollWidth > window.innerWidth + 2,
+            ),
+            false,
+            path + " catalogue overflows at 390px",
+          );
+        }
+        assert.equal(await grid.getAttribute("data-view"), "list");
         await page.evaluate(() => localStorage.clear());
         checked++;
       } catch (error) {
@@ -297,18 +311,18 @@ for (const [engineName, engine] of [
           waitUntil: "domcontentloaded",
           timeout: 10000,
         });
-        const list = blockedPage.getByRole("button", {
-          name: "List",
+        const gridView = blockedPage.getByRole("button", {
+          name: "Grid",
           exact: true,
         });
-        await list.waitFor({ timeout: 10000 });
-        await list.click();
-        assert.equal(await list.getAttribute("aria-pressed"), "true");
+        await gridView.waitFor({ timeout: 10000 });
+        await gridView.click();
+        assert.equal(await gridView.getAttribute("aria-pressed"), "true");
         assert.equal(
           await blockedPage
             .locator("[data-catalogue-grid]")
             .getAttribute("data-view"),
-          "list",
+          "grid",
         );
         checked++;
       } catch (error) {
@@ -631,19 +645,19 @@ for (const [engineName, engine] of [
       [
         "/experiences",
         [
-          "Show earlier experience",
-          "Hide earlier experience",
-          "Show earlier education",
-          "Hide earlier education",
+          "Show 3 earlier roles",
+          "Hide 3 earlier roles",
+          "Show 2 earlier milestones",
+          "Hide 2 earlier milestones",
         ],
       ],
       [
         "/fr/experiences",
         [
-          "Voir les expériences précédentes",
-          "Masquer les expériences précédentes",
-          "Voir les formations précédentes",
-          "Masquer les formations précédentes",
+          "Afficher 3 postes précédents",
+          "Masquer 3 postes précédents",
+          "Afficher 2 étapes précédentes",
+          "Masquer 2 étapes précédentes",
         ],
       ],
     ]) {
@@ -814,20 +828,13 @@ for (const [engineName, engine] of [
         assert.match(style.family, /JetBrains Mono/, selector + " font");
         assert.match(style.numeric, /tabular-nums/, selector + " figures");
         if (path.endsWith("experiences")) {
-          const eyebrow = page.locator(
-            "#professional [data-section-index] .eyebrow__label",
-          );
+          // The overline is a label ("01 — Experience"); the count lives in
+          // the toggle, which names the number of earlier roles.
           const numbered = page.locator("#professional [data-section-index]");
-          const before = (await numbered.textContent()).replace(/\s+/g, " ");
-          assert.match(before, /^01 — \d+ /, "collapsed overline " + before);
-          await page.locator("#professional .career-earlier-toggle").click();
-          const after = (await numbered.textContent()).replace(/\s+/g, " ");
-          assert.match(after, /^01 — \d+ /, "expanded overline " + after);
-          assert.notEqual(
-            await eyebrow.textContent(),
-            before.slice(5),
-            "the count must change when earlier roles are shown",
-          );
+          const overline = (await numbered.textContent()).replace(/\s+/g, " ");
+          assert.match(overline, /^01 — \D/, "overline " + overline);
+          const toggle = page.locator("#professional .career-earlier-toggle");
+          assert.match(await toggle.innerText(), /\d/, "toggle needs a count");
         }
         checked++;
       } catch (error) {
@@ -839,7 +846,8 @@ for (const [engineName, engine] of [
 
     // Project cards: the whole card opens the project page through one
     // stretched title link, keyboard focus rings the card, hovering dims the
-    // neighbours (motion allowed only), and numbers are stable ranks.
+    // neighbours' art panels (motion allowed only), and numbers are stable
+    // ranks.
     for (const [path, filter] of [
       ["/", null],
       ["/fr/projects", "Bibliothèques"],
@@ -853,8 +861,11 @@ for (const [engineName, engine] of [
         });
         const cards = page.locator(".showcase-card");
         const [first, second] = [cards.nth(0), cards.nth(1)];
+        // Only the art panel dims: the neighbours' text keeps its contrast.
         const opacity = (card) =>
-          card.evaluate((node) => Number(getComputedStyle(node).opacity));
+          card
+            .locator(".showcase-art")
+            .evaluate((node) => Number(getComputedStyle(node).opacity));
         await first.scrollIntoViewIfNeeded();
         // Let the homepage entry animation finish first.
         await page.waitForTimeout(1000);
@@ -1179,6 +1190,17 @@ for (const [engineName, engine] of [
             path + " nav link target is " + box?.height + "px high",
           );
         }
+        // Tab from the open button lands on the first link it revealed,
+        // and the menu stays open (WCAG 2.4.3).
+        await mobilePage.keyboard.press("Tab");
+        assert.equal(
+          await navLinks
+            .first()
+            .evaluate((node) => node === document.activeElement),
+          true,
+          path + " Tab from the open menu button must reach the first link",
+        );
+        assert.equal(await menuButton.getAttribute("aria-expanded"), "true");
         await mobilePage.keyboard.press("Escape");
         assert.equal(await menuButton.getAttribute("aria-expanded"), "false");
         assert.equal(

@@ -33,7 +33,7 @@ const actions = [
 ---
 
 <section class="home-hero" aria-labelledby="home-hero-title">
-  <div class="home-hero-inner">
+  <div class="home-hero-inner container">
     <div class="home-hero-overline" aria-hidden="true">
       <Eyebrow as="span" class="home-hero-overline-index" index={index}>
         {t("home.hero.index")}
@@ -130,10 +130,8 @@ const actions = [
   .home-hero-inner {
     display: flex;
     flex-direction: column;
-    width: min(100%, var(--container));
     min-width: 0;
-    margin-inline: auto;
-    padding: clamp(var(--space-s), 3.6vh, var(--space-l)) var(--space-m);
+    padding-block: clamp(var(--space-s), 3.6vh, var(--space-l));
   }
 
   .home-hero-overline {
@@ -299,7 +297,7 @@ const actions = [
       transition: transform var(--dur-fast) var(--ease-out);
     }
     .home-action:hover .home-action-icon {
-      transform: translateX(3px);
+      transform: translateX(var(--nudge-x));
     }
   }
 
@@ -434,7 +432,7 @@ const actions = [
   }
   @media (max-width: 720px) {
     .home-hero-inner {
-      padding: var(--space-s);
+      padding-block: var(--space-s);
     }
     .home-hero-overline-discipline {
       display: none;
@@ -443,8 +441,7 @@ const actions = [
       padding-block: var(--space-l) var(--space-xl);
     }
     .home-hero-title {
-      /* The display step would overflow 18-character lines on phones. */
-      font-size: clamp(2.5rem, 11.5vw, 4.75rem);
+      font-size: var(--step-display-narrow);
     }
     .home-hero-bottom-row {
       gap: var(--space-s);

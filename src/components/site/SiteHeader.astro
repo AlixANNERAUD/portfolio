@@ -18,6 +18,8 @@ const other = locales.find((locale) => locale !== lang)!;
 const tOther = useTranslations(other);
 const localeHref = Astro.props.localeHref ?? localizePath(path, other);
 const current = localizePath(path, lang);
+/* Same breakpoint as the @media (max-width: 720px) rules below. */
+const narrowQuery = "(max-width: 720px)";
 const links: { key: UIKey; path: string }[] = [
   { key: "nav.experiences", path: "/experiences" },
   { key: "nav.projects", path: "/projects" },
@@ -31,8 +33,8 @@ const links: { key: UIKey; path: string }[] = [
   screens). The inline script below marks the header with data-menu, which
   collapses the narrow-screen navigation behind the menu button.
 -->
-<header class="site-header" data-site-header>
-  <div class="site-header-inner">
+<header class="site-header" data-site-header data-narrow={narrowQuery}>
+  <div class="site-header-inner container">
     <a
       class="site-brand"
       href={localizePath("/", lang)}
@@ -40,6 +42,24 @@ const links: { key: UIKey; path: string }[] = [
     >
       {site.name}
     </a>
+    {/*
+      The menu button precedes the navigation it opens, so Tab goes from the
+      open button straight into the links. CSS places it at the row's end.
+    */}
+    <button
+      class="site-menu-button site-control"
+      type="button"
+      aria-expanded="false"
+      aria-controls="site-main-nav"
+    >
+      <span class="site-menu-icon site-menu-icon-open" aria-hidden="true">
+        <Menu size={20} />
+      </span>
+      <span class="site-menu-icon site-menu-icon-close" aria-hidden="true">
+        <X size={20} />
+      </span>
+      <span class="visually-hidden">{t("nav.menu")}</span>
+    </button>
     <nav id="site-main-nav" class="site-main-nav" aria-label={t("nav.main")}>
       {links.map((link) => {
         const href = localizePath(link.path, lang);
@@ -67,20 +87,6 @@ const links: { key: UIKey; path: string }[] = [
         {tOther("locale.short")}
       </a>
       <ThemeToggle lang={lang} />
-      <button
-        class="site-menu-button site-control"
-        type="button"
-        aria-expanded="false"
-        aria-controls="site-main-nav"
-      >
-        <span class="site-menu-icon site-menu-icon-open" aria-hidden="true">
-          <Menu size={20} />
-        </span>
-        <span class="site-menu-icon site-menu-icon-close" aria-hidden="true">
-          <X size={20} />
-        </span>
-        <span class="visually-hidden">{t("nav.menu")}</span>
-      </button>
     </div>
   </div>
 </header>
@@ -90,8 +96,8 @@ const links: { key: UIKey; path: string }[] = [
     const button = header && header.querySelector(".site-menu-button");
     const nav =
       button && document.getElementById(button.getAttribute("aria-controls"));
-    if (header && button && nav) {
-      const narrow = matchMedia("(max-width: 720px)");
+    if (header && button && nav && header.dataset.narrow) {
+      const narrow = matchMedia(header.dataset.narrow);
       const isOpen = () => header.dataset.menu === "open";
       const setOpen = (open) => {
         header.dataset.menu = open ? "open" : "closed";
@@ -135,9 +141,7 @@ const links: { key: UIKey; path: string }[] = [
     display: flex;
     align-items: center;
     gap: var(--space-3xs) var(--space-m);
-    max-width: var(--container);
-    margin: 0 auto;
-    padding: var(--space-2xs) var(--space-m);
+    padding-block: var(--space-2xs);
   }
 
   .site-brand {
@@ -196,7 +200,7 @@ const links: { key: UIKey; path: string }[] = [
   }
 
   /* Square header controls: locale switch, theme toggle and menu button. */
-  .site-header-tools :global(.site-control) {
+  .site-header-inner :global(.site-control) {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -225,7 +229,7 @@ const links: { key: UIKey; path: string }[] = [
   }
 
   @media (hover: hover) {
-    .site-header-tools :global(.site-control:hover) {
+    .site-header-inner :global(.site-control:hover) {
       border-color: var(--color-border);
       background: var(--color-surface-2);
       color: var(--color-text);
@@ -233,8 +237,9 @@ const links: { key: UIKey; path: string }[] = [
   }
 
   /* Outranks the shared control rule; shown once the script runs. */
-  .site-header-tools .site-menu-button {
+  .site-header-inner .site-menu-button {
     display: none;
+    order: 4;
   }
 
   .site-menu-button[aria-expanded="true"] .site-menu-icon-open,
@@ -249,8 +254,7 @@ const links: { key: UIKey; path: string }[] = [
   @media (max-width: 720px) {
     .site-header-inner {
       flex-wrap: wrap;
-      gap: var(--space-3xs) var(--space-2xs);
-      padding-inline: var(--space-s);
+      gap: var(--space-3xs);
     }
 
     .site-header-tools {
@@ -268,7 +272,9 @@ const links: { key: UIKey; path: string }[] = [
     }
 
     .site-main-nav a {
-      padding-inline: 0;
+      justify-content: center;
+      min-width: var(--control-size);
+      padding-inline: var(--space-3xs);
     }
 
     /* Enhanced: one row, the navigation opens below it as a panel. */

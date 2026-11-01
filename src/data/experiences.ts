@@ -1,12 +1,13 @@
 /** Bilingual, public-safe experience highlights for the portfolio timeline. */
-import type { Localized } from "./types.ts";
+import type { Label, Localized } from "./types.ts";
 
 export type ExperienceGroup = "professional" | "education";
 
 export interface Experience {
   id: string;
   group: ExperienceGroup;
-  company: string;
+  /** Organization name; localized only when it is not a proper noun. */
+  company: Label;
   companyUrl?: string;
   monogram: string;
   /** Verified public logo URL; only shown alongside the organization name. */
@@ -18,7 +19,7 @@ export interface Experience {
   location: Localized;
   summary: Localized;
   highlights: readonly Localized[];
-  technologies: readonly string[];
+  technologies: readonly Label[];
   ongoing?: boolean;
   /** Shown on the homepage, in data order. */
   homepage?: true;
@@ -37,14 +38,17 @@ export const experiences: readonly Experience[] = [
     companyUrl: "https://memo.bank/",
     monogram: "M",
     role: { fr: "Ingénieur sécurité", en: "Security Engineer" },
-    period: { fr: "Sept. 2026 - Août 2027", en: "Sep 2026 - Aug 2027" },
+    period: { fr: "Sept. 2026 – Août 2027", en: "Sep 2026 – Aug 2027" },
     location: { fr: "Paris, France", en: "Paris, France" },
     summary: {
       fr: "Ingénierie sécurité dans l'environnement d'une banque.",
       en: "Security engineering in a banking environment.",
     },
     highlights: [],
-    technologies: ["Security", "Software engineering"],
+    technologies: [
+      { en: "Security", fr: "Sécurité" },
+      { en: "Software engineering", fr: "Génie logiciel" },
+    ],
     ongoing: true,
   },
   {
@@ -59,7 +63,7 @@ export const experiences: readonly Experience[] = [
       fr: "Technicien réseau et télécoms",
       en: "Network & Telecom Technician",
     },
-    period: { fr: "Déc. 2025 - Sept. 2026", en: "Dec 2025 - Sep 2026" },
+    period: { fr: "Déc. 2025 – Sept. 2026", en: "Dec 2025 – Sep 2026" },
     location: {
       fr: "Mont-Saint-Aignan, France",
       en: "Mont-Saint-Aignan, France",
@@ -82,7 +86,13 @@ export const experiences: readonly Experience[] = [
         en: "Built a Vue/WXT browser extension to enrich support tickets and streamline diagnostics.",
       },
     ],
-    technologies: ["Network L2/L3", "MPLS", "VoIP", "Vue", "WXT"],
+    technologies: [
+      { en: "Network L2/L3", fr: "Réseau L2/L3" },
+      "MPLS",
+      "VoIP",
+      "Vue",
+      "WXT",
+    ],
   },
   {
     id: "amazon",
@@ -96,7 +106,7 @@ export const experiences: readonly Experience[] = [
       fr: "Stagiaire en ingénierie logicielle",
       en: "Software Engineering Intern",
     },
-    period: { fr: "Mai - Août 2025", en: "May - Aug 2025" },
+    period: { fr: "Mai – Août 2025", en: "May – Aug 2025" },
     location: { fr: "Madrid, Espagne", en: "Madrid, Spain" },
     summary: {
       fr: "Modernisation d'un outil interne d'investigation de contenus pour des équipes marketing.",
@@ -123,7 +133,7 @@ export const experiences: readonly Experience[] = [
     companyUrl: "https://www.nyu.edu/",
     monogram: "NYU",
     role: { fr: "Stagiaire en recherche", en: "Research Intern" },
-    period: { fr: "Juin - Août 2024", en: "Jun - Aug 2024" },
+    period: { fr: "Juin – Août 2024", en: "Jun – Aug 2024" },
     location: { fr: "New York, États-Unis", en: "New York, USA" },
     summary: {
       fr: "Recherche sur la localisation de sources de gaz à partir de réseaux de capteurs.",
@@ -139,7 +149,12 @@ export const experiences: readonly Experience[] = [
         en: "Prototyped data acquisition and statistical analysis.",
       },
     ],
-    technologies: ["Python", "C++", "Simulation", "Signal processing"],
+    technologies: [
+      "Python",
+      "C++",
+      "Simulation",
+      { en: "Signal processing", fr: "Traitement du signal" },
+    ],
   },
   {
     id: "insa-relations",
@@ -153,7 +168,7 @@ export const experiences: readonly Experience[] = [
       fr: "Assistant aux relations entreprises",
       en: "Corporate Relations Assistant",
     },
-    period: { fr: "2021 - 2024", en: "2021 - 2024" },
+    period: { fr: "2021–2024", en: "2021–2024" },
     location: { fr: "Rouen, France", en: "Rouen, France" },
     summary: {
       fr: "Gestion de données partenaires et appui aux campagnes de relations entreprises.",
@@ -169,7 +184,10 @@ export const experiences: readonly Experience[] = [
         en: "Supported administrative follow-up and apprenticeship-tax outreach.",
       },
     ],
-    technologies: ["Data management", "Partner relations"],
+    technologies: [
+      { en: "Data management", fr: "Gestion de données" },
+      { en: "Partner relations", fr: "Relations partenaires" },
+    ],
   },
   {
     id: "therapic",
@@ -179,8 +197,8 @@ export const experiences: readonly Experience[] = [
     companyUrl: "https://www.becquerel.fr/",
     monogram: "T",
     role: {
-      fr: "Chef de projet / Product Owner - ThéraPIC",
-      en: "Project Lead / Product Owner - ThéraPIC",
+      fr: "Chef de projet / Product Owner — ThéraPIC",
+      en: "Project Lead / Product Owner — ThéraPIC",
     },
     period: { fr: "2025", en: "2025" },
     location: { fr: "Rouen, France", en: "Rouen, France" },
@@ -211,14 +229,18 @@ export const experiences: readonly Experience[] = [
       fr: "Diplôme d'ingénieur informatique",
       en: "Computer Engineering Degree",
     },
-    period: { fr: "2021 - 2027", en: "2021 - 2027" },
+    period: { fr: "2021–2027", en: "2021–2027" },
     location: { fr: "Rouen, France", en: "Rouen, France" },
     summary: {
       fr: "Formation en algorithmique, systèmes d'exploitation, informatique embarquée, réseaux, génie logiciel et intelligence artificielle.",
       en: "Studies in algorithms, operating systems, embedded computing, networks, software engineering and AI.",
     },
     highlights: [],
-    technologies: ["Systems", "Networks", "Software engineering"],
+    technologies: [
+      { en: "Systems", fr: "Systèmes" },
+      { en: "Networks", fr: "Réseaux" },
+      { en: "Software engineering", fr: "Génie logiciel" },
+    ],
     ongoing: true,
   },
   // Earlier milestones remain first-class timeline entries, but show their
@@ -250,7 +272,9 @@ export const experiences: readonly Experience[] = [
         en: "Observed the constraints and organization of work on a production line.",
       },
     ],
-    technologies: ["Industrial production"],
+    technologies: [
+      { en: "Industrial production", fr: "Production industrielle" },
+    ],
   },
   {
     id: "guenola-sahut",
@@ -280,11 +304,11 @@ export const experiences: readonly Experience[] = [
     id: "baccalaureat",
     group: "education",
     earlier: true,
-    company: "Enseignement secondaire",
+    company: { en: "Secondary school", fr: "Enseignement secondaire" },
     monogram: "BAC",
     role: {
-      fr: "Baccalauréat scientifique - section européenne",
-      en: "Scientific Baccalaureate - European Section",
+      fr: "Baccalauréat scientifique — section européenne",
+      en: "Scientific Baccalaureate — European Section",
     },
     period: { fr: "2021", en: "2021" },
     location: { fr: "France", en: "France" },
@@ -323,7 +347,7 @@ export const experiences: readonly Experience[] = [
         en: "Cambridge English Preliminary certification earned in 2018.",
       },
     ],
-    technologies: ["English · B1"],
+    technologies: [{ en: "English · B1", fr: "Anglais · B1" }],
   },
 ];
 

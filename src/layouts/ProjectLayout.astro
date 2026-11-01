@@ -12,6 +12,7 @@ import {
   type CatalogueProject,
   type Project,
 } from "../data/projects.ts";
+import { technologyLabel } from "../data/technologies.ts";
 import { localize } from "../data/types.ts";
 import { localizePath, type Locale } from "../i18n/locales.ts";
 import { useTranslations } from "../i18n/ui.ts";
@@ -85,12 +86,12 @@ const { team, externalUrl: external }: Project = project;
       <div class="project-header__footer">
         <Tags
           class="project-tags"
-          tags={project.tags}
+          tags={project.tags.map((tag) => technologyLabel(tag, lang))}
           label={t("project.technologies")}
         />
         {external && (
           <a
-            class="project-external"
+            class="project-external button-link"
             href={external}
             target="_blank"
             rel="noopener noreferrer"
@@ -165,7 +166,8 @@ const { team, externalUrl: external }: Project = project;
     font-variant-numeric: tabular-nums;
   }
   .project-meta__badge {
-    padding: 0.15em 0.65em;
+    padding: var(--space-3xs) var(--space-2xs);
+    line-height: 1;
     border-radius: var(--radius-full);
     background: var(--color-accent-soft);
     color: var(--color-accent);
@@ -180,26 +182,6 @@ const { team, externalUrl: external }: Project = project;
   }
   .project-header :global(.project-tags) {
     margin: 0;
-  }
-  .project-external {
-    display: inline-flex;
-    min-height: 2.75rem;
-    align-items: center;
-    gap: 0.4em;
-    padding: 0 var(--space-s);
-    border: 1px solid var(--color-accent);
-    border-radius: var(--radius-m);
-    color: var(--color-accent);
-    font-size: var(--step--1);
-    font-weight: 600;
-    text-decoration: none;
-    transition:
-      background-color var(--dur-fast) var(--ease-out),
-      color var(--dur-fast) var(--ease-out);
-  }
-  .project-external:hover {
-    background: var(--color-accent-soft);
-    color: var(--color-accent-hover);
   }
   /* The body sits in the page column: no second prose container. */
   .project-page .project-body {

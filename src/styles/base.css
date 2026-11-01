@@ -66,12 +66,25 @@ svg {
   min-width: 0;
 }
 
-/* Shared editorial page container (Skills, Experience, Projects). */
-.editorial-page {
-  width: min(100%, var(--container));
+/*
+ * The single page column. Header, footer, home hero, home sections, the
+ * catalogue and the editorial pages share its width and inline padding, so
+ * their edges line up from page to page.
+ */
+.container,
+.editorial-page,
+.portfolio-showcase,
+.home-experience,
+.xila-topology {
+  width: 100%;
   max-width: var(--container);
   margin-inline: auto;
-  padding: var(--space-xl) var(--space-m) var(--space-3xl);
+  padding-inline: var(--page-inline);
+}
+
+/* Editorial pages (Skills, Experience, Resume). */
+.editorial-page {
+  padding-block: var(--space-xl) var(--space-3xl);
   color: var(--color-text);
 }
 
@@ -91,7 +104,7 @@ svg {
 
 @media (max-width: 720px) {
   .editorial-page {
-    padding: var(--space-l) var(--space-s) var(--space-2xl);
+    padding-block: var(--space-l) var(--space-2xl);
   }
 }
 
@@ -105,16 +118,48 @@ svg {
   white-space: nowrap;
 }
 
-/* Shared container for the featured projects and the project catalogue. */
 .portfolio-showcase {
-  max-width: 1160px;
-  margin-inline: auto;
-  padding: 0 1.5rem;
   color: var(--color-text);
 }
 
-@media (max-width: 600px) {
-  .portfolio-showcase {
-    padding: 0 1rem;
-  }
+/*
+ * Outline button link (project external link, resume actions, Xila demo):
+ * a 44px target with an accent outline; --primary fills it.
+ */
+.button-link {
+  display: inline-flex;
+  min-height: var(--control-size);
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3xs);
+  padding: 0 var(--space-s);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-m);
+  background: transparent;
+  color: var(--color-accent);
+  font: inherit;
+  font-size: var(--step--1);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.button-link:hover {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-hover);
+}
+
+.button-link--primary {
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+
+.button-link--primary:hover {
+  border-color: var(--color-accent-hover);
+  background: var(--color-accent-hover);
+  color: var(--color-bg);
 }

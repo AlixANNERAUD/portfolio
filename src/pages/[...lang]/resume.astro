@@ -37,12 +37,16 @@ const pdf = site.resumePdf[lang];
         <section class="resume-card" aria-labelledby="resume-actions">
           <h2 id="resume-actions">{t("resume.actions")}</h2>
           <div class="resume-actions">
-            <a class="resume-action resume-action--primary" href={pdf} download>
+            <a
+              class="resume-action button-link button-link--primary"
+              href={pdf}
+              download
+            >
               <Download size={17} aria-hidden="true" />
               {t("resume.download")}
             </a>
             <a
-              class="resume-action"
+              class="resume-action button-link"
               href={pdf}
               target="_blank"
               rel="noopener noreferrer"
@@ -58,7 +62,7 @@ const pdf = site.resumePdf[lang];
         src={pdf}
         title={t("resume.pdfTitle")}
         fallback={t("resume.fallback")}
-        openLabel={t("resume.openPdf")}
+        openLabel={t("resume.openFallback")}
         newTabLabel={t("a11y.newTab")}
       />
     </div>
@@ -99,35 +103,6 @@ const pdf = site.resumePdf[lang];
   .resume-actions {
     display: grid;
     gap: var(--space-2xs);
-  }
-  .resume-action {
-    display: inline-flex;
-    min-height: 2.75rem;
-    align-items: center;
-    justify-content: center;
-    gap: 0.45em;
-    padding: 0 var(--space-s);
-    border: 1px solid var(--color-accent);
-    border-radius: var(--radius-m);
-    color: var(--color-accent);
-    font-size: var(--step--1);
-    font-weight: 600;
-    text-decoration: none;
-    transition:
-      background-color var(--dur-fast) var(--ease-out),
-      border-color var(--dur-fast) var(--ease-out),
-      color var(--dur-fast) var(--ease-out);
-  }
-  .resume-action:hover {
-    background: var(--color-accent-soft);
-  }
-  .resume-action--primary {
-    background: var(--color-accent);
-    color: var(--color-bg);
-  }
-  .resume-action--primary:hover {
-    border-color: var(--color-accent-hover);
-    background: var(--color-accent-hover);
   }
   @media (min-width: 560px) and (max-width: 899px) {
     .resume-actions {

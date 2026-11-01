@@ -1,6 +1,6 @@
 /** Public, bilingual technical skills grounded in actual portfolio projects. */
 import type { ProjectId } from "./projects.ts";
-import type { Localized } from "./types.ts";
+import type { Label, Localized } from "./types.ts";
 
 /**
  * Links to a dedicated EN/FR project page, or to an explicit resource
@@ -16,7 +16,7 @@ export interface SkillDomain {
   icon: "cpu" | "database" | "code" | "server" | "shield" | "bot";
   title: Localized;
   description: Localized;
-  technologies: readonly string[];
+  technologies: readonly Label[];
   examples: readonly SkillEvidence[];
 }
 
@@ -153,7 +153,7 @@ export const skillDomains: readonly SkillDomain[] = [
       "AWS",
       "GitHub Actions",
       "Git",
-      "Networking",
+      { en: "Networking", fr: "Réseaux" },
     ],
     examples: [
       {
@@ -230,7 +230,7 @@ export const skillDomains: readonly SkillDomain[] = [
       "Claude Code",
       "Codex",
       "MCP",
-      "Testing",
+      { en: "Testing", fr: "Tests" },
       "Git / CI",
     ],
     examples: [

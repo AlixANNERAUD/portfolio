@@ -1,4 +1,6 @@
 ---
+import { FileText } from "@lucide/astro";
+
 /**
  * Inline PDF preview for wide screens. Narrow screens hide it and rely on
  * the page's Download/Open buttons; browsers that cannot show the PDF render
@@ -8,6 +10,7 @@ interface Props {
   src: string;
   title: string;
   fallback: string;
+  /** A neutral label ("Open the PDF"); the hidden note adds "new tab". */
   openLabel: string;
   newTabLabel: string;
 }
@@ -22,14 +25,15 @@ const { src, title, fallback, openLabel, newTabLabel } = Astro.props;
   title={title}
   aria-label={title}
 >
-  <p class="resume-preview__fallback">
-    {fallback}{" "}
-    <a href={src} target="_blank" rel="noopener noreferrer">
+  <div class="resume-preview__fallback">
+    <FileText size={32} stroke-width={1.5} aria-hidden="true" />
+    <p>{fallback}</p>
+    <a class="button-link" href={src} target="_blank" rel="noopener noreferrer">
       {openLabel}
       <span class="visually-hidden"> {newTabLabel}</span>
       <span aria-hidden="true">↗</span>
     </a>
-  </p>
+  </div>
 </object>
 
 <style>
@@ -49,9 +53,23 @@ const { src, title, fallback, openLabel, newTabLabel } = Astro.props;
       background: var(--color-surface);
     }
   }
+  /* Centred empty state when the browser cannot show the PDF inline. */
   .resume-preview__fallback {
-    margin: 0;
-    padding: var(--space-m);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-s);
+    height: 100%;
+    padding: var(--space-l);
     color: var(--color-text-muted);
+    text-align: center;
+  }
+  .resume-preview__fallback p {
+    max-width: 28ch;
+    margin: 0;
+  }
+  .resume-preview__fallback svg {
+    color: var(--color-accent);
   }
 </style>
