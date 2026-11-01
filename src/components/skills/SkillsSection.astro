@@ -1,0 +1,256 @@
+---
+import {
+  ArrowUpRight,
+  Bot,
+  CodeXml,
+  Cpu,
+  Database,
+  Server,
+  Shield,
+} from "@lucide/astro";
+import Card from "../ui/Card.astro";
+import SectionHeading from "../ui/SectionHeading.astro";
+import Tags from "../ui/Tags.astro";
+import { getProject, projectUrl } from "../../data/projects.ts";
+import {
+  skillDomains,
+  type SkillDomain,
+  type SkillEvidence,
+} from "../../data/skills.ts";
+import { localize } from "../../data/types.ts";
+import { localizePath, type Locale } from "../../i18n/locales.ts";
+import { useTranslations } from "../../i18n/ui.ts";
+
+/** Technical domains, each backed by links to the projects that show it. */
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const domains = skillDomains;
+
+const icons = {
+  cpu: Cpu,
+  database: Database,
+  code: CodeXml,
+  server: Server,
+  shield: Shield,
+  bot: Bot,
+} satisfies Record<SkillDomain["icon"], unknown>;
+
+function evidenceLink(evidence: SkillEvidence) {
+  if (evidence.kind === "project") {
+    return {
+      title: localize(getProject(evidence.projectId).title, lang),
+      href: projectUrl(evidence.projectId, lang),
+      external: false,
+    };
+  }
+  const external = /^https?:\/\//.test(evidence.href);
+  return {
+    title: evidence.label[lang],
+    href: evidence.href.startsWith("/")
+      ? localizePath(evidence.href, lang)
+      : evidence.href,
+    external,
+  };
+}
+const pad = (n: number) => String(n).padStart(2, "0");
+---
+
+<section
+  id="domains"
+  class="skills-section"
+  aria-labelledby="skills-domains-heading"
+>
+  <SectionHeading
+    headingId="skills-domains-heading"
+    eyebrow={t("skills.domains.eyebrow")}
+    title={t("skills.domains.title")}
+    description={t("skills.domains.intro")}
+  >
+    <span slot="aside" class="skills-count">
+      <strong>{pad(domains.length)}</strong>
+      <span>{t("skills.domains.count")}</span>
+    </span>
+  </SectionHeading>
+
+  <div class="skills-domain-grid">
+    {domains.map((domain, index) => {
+      const Icon = icons[domain.icon];
+      return (
+        <Card
+          id={`skill-${domain.id}`}
+          class="skills-domain-card"
+          variant="skill"
+          aria-labelledby={`skill-title-${domain.id}`}
+        >
+          <div class="skills-card-top">
+            <span class="skills-domain-icon" aria-hidden="true">
+              <Icon size={23} stroke-width={1.75} />
+            </span>
+            <span class="skills-card-index" aria-hidden="true">
+              {pad(index + 1)}
+            </span>
+          </div>
+
+          <h3 id={`skill-title-${domain.id}`}>{domain.title[lang]}</h3>
+          <p class="skills-domain-description">{domain.description[lang]}</p>
+
+          <Tags
+            tags={domain.technologies}
+            label={t("skills.technologies")}
+            density="skill"
+          />
+
+          <div class="skills-evidence">
+            <h4>{t("skills.evidence")}</h4>
+            <ul>
+              {domain.examples.map((evidence) => {
+                const link = evidenceLink(evidence);
+                return (
+                  <li>
+                    <a
+                      href={link.href}
+                      target={link.external ? "_blank" : undefined}
+                      rel={link.external ? "noopener noreferrer" : undefined}
+                    >
+                      <span class="skills-evidence-name">{link.title}</span>
+                      <ArrowUpRight size={16} aria-hidden="true" />
+                    </a>
+                    <p>{evidence.detail[lang]}</p>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </Card>
+      );
+    })}
+  </div>
+</section>
+
+<style>
+  .skills-section {
+    margin-bottom: 4.5rem;
+  }
+  .skills-count {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.1rem;
+    flex: 0 0 auto;
+    color: var(--color-text-muted);
+  }
+  .skills-count strong {
+    font-family: var(--font-display);
+    color: var(--color-accent);
+    font-size: 2.8rem;
+    font-weight: 400;
+    line-height: 1;
+  }
+  .skills-count span {
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .skills-domain-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .skills-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.2rem;
+  }
+  .skills-domain-icon {
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    background: var(--color-surface);
+    color: var(--color-accent);
+  }
+  .skills-card-index {
+    color: var(--color-text-subtle);
+    font:
+      500 0.8rem/1.4 ui-monospace,
+      monospace;
+  }
+  .skills-domain-card h3 {
+    margin: 0 0 0.6rem;
+    border: 0;
+    padding: 0;
+    font-size: clamp(1.2rem, 2.1vw, 1.5rem);
+    letter-spacing: -0.025em;
+    line-height: 1.3;
+  }
+  .skills-domain-description {
+    margin: 0 0 1.1rem;
+    color: var(--color-text-muted);
+    font-size: 0.92rem;
+    line-height: 1.7;
+  }
+  .skills-evidence {
+    margin-top: auto;
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--color-border);
+  }
+  .skills-evidence h4 {
+    margin: 0 0 0.75rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .skills-evidence ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 175px), 1fr));
+    gap: 0.85rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .skills-evidence li {
+    min-width: 0;
+  }
+  .skills-evidence a {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    color: var(--color-text);
+    font-size: 0.86rem;
+    font-weight: 650;
+    text-decoration: none;
+  }
+  .skills-evidence a:hover {
+    color: var(--color-accent);
+  }
+  .skills-evidence a svg {
+    flex: 0 0 auto;
+    color: var(--color-accent);
+  }
+  .skills-evidence p {
+    margin: 0.28rem 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.78rem;
+    line-height: 1.55;
+  }
+  @media (max-width: 720px) {
+    .skills-domain-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 560px) {
+    .skills-count strong {
+      font-size: 2.2rem;
+    }
+  }
+</style>

@@ -1,0 +1,109 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import Eyebrow from "./Eyebrow.astro";
+
+/**
+ * Section header: eyebrow, H2 and description, with optional `icon`
+ * (decorative, left of the text) and `aside` (right-aligned) slots.
+ */
+type Props = HTMLAttributes<"header"> & {
+  eyebrow: string;
+  title: string;
+  description: string;
+  headingId: string;
+};
+
+const {
+  eyebrow,
+  title,
+  description,
+  headingId,
+  class: className,
+  ...rest
+} = Astro.props;
+const hasIcon = Astro.slots.has("icon");
+const hasAside = Astro.slots.has("aside");
+---
+
+<header
+  class:list={[
+    "editorial-section-heading",
+    { "editorial-section-heading--icon": hasIcon },
+    className,
+  ]}
+  {...rest}
+>
+  <div class="editorial-section-heading__main">
+    {hasIcon && (
+      <span class="editorial-section-heading__icon" aria-hidden="true">
+        <slot name="icon" />
+      </span>
+    )}
+    <div>
+      <Eyebrow class="editorial-section-heading__eyebrow">{eyebrow}</Eyebrow>
+      <h2 id={headingId}>{title}</h2>
+      <p class="editorial-section-heading__description">{description}</p>
+    </div>
+  </div>
+  {hasAside && (
+    <div class="editorial-section-heading__aside">
+      <slot name="aside" />
+    </div>
+  )}
+</header>
+
+<style>
+  .editorial-section-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
+  }
+  .editorial-section-heading--icon {
+    padding-bottom: 1.5rem;
+    margin-bottom: 0;
+  }
+  .editorial-section-heading__main {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.15rem;
+    min-width: 0;
+  }
+  .editorial-section-heading__icon {
+    display: flex;
+    flex: 0 0 3.1rem;
+    align-items: center;
+    justify-content: center;
+    width: 3.1rem;
+    height: 3.1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    background: var(--color-surface);
+    color: var(--color-accent);
+  }
+  .editorial-section-heading__eyebrow {
+    margin-bottom: 0.5rem;
+  }
+  .editorial-section-heading h2 {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 3.6vw, 3.2rem);
+    font-weight: 400;
+    letter-spacing: var(--tracking-display);
+    line-height: 1.15;
+  }
+  .editorial-section-heading__description {
+    margin: 0.65rem 0 0;
+    max-width: 38rem;
+    color: var(--color-text-muted);
+    font-size: 0.92rem;
+    line-height: 1.7;
+  }
+  .editorial-section-heading--icon .editorial-section-heading__description {
+    margin-top: 0.45rem;
+    font-size: 0.9rem;
+  }
+</style>

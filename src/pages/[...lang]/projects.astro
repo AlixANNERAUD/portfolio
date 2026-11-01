@@ -1,7 +1,7 @@
 ---
 import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import PortfolioShowcase from "../../components/PortfolioShowcase.vue";
+import ProjectCatalogue from "../../components/projects/ProjectCatalogue.astro";
 import { localeStaticPaths } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
 
@@ -19,5 +19,5 @@ const t = useTranslations(lang);
   title={t("nav.projects")}
   description={t("projects.description")}
 >
-  <PortfolioShowcase lang={lang} mode="catalogue" client:load />
+  <ProjectCatalogue lang={lang} />
 </BaseLayout>

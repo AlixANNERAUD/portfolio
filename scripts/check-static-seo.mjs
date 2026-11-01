@@ -1,7 +1,7 @@
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { parse } from "node-html-parser";
-import { portfolioProjects } from "../src/data/portfolioProjects.ts";
+import { featuredProjects, projects } from "../src/data/projects.ts";
 
 /**
  * Build-output smoke tests for the bilingual Astro site.
@@ -26,7 +26,7 @@ const cases = [
 ];
 
 // Test EVERY static detail route, including alternate locale metadata.
-const projectIds = portfolioProjects.map((project) => project.id);
+const projectIds = projects.map((project) => project.id);
 for (const id of projectIds) {
   {
     cases.push([
@@ -323,7 +323,7 @@ for (const [file, experienceUrl] of [
       failed.push(file + ": missing professional milestone link for " + id);
     }
   }
-  for (const project of ["xila", "infrastructure", "mini-train-store"]) {
+  for (const { id: project } of featuredProjects) {
     const prefix = file.startsWith("fr/") ? "/fr/projects/" : "/projects/";
     if (!html.includes(prefix + project)) {
       failed.push(file + ": missing selected project " + project);
@@ -467,8 +467,9 @@ for (const [file, projectPrefix] of [
   }
 }
 
-// Older experiences are complete cards, initially hidden by one toggle per section.
-// All content remains SSR-rendered; Vue handles accessible group visibility.
+// Older experiences are complete cards, hidden by one toggle per section.
+// All content is SSR-rendered and visible without JavaScript: a module script
+// reveals the toggles and collapses the earlier lists. No framework island.
 for (const [file, professionalLabel, educationLabel] of [
   ["experiences.html", "Show earlier experience", "Show earlier education"],
   [
@@ -479,6 +480,12 @@ for (const [file, professionalLabel, educationLabel] of [
 ]) {
   const html = read(file);
   for (const group of ["professional", "education"]) {
+    const list = html.match(
+      new RegExp('<ol[^>]*id="earlier-' + group + '"[^>]*>'),
+    )?.[0];
+    if (list && /\shidden[\s>=]/.test(list)) {
+      failed.push(file + ": earlier " + group + " list hidden without JS");
+    }
     if (
       !html.includes('id="earlier-' + group + '"') ||
       !html.includes('aria-controls="earlier-' + group + '"')
@@ -520,6 +527,26 @@ for (const file of ["experiences.html", "fr/experiences.html"]) {
     !html.includes("logo-becquerel-blanc_tournant.jpg")
   ) {
     failed.push(file + ": experience company logo markup missing from SSR");
+  }
+}
+
+// The site is all-Astro: no page may ship a hydrated island, and every
+// client script stays a small progressive enhancement.
+{
+  const MAX_SCRIPT_BYTES = 20 * 1024;
+  const files = readdirSync(dist, { recursive: true }).map(String);
+  for (const file of files.filter((name) => name.endsWith(".html"))) {
+    if (/<astro-island\b/.test(read(file))) {
+      failed.push(file + ": contains an <astro-island> hydrated component");
+    }
+  }
+  for (const file of files.filter(
+    (name) => name.startsWith("_astro/") && name.endsWith(".js"),
+  )) {
+    const { size } = statSync(resolve(dist, file));
+    if (size > MAX_SCRIPT_BYTES) {
+      failed.push(file + ": client script is " + size + " bytes (> 20 KB)");
+    }
   }
 }
 

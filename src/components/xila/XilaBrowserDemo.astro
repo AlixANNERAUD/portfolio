@@ -1,0 +1,236 @@
+---
+import type { Locale } from "../../i18n/locales.ts";
+import { useTranslations } from "../../i18n/ui.ts";
+
+/**
+ * Link to the hosted Xila WebAssembly demo, plus an opt-in embedded panel.
+ * The iframe only receives its `src` once the visitor asks for it; without
+ * JavaScript the button stays hidden and the external link still works.
+ */
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const DEMO_URL = "https://documentation.xila.dev/demonstrations/wasm/en/";
+---
+
+<section class="xila-demo" aria-label={t("xila.demo.title")}>
+  <div class="xila-demo-heading">
+    <div class="xila-demo-illustration" aria-hidden="true">
+      <span class="xila-demo-mark">X</span>
+      <span class="xila-demo-terminal">xila&gt; _</span>
+    </div>
+    <div>
+      <h3>{t("xila.demo.title")}</h3>
+      <p>{t("xila.demo.subtitle")}</p>
+    </div>
+  </div>
+
+  <p class="xila-demo-warning">{t("xila.demo.warning")}</p>
+
+  <div class="xila-demo-actions">
+    <a
+      href={DEMO_URL}
+      class="xila-demo-primary"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {t("xila.demo.external")} <span aria-hidden="true">↗</span>
+    </a>
+    <button
+      type="button"
+      class="xila-demo-toggle"
+      aria-expanded="false"
+      aria-controls="xila-embedded-demo"
+      data-label-open={t("xila.demo.start")}
+      data-label-close={t("xila.demo.close")}
+      hidden
+    >
+      {t("xila.demo.start")}
+    </button>
+  </div>
+  <p class="xila-demo-privacy">{t("xila.demo.privacy")}</p>
+
+  <div id="xila-embedded-demo" class="xila-demo-panel" hidden>
+    {/* Filled after the panel is shown, so screen readers announce it. */}
+    <p
+      class="xila-demo-loading"
+      role="status"
+      data-message={t("xila.demo.loading")}
+    ></p>
+    <iframe
+      data-src={DEMO_URL}
+      title={t("xila.demo.frame")}
+      referrerpolicy="no-referrer"
+      allow="clipboard-read; clipboard-write"
+      sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-downloads"
+    ></iframe>
+    <p class="xila-demo-fallback">{t("xila.demo.fallback")}</p>
+  </div>
+</section>
+
+<script>
+  for (const button of document.querySelectorAll<HTMLButtonElement>(
+    ".xila-demo-toggle",
+  )) {
+    const panel = document.getElementById(
+      button.getAttribute("aria-controls") ?? "",
+    );
+    const frame = panel?.querySelector("iframe");
+    const loading = panel?.querySelector<HTMLElement>(".xila-demo-loading");
+    if (!panel || !frame || !loading) continue;
+
+    let loaded = false;
+    frame.addEventListener("load", () => {
+      if (!frame.hasAttribute("src")) return;
+      loaded = true;
+      loading.textContent = "";
+    });
+
+    button.addEventListener("click", () => {
+      const open = button.getAttribute("aria-expanded") !== "true";
+      button.setAttribute("aria-expanded", String(open));
+      button.textContent =
+        (open ? button.dataset.labelClose : button.dataset.labelOpen) ?? "";
+      panel.hidden = !open;
+      loading.textContent = "";
+      loaded = false;
+      if (open) {
+        requestAnimationFrame(() => {
+          if (!loaded) loading.textContent = loading.dataset.message ?? "";
+        });
+      }
+      // Closing unloads the demo; reopening starts it afresh.
+      if (open) frame.src = frame.dataset.src ?? "";
+      else frame.removeAttribute("src");
+    });
+    button.hidden = false;
+  }
+</script>
+
+<style>
+  .xila-demo {
+    margin: 1.5rem 0 2rem;
+    padding: clamp(1rem, 2vw, 1.5rem);
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    background: var(--color-surface);
+  }
+  .xila-demo-heading {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+  .xila-demo-heading h3 {
+    margin: 0 0 0.35rem;
+    border: 0;
+    padding: 0;
+    font-size: 1.2rem;
+  }
+  .xila-demo-heading p {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+  }
+  .xila-demo-illustration {
+    flex: 0 0 6.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 5.5rem;
+    border-radius: 0.6rem;
+    background: linear-gradient(145deg, #162b35, #284c53);
+    color: white;
+  }
+  .xila-demo-mark {
+    font: normal 2.65rem/1 var(--font-display);
+  }
+  .xila-demo-terminal {
+    font:
+      0.65rem ui-monospace,
+      monospace;
+    opacity: 0.8;
+  }
+  .xila-demo-warning {
+    margin: 1.2rem 0;
+    color: var(--color-text-muted);
+    line-height: 1.65;
+    font-size: 0.87rem;
+  }
+  .xila-demo-actions {
+    display: flex;
+    gap: 0.7rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .xila-demo-actions > a,
+  .xila-demo-actions > button {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.65rem 0.9rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.4;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .xila-demo-actions > .xila-demo-primary {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-bg);
+  }
+  .xila-demo-actions > button {
+    background: var(--color-bg);
+    color: var(--color-text);
+  }
+  .xila-demo-actions > button[hidden],
+  .xila-demo-panel[hidden],
+  .xila-demo-loading:empty {
+    display: none;
+  }
+  .xila-demo-privacy,
+  .xila-demo-fallback {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    margin: 1rem 0 0;
+  }
+  .xila-demo-panel {
+    margin-top: 1.25rem;
+    border-top: 1px solid var(--color-border);
+    padding-top: 1rem;
+  }
+  .xila-demo-panel iframe {
+    display: block;
+    width: 100%;
+    height: min(68vh, 620px);
+    min-height: 360px;
+    border: 1px solid var(--color-border);
+    border-radius: 0.6rem;
+    background: #101820;
+  }
+  .xila-demo-loading {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+  }
+  @media (max-width: 600px) {
+    .xila-demo-heading {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+    .xila-demo-actions > a,
+    .xila-demo-actions > button {
+      width: 100%;
+    }
+    .xila-demo-panel iframe {
+      min-height: 300px;
+    }
+  }
+</style>

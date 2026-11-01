@@ -1,0 +1,125 @@
+---
+import ExperienceCard from "../experience/ExperienceCard.astro";
+import { homepageExperiences } from "../../data/experiences.ts";
+import { localizePath, type Locale } from "../../i18n/locales.ts";
+import { useTranslations } from "../../i18n/ui.ts";
+
+interface Props {
+  lang: Locale;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section
+  class="home-experience"
+  id="career-highlights"
+  aria-labelledby="home-experience-heading"
+>
+  <div class="home-experience-heading">
+    <div>
+      <p class="home-experience-eyebrow">{t("home.experience.eyebrow")}</p>
+      <h2 id="home-experience-heading">{t("home.experience.title")}</h2>
+    </div>
+    <p class="home-experience-intro">{t("home.experience.intro")}</p>
+  </div>
+
+  <ol class="home-experience-grid">
+    {homepageExperiences.map((entry) => (
+      <li class="home-experience-card">
+        <ExperienceCard experience={entry} lang={lang} variant="compact" />
+      </li>
+    ))}
+  </ol>
+
+  <a class="home-experience-more" href={localizePath("/experiences", lang)}>
+    {t("home.experience.more")} <span aria-hidden="true">↗</span>
+  </a>
+</section>
+
+<style>
+  .home-experience {
+    width: min(100%, 1160px);
+    margin: 3.25rem auto 4.25rem;
+    padding: 0 1.5rem;
+    color: var(--color-text);
+  }
+  .home-experience-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: space-between;
+    gap: 1.25rem 2rem;
+    padding-bottom: 1.65rem;
+    margin-bottom: 1.15rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .home-experience-eyebrow {
+    margin: 0 0 0.65rem;
+    font-size: 0.74rem;
+    font-weight: 650;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+  .home-experience-heading h2 {
+    margin: 0;
+    font: 400 clamp(2rem, 3.8vw, 3.4rem)/1.14 var(--font-display);
+    letter-spacing: -0.04em;
+  }
+  .home-experience-intro {
+    flex: 0 1 28rem;
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 0.92rem;
+    line-height: 1.65;
+  }
+  .home-experience-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .home-experience-card {
+    min-width: 0;
+    border: 1px solid var(--color-border);
+    border-radius: 0.85rem;
+    background: var(--color-bg);
+    transition:
+      border-color 170ms ease,
+      transform 170ms ease;
+  }
+  .home-experience-card:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+  }
+  .home-experience-more {
+    display: inline-flex;
+    gap: 0.4rem;
+    align-items: center;
+    margin-top: 1.3rem;
+    color: var(--color-accent);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 650;
+  }
+  .home-experience-more:hover {
+    text-decoration: underline;
+  }
+  @media (max-width: 680px) {
+    .home-experience {
+      margin: 2.5rem auto 3rem;
+      padding: 0 1rem;
+    }
+    .home-experience-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .home-experience-card:hover {
+      transform: none;
+    }
+  }
+</style>

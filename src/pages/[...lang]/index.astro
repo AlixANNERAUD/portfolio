@@ -1,10 +1,10 @@
 ---
 import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import HomeHero from "../../components/HomeHero.astro";
-import HomeExperience from "../../components/HomeExperience.astro";
-import PortfolioShowcase from "../../components/PortfolioShowcase.vue";
-import XilaArchitectureMotion from "../../components/XilaArchitectureMotion.vue";
+import HomeHero from "../../components/home/HomeHero.astro";
+import HomeExperience from "../../components/home/HomeExperience.astro";
+import FeaturedProjects from "../../components/home/FeaturedProjects.astro";
+import XilaTopology from "../../components/xila/XilaTopology.astro";
 import { personJsonLd } from "../../data/jsonLd.ts";
 import { localeStaticPaths } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
@@ -26,6 +26,6 @@ const t = useTranslations(lang);
 >
   <HomeHero lang={lang} />
   <HomeExperience lang={lang} />
-  <PortfolioShowcase lang={lang} mode="featured" />
-  <XilaArchitectureMotion lang={lang} client:visible />
+  <FeaturedProjects lang={lang} />
+  <XilaTopology lang={lang} />
 </BaseLayout>

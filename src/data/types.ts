@@ -18,3 +18,9 @@ function isLocalized<T>(value: T | Localized<T>): value is Localized<T> {
 export function localize<T>(value: T | Localized<T>, lang: Locale): T {
   return isLocalized(value) ? value[lang] : value;
 }
+
+/** A year range; `end` is a year, `"present"` for ongoing work, or absent for a single year. */
+export interface Period {
+  start: string;
+  end?: string;
+}

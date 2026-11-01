@@ -11,6 +11,18 @@ import {
 import { ui, useTranslations } from "../src/i18n/ui.ts";
 import { site } from "../src/data/site.ts";
 import { localize } from "../src/data/types.ts";
+import { formatCount, formatPeriod } from "../src/lib/format.ts";
+import {
+  RANK_WEIGHTS,
+  featuredProjects,
+  projectScore,
+  projectUrl,
+  projects,
+  relatedProjects,
+} from "../src/data/projects.ts";
+import { technologies } from "../src/data/technologies.ts";
+import { experiences } from "../src/data/experiences.ts";
+import { skillDomains } from "../src/data/skills.ts";
 
 test("locales: English is the unprefixed default", () => {
   assert.deepEqual([...locales], ["en", "fr"]);
@@ -100,6 +112,10 @@ test("useTranslations translates and interpolates variables", () => {
     "Compétences | Alix ANNERAUD",
   );
   assert.equal(en("meta.pageTitle"), "{title} | Alix ANNERAUD");
+  assert.equal(
+    fr("experience.compactLinkLabel", { role: "Stagiaire", company: "ACME" }),
+    "Stagiaire \u2013 ACME. Voir cette expérience",
+  );
 });
 
 test("French UI strings use French typographic spaces", () => {
@@ -114,5 +130,90 @@ test("French UI strings use French typographic spaces", () => {
     assert.doesNotMatch(value, /[^ ]»/, `fr.${key}: U+00A0 before »`);
     assert.doesNotMatch(value, /"/, `fr.${key}: use « » instead of "`);
     assert.doesNotMatch(value, /'/, `fr.${key}: use ’ instead of '`);
+  }
+});
+
+test("formatPeriod renders ongoing, single-year and closed periods", () => {
+  assert.equal(
+    formatPeriod({ start: "2019", end: "present" }, "en"),
+    "2019\u2013present",
+  );
+  assert.equal(
+    formatPeriod({ start: "2019", end: "present" }, "fr"),
+    "Depuis 2019",
+  );
+  for (const lang of locales) {
+    assert.equal(formatPeriod({ start: "2023" }, lang), "2023");
+    assert.equal(
+      formatPeriod({ start: "2022", end: "2023" }, lang),
+      "2022\u20132023",
+    );
+  }
+});
+
+test("formatCount pluralizes with Intl.PluralRules", () => {
+  assert.equal(formatCount(1, "project", "fr"), "1 projet");
+  assert.equal(formatCount(12, "project", "fr"), "12 projets");
+  assert.equal(formatCount(0, "project", "fr"), "0 projet");
+  assert.equal(formatCount(1, "project", "en"), "1 project");
+  assert.equal(formatCount(0, "project", "en"), "0 projects");
+  assert.equal(formatCount(4, "role", "en"), "4 roles");
+  assert.equal(formatCount(1, "role", "fr"), "1 poste");
+  assert.equal(formatCount(4, "milestone", "en"), "4 milestones");
+  assert.equal(formatCount(1, "milestone", "fr"), "1 étape");
+});
+
+test("ranking weights total 100 and drive the featured selection", () => {
+  assert.equal(
+    Object.values(RANK_WEIGHTS).reduce((sum, weight) => sum + weight, 0),
+    100,
+  );
+  assert.equal(featuredProjects.length, 3);
+  const best = Math.min(...featuredProjects.map(projectScore));
+  for (const project of projects) {
+    if (!featuredProjects.includes(project)) {
+      assert.ok(projectScore(project) <= best, project.id);
+    }
+  }
+});
+
+test("projectUrl localizes project detail paths", () => {
+  assert.equal(projectUrl("xila", "en"), "/projects/xila");
+  assert.equal(projectUrl("xila", "fr"), "/fr/projects/xila");
+});
+
+test("relatedProjects excludes the project itself", () => {
+  const related = relatedProjects("xila");
+  assert.equal(related.length, 3);
+  assert.ok(related.every((project) => project.id !== "xila"));
+  assert.equal(new Set(related.map((project) => project.id)).size, 3);
+  assert.equal(relatedProjects("xila", 5).length, 5);
+});
+
+test("project tags come from the canonical technology list", () => {
+  const known = new Set(technologies);
+  for (const project of projects) {
+    for (const tag of project.tags) assert.ok(known.has(tag), tag);
+  }
+});
+
+test("homepage experiences are flagged in the data", () => {
+  assert.deepEqual(
+    experiences.filter((entry) => entry.homepage).map((entry) => entry.id),
+    ["memo-bank", "linkt", "amazon", "nyu"],
+  );
+});
+
+test("skill evidence is a project reference or an explicit link", () => {
+  const ids = new Set(projects.map((project) => project.id));
+  for (const domain of skillDomains) {
+    for (const evidence of domain.examples) {
+      if (evidence.kind === "project") {
+        assert.ok(ids.has(evidence.projectId), evidence.projectId);
+      } else {
+        assert.equal(evidence.kind, "link");
+        assert.ok(evidence.href && evidence.label.en && evidence.label.fr);
+      }
+    }
   }
 });

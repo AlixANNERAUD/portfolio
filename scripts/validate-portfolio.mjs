@@ -1,30 +1,34 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import {
-  portfolioProjects,
+  featuredProjects,
+  projects,
   projectScore,
-  PROJECT_RANK_WEIGHTS,
-} from "../src/data/portfolioProjects.ts";
+  RANK_WEIGHTS,
+} from "../src/data/projects.ts";
+import { technologies } from "../src/data/technologies.ts";
+import { experiences } from "../src/data/experiences.ts";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
-const projects = portfolioProjects;
 if (!Array.isArray(projects) || projects.length === 0) {
   throw new Error("Project catalogue is empty.");
 }
 
 const ids = new Set();
-let featured = 0;
+const knownTags = new Set(technologies);
+const locales = ["en", "fr"];
+const year = /^\d{4}$/;
 
-// Editorial ranking weights are defined only in portfolioProjects.ts.
+// Editorial ranking weights are defined only in projects.ts.
 const weightFactors = [
   "technicalDepth",
   "originality",
   "practicalImpact",
   "evidence",
 ];
-const weights = PROJECT_RANK_WEIGHTS;
+const weights = RANK_WEIGHTS;
 if (
   Object.keys(weights).length !== weightFactors.length ||
   weightFactors.some((factor) => !Number.isFinite(weights[factor])) ||
@@ -37,7 +41,6 @@ for (const project of projects) {
     throw new Error("Missing, invalid or duplicate project ID: " + project.id);
   }
   ids.add(project.id);
-  if (project.featured) featured++;
   if (
     !["personal", "library", "competition", "academic"].includes(project.group)
   ) {
@@ -46,6 +49,7 @@ for (const project of projects) {
   if (
     ![
       "systems",
+      "software",
       "web",
       "infrastructure",
       "embedded",
@@ -54,6 +58,12 @@ for (const project of projects) {
     ].includes(project.category)
   ) {
     throw new Error("Unknown category: " + project.id);
+  }
+  if (
+    project.team !== undefined &&
+    (!Number.isInteger(project.team) || project.team < 1)
+  ) {
+    throw new Error("Team size must be a positive integer: " + project.id);
   }
   if (project.externalUrl) {
     const url = new URL(project.externalUrl);
@@ -80,31 +90,50 @@ for (const project of projects) {
   for (const tag of project.tags) {
     if (
       typeof tag !== "string" ||
+      !knownTags.has(tag) ||
       tag.trim() !== tag ||
       tag.length > 32 ||
       /[<>\[\]"=]/.test(tag) ||
       /https?:/i.test(tag)
     ) {
       throw new Error(
-        "Malformed project technology tag for " + project.id + ": " + tag,
+        "Malformed or unknown project technology tag for " +
+          project.id +
+          ": " +
+          tag,
       );
     }
   }
-  for (const lang of ["fr", "en"]) {
-    for (const field of ["title", "period", "description"]) {
-      if (!project[field]?.[lang]?.trim()) {
-        throw new Error("Missing " + field + "." + lang + " for " + project.id);
-      }
+  const { start, end } = project.period ?? {};
+  if (
+    !year.test(start ?? "") ||
+    (end !== undefined && end !== "present" && !(year.test(end) && end > start))
+  ) {
+    throw new Error("Invalid period for " + project.id);
+  }
+  if (typeof project.title === "string" ? !project.title.trim() : false) {
+    throw new Error("Missing title for " + project.id);
+  }
+  for (const lang of locales) {
+    if (typeof project.title !== "string" && !project.title?.[lang]?.trim()) {
+      throw new Error("Missing title." + lang + " for " + project.id);
+    }
+    if (!project.description?.[lang]?.trim()) {
+      throw new Error("Missing description." + lang + " for " + project.id);
     }
   }
 }
 
-if (featured !== 3)
+if (featuredProjects.length !== 3)
   throw new Error("Expected exactly three featured projects.");
-const topFeatured = [...projects]
-  .sort((a, b) => projectScore(b) - projectScore(a) || a.id.localeCompare(b.id))
-  .slice(0, featured);
-if (topFeatured.some((project) => !project.featured)) {
+const lowestFeatured = Math.min(...featuredProjects.map(projectScore));
+if (
+  projects.some(
+    (project) =>
+      !featuredProjects.includes(project) &&
+      projectScore(project) > lowestFeatured,
+  )
+) {
   throw new Error(
     "Featured projects must be the highest-ranked editorial picks.",
   );
@@ -190,14 +219,37 @@ console.log(
     " dedicated FR/EN pages and six case studies.",
 );
 
-// Markdown pages and Vue islands are referenced from typed content, not VitePress config.
+// MDX pages are rendered by the Astro integration with preserved .html routes.
 const config = readFileSync(join(root, "astro.config.mjs"), "utf8");
-if (
-  !config.includes("vue()") ||
-  !config.includes("mdx()") ||
-  !config.includes('format: "preserve"')
-) {
+if (!config.includes("mdx()") || !config.includes('format: "preserve"')) {
   throw new Error(
     "Astro integrations and preserved .html route format are required.",
+  );
+}
+
+// The site is all-Astro: no Vue component or client framework may return.
+const vueFiles = readdirSync(join(root, "src"), { recursive: true })
+  .map(String)
+  .filter((file) => file.endsWith(".vue"));
+if (vueFiles.length > 0) {
+  throw new Error("Vue components are not allowed: " + vueFiles.join(", "));
+}
+const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+const deps = { ...pkg.dependencies, ...pkg.devDependencies };
+const banned = ["vue", "@astrojs/vue", "lucide-vue-next"].filter(
+  (name) => name in deps,
+);
+if (banned.length > 0) {
+  throw new Error("Client framework dependencies: " + banned.join(", "));
+}
+
+// The homepage shows exactly the four professional roles.
+const homepage = experiences.filter((entry) => entry.homepage);
+if (
+  homepage.length !== 4 ||
+  homepage.some((entry) => entry.group !== "professional")
+) {
+  throw new Error(
+    "Exactly four professional roles must be flagged `homepage`.",
   );
 }

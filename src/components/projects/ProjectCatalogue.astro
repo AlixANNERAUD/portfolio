@@ -1,0 +1,368 @@
+---
+import Hero from "../ui/Hero.astro";
+import ProjectCard from "./ProjectCard.astro";
+import {
+  byScore,
+  projects,
+  projectScore,
+  type Project,
+  type ProjectCategory,
+  type ProjectGroup,
+} from "../../data/projects.ts";
+import { localize } from "../../data/types.ts";
+import type { Locale } from "../../i18n/locales.ts";
+import { useTranslations } from "../../i18n/ui.ts";
+import { formatCount } from "../../lib/format.ts";
+
+/**
+ * Every project card is server-rendered in relevance order. A module script
+ * reveals the filter, search and sort controls and toggles `hidden` on the
+ * cards; without JavaScript the full list stays visible.
+ */
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const groups = [
+  "all",
+  "personal",
+  "library",
+  "competition",
+  "academic",
+] as const satisfies readonly (ProjectGroup | "all")[];
+const categories = [
+  "all",
+  "systems",
+  "software",
+  "web",
+  "infrastructure",
+  "embedded",
+  "security",
+  "data",
+] as const satisfies readonly (ProjectCategory | "all")[];
+
+const categoryLabel = (id: (typeof categories)[number]) =>
+  id === "all" ? t("projects.category.all") : t(`category.${id}`);
+
+const sorted = [...projects].sort(byScore);
+const searchText = (project: Project) =>
+  [localize(project.title, lang), project.description[lang], ...project.tags]
+    .join(" ")
+    .toLocaleLowerCase(lang);
+---
+
+<section
+  class="portfolio-showcase portfolio-showcase--catalogue"
+  aria-label={t("projects.label")}
+  data-catalogue
+  data-lang={lang}
+>
+  <Hero
+    variant="compact"
+    headingLevel="h1"
+    eyebrow={t("projects.eyebrow")}
+    title={t("nav.projects")}
+    intro={t("projects.intro")}
+  />
+
+  <div class="showcase-toolbar" hidden>
+    <div class="showcase-controls">
+      <div>
+        <span class="showcase-control-label" aria-hidden="true">
+          {t("projects.kind")}
+        </span>
+        <div
+          class="showcase-filters"
+          role="group"
+          aria-label={t("projects.kind")}
+          data-filter="group"
+        >
+          {groups.map((id) => (
+            <button
+              type="button"
+              value={id}
+              aria-pressed={id === "all" ? "true" : "false"}
+            >
+              {t(`projects.group.${id}`)}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div>
+        <span class="showcase-control-label" aria-hidden="true">
+          {t("projects.area")}
+        </span>
+        <div
+          class="showcase-filters"
+          role="group"
+          aria-label={t("projects.area")}
+          data-filter="category"
+        >
+          {categories.map((id) => (
+            <button
+              type="button"
+              value={id}
+              aria-pressed={id === "all" ? "true" : "false"}
+            >
+              {categoryLabel(id)}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+    <div class="showcase-toolbar-actions">
+      <label class="showcase-sort">
+        <span>{t("projects.sortLabel")}</span>
+        <select data-catalogue-sort>
+          <option value="recommended">{t("projects.sort.recommended")}</option>
+          <option value="alphabetical">
+            {t("projects.sort.alphabetical")}
+          </option>
+        </select>
+      </label>
+      <label class="showcase-search">
+        <span class="visually-hidden">{t("projects.search")}</span>
+        <input
+          type="search"
+          placeholder={t("projects.search")}
+          data-catalogue-search
+        />
+      </label>
+    </div>
+  </div>
+
+  <p
+    class="showcase-count"
+    role="status"
+    data-count-one={t("count.project.one")}
+    data-count-other={t("count.project.other")}
+  >
+    {formatCount(sorted.length, "project", lang)}
+  </p>
+
+  <div class="showcase-grid" data-catalogue-grid>
+    {sorted.map((project, index) => (
+      <ProjectCard
+        project={project}
+        lang={lang}
+        position={index + 1}
+        data-group={project.group}
+        data-category={project.category}
+        data-search={searchText(project)}
+        data-score={projectScore(project)}
+        data-title={localize(project.title, lang)}
+      />
+    ))}
+  </div>
+
+  <p class="showcase-empty" hidden>
+    {t("projects.empty")}
+  </p>
+</section>
+
+<script>
+  import { formatPlural } from "../../lib/plural.ts";
+  import type { Locale } from "../../i18n/locales.ts";
+
+  for (const root of document.querySelectorAll<HTMLElement>(
+    "[data-catalogue]",
+  )) {
+    const lang = root.dataset.lang as Locale | undefined;
+    const toolbar = root.querySelector<HTMLElement>(".showcase-toolbar");
+    const grid = root.querySelector<HTMLElement>("[data-catalogue-grid]");
+    const status = root.querySelector<HTMLElement>("[role=status]");
+    const empty = root.querySelector<HTMLElement>(".showcase-empty");
+    const search = root.querySelector<HTMLInputElement>(
+      "[data-catalogue-search]",
+    );
+    const sort = root.querySelector<HTMLSelectElement>("[data-catalogue-sort]");
+    const { countOne, countOther } = status?.dataset ?? {};
+    // Broken markup leaves the server-rendered list untouched.
+    if (
+      !lang ||
+      !countOne ||
+      !countOther ||
+      !toolbar ||
+      !grid ||
+      !status ||
+      !empty ||
+      !search ||
+      !sort
+    )
+      continue;
+
+    // Server order is the relevance ranking; keep it for "recommended".
+    const cards = [...grid.querySelectorAll<HTMLElement>(".showcase-card")];
+    const collator = new Intl.Collator(lang);
+    const byTitle = [...cards].sort((a, b) =>
+      collator.compare(a.dataset.title ?? "", b.dataset.title ?? ""),
+    );
+    const filters = { group: "all", category: "all" };
+    const forms = { one: countOne, other: countOther };
+
+    const update = () => {
+      const term = search.value.trim().toLocaleLowerCase(lang);
+      const ordered = sort.value === "alphabetical" ? byTitle : cards;
+      let shown = 0;
+      for (const card of ordered) {
+        const visible =
+          (filters.group === "all" || card.dataset.group === filters.group) &&
+          (filters.category === "all" ||
+            card.dataset.category === filters.category) &&
+          (!term || (card.dataset.search ?? "").includes(term));
+        card.hidden = !visible;
+        grid.append(card);
+        if (!visible) continue;
+        shown++;
+        const position = card.querySelector(".showcase-art-position");
+        if (position) position.textContent = String(shown).padStart(2, "0");
+      }
+      status.textContent = formatPlural(shown, forms, lang);
+      empty.hidden = shown > 0;
+    };
+
+    for (const group of root.querySelectorAll<HTMLElement>("[data-filter]")) {
+      const key = group.dataset.filter as keyof typeof filters;
+      const buttons = [...group.querySelectorAll("button")];
+      for (const button of buttons) {
+        button.addEventListener("click", () => {
+          filters[key] = button.value;
+          for (const other of buttons) {
+            other.setAttribute("aria-pressed", String(other === button));
+          }
+          update();
+        });
+      }
+    }
+    search.addEventListener("input", update);
+    sort.addEventListener("change", update);
+    toolbar.hidden = false;
+    update();
+  }
+</script>
+
+<style>
+  .portfolio-showcase {
+    margin-block: 4.25rem 5rem;
+  }
+  .showcase-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0 0 1.5rem;
+  }
+  .showcase-toolbar[hidden],
+  .showcase-empty[hidden],
+  .showcase-grid > :global([hidden]) {
+    display: none;
+  }
+  .showcase-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem 1.25rem;
+  }
+  .showcase-control-label {
+    display: block;
+    margin: 0 0 0.35rem;
+    font-size: 0.73rem;
+    color: var(--color-text-muted);
+  }
+  .showcase-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .showcase-filters button {
+    padding: 0.52rem 0.82rem;
+    border: 1px solid var(--color-border);
+    border-radius: 2rem;
+    background: var(--color-bg);
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition:
+      border-color 160ms ease,
+      background-color 160ms ease;
+  }
+  .showcase-filters button:hover,
+  .showcase-filters button[aria-pressed="true"] {
+    background: var(--color-surface);
+    border-color: var(--color-accent);
+    color: var(--color-text);
+  }
+  .showcase-toolbar-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 0.75rem;
+  }
+  .showcase-sort {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .showcase-sort > span {
+    color: var(--color-text-muted);
+    font-size: 0.73rem;
+  }
+  .showcase-sort select {
+    min-height: 2.35rem;
+    padding: 0.49rem 1.5rem 0.49rem 0.6rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font: inherit;
+    font-size: 0.82rem;
+    cursor: pointer;
+  }
+  .showcase-search input {
+    box-sizing: border-box;
+    width: min(100%, 15rem);
+    padding: 0.62rem 0.85rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font: inherit;
+    font-size: 0.82rem;
+  }
+  .showcase-count {
+    margin: 0.1rem 0 1rem;
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+  }
+  .showcase-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .showcase-empty {
+    padding: 2rem;
+    text-align: center;
+    color: var(--color-text-muted);
+  }
+  @media (max-width: 600px) {
+    .portfolio-showcase {
+      margin-block: 2rem 3rem;
+    }
+    .showcase-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .showcase-toolbar-actions {
+      width: 100%;
+    }
+    .showcase-search {
+      flex: 1 1 100%;
+    }
+    .showcase-search,
+    .showcase-search input {
+      width: 100%;
+    }
+  }
+</style>

@@ -1,0 +1,205 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import { ArrowDownRight } from "@lucide/astro";
+import Eyebrow from "./Eyebrow.astro";
+
+export interface HeroNavItem {
+  href: string;
+  label: string;
+}
+
+type Props = HTMLAttributes<"header"> & {
+  eyebrow: string;
+  title: string;
+  /** Emphasized end of the title, rendered in italics. */
+  accent?: string;
+  intro: string;
+  headingLevel?: "h1" | "h2";
+  variant?: "wide" | "compact";
+  /** In-page navigation; the label names the landmark and is its caption. */
+  nav?: { label: string; items: readonly HeroNavItem[] };
+};
+
+const {
+  eyebrow,
+  title,
+  accent,
+  intro,
+  headingLevel: Heading = "h1",
+  variant = "wide",
+  nav,
+  class: className,
+  ...rest
+} = Astro.props;
+---
+
+<header
+  class:list={["editorial-hero", `editorial-hero--${variant}`, className]}
+  {...rest}
+>
+  <div class="editorial-hero__copy">
+    <Eyebrow class="editorial-hero__eyebrow">{eyebrow}</Eyebrow>
+    <Heading class="editorial-hero__title">
+      {title}
+      {accent && " "}
+      {accent && <em>{accent}</em>}
+    </Heading>
+    <p class="editorial-hero__intro">{intro}</p>
+  </div>
+  {nav && nav.items.length > 0 && (
+    <nav class="editorial-hero__nav" aria-label={nav.label}>
+      <Eyebrow class="editorial-hero__nav-caption">{nav.label}</Eyebrow>
+      {nav.items.map((item) => (
+        <a href={item.href}>
+          <span>{item.label}</span>
+          <ArrowDownRight size={17} aria-hidden="true" />
+        </a>
+      ))}
+    </nav>
+  )}
+</header>
+
+<style>
+  .editorial-hero {
+    border-bottom: 1px solid var(--color-border);
+  }
+  .editorial-hero--wide {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(230px, 290px);
+    align-items: end;
+    gap: 2.5rem;
+    padding: 1.5rem 0 3.5rem;
+    margin-bottom: 3.7rem;
+  }
+  .editorial-hero--compact {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 2.5rem;
+    margin: 0 0 2rem;
+    padding-bottom: 1.75rem;
+  }
+  .editorial-hero__copy {
+    min-width: 0;
+  }
+  .editorial-hero__title {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-family: var(--font-display);
+    font-size: clamp(2.6rem, 5.5vw, 5.4rem);
+    font-weight: 400;
+    letter-spacing: var(--tracking-display);
+    line-height: 1.07;
+  }
+  .editorial-hero__title em {
+    color: var(--color-accent);
+    font-weight: 400;
+  }
+  .editorial-hero__intro {
+    max-width: 39rem;
+    margin: 1.45rem 0 0;
+    color: var(--color-text-muted);
+    font-size: 1.01rem;
+    line-height: 1.75;
+  }
+  .editorial-hero--compact .editorial-hero__copy {
+    display: grid;
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
+    align-items: end;
+    column-gap: 2.5rem;
+  }
+  .editorial-hero--compact .editorial-hero__eyebrow {
+    grid-column: 1;
+    grid-row: 1;
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.15em;
+  }
+  .editorial-hero--compact .editorial-hero__title {
+    grid-column: 1;
+    grid-row: 2;
+    font-size: clamp(2.3rem, 4.8vw, 4.7rem);
+    letter-spacing: var(--tracking-display);
+  }
+  .editorial-hero--compact .editorial-hero__intro {
+    grid-column: 2;
+    grid-row: 2;
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.65;
+  }
+  .editorial-hero__nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 1rem 1.15rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    background: var(--color-surface);
+  }
+  .editorial-hero__nav-caption {
+    margin-bottom: 0.65rem;
+  }
+  .editorial-hero__nav a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 0;
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text);
+    font-size: 0.86rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .editorial-hero__nav a svg {
+    color: var(--color-accent);
+  }
+  @media (max-width: 960px) {
+    .editorial-hero--wide {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+      padding-bottom: 2.5rem;
+    }
+    .editorial-hero__nav {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem 1.3rem;
+    }
+    .editorial-hero__nav-caption {
+      flex-basis: 100%;
+      margin: 0;
+    }
+    .editorial-hero__nav a {
+      gap: 1rem;
+      border: 0;
+    }
+  }
+  @media (max-width: 850px) {
+    .editorial-hero--compact {
+      align-items: start;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+    .editorial-hero--compact .editorial-hero__copy {
+      grid-template-columns: 1fr;
+      row-gap: 0.85rem;
+    }
+    .editorial-hero--compact .editorial-hero__eyebrow,
+    .editorial-hero--compact .editorial-hero__title,
+    .editorial-hero--compact .editorial-hero__intro {
+      grid-column: 1;
+      grid-row: auto;
+    }
+    .editorial-hero--compact .editorial-hero__intro {
+      max-width: 35rem;
+    }
+  }
+  @media (max-width: 720px) {
+    .editorial-hero--wide {
+      margin-bottom: 2.5rem;
+    }
+  }
+</style>
