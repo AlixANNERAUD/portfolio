@@ -3,11 +3,7 @@ title: "Robot mouche"
 description: "A C++ robot combining Wi-Fi remote control, line following and obstacle avoidance."
 ---
 
-[← All projects](/projects)
-
 # Robot mouche
-
-**C++** · 2023
 
 > A C++ robot combining Wi-Fi remote control, line following and obstacle avoidance.
 
@@ -22,9 +18,3 @@ The robot combines Wi-Fi remote control with autonomous, sensor-driven behavior.
 ## Scope and limitations
 
 Academic or research work, potentially collaborative. It illustrates an engineering method or experiment rather than claiming a commercially deployed product.
-
-## Explore the project
-
-[Source repository, documentation or official result](https://github.com/AlixANNERAUD/Robot_Mouche) ↗
-
-**Related work:** [Model railway network](/projects/model-railway) · [Connected speaker](/projects/connected-speaker)

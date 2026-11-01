@@ -20,12 +20,10 @@ export interface Props {
   noindex?: boolean;
   ogType?: "website" | "article";
   jsonLd?: object[];
-  /** Full-height pages (the resume viewer) omit the footer. */
-  noFooter?: boolean;
   /** Locale switch target, for pages without a counterpart in the other locale. */
   localeHref?: string;
 }
-const { noFooter = false, localeHref, ...head } = Astro.props;
+const { localeHref, ...head } = Astro.props;
 const { lang, path, home = false } = head;
 const t = useTranslations(lang);
 ---
@@ -44,7 +42,7 @@ const t = useTranslations(lang);
       <main id="main" class={home ? "site-home" : undefined}>
         <slot />
       </main>
-      {!noFooter && <SiteFooter lang={lang} />}
+      <SiteFooter lang={lang} />
     </div>
   </body>
 </html>

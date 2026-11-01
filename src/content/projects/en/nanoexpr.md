@@ -3,11 +3,7 @@ title: "nanoexpr"
 description: "Heap-free mathematical expression parser and evaluator for embedded Rust with bounded stack usage."
 ---
 
-[← All projects](/projects)
-
 # nanoexpr
-
-**Rust · no_std · Parser · C ABI** · 2026 - present
 
 > Heap-free mathematical expression parser and evaluator for embedded Rust with bounded stack usage.
 
@@ -22,9 +18,3 @@ The parser evaluates expressions without building a heap-allocated syntax tree, 
 ## Scope and limitations
 
 Designed as a reusable library independent of one application. Refer to the upstream repository for current APIs, examples, platform constraints and supported versions.
-
-## Explore the project
-
-[Source repository, documentation or official result](https://github.com/AlixANNERAUD/nanoexpr) ↗
-
-**Related work:** [Xila](/projects/xila) · [getargs-derive](/projects/getargs-derive)

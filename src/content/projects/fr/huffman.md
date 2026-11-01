@@ -3,11 +3,7 @@ title: "Compresseur/décompresseur Huffman"
 description: "Compresseur/décompresseur Huffman écrit en C, avec manipulation des flux de bits."
 ---
 
-[← Tous les projets](/fr/projects)
-
 # Compresseur/décompresseur Huffman
-
-**C** · 2023
 
 > Compresseur/décompresseur Huffman écrit en C, avec manipulation des flux de bits.
 
@@ -22,9 +18,3 @@ Le projet couvre un algorithme de compression sans perte depuis la construction 
 ## Portée et limites
 
 Travail réalisé dans un cadre académique ou de recherche, pouvant être collectif. Il illustre une démarche d'ingénierie ou une expérimentation et n'est pas présenté comme un produit commercial déployé.
-
-## Explorer le projet
-
-[Dépôt, documentation ou résultat officiel](https://github.com/AlixANNERAUD/Huffman_compressor) ↗
-
-**Dans le même domaine :** [Xila](/fr/projects/xila) · [nanoexpr](/fr/projects/nanoexpr)

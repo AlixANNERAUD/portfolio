@@ -3,11 +3,7 @@ title: "nanoexpr"
 description: "Parseur et évaluateur d'expressions mathématiques pour Rust embarqué, sans allocation dynamique et avec taille de pile bornée."
 ---
 
-[← Tous les projets](/fr/projects)
-
 # nanoexpr
-
-**Rust · no_std · Parser · C ABI** · 2026 - présent
 
 > Parseur et évaluateur d'expressions mathématiques pour Rust embarqué, sans allocation dynamique et avec taille de pile bornée.
 
@@ -22,9 +18,3 @@ Le parseur évalue des expressions sans construire d'arbre sur le tas, une déci
 ## Portée et limites
 
 Bibliothèque conçue pour être réutilisée indépendamment d'une application. Les API et exemples à jour figurent dans le dépôt source ; les contraintes d'environnement et les versions supportées doivent y être vérifiées.
-
-## Explorer le projet
-
-[Dépôt, documentation ou résultat officiel](https://github.com/AlixANNERAUD/nanoexpr) ↗
-
-**Dans le même domaine :** [Xila](/fr/projects/xila) · [getargs-derive](/fr/projects/getargs-derive)

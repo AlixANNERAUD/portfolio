@@ -3,11 +3,7 @@ title: "Deez'Nalyzer"
 description: "A Django/Vue application using audio analysis and machine learning to classify music genres."
 ---
 
-[← All projects](/projects)
-
 # Deez'Nalyzer
-
-**Django · Vue.js · ML** · 2024
 
 > A Django/Vue application using audio analysis and machine learning to classify music genres.
 
@@ -22,9 +18,3 @@ The architecture connects music API ingestion, audio feature extraction, model t
 ## Scope and limitations
 
 Academic or research work, potentially collaborative. It illustrates an engineering method or experiment rather than claiming a commercially deployed product.
-
-## Explore the project
-
-[Source repository, documentation or official result](https://github.com/AlixANNERAUD/Deez_Nalyzer) ↗
-
-**Related work:** [Music danceability](/projects/music-danceability) · [System of linear equations calculator](/projects/linear-equations)

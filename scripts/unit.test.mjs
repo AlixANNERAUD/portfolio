@@ -14,7 +14,9 @@ import { localize } from "../src/data/types.ts";
 import { formatCount, formatPeriod, sectionLabel } from "../src/lib/format.ts";
 import {
   RANK_WEIGHTS,
+  byScore,
   featuredProjects,
+  nextProject,
   projectScore,
   projectUrl,
   projects,
@@ -194,6 +196,16 @@ test("relatedProjects excludes the project itself", () => {
   assert.ok(related.every((project) => project.id !== "xila"));
   assert.equal(new Set(related.map((project) => project.id)).size, 3);
   assert.equal(relatedProjects("xila", 5).length, 5);
+});
+
+test("nextProject follows relevance order, wraps and skips", () => {
+  const ranked = [...projects].sort(byScore);
+  assert.equal(nextProject(ranked[0].id).id, ranked[1].id);
+  assert.equal(nextProject(ranked.at(-1).id).id, ranked[0].id);
+  assert.equal(nextProject(ranked[0].id, [ranked[1].id]).id, ranked[2].id);
+  const skip = relatedProjects("xila").map((project) => project.id);
+  const next = nextProject("xila", skip);
+  assert.ok(next.id !== "xila" && !skip.includes(next.id));
 });
 
 test("project tags come from the canonical technology list", () => {

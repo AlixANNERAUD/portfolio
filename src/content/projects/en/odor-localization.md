@@ -3,11 +3,7 @@ title: "Gas source localization"
 description: "ESP32/MQ sensor acquisition and MQTT pipeline prototype for exploring gas source localization during a research internship."
 ---
 
-[← All projects](/projects)
-
 # Gas source localization
-
-**ESP32 · MQTT · Capteurs · Recherche** · 2024
 
 > ESP32/MQ sensor acquisition and MQTT pipeline prototype for exploring gas source localization during a research internship.
 
@@ -22,9 +18,3 @@ The prototype outlines the chain MQ gas sensors → ESP32 → MQTT transport →
 ## Scope and limitations
 
 Academic or research work, potentially collaborative. It illustrates an engineering method or experiment rather than claiming a commercially deployed product.
-
-## Explore the project
-
-[Source repository, documentation or official result](https://github.com/AlixANNERAUD/Odor_localization) ↗
-
-**Related work:** [Model railway network](/projects/model-railway) · [Connected speaker](/projects/connected-speaker)

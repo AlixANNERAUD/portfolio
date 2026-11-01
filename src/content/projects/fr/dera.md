@@ -3,11 +3,7 @@ title: "dera.page"
 description: "Plateforme de services étudiants auto-hébergée, avec agenda, messagerie et réseau social."
 ---
 
-[← Tous les projets](/fr/projects)
-
 # dera.page
-
-**Rust · Docker** · 2022 - Présent
 
 > Plateforme de services étudiants auto-hébergée, avec agenda, messagerie et réseau social.
 
@@ -22,9 +18,3 @@ La plateforme rassemble plusieurs services étudiants dans une même expérience
 ## Portée et limites
 
 Projet personnel : les choix techniques et le maintien à long terme guident l'évolution. La fiche décrit les fonctions documentées, pas des performances ou usages non mesurés.
-
-## Explorer le projet
-
-[Dépôt, documentation ou résultat officiel](https://dera.page) ↗
-
-**Dans le même domaine :** [Mini Train Store](/fr/projects/mini-train-store) · [ITI Aventure](/fr/projects/iti-adventure)

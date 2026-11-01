@@ -93,12 +93,17 @@ const t = useTranslations(lang);
     border-radius: 0.85rem;
     background: var(--color-bg);
     transition:
-      border-color 170ms ease,
-      transform 170ms ease;
+      border-color var(--dur-base) var(--ease-out),
+      transform var(--dur-base) var(--ease-out);
   }
   .home-experience-card:hover {
     border-color: var(--color-accent);
-    transform: translateY(-2px);
+  }
+  /* Lift only for a pointer that hovers, with motion allowed. */
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .home-experience-card:hover {
+      transform: translateY(-2px);
+    }
   }
   .home-experience-more {
     display: inline-flex;
@@ -120,11 +125,6 @@ const t = useTranslations(lang);
     }
     .home-experience-grid {
       grid-template-columns: 1fr;
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .home-experience-card:hover {
-      transform: none;
     }
   }
 </style>

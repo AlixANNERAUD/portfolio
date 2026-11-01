@@ -3,11 +3,7 @@ title: "getargs-derive"
 description: "Macros procédurales pour décrire des interfaces CLI en Rust embarqué, avec analyse sans allocation et aide générée à la compilation."
 ---
 
-[← Tous les projets](/fr/projects)
-
 # getargs-derive
-
-**Rust · Proc macros · CLI · no_std** · 2026 - présent
 
 > Macros procédurales pour décrire des interfaces CLI en Rust embarqué, avec analyse sans allocation et aide générée à la compilation.
 
@@ -22,9 +18,3 @@ L'API de dérivation décrit commandes et options directement dans des structure
 ## Portée et limites
 
 Bibliothèque conçue pour être réutilisée indépendamment d'une application. Les API et exemples à jour figurent dans le dépôt source ; les contraintes d'environnement et les versions supportées doivent y être vérifiées.
-
-## Explorer le projet
-
-[Dépôt, documentation ou résultat officiel](https://github.com/AlixANNERAUD/getargs-derive) ↗
-
-**Dans le même domaine :** [Xila](/fr/projects/xila) · [nanoexpr](/fr/projects/nanoexpr)

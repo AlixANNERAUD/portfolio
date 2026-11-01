@@ -3,11 +3,7 @@ title: "System of linear equations calculator"
 description: "A C implementation of Gaussian elimination with partial pivoting for linear systems."
 ---
 
-[← All projects](/projects)
-
 # System of linear equations calculator
-
-**C · Algèbre linéaire** · 2022
 
 > A C implementation of Gaussian elimination with partial pivoting for linear systems.
 
@@ -22,9 +18,3 @@ The solver uses Gaussian elimination with partial pivoting to improve numerical 
 ## Scope and limitations
 
 Academic or research work, potentially collaborative. It illustrates an engineering method or experiment rather than claiming a commercially deployed product.
-
-## Explore the project
-
-[Source repository, documentation or official result](https://github.com/AlixANNERAUD/System_of_linear_equations_solver) ↗
-
-**Related work:** [Deez'Nalyzer](/projects/deez-nalyzer) · [Music danceability](/projects/music-danceability)

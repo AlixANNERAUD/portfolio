@@ -3,11 +3,7 @@ title: "Evidential Occupancy Grid Map (EOGM)"
 description: "Robotic occupancy mapping from onboard sensors, using Dempster-Shafer evidence theory."
 ---
 
-[← All projects](/projects)
-
 # Evidential Occupancy Grid Map (EOGM)
-
-**C++ · ROS** · 2024
 
 > Robotic occupancy mapping from onboard sensors, using Dempster-Shafer evidence theory.
 
@@ -22,9 +18,3 @@ Sensor-derived occupancy maps are fused by a ROS node using evidential reasoning
 ## Scope and limitations
 
 Academic or research work, potentially collaborative. It illustrates an engineering method or experiment rather than claiming a commercially deployed product.
-
-## Explore the project
-
-[Source repository, documentation or official result](https://github.com/AlixANNERAUD/Evidential_occupancy_map) ↗
-
-**Related work:** [Model railway network](/projects/model-railway) · [Connected speaker](/projects/connected-speaker)

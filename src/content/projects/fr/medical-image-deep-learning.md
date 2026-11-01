@@ -3,11 +3,7 @@ title: "Segmentation d'images médicales"
 description: "Expérimentation de segmentation et classification de tissus et cellules histopathologiques avec nnU-Net, CellViT++ et HoVer-Net."
 ---
 
-[← Tous les projets](/fr/projects)
-
 # Segmentation d'images médicales
-
-**Python · Deep Learning · nnU-Net · CellViT** · Projet académique
 
 > Expérimentation de segmentation et classification de tissus et cellules histopathologiques avec nnU-Net, CellViT++ et HoVer-Net.
 
@@ -22,9 +18,3 @@ La démarche consiste à préparer des images histopathologiques, puis à tester
 ## Portée et limites
 
 Travail réalisé dans un cadre académique ou de recherche, pouvant être collectif. Il illustre une démarche d'ingénierie ou une expérimentation et n'est pas présenté comme un produit commercial déployé.
-
-## Explorer le projet
-
-[Dépôt, documentation ou résultat officiel](https://github.com/AlixANNERAUD/Deep_learning_project) ↗
-
-**Dans le même domaine :** [Deez'Nalyzer](/fr/projects/deez-nalyzer) · [Prédiction de la dansabilité musicale](/fr/projects/music-danceability)

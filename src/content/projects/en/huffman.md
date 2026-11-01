@@ -3,11 +3,7 @@ title: "Huffman (de)compressor"
 description: "A Huffman compressor/decompressor written in C with bitstream processing."
 ---
 
-[← All projects](/projects)
-
 # Huffman (de)compressor
-
-**C** · 2023
 
 > A Huffman compressor/decompressor written in C with bitstream processing.
 
@@ -22,9 +18,3 @@ The project implements a lossless compression algorithm from building a coding t
 ## Scope and limitations
 
 Academic or research work, potentially collaborative. It illustrates an engineering method or experiment rather than claiming a commercially deployed product.
-
-## Explore the project
-
-[Source repository, documentation or official result](https://github.com/AlixANNERAUD/Huffman_compressor) ↗
-
-**Related work:** [Xila](/projects/xila) · [nanoexpr](/projects/nanoexpr)

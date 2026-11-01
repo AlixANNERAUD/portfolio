@@ -3,11 +3,7 @@ title: "embedded-i18n"
 description: "Compile-time localization for embedded Rust: translations stored in firmware, compile-time checks and allocator-free operation."
 ---
 
-[← All projects](/projects)
-
 # embedded-i18n
-
-**Rust · Macros · no_std · i18n** · 2026 - present
 
 > Compile-time localization for embedded Rust: translations stored in firmware, compile-time checks and allocator-free operation.
 
@@ -22,9 +18,3 @@ Translations become static strings at build time and reside in firmware ROM. Mac
 ## Scope and limitations
 
 Designed as a reusable library independent of one application. Refer to the upstream repository for current APIs, examples, platform constraints and supported versions.
-
-## Explore the project
-
-[Source repository, documentation or official result](https://github.com/AlixANNERAUD/embedded-i18n) ↗
-
-**Related work:** [Model railway network](/projects/model-railway) · [Connected speaker](/projects/connected-speaker)

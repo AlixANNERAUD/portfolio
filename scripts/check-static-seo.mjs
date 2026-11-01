@@ -1,7 +1,17 @@
 import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { parse } from "node-html-parser";
-import { byScore, featuredProjects, projects } from "../src/data/projects.ts";
+import {
+  byScore,
+  featuredProjects,
+  projects,
+  projectUrl,
+  relatedProjects,
+} from "../src/data/projects.ts";
+import { experiences } from "../src/data/experiences.ts";
+import { site as siteData } from "../src/data/site.ts";
+import { skillDomains } from "../src/data/skills.ts";
+import { formatPeriod } from "../src/lib/format.ts";
 import { ui } from "../src/i18n/ui.ts";
 
 /**
@@ -799,6 +809,208 @@ for (const file of ["experiences.html", "fr/experiences.html"]) {
         );
       }
     }
+  }
+}
+
+// Project pages: ProjectLayout renders the breadcrumb, the H1 lifted from the
+// Markdown, a meta line from the data (period, type, team, tags), an external
+// link named after its target, 2-3 related project cards and a next link. The
+// Markdown body no longer repeats the back link, meta line or related links.
+{
+  const labels = {
+    en: {
+      breadcrumb: "Breadcrumb",
+      home: "Home",
+      projects: "Projects",
+      group: {
+        personal: "Personal project",
+        library: "Library",
+        competition: "Competition",
+        academic: "Academic project",
+      },
+      team: (n) => "Team of " + n,
+      github: "View the GitHub repository",
+      visit: (host) => "Visit " + host,
+      related: "Related projects",
+    },
+    fr: {
+      breadcrumb: "Fil d’Ariane",
+      home: "Accueil",
+      projects: "Projets",
+      group: {
+        personal: "Projet personnel",
+        library: "Bibliothèque",
+        competition: "Compétition",
+        academic: "Projet académique",
+      },
+      team: (n) => "Équipe de " + n,
+      github: "Voir le dépôt GitHub",
+      visit: (host) => "Visiter " + host,
+      related: "Dans le même domaine",
+    },
+  };
+  const text = (node) => node?.text.replace(/\s+/g, " ").trim() ?? "";
+  for (const project of projects) {
+    for (const lang of ["en", "fr"]) {
+      const l = labels[lang];
+      const file =
+        (lang === "fr" ? "fr/" : "") + "projects/" + project.id + ".html";
+      const html = read(file);
+      if (!html) continue;
+      const root = parse(html);
+      const main = root.querySelector("main");
+      const crumbs = main?.querySelector(
+        'nav[aria-label="' + l.breadcrumb + '"] ol',
+      );
+      const items = crumbs?.querySelectorAll("li") ?? [];
+      const home = lang === "fr" ? "/fr/" : "/";
+      const catalogue = lang === "fr" ? "/fr/projects" : "/projects";
+      if (
+        items.length !== 3 ||
+        items[0].querySelector("a")?.getAttribute("href") !== home ||
+        text(items[0]) !== l.home ||
+        items[1].querySelector("a")?.getAttribute("href") !== catalogue ||
+        text(items[1]) !== l.projects ||
+        items[2].querySelector("a") ||
+        items[2].querySelector('[aria-current="page"]') === null
+      ) {
+        failed.push(file + ": breadcrumb must be Home › Projects › current");
+      }
+      const header = main?.querySelector(".project-header");
+      if (!header?.querySelector("h1")) {
+        failed.push(file + ": the project H1 belongs to .project-header");
+      }
+      const meta = text(header?.querySelector(".project-meta"));
+      const expectedMeta = [
+        formatPeriod(project.period, lang),
+        l.group[project.group],
+        ...(project.team ? [l.team(project.team)] : []),
+      ];
+      if (expectedMeta.some((part) => !meta.includes(part))) {
+        failed.push(
+          file +
+            ": meta line must show " +
+            JSON.stringify(expectedMeta) +
+            ", found " +
+            JSON.stringify(meta),
+        );
+      }
+      const tags = header
+        ?.querySelectorAll(".editorial-tags li")
+        .map((tag) => text(tag));
+      if ((tags ?? []).join("|") !== project.tags.join("|")) {
+        failed.push(file + ": meta tags must be the project's data tags");
+      }
+      const external = header?.querySelectorAll(".project-external");
+      if (project.externalUrl) {
+        const url = new URL(project.externalUrl);
+        const host = url.hostname.replace(/^www\./, "");
+        const label = host === "github.com" ? l.github : l.visit(host);
+        const link = external?.[0];
+        if (
+          external?.length !== 1 ||
+          link.getAttribute("href") !== project.externalUrl ||
+          link.getAttribute("target") !== "_blank" ||
+          !text(link).startsWith(label + " ") ||
+          !text(link).endsWith("↗")
+        ) {
+          failed.push(
+            file + ": external link must read " + JSON.stringify(label),
+          );
+        }
+      } else if (external?.length) {
+        failed.push(file + ": unexpected external link");
+      }
+      const related = main?.querySelector(".project-related");
+      const relatedLinks = related
+        ?.querySelectorAll(".showcase-card-link")
+        .map((link) => link.getAttribute("href"));
+      const expectedRelated = relatedProjects(project.id).map((p) =>
+        projectUrl(p.id, lang),
+      );
+      if (
+        text(related?.querySelector("h2")) !== l.related ||
+        (relatedLinks ?? []).join("|") !== expectedRelated.join("|")
+      ) {
+        failed.push(file + ": related projects must list " + expectedRelated);
+      }
+      const next = main
+        ?.querySelector(".editorial-next a")
+        ?.getAttribute("href");
+      if (
+        !next?.startsWith(catalogue + "/") ||
+        next === projectUrl(project.id, lang) ||
+        expectedRelated.includes(next)
+      ) {
+        failed.push(file + ": next link must point to another project");
+      }
+      const body = main?.querySelector(".project-body");
+      if (
+        !body ||
+        body.querySelector("h1") ||
+        body
+          .querySelectorAll("a")
+          .some((link) =>
+            [catalogue, ...expectedRelated].includes(link.getAttribute("href")),
+          ) ||
+        /Related work|Dans le même domaine|← /.test(body.text)
+      ) {
+        failed.push(
+          file + ": Markdown body must not repeat layout navigation or H1",
+        );
+      }
+    }
+  }
+}
+
+// Resume: one H1, an HTML summary built from the data (roles, education,
+// skills), Download/Open buttons for the PDF, an <object> preview with a
+// fallback link, and the site footer.
+for (const [file, lang] of [
+  ["resume.html", "en"],
+  ["fr/resume.html", "fr"],
+]) {
+  const html = read(file);
+  if (!html) continue;
+  const root = parse(html);
+  const main = root.querySelector("main");
+  const pdf = siteData.resumePdf[lang];
+  if (main?.querySelectorAll("h1").length !== 1) {
+    failed.push(file + ": resume must have exactly one H1");
+  }
+  const summary = main?.querySelector(".resume-summary");
+  const summaryText = summary?.text.replace(/\s+/g, " ") ?? "";
+  const expected = [
+    ...experiences.map((entry) => entry.role[lang]),
+    ...skillDomains.map((domain) => domain.title[lang]),
+  ];
+  const missing = expected.filter((value) => !summaryText.includes(value));
+  if (!summary || missing.length) {
+    failed.push(file + ": resume summary misses " + JSON.stringify(missing));
+  }
+  if ((summary?.querySelectorAll("h2").length ?? 0) < 3) {
+    failed.push(file + ": resume summary needs experience/education/skills");
+  }
+  const download = main?.querySelector(
+    'a.resume-action[download][href="' + pdf + '"]',
+  );
+  const open = main?.querySelector(
+    'a.resume-action[target="_blank"][href="' + pdf + '"]',
+  );
+  if (!download || !open) {
+    failed.push(file + ": resume needs Download and Open PDF buttons");
+  }
+  const preview = main?.querySelector(
+    'object.resume-preview[type="application/pdf"][data="' + pdf + '"]',
+  );
+  if (!preview?.querySelector('a[href="' + pdf + '"]')) {
+    failed.push(file + ": resume <object> preview with a fallback link");
+  }
+  if (main?.querySelector("iframe")) {
+    failed.push(file + ": resume must not use the old full-page iframe");
+  }
+  if (!root.querySelector("footer.site-footer")) {
+    failed.push(file + ": resume must show the site footer");
   }
 }
 

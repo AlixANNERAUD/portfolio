@@ -3,11 +3,7 @@ title: "ITI Adventure"
 description: "A text-based Java RPG exploring object-oriented design and software patterns."
 ---
 
-[← All projects](/projects)
-
 # ITI Adventure
-
-**Java** · 2024
 
 > A text-based Java RPG exploring object-oriented design and software patterns.
 
@@ -22,9 +18,3 @@ The educational value is the decomposition of a text RPG into objects, events an
 ## Scope and limitations
 
 Academic or research work, potentially collaborative. It illustrates an engineering method or experiment rather than claiming a commercially deployed product.
-
-## Explore the project
-
-[Source repository, documentation or official result](https://github.com/AlixANNERAUD/ITI_aventure) ↗
-
-**Related work:** [Mini Train Store](/projects/mini-train-store) · [dera.page](/projects/dera)

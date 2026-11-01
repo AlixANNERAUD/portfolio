@@ -3,11 +3,7 @@ title: "nanoaudio"
 description: "Bibliothèque audio embarquée sans allocation : traitement PCM, mixage, buffers circulaires et codecs avec buffers fournis par l'appelant."
 ---
 
-[← Tous les projets](/fr/projects)
-
 # nanoaudio
-
-**Rust · no_std · Audio · DSP** · 2026 - présent
 
 > Bibliothèque audio embarquée sans allocation : traitement PCM, mixage, buffers circulaires et codecs avec buffers fournis par l'appelant.
 
@@ -22,9 +18,3 @@ La bibliothèque sépare le traitement des échantillons PCM du matériel audio 
 ## Portée et limites
 
 Bibliothèque conçue pour être réutilisée indépendamment d'une application. Les API et exemples à jour figurent dans le dépôt source ; les contraintes d'environnement et les versions supportées doivent y être vérifiées.
-
-## Explorer le projet
-
-[Dépôt, documentation ou résultat officiel](https://github.com/AlixANNERAUD/nanoaudio) ↗
-
-**Dans le même domaine :** [Réseau ferroviaire miniature](/fr/projects/model-railway) · [Enceinte connectée](/fr/projects/connected-speaker)

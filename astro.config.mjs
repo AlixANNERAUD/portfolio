@@ -1,6 +1,8 @@
 import { defineConfig, fontProviders } from "astro/config";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
+import { satteri } from "@astrojs/markdown-satteri";
+import projectTitlePlugin from "./src/lib/project-title-plugin.mjs";
 
 const site = "https://alix.anneraud.fr";
 // The French home page is canonically `/fr/` (its indexed URL), but the
@@ -22,6 +24,9 @@ export default defineConfig({
     defaultLocale: "en",
     routing: { prefixDefaultLocale: false },
   },
+  // Project pages: the Markdown H1 moves into ProjectLayout's header. MDX
+  // inherits this processor (Sätteri, Astro's default Markdown processor).
+  markdown: { processor: satteri({ mdastPlugins: [projectTitlePlugin] }) },
   integrations: [
     mdx(),
     sitemap({

@@ -1,0 +1,221 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import Breadcrumb from "../components/projects/Breadcrumb.astro";
+import RelatedProjects from "../components/projects/RelatedProjects.astro";
+import Eyebrow from "../components/ui/Eyebrow.astro";
+import NextLink from "../components/ui/NextLink.astro";
+import Tags from "../components/ui/Tags.astro";
+import {
+  nextProject,
+  projectUrl,
+  relatedProjects,
+  type CatalogueProject,
+  type Project,
+} from "../data/projects.ts";
+import { localize } from "../data/types.ts";
+import { localizePath, type Locale } from "../i18n/locales.ts";
+import { useTranslations } from "../i18n/ui.ts";
+import { formatPeriod } from "../lib/format.ts";
+
+/**
+ * A project page: breadcrumb, H1 and a meta line built from the project data
+ * (period, type, team, tags, external link), the Markdown body, then related
+ * projects and the next project. The body holds only the written content.
+ */
+interface Props {
+  lang: Locale;
+  project: CatalogueProject;
+  /** Page H1, taken from the Markdown `# Title`. */
+  heading: string;
+  /** SEO title and description, from the Markdown frontmatter. */
+  title: string;
+  description: string;
+}
+
+const { lang, project, heading, title, description } = Astro.props;
+const t = useTranslations(lang);
+
+const related = relatedProjects(project.id);
+const next = nextProject(
+  project.id,
+  related.map((item) => item.id),
+);
+
+/** "View the GitHub repository" for GitHub, otherwise "Visit host". */
+function externalLabel(href: string): string {
+  const host = new URL(href).hostname.replace(/^www\./, "");
+  return host === "github.com"
+    ? t("project.repository")
+    : t("project.visit", { host });
+}
+// Widened to Project: optional fields absent from every entry stay typed.
+const { team, externalUrl: external }: Project = project;
+---
+
+<BaseLayout
+  lang={lang}
+  path={`/projects/${project.id}`}
+  title={title}
+  description={description}
+  ogType="article"
+>
+  <article class="project-page">
+    <header class="project-header">
+      <Breadcrumb
+        label={t("project.breadcrumb")}
+        items={[
+          { label: t("nav.home"), href: localizePath("/", lang) },
+          { label: t("nav.projects"), href: localizePath("/projects", lang) },
+          { label: localize(project.title, lang) },
+        ]}
+      />
+      <Eyebrow class="project-category">
+        {t(`category.${project.category}`)}
+      </Eyebrow>
+      <h1 class="project-title">{heading}</h1>
+      <p class="project-meta" aria-label={t("project.meta")}>
+        <span class="project-meta__period">
+          {formatPeriod(project.period, lang)}
+        </span>
+        <span class="project-meta__badge">
+          {t(`project.group.${project.group}`)}
+        </span>
+        {team && <span>{t("project.team", { count: team })}</span>}
+      </p>
+      <div class="project-header__footer">
+        <Tags
+          class="project-tags"
+          tags={project.tags}
+          label={t("project.technologies")}
+        />
+        {external && (
+          <a
+            class="project-external"
+            href={external}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {externalLabel(external)}
+            <span class="visually-hidden"> {t("a11y.newTab")}</span>
+            <span class="project-external__arrow" aria-hidden="true">
+              ↗
+            </span>
+          </a>
+        )}
+      </div>
+    </header>
+
+    <div class="project-body prose">
+      <slot />
+    </div>
+
+    <RelatedProjects projects={related} lang={lang} />
+
+    <NextLink
+      class="project-next"
+      lang={lang}
+      title={localize(next.title, lang)}
+      description={next.description[lang]}
+      href={projectUrl(next.id, lang)}
+      linkLabel={t("project.next")}
+    />
+  </article>
+</BaseLayout>
+
+<style>
+  .project-page {
+    width: min(100%, var(--container-prose));
+    margin-inline: auto;
+    padding: var(--space-s) var(--space-m) var(--space-3xl);
+  }
+  .project-header {
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-m);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .project-header :global(.breadcrumb) {
+    margin-bottom: var(--space-l);
+  }
+  .project-header :global(.project-category) {
+    margin-bottom: var(--space-xs);
+    letter-spacing: var(--tracking-overline);
+  }
+  .project-title {
+    margin: 0 0 var(--space-m);
+    font-family: var(--font-display);
+    font-size: var(--step-5);
+    font-weight: 400;
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-display);
+    text-wrap: balance;
+    /* Long compounds ("Compresseur/décompresseur") must not overflow at 320px. */
+    overflow-wrap: break-word;
+  }
+  .project-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2xs) var(--space-s);
+    margin: 0 0 var(--space-s);
+    color: var(--color-text-muted);
+    font-size: var(--step--1);
+  }
+  .project-meta__period {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  .project-meta__badge {
+    padding: 0.15em 0.65em;
+    border-radius: var(--radius-full);
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+    font-weight: 600;
+  }
+  .project-header__footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-xs) var(--space-m);
+  }
+  .project-header :global(.project-tags) {
+    margin: 0;
+  }
+  .project-external {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    gap: 0.4em;
+    padding: 0 var(--space-s);
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-m);
+    color: var(--color-accent);
+    font-size: var(--step--1);
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+      background-color var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out);
+  }
+  .project-external:hover {
+    background: var(--color-accent-soft);
+    color: var(--color-accent-hover);
+  }
+  /* The body sits in the page column: no second prose container. */
+  .project-page .project-body {
+    width: auto;
+    margin: 0;
+    padding: 0;
+  }
+  .project-page :global(.project-next) {
+    margin-top: var(--space-2xl);
+  }
+  @media (max-width: 720px) {
+    .project-page {
+      padding: var(--space-2xs) var(--space-s) var(--space-2xl);
+    }
+    .project-header :global(.breadcrumb) {
+      margin-bottom: var(--space-s);
+    }
+  }
+</style>

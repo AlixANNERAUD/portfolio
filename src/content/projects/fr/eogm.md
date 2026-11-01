@@ -3,11 +3,7 @@ title: "Cartographie d'occupation évidentielle (EOGM)"
 description: "Cartographie d'occupation robotique à partir de capteurs embarqués, basée sur la théorie de Dempster-Shafer."
 ---
 
-[← Tous les projets](/fr/projects)
-
 # Cartographie d'occupation évidentielle (EOGM)
-
-**C++ · ROS** · 2024
 
 > Cartographie d'occupation robotique à partir de capteurs embarqués, basée sur la théorie de Dempster-Shafer.
 
@@ -22,9 +18,3 @@ Les cartes d'occupation provenant de capteurs sont fusionnées par un nœud ROS,
 ## Portée et limites
 
 Travail réalisé dans un cadre académique ou de recherche, pouvant être collectif. Il illustre une démarche d'ingénierie ou une expérimentation et n'est pas présenté comme un produit commercial déployé.
-
-## Explorer le projet
-
-[Dépôt, documentation ou résultat officiel](https://github.com/AlixANNERAUD/Evidential_occupancy_map) ↗
-
-**Dans le même domaine :** [Réseau ferroviaire miniature](/fr/projects/model-railway) · [Enceinte connectée](/fr/projects/connected-speaker)

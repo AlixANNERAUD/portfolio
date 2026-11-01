@@ -3,11 +3,7 @@ title: "battery-percent"
 description: "Estimation de charge par courbes de décharge et interpolation, avec filtrage ADC : bibliothèque C99 et bindings Rust no_std."
 ---
 
-[← Tous les projets](/fr/projects)
-
 # battery-percent
-
-**C99 · Rust · Battery · MCU** · 2026 - présent
 
 > Estimation de charge par courbes de décharge et interpolation, avec filtrage ADC : bibliothèque C99 et bindings Rust no_std.
 
@@ -22,9 +18,3 @@ L'estimation repose sur des courbes de décharge et de l'interpolation plutôt q
 ## Portée et limites
 
 Bibliothèque conçue pour être réutilisée indépendamment d'une application. Les API et exemples à jour figurent dans le dépôt source ; les contraintes d'environnement et les versions supportées doivent y être vérifiées.
-
-## Explorer le projet
-
-[Dépôt, documentation ou résultat officiel](https://github.com/AlixANNERAUD/battery-percent) ↗
-
-**Dans le même domaine :** [Réseau ferroviaire miniature](/fr/projects/model-railway) · [Enceinte connectée](/fr/projects/connected-speaker)

@@ -3,11 +3,7 @@ title: "INSAtram"
 description: "A Free Pascal/SDL tram network management and passenger-flow simulation game."
 ---
 
-[← All projects](/projects)
-
 # INSAtram
-
-**Free pascal** · 2022
 
 > A Free Pascal/SDL tram network management and passenger-flow simulation game.
 
@@ -22,9 +18,3 @@ The simulator models a transport network, route planning and passenger movement.
 ## Scope and limitations
 
 Academic or research work, potentially collaborative. It illustrates an engineering method or experiment rather than claiming a commercially deployed product.
-
-## Explore the project
-
-[Source repository, documentation or official result](https://github.com/AlixANNERAUD/INSAtram) ↗
-
-**Related work:** [Mini Train Store](/projects/mini-train-store) · [dera.page](/projects/dera)

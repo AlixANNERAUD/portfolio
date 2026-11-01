@@ -14,6 +14,8 @@ const targets = [
   "/fr/projects",
   "/projects/xila",
   "/fr/projects/xila",
+  "/projects/huffman",
+  "/fr/projects/huffman",
   "/experiences",
   "/fr/experiences",
   "/skills",
@@ -927,6 +929,132 @@ for (const [engineName, engine] of [
         failures.push(engineName + " " + path + " project cards: " + error);
       }
       await page.emulateMedia({ reducedMotion: "no-preference" });
+    }
+
+    // Motion audit: with reduced motion requested, nothing animates, hovered
+    // cards, buttons and their arrows do not move, and the Xila topology keeps
+    // its static drawing instead of the WebGL animation.
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    for (const path of [
+      "/",
+      "/fr/",
+      "/projects",
+      "/projects/xila",
+      "/experiences",
+      "/skills",
+      "/resume",
+    ]) {
+      try {
+        await page.setViewportSize({ width: 1440, height: 900 });
+        await page.goto(base + path, { waitUntil: "load", timeout: 10000 });
+        const animated = await page.evaluate(() =>
+          [...document.querySelectorAll("*")]
+            .filter((node) => getComputedStyle(node).animationName !== "none")
+            .map((node) => node.tagName.toLowerCase() + "." + node.className)
+            .slice(0, 5),
+        );
+        assert.deepEqual(animated, [], path + " animates under reduced motion");
+        if (path === "/" || path === "/fr/") {
+          assert.equal(
+            await page
+              .locator(".home-hero-title-line")
+              .first()
+              .evaluate((node) => getComputedStyle(node).animationName),
+            "none",
+            path + " hero lines must not animate",
+          );
+          assert.equal(
+            await page.locator(".xila-topology canvas.is-ready").count(),
+            0,
+            path + " Xila topology must stay static",
+          );
+        }
+        for (const selector of [
+          ".showcase-card",
+          ".home-experience-card",
+          ".home-action",
+          ".showcase-all-link",
+          ".editorial-next a",
+          ".resume-action",
+        ]) {
+          const target = page.locator(selector).filter({ visible: true });
+          if ((await target.count()) === 0) continue;
+          await target.first().scrollIntoViewIfNeeded();
+          await target.first().hover();
+          await page.waitForTimeout(80);
+          const moved = await target.first().evaluate((node) =>
+            [node, ...node.querySelectorAll("*")]
+              .filter((el) => {
+                const style = getComputedStyle(el);
+                return (
+                  style.transform !== "none" ||
+                  (style.translate !== "none" && style.translate !== "")
+                );
+              })
+              .map((el) => el.tagName.toLowerCase() + "." + el.className),
+          );
+          assert.deepEqual(
+            moved,
+            [],
+            path + " " + selector + " moves on hover under reduced motion",
+          );
+        }
+        checked++;
+      } catch (error) {
+        failures.push(engineName + " " + path + " reduced motion: " + error);
+      }
+    }
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+
+    // Resume: the PDF preview only appears on wide screens; the download and
+    // open buttons and the site footer are always there.
+    for (const path of ["/resume", "/fr/resume"]) {
+      try {
+        await page.setViewportSize({ width: 1440, height: 900 });
+        await page.goto(base + path, {
+          waitUntil: "domcontentloaded",
+          timeout: 10000,
+        });
+        // Firefox reports <object> as hidden to isVisible(): read its box.
+        const preview = page.locator("object.resume-preview");
+        const shown = () =>
+          preview.evaluate((node) =>
+            getComputedStyle(node).display === "none"
+              ? 0
+              : node.getBoundingClientRect().height,
+          );
+        // Firefox sizes the <object> once it has resolved it, after DOM load.
+        await page.waitForFunction(
+          () => {
+            const node = document.querySelector("object.resume-preview");
+            return node && node.getBoundingClientRect().height >= 600;
+          },
+          null,
+          { timeout: 5000 },
+        );
+        await page.setViewportSize({ width: 390, height: 844 });
+        await page.waitForTimeout(60);
+        assert.equal(
+          await shown(),
+          0,
+          path + " preview must be hidden on narrow screens",
+        );
+        const actions = page.locator(".resume-action");
+        assert.equal(await actions.count(), 2);
+        for (const action of await actions.all()) {
+          assert.equal(await action.isVisible(), true);
+          const actionBox = await action.boundingBox();
+          assert.ok(actionBox.height >= 44, path + " action under 44px");
+        }
+        assert.equal(
+          await page.locator("footer.site-footer").isVisible(),
+          true,
+          path + " footer missing",
+        );
+        checked++;
+      } catch (error) {
+        failures.push(engineName + " " + path + " resume layout: " + error);
+      }
     }
 
     await context.close();

@@ -3,11 +3,7 @@ title: "Localisation de sources de gaz"
 description: "Prototype de collecte de mesures de capteurs MQ via ESP32 et MQTT pour explorer la localisation de sources de gaz lors d'un stage de recherche."
 ---
 
-[← Tous les projets](/fr/projects)
-
 # Localisation de sources de gaz
-
-**ESP32 · MQTT · Capteurs · Recherche** · 2024
 
 > Prototype de collecte de mesures de capteurs MQ via ESP32 et MQTT pour explorer la localisation de sources de gaz lors d'un stage de recherche.
 
@@ -22,9 +18,3 @@ Le prototype schématise la chaîne capteurs de gaz MQ → ESP32 → transport M
 ## Portée et limites
 
 Travail réalisé dans un cadre académique ou de recherche, pouvant être collectif. Il illustre une démarche d'ingénierie ou une expérimentation et n'est pas présenté comme un produit commercial déployé.
-
-## Explorer le projet
-
-[Dépôt, documentation ou résultat officiel](https://github.com/AlixANNERAUD/Odor_localization) ↗
-
-**Dans le même domaine :** [Réseau ferroviaire miniature](/fr/projects/model-railway) · [Enceinte connectée](/fr/projects/connected-speaker)

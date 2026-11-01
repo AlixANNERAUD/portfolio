@@ -3,11 +3,7 @@ title: "Model railway network"
 description: "Custom electronics for occupancy detection and automated signalling on an H0-scale railway."
 ---
 
-[← All projects](/projects)
-
 # Model railway network
-
-**ESP32 · S88 · DCC · Électronique** · 2019 - Present
 
 > Custom electronics for occupancy detection and automated signalling on an H0-scale railway.
 
@@ -22,9 +18,3 @@ This project connects DCC control, S88 feedback and signaling boards. Its main e
 ## Scope and limitations
 
 Personal project: design choices and long-term maintenance shape its evolution. This page describes documented capabilities rather than unmeasured results.
-
-## Explore the project
-
-[Source repository, documentation or official result](https://github.com/AlixANNERAUD/S88-Wireless-Feedback-System) ↗
-
-**Related work:** [Connected speaker](/projects/connected-speaker) · [lvgl_theme_shadcn](/projects/lvgl-theme-shadcn)

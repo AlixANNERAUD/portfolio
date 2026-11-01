@@ -3,11 +3,7 @@ title: "ITI Aventure"
 description: "Jeu de rôle textuel Java appliquant programmation objet et patrons de conception."
 ---
 
-[← Tous les projets](/fr/projects)
-
 # ITI Aventure
-
-**Java** · 2024
 
 > Jeu de rôle textuel Java appliquant programmation objet et patrons de conception.
 
@@ -22,9 +18,3 @@ L'intérêt pédagogique est la décomposition d'un jeu textuel en objets, évé
 ## Portée et limites
 
 Travail réalisé dans un cadre académique ou de recherche, pouvant être collectif. Il illustre une démarche d'ingénierie ou une expérimentation et n'est pas présenté comme un produit commercial déployé.
-
-## Explorer le projet
-
-[Dépôt, documentation ou résultat officiel](https://github.com/AlixANNERAUD/ITI_aventure) ↗
-
-**Dans le même domaine :** [Mini Train Store](/fr/projects/mini-train-store) · [dera.page](/fr/projects/dera)

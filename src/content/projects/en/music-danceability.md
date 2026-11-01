@@ -3,11 +3,7 @@ title: "Music danceability"
 description: "Machine-learning experiments predicting song danceability from Spotify audio features."
 ---
 
-[← All projects](/projects)
-
 # Music danceability
-
-**Python** · 2023
 
 > Machine-learning experiments predicting song danceability from Spotify audio features.
 
@@ -22,9 +18,3 @@ Spotify-derived features are used to compare supervised models and examine their
 ## Scope and limitations
 
 Academic or research work, potentially collaborative. It illustrates an engineering method or experiment rather than claiming a commercially deployed product.
-
-## Explore the project
-
-[Source repository, documentation or official result](https://github.com/AlixANNERAUD/Music_danceability_prediction) ↗
-
-**Related work:** [Deez'Nalyzer](/projects/deez-nalyzer) · [System of linear equations calculator](/projects/linear-equations)

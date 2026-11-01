@@ -650,3 +650,19 @@ export function relatedProjects(id: ProjectId, n = 3): CatalogueProject[] {
     )
     .slice(0, n);
 }
+
+/**
+ * The project after `id` in relevance order, wrapping around, that is not in
+ * `skip` (e.g. the related projects already listed on the page).
+ */
+export function nextProject(
+  id: ProjectId,
+  skip: readonly ProjectId[] = [],
+): CatalogueProject {
+  const start = projectRank(id);
+  for (let step = 0; step < ranked.length - 1; step++) {
+    const candidate = ranked[(start + step) % ranked.length];
+    if (!skip.includes(candidate.id)) return candidate;
+  }
+  throw new Error(`No next project for ${id}`);
+}

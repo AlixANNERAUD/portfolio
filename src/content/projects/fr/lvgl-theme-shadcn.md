@@ -3,11 +3,7 @@ title: "lvgl_theme_shadcn"
 description: "Un thème inspiré de shadcn/ui pour LVGL 9 : widgets, palettes claires/sombres et personnalisation sur microcontrôleurs."
 ---
 
-[← Tous les projets](/fr/projects)
-
 # lvgl_theme_shadcn
-
-**C99 · LVGL · Rust · UI** · 2026 - présent
 
 > Un thème inspiré de shadcn/ui pour LVGL 9 : widgets, palettes claires/sombres et personnalisation sur microcontrôleurs.
 
@@ -22,9 +18,3 @@ Le thème abstrait une identité visuelle cohérente au-dessus des widgets LVGL 
 ## Portée et limites
 
 Bibliothèque conçue pour être réutilisée indépendamment d'une application. Les API et exemples à jour figurent dans le dépôt source ; les contraintes d'environnement et les versions supportées doivent y être vérifiées.
-
-## Explorer le projet
-
-[Dépôt, documentation ou résultat officiel](https://github.com/AlixANNERAUD/lvgl_theme_shadcn) ↗
-
-**Dans le même domaine :** [Réseau ferroviaire miniature](/fr/projects/model-railway) · [Enceinte connectée](/fr/projects/connected-speaker)

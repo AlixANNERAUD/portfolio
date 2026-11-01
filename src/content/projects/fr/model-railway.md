@@ -3,11 +3,7 @@ title: "Réseau ferroviaire miniature"
 description: "Cartes électroniques de détection d'occupation et commande de signalisation pour un réseau H0 numérique."
 ---
 
-[← Tous les projets](/fr/projects)
-
 # Réseau ferroviaire miniature
-
-**ESP32 · S88 · DCC · Électronique** · 2019 - Présent
 
 > Cartes électroniques de détection d'occupation et commande de signalisation pour un réseau H0 numérique.
 
@@ -22,9 +18,3 @@ Le projet fait dialoguer commande numérique DCC, détection S88 et cartes de si
 ## Portée et limites
 
 Projet personnel : les choix techniques et le maintien à long terme guident l'évolution. La fiche décrit les fonctions documentées, pas des performances ou usages non mesurés.
-
-## Explorer le projet
-
-[Dépôt, documentation ou résultat officiel](https://github.com/AlixANNERAUD/S88-Wireless-Feedback-System) ↗
-
-**Dans le même domaine :** [Enceinte connectée](/fr/projects/connected-speaker) · [lvgl_theme_shadcn](/fr/projects/lvgl-theme-shadcn)

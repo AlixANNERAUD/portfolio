@@ -3,11 +3,7 @@ title: "battery-percent"
 description: "Battery state-of-charge estimation from discharge curves and interpolation, with ADC filtering, in C99 and no_std Rust."
 ---
 
-[← All projects](/projects)
-
 # battery-percent
-
-**C99 · Rust · Battery · MCU** · 2026 - present
 
 > Battery state-of-charge estimation from discharge curves and interpolation, with ADC filtering, in C99 and no_std Rust.
 
@@ -22,9 +18,3 @@ Charge estimation uses discharge curves and interpolation instead of a linear ma
 ## Scope and limitations
 
 Designed as a reusable library independent of one application. Refer to the upstream repository for current APIs, examples, platform constraints and supported versions.
-
-## Explore the project
-
-[Source repository, documentation or official result](https://github.com/AlixANNERAUD/battery-percent) ↗
-
-**Related work:** [Model railway network](/projects/model-railway) · [Connected speaker](/projects/connected-speaker)

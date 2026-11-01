@@ -3,11 +3,7 @@ title: "embedded-i18n"
 description: "Internationalisation compilée dans le firmware Rust : traductions en ROM, validation à la compilation et fonctionnement sans allocateur."
 ---
 
-[← Tous les projets](/fr/projects)
-
 # embedded-i18n
-
-**Rust · Macros · no_std · i18n** · 2026 - présent
 
 > Internationalisation compilée dans le firmware Rust : traductions en ROM, validation à la compilation et fonctionnement sans allocateur.
 
@@ -22,9 +18,3 @@ Les ressources de langue deviennent des chaînes statiques au moment de la compi
 ## Portée et limites
 
 Bibliothèque conçue pour être réutilisée indépendamment d'une application. Les API et exemples à jour figurent dans le dépôt source ; les contraintes d'environnement et les versions supportées doivent y être vérifiées.
-
-## Explorer le projet
-
-[Dépôt, documentation ou résultat officiel](https://github.com/AlixANNERAUD/embedded-i18n) ↗
-
-**Dans le même domaine :** [Réseau ferroviaire miniature](/fr/projects/model-railway) · [Enceinte connectée](/fr/projects/connected-speaker)
