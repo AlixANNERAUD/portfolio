@@ -12,6 +12,7 @@ import {
 import Card from "../ui/Card.astro";
 import SectionHeading from "../ui/SectionHeading.astro";
 import Tags from "../ui/Tags.astro";
+import { experiences } from "../../data/experiences.ts";
 import { getProject, projectUrl } from "../../data/projects.ts";
 import {
   skillDomains,
@@ -22,7 +23,10 @@ import { localize } from "../../data/types.ts";
 import { localizePath, type Locale } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
 
-/** Technical domains, each backed by links to the projects that show it. */
+/**
+ * Technical domains, each backed by links to the projects, roles and degrees
+ * that show it. Every link is labelled with its kind.
+ */
 interface Props {
   lang: Locale;
   /** Position of the section on the page, numbering its overline. */
@@ -45,13 +49,26 @@ const icons = {
 function evidenceLink(evidence: SkillEvidence) {
   if (evidence.kind === "project") {
     return {
+      kind: t("skills.evidence.project"),
       title: localize(getProject(evidence.projectId).title, lang),
       href: projectUrl(evidence.projectId, lang),
       external: false,
     };
   }
+  if (evidence.kind === "experience") {
+    const entry = experiences.find(({ id }) => id === evidence.experienceId);
+    if (!entry) throw new Error(`Unknown experience ${evidence.experienceId}`);
+    return {
+      kind: t(`skills.evidence.${entry.group}`),
+      title: localize(entry.company, lang),
+      // The card's heading on the timeline, never a collapsed earlier card.
+      href: `${localizePath("/experiences", lang)}#${entry.id}-title`,
+      external: false,
+    };
+  }
   const external = /^https?:\/\//.test(evidence.href);
   return {
+    kind: t("skills.evidence.link"),
     title: evidence.label[lang],
     href: evidence.href.startsWith("/")
       ? localizePath(evidence.href, lang)
@@ -105,12 +122,13 @@ const pad = (n: number) => String(n).padStart(2, "0");
           />
 
           <div class="skills-evidence">
-            <h4>{t("skills.evidence")}</h4>
+            <h4>{t("skills.evidence.label")}</h4>
             <ul>
               {domain.examples.map((evidence) => {
                 const link = evidenceLink(evidence);
                 return (
                   <li>
+                    <span class="skills-evidence-kind">{link.kind}</span>
                     <a
                       href={link.href}
                       target={link.external ? "_blank" : undefined}
@@ -214,6 +232,15 @@ const pad = (n: number) => String(n).padStart(2, "0");
   }
   .skills-evidence li {
     min-width: 0;
+  }
+  .skills-evidence-kind {
+    display: block;
+    margin-bottom: var(--space-3xs);
+    color: var(--color-text-subtle);
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
   }
   /* Inline, so the arrow follows the last word even when the title wraps. */
   .skills-evidence a {
