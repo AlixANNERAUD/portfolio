@@ -27,13 +27,13 @@ The analysis is a single Jupyter notebook in Python, written up in a LaTeX repor
 - **One-hot encoding.** The musical key becomes twelve binary columns, so the regression can give each key its own coefficient.
 - **Forward selection.** Variables are added one at a time, and the subset with the lowest Mallows' Cp is kept.
 - **Outliers from leverage and contribution.** Each song's leverage and contribution to the model are computed in blocks of 1,000 songs to limit memory use; songs above the thresholds are removed.
-- **Statistical tests.** A Shapiro test checks whether danceability follows a normal distribution, and Student's t-tests compare explicit and non-explicit songs on danceability and on popularity.
+- **Statistical tests.** A Shapiro-Wilk test checks whether danceability follows a normal distribution, and Student's t-tests compare explicit and non-explicit songs on danceability and on popularity.
 
 ## Results
 
 - Valence, speechiness, year and popularity were the variables most associated with a higher danceability, while acousticness, energy and liveness lowered it. The key had no significant effect.
 - The model chosen by forward selection reached an R² of about 0.49, and about 0.65 after removing outliers. Both values were computed on the data used to fit the model.
-- The t-test found explicit songs more popular than non-explicit ones (p < 0.05). For danceability, the test returned a p-value of exactly 0, which we flagged as suspicious.
+- The notebook also compares popularity between explicit and non-explicit songs, but that test selects the wrong columns, so we draw no conclusion from it. For danceability, the test returned a p-value of exactly 0, which we flagged as suspicious.
 - On tracks fetched from the API, predictions differed from Spotify's scores. We attributed the gaps to a dataset that may be outdated and to variables Spotify uses but the dataset lacks.
 
 ## Limitations

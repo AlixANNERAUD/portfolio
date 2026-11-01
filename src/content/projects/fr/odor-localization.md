@@ -7,11 +7,11 @@ description: "Prototype de recherche issu d’un stage à NYU : des nœuds ESP3
 
 ## Le problème
 
-Quand un gaz se répand dans une pièce, quelques capteurs bon marché placés à des positions connues peuvent-ils indiquer d’où il vient ? C’était le sujet de mon stage de recherche à l’université de New York, à l’été 2024. Notre équipe de deux a construit un prototype pour l’étudier : une simulation de la diffusion du gaz, le micrologiciel des nœuds de mesure et un programme de traitement.
+Quand un gaz se répand dans une pièce, quelques capteurs bon marché placés à des positions connues peuvent-ils indiquer d’où il vient ? C’était le sujet de mon stage de recherche à l’Université de New York (NYU), à l’été 2024. Notre équipe de deux a construit un prototype pour l’étudier : une simulation de la diffusion du gaz, le micrologiciel des nœuds de mesure et un programme de traitement.
 
 ## Architecture
 
-Les mesures franchissent quatre étapes :
+Les mesures passent par quatre étapes :
 
 1. **Acquérir.** Chaque nœud est un ESP32 qui lit des capteurs de gaz MQ sur ses entrées analogiques, horodate chaque mesure grâce à l’heure réseau et affiche son état sur un petit écran OLED.
 2. **Transmettre.** Les nœuds publient leurs mesures en JSON, par Wi-Fi, auprès d’un courtier MQTT.

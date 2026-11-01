@@ -58,6 +58,7 @@ test("typesetFrench leaves URLs, times, ratios and numbers alone", () => {
     "le site www.example.org/?q=1",
     "à 10:30, format 16:9",
     "1e10 et 0x1e",
+    "4e-3 et 2e+5",
     "std::vec et C::f",
   ]) {
     assert.deepEqual(typesetFrench(text), [text], text);

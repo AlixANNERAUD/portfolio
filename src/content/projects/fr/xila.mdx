@@ -18,7 +18,7 @@ L’essentiel du travail consiste donc à **définir des contrats réutilisables
 
 <ArchitectureFlow title="Couches principales de Xila" steps={[{ title: 'Pilotes', detail: 'Cibles Linux natif, navigateur et matériel, assemblées dans le dépôt Platforms.' }, { title: 'Sous-systèmes', detail: 'Tâches, VFS, réseau, graphisme, mémoire et temps, écrits en Rust.' }, { title: 'Frontière d’exécution', detail: 'Moteur Wasmi et liaisons entre invité et hôte.' }, { title: 'Applications', detail: 'Invités WebAssembly comme Calculator et Weather, et le shell graphique.' }]} />
 
-Le code est réparti entre trois dépôts. **Core** regroupe les crates portables, **Applications** les programmes officiels et le moteur Wasmi, et **Platforms** les pilotes concrets et l’assemblage final pour chaque cible. Chaque crate a l’un de ces quatre rôles : un **sous-système** possède un service d’exécution, une **bibliothèque** définit des contrats ou des implémentations, un **pilote** adapte une fonction à une plateforme, et un **exécutable** est un programme qui utilise les services assemblés.
+Le code est réparti entre trois dépôts. **Core** regroupe les crates portables, **Applications** les programmes officiels et le moteur Wasmi, et **Platforms** les pilotes concrets et l’assemblage final pour chaque cible. Chaque crate a l’un de ces quatre rôles : un **sous-système** gère un service d’exécution, une **bibliothèque** définit des contrats ou des implémentations, un **pilote** adapte une fonction à une plateforme, et un **exécutable** est un programme qui utilise les services assemblés.
 
 Une requête de fichier passe par le VFS, puis par les contrats du système de fichiers, avant d’atteindre une instance LittleFS montée ou un pilote de périphérique. Un invité WebAssembly suit le même chemin à travers les liaisons du moteur : il atteint les mêmes gestionnaires de sous-systèmes que les programmes natifs.
 
@@ -38,7 +38,7 @@ Xila est un logiciel libre sous licence Apache 2.0, documenté sur [xila.dev](ht
 
 ## Limites
 
-Xila est en développement actif, et la prise en charge du matériel varie selon la cible. Les exemples natif et navigateur sont des environnements de développement : ils ne prouvent pas qu’une carte donnée est prise en charge, et les vérifications lancées sur l’hôte Linux ne prouvent pas que le code est correct sur ESP32, nRF ou STM32. L’interpréteur Wasm, les couches d’abstraction et LVGL coûtent de la mémoire et du temps de calcul, à mesurer sur l’appareil visé.
+Xila est en développement actif, et la prise en charge du matériel varie selon la cible. Les exemples natif et navigateur sont des environnements de développement : ils ne prouvent pas qu’une carte donnée soit prise en charge, et les vérifications lancées sur l’hôte Linux ne prouvent pas que le code soit correct sur ESP32, nRF ou STM32. L’interpréteur Wasm, les couches d’abstraction et LVGL coûtent de la mémoire et du temps de calcul, à mesurer sur l’appareil visé.
 
 ## Explorer le projet
 

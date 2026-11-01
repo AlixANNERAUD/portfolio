@@ -7,7 +7,7 @@ description: "Troisième place au classement général du CTF Jeanne d’Hack 20
 
 ## Présentation
 
-Au CTF Jeanne d’Hack 2025, une compétition de cybersécurité organisée à l’Université de Rouen, notre équipe « Les Schtroumpfs » a terminé à la troisième place du classement général.
+Au CTF Jeanne d’Hack 2025, une compétition de cybersécurité organisée à l’Université de Rouen Normandie, notre équipe « Les Schtroumpfs » a terminé à la troisième place du classement général.
 
 ## Contexte
 

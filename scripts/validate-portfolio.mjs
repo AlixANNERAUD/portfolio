@@ -261,7 +261,8 @@ if (
 /** Splits a page into its `title`/`description` frontmatter and its body. */
 function parseFrontmatter(source) {
   const [, frontmatter = "", body = source] =
-    source.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/) ?? [];
+    source.replace(/\r\n?/g, "\n").match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/) ??
+    [];
   const fields = {};
   for (const [, key, raw] of frontmatter.matchAll(
     /^(title|description): (.*)$/gm,
@@ -302,6 +303,16 @@ for (const lang of locales) {
     const { fields, body } = parseFrontmatter(
       readProjectPage(lang, project.id),
     );
+    // Only single-line `title:` and `description:` values are read.
+    const missing = ["title", "description"].filter(
+      (key) => typeof fields[key] !== "string" || !fields[key].trim(),
+    );
+    if (missing.length) {
+      editorialIssues.push(
+        `${where}: frontmatter needs single-line ${missing.join(" and ")}`,
+      );
+      continue;
+    }
     const title = fields.title.trim();
     const duplicate = seenTitles.get(title.toLowerCase());
     if (duplicate) {

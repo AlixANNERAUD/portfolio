@@ -1,10 +1,11 @@
 /**
  * Schema.org JSON-LD builders. Every page emits one `@graph`; the Person,
- * WebSite and home ProfilePage keep the same `@id` in both locales, and other
- * nodes reference them by `@id` instead of repeating them.
+ * WebSite and home ProfilePage keep the same `@id` in both locales. Project
+ * nodes inline a minimal Person author and WebSite (same `@id`, name, URL) so
+ * each project page's graph stands on its own.
  */
 import { experiences } from "../data/experiences.ts";
-import type { Project } from "../data/projects.ts";
+import { projectRepository, type Project } from "../data/projects.ts";
 import { site } from "../data/site.ts";
 import { skillDomains } from "../data/skills.ts";
 import { technologyLabel, type Technology } from "../data/technologies.ts";
@@ -21,9 +22,6 @@ const ref = (id: string) => ({ "@id": id });
 const absolute = (enPath: string, lang: Locale) =>
   site.url + localizePath(enPath, lang);
 
-/** Hosts whose project links point at source code (`codeRepository`). */
-const codeHosts = new Set(["github.com", "gitlab.com", "codeberg.org"]);
-
 /** Tags that name a programming language, with the language's own name. */
 const programmingLanguages: Partial<Record<Technology, string>> = {
   C: "C",
@@ -39,9 +37,27 @@ const programmingLanguages: Partial<Record<Technology, string>> = {
 const currentRole = experiences.find(
   (entry) => entry.group === "professional" && entry.ongoing,
 );
+/** Studies in progress: an affiliation, not yet an `alumniOf`. */
 const currentStudies = experiences.filter(
   (entry) => entry.group === "education" && entry.ongoing,
 );
+
+/**
+ * Minimal Person and WebSite nodes for project pages: validators read each page
+ * on its own, so a bare `@id` reference would leave the author unnamed.
+ */
+const personSummary = () => ({
+  "@type": "Person",
+  "@id": personId,
+  name: site.name,
+  url: `${site.url}/`,
+});
+const websiteSummary = () => ({
+  "@type": "WebSite",
+  "@id": websiteId,
+  name: site.name,
+  url: `${site.url}/`,
+});
 
 export function personLd(lang: Locale): JsonLdNode {
   return {
@@ -58,11 +74,13 @@ export function personLd(lang: Locale): JsonLdNode {
         url: currentRole.companyUrl,
       },
     }),
-    alumniOf: currentStudies.map((entry) => ({
-      "@type": "EducationalOrganization",
-      name: localize(entry.company, lang),
-      url: entry.companyUrl,
-    })),
+    ...(currentStudies.length > 0 && {
+      affiliation: currentStudies.map((entry) => ({
+        "@type": "EducationalOrganization",
+        name: localize(entry.company, lang),
+        url: entry.companyUrl,
+      })),
+    }),
     knowsAbout: skillDomains.map((domain) => domain.title[lang]),
     sameAs: Object.values(site.social),
   };
@@ -93,7 +111,7 @@ export function profilePageLd(lang: Locale): JsonLdNode {
 }
 
 /**
- * The project: `SoftwareSourceCode` when its link is a code host, otherwise
+ * The project: `SoftwareSourceCode` when it has a public repository, otherwise
  * `CreativeWork` (no repository nor language claimed).
  */
 export function projectLd(
@@ -102,24 +120,22 @@ export function projectLd(
   description: string,
 ): JsonLdNode {
   const url = absolute(`/projects/${project.id}`, lang);
-  const code =
-    project.externalUrl !== undefined &&
-    codeHosts.has(new URL(project.externalUrl).hostname);
+  const repository = projectRepository(project);
   const languages = [
     ...new Set(project.tags.flatMap((tag) => programmingLanguages[tag] ?? [])),
   ];
   return {
-    "@type": code ? "SoftwareSourceCode" : "CreativeWork",
+    "@type": repository ? "SoftwareSourceCode" : "CreativeWork",
     "@id": `${url}#project`,
     url,
     name: localize(project.title, lang),
     description,
     inLanguage: lang,
     keywords: project.tags.map((tag) => technologyLabel(tag, lang)),
-    author: ref(personId),
-    isPartOf: ref(websiteId),
-    ...(code && {
-      codeRepository: project.externalUrl,
+    author: personSummary(),
+    isPartOf: websiteSummary(),
+    ...(repository && {
+      codeRepository: repository,
       ...(languages.length && { programmingLanguage: languages }),
     }),
   };

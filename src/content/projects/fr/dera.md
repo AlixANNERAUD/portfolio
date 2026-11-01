@@ -11,7 +11,7 @@ dera.page propose aux étudiants de l’INSA Rouen Normandie plusieurs services 
 
 ## Choix techniques
 
-- **Auto-hébergée.** Les services tournent sur une infrastructure que je gère, ce qui garde la maîtrise des données et du déploiement.
+- **Auto-hébergée.** Les services tournent sur une infrastructure que je gère, ce qui me permet de garder la maîtrise des données et du déploiement.
 - **Écrite en Rust**, pour les performances et la fiabilité.
 
 ## Explorer le projet

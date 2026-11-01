@@ -1,13 +1,13 @@
 ---
-title: "ITI Adventure: text adventure game in Java"
+title: "ITI Aventure: text adventure game in Java"
 description: "A terminal text adventure in Java 21, built by a team of two at INSA Rouen Normandie: rooms, locked doors, keys and roaming monsters, loaded from a text file."
 ---
 
-# ITI Adventure: an object-oriented text adventure in Java
+# ITI Aventure: an object-oriented text adventure in Java
 
 ## Overview
 
-ITI Adventure is a text adventure game played in the terminal. We wrote it in Java as a team of two for the "Advanced programming and Java" course at INSA Rouen Normandie, in 2024. The player moves through a world of rooms connected by doors, some of them locked, picks up and drops objects, and opens doors and chests, while monsters wander from room to room. The game ends in success or failure as soon as one of its end conditions is met.
+ITI Aventure is a text adventure game played in the terminal. We wrote it in Java as a team of two for the "Advanced programming and Java" course at INSA Rouen Normandie, in 2024. The player moves through a world of rooms connected by doors, some of them locked, picks up and drops objects, and opens doors and chests, while monsters wander from room to room. The game ends in success or failure as soon as one of its end conditions is met.
 
 ## Technical choices
 

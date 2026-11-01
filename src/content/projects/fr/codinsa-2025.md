@@ -1,13 +1,13 @@
 ---
 title: "Cod’INSA 2025 : victoire de l’INSA Rouen"
-description: "Première place au classement général de Cod’INSA 2025, un concours de programmation par équipes qui récompense des solutions algorithmiques rapides et justes."
+description: "Première place au classement général de Cod’INSA 2025, concours de programmation par équipes qui récompense des solutions algorithmiques rapides et correctes."
 ---
 
 # Cod’INSA 2025 : première place au classement général
 
 ## Présentation
 
-J’ai fait partie de l’équipe de l’INSA Rouen qui a remporté Cod’INSA 2025, à la première place du classement général.
+J’ai fait partie de l’équipe de l’INSA Rouen Normandie qui a remporté Cod’INSA 2025, en terminant première du classement général.
 
 ## Contexte
 

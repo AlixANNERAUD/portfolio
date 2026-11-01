@@ -1,6 +1,6 @@
 ---
 title: "Prédire la dansabilité d’un titre Spotify"
-description: "Projet d’équipe en science des données qui modélise la dansabilité Spotify par régression linéaire multiple sur 160 000 titres, puis la teste via l’API."
+description: "Projet d’équipe en science des données qui modélise la dansabilité Spotify par régression linéaire multiple sur 160 000 titres, puis teste le modèle via l’API."
 ---
 
 # Expliquer le score de dansabilité de Spotify par la régression linéaire
@@ -27,13 +27,13 @@ L’analyse tient dans un seul carnet Jupyter en Python, accompagné d’un rapp
 - **Un codage disjonctif complet.** La tonalité devient douze colonnes binaires, ce qui permet à la régression d’attribuer un coefficient à chaque tonalité.
 - **Une sélection ascendante.** Les variables sont ajoutées une à une, et le sous-ensemble au plus faible Cp de Mallows est retenu.
 - **Des valeurs aberrantes repérées par levier et contribution.** Le levier et la contribution de chaque titre au modèle sont calculés par blocs de 1 000 titres pour limiter la mémoire utilisée ; les titres au-delà des seuils sont retirés.
-- **Des tests statistiques.** Un test de Shapiro vérifie si la dansabilité suit une loi normale, et des tests de Student comparent titres explicites et non explicites sur la dansabilité et sur la popularité.
+- **Des tests statistiques.** Un test de Shapiro-Wilk vérifie si la dansabilité suit une loi normale, et des tests de Student comparent titres explicites et non explicites sur la dansabilité et sur la popularité.
 
 ## Résultats
 
-- La valence, la part de paroles, l’année et la popularité sont les variables les plus associées à une dansabilité élevée, tandis que le caractère acoustique, l’énergie et la présence d’un public la font baisser. La tonalité n’a pas d’effet significatif.
+- La valence, le caractère parlé (speechiness), l’année et la popularité sont les variables les plus associées à une dansabilité élevée, tandis que le caractère acoustique, l’énergie et la présence d’un public la font baisser. La tonalité n’a pas d’effet significatif.
 - Le modèle retenu par sélection ascendante atteint un R² d’environ 0,49, puis d’environ 0,65 après retrait des valeurs aberrantes. Ces deux valeurs sont calculées sur les données ayant servi à ajuster le modèle.
-- Le test de Student conclut que les titres explicites sont plus populaires que les autres (p < 0,05). Pour la dansabilité, le test a renvoyé une p-valeur exactement nulle, que nous avons jugée suspecte.
+- Le carnet compare aussi la popularité des titres explicites et non explicites, mais ce test porte sur les mauvaises colonnes : nous n’en tirons aucune conclusion. Pour la dansabilité, le test a renvoyé une p-valeur exactement nulle, que nous avons jugée suspecte.
 - Sur les titres récupérés par l’API, les prédictions s’écartent des scores de Spotify. Nous avons attribué ces écarts à un jeu de données peut-être daté et à des variables utilisées par Spotify mais absentes du jeu de données.
 
 ## Limites

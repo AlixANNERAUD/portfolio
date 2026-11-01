@@ -14,5 +14,5 @@ Pendant le premier confinement, en 2020, j’ai participé à la plateforme Covi
 Les visières étaient imprimées sur une **Geeetech A20M**. Pour cette série, j’ai écrit un **G-code** sur mesure :
 
 - **Des piles de cinq.** Chaque impression produisait une pile de cinq armatures au lieu d’une seule.
-- **Des réglages ajustés.** La vitesse et la précision d’impression ont été ajustées pour ces pièces.
+- **Des réglages adaptés.** La vitesse et la précision d’impression ont été ajustées pour ces pièces.
 - **Une éjection automatique.** J’ai imprimé une pièce supplémentaire, fixée sous le ventilateur de la tête d’impression. À la fin d’une impression, la tête s’en servait pour pousser la pile terminée hors du plateau, libérant la place pour la suivante.

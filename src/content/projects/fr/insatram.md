@@ -1,15 +1,15 @@
 ---
 title: "INSAtram : jeu de tramway en Free Pascal"
-description: "Un jeu de tramway inspiré de Mini Metro, écrit en Free Pascal avec SDL 1.2 par une équipe de trois à l’INSA Rouen, avec des trajets calculés par Dijkstra."
+description: "Un jeu de tramway inspiré de Mini Metro, en Free Pascal avec SDL 1.2, écrit à trois à l’INSA Rouen, avec des trajets calculés par l’algorithme de Dijkstra."
 ---
 
 # INSAtram : un jeu de tramway à la Mini Metro en Free Pascal
 
 ## Présentation
 
-INSAtram est un jeu de gestion de réseau de tramway inspiré de Mini Metro, du studio Dinosaur Polo Club. Nous l’avons réalisé à trois pour le projet d’informatique de deuxième année du cycle préparatoire de l’INSA Rouen, en 2022, uniquement à partir d’observations du jeu original.
+INSAtram est un jeu de gestion de réseau de tramway inspiré de Mini Metro, du studio Dinosaur Polo Club. Nous l’avons réalisé à trois pour le projet d’informatique de deuxième année du cycle préparatoire de l’INSA Rouen Normandie, en 2022, uniquement à partir d’observations du jeu original.
 
-Des stations de cinq formes apparaissent sur la carte, et des voyageurs y attendent un train vers une station de leur forme. Le joueur trace des lignes de tramway entre les stations ; chaque ligne accueille jusqu’à quatre trains de trois voitures au plus, de six voyageurs chacune. Chaque semaine de jeu, la partie propose de choisir entre deux récompenses tirées au hasard : une nouvelle ligne, un train, une voiture ou un tunnel, nécessaire à une ligne pour traverser le fleuve. La partie est perdue lorsqu’une station accueille plus de six voyageurs pendant plus de 40 secondes, et le score compte les voyageurs arrivés à destination.
+Des stations de cinq formes apparaissent sur la carte, et des voyageurs y attendent un train vers une station de la même forme que la leur. Le joueur trace des lignes de tramway entre les stations ; chaque ligne accueille jusqu’à quatre trains de trois voitures au plus, de six voyageurs chacune. Chaque semaine de jeu, la partie propose de choisir entre deux récompenses tirées au hasard : une nouvelle ligne, un train, une voiture ou un tunnel, nécessaire à une ligne pour traverser le fleuve. La partie est perdue lorsqu’une station accueille plus de six voyageurs pendant plus de 40 secondes, et le score compte les voyageurs arrivés à destination.
 
 ## Choix techniques
 

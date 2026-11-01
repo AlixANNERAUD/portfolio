@@ -31,7 +31,7 @@ const BOUNDARY = "(?=\\s|$|[)\\]»”\"'’.,…])";
 const URL_PATTERN = /(?:https?:\/\/|www\.)[^\s<>«»"“”]+[^\s<>«»"“”.,;:!?)]/g;
 
 const ORDINAL_PATTERN =
-  /(?<![\p{L}\p{N}.,])(\d+)(ères|ère|res|re|ers|er|èmes|ème|emes|eme|es|e)(?![\p{L}\p{N}])/gu;
+  /(?<![\p{L}\p{N}.,])(\d+)(ères|ère|res|re|ers|er|èmes|ème|emes|eme|es|e)(?![\p{L}\p{N}]|[-+]\d)/gu;
 const ORDINAL_SUFFIX = {
   ère: "re",
   re: "re",

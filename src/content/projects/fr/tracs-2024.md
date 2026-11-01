@@ -1,17 +1,17 @@
 ---
 title: "TRACS 2024 : compétition de cybersécurité"
-description: "Avec l’équipe Les Schtroumpfs, 36e place au classement étudiant de TRACS 2024, la compétition de cybersécurité de la DGSE, le renseignement extérieur français."
+description: "Avec Les Schtroumpfs, 36e du classement étudiant de TRACS 2024, la compétition de cybersécurité de la DGSE, le service de renseignement extérieur français."
 ---
 
 # TRACS 2024 : 36e place au classement étudiant
 
 ## Présentation
 
-En 2024, notre équipe « Les Schtroumpfs » a participé à TRACS, la compétition de cybersécurité organisée par la DGSE, et s’est classée 36e au classement étudiant.
+En 2024, notre équipe « Les Schtroumpfs » a participé à TRACS, la compétition de cybersécurité organisée par la DGSE, et a terminé 36e du classement étudiant.
 
 ## Contexte
 
-Comme dans un CTF, les équipes résolvent des épreuves de sécurité informatique pour marquer des points. TRACS publie un classement des équipes étudiantes, dont est issue cette place. Comme tous les résultats de cette rubrique, elle revient à l’équipe entière.
+Comme dans un CTF, les équipes résolvent des épreuves de sécurité informatique pour marquer des points. Cette place provient du classement des équipes étudiantes publié par TRACS. Comme tous les résultats de cette rubrique, elle revient à l’équipe entière.
 
 ## Consulter le résultat
 

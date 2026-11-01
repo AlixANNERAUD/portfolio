@@ -1,6 +1,6 @@
 # Alix ANNERAUD - Portfolio
 
-**Logiciel, systèmes et sécurité.** Ingénierie logicielle · Systèmes · Sécurité
+**Logiciel, systèmes et sécurité.**
 
 [Portfolio](https://alix.anneraud.fr/fr/) · [Projets](https://alix.anneraud.fr/fr/projects) · [English](./README.md)
 
@@ -11,7 +11,7 @@ Ce site est un portfolio bilingue entièrement généré avec **Astro** : chaqu
 - **Astro 7** : génération HTML, routes, pages FR/EN, SEO et sitemap.
 - **Composants Astro + TypeScript** : toute l’interface. De petits `<script>` modules ajoutent les filtres des projets, le bouton des expériences plus anciennes, le repli des logos, la démo Xila à la demande et l’animation WebGL facultative ; sans JavaScript, tout le contenu reste visible. Aucun framework client.
 - **MDX** : diagrammes et composants Astro intégrés aux études de cas Xila, Infrastructure et Mini Train Store.
-- **CSS scoped d’Astro** sur les jetons de design de `src/styles/tokens.css` : styles responsive de l’interface, sans framework CSS.
+- **Styles à portée limitée (scoped) d’Astro** sur les jetons de design de `src/styles/tokens.css` : styles adaptatifs (responsive) de l’interface, sans framework CSS.
 - **`src/i18n/ui.ts`** : dictionnaire typé FR/EN de toutes les chaînes de l’interface.
 - **GitHub Pages** : hébergement de `dist/`, sans backend.
 
@@ -66,7 +66,7 @@ tools/browser-checks/     Test de fumée Playwright
 
 **Données structurées :** chaque page indexable contient un seul `@graph` JSON-LD construit par `src/lib/seo.ts` ; les nœuds Person et WebSite gardent le même `@id` dans les deux langues.
 
-**Typographie française :** les fiches en français sont composées à la compilation par `src/lib/rehype-french-typography.mjs` (espaces insécables, guillemets « » , ordinaux). Les chaînes de l’interface et les données ne passent pas par ce plugin : `validate:portfolio` vérifie qu’elles sont déjà correctes.
+**Typographie française :** les fiches en français sont composées à la compilation par `src/lib/rehype-french-typography.mjs` (espaces insécables, guillemets « », ordinaux). Les chaînes de l’interface et les données ne passent pas par ce plugin : `validate:portfolio` vérifie qu’elles sont déjà correctes.
 
 **Page d’accueil :** le parcours professionnel précède les projets mis en avant. Le schéma WebGL apparaît plus bas, clairement présenté comme l’architecture de Xila, et non comme l’ensemble du parcours. Les cartes d’expérience sont générées statiquement depuis les données partagées.
 

@@ -17,7 +17,7 @@ The robot is built around a Raspberry Pi 4, with an L293D driver for its two mot
 - **A web control panel.** A static web page drives the robot through a small HTTP API: joystick direction and speed, settings such as the current mode, and sounds to play. The program turns the direction into a speed for each motor.
 - **Line detection in a separate process.** When line-following mode starts, the C++ program launches a Python script that captures camera frames with Picamera2 and reduces the top rows of each frame to a brightness profile of 640 values. The C++ side reads this profile, locates the line from the pixels above a threshold and converts its position into a steering angle. When the line is lost, the robot turns toward the side where it was last seen.
 - **Stop before obstacles.** In line-following mode, the robot stops while the LiDAR measures an obstacle closer than 5 cm. The LCD shows the measured distance or an obstacle warning, and a sound plays.
-- **Testable without the robot.** GPIO access goes through a pin interface with a Raspberry Pi 4 implementation and a native one, so the Unity unit tests run in GitHub Actions without hardware. The repository also keeps a tested PID controller that the final line follower does not use.
+- **Testable without the robot.** GPIO access goes through a pin interface with a Raspberry Pi 4 implementation and a native one, so the code builds off the robot. GitHub Actions runs a Unity test of the PID controller, which the final line follower does not use.
 
 ## Explore the project
 

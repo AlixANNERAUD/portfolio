@@ -7,7 +7,7 @@ description: "Première place ex æquo avec deux autres équipes au classement g
 
 ## Présentation
 
-Au CTF Jeanne d’Hack 2026, une compétition de cybersécurité organisée à l’Université de Rouen, notre équipe « #JeSuisAlix » a terminé première du classement général, à égalité avec deux autres équipes.
+Au CTF Jeanne d’Hack 2026, une compétition de cybersécurité organisée à l’Université de Rouen Normandie, notre équipe « #JeSuisAlix » a terminé première du classement général, à égalité avec deux autres équipes.
 
 ## Contexte
 

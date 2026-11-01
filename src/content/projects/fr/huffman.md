@@ -1,6 +1,6 @@
 ---
 title: "Codage de Huffman : un compresseur en C"
-description: "Un compresseur Huffman en C, écrit à quatre à l’INSA Rouen Normandie, avec son propre en-tête de fichier, des tests unitaires CUnit et des tests aller-retour."
+description: "Un compresseur de Huffman en C, écrit à quatre à l’INSA Rouen Normandie, avec son en-tête de fichier, des tests unitaires CUnit et des tests aller-retour."
 ---
 
 # Codage de Huffman : un compresseur de fichiers sans perte en C
@@ -22,4 +22,4 @@ Le programme propose deux commandes : `huffman c FICHIER` compresse un fichier e
 
 ## Explorer le projet
 
-- [Code source](https://github.com/AlixANNERAUD/huffman_compressor) : sources C, makefile, tests et rapport LaTeX.
+- [Code source](https://github.com/AlixANNERAUD/huffman_compressor) : sources C, Makefile, tests et rapport LaTeX.

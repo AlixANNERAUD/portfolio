@@ -29,7 +29,31 @@ export interface Project {
   ranking: Record<RankFactor, number>;
   /** Team size, when the project was built by a team. */
   team?: number;
+  /** Main link: the project's site, demo or repository. */
   externalUrl?: string;
+  /** Public source repository, when `externalUrl` is not already one. */
+  repositoryUrl?: string;
+}
+
+/** Hosts whose links point at source code. */
+export const codeHosts: ReadonlySet<string> = new Set([
+  "github.com",
+  "gitlab.com",
+  "codeberg.org",
+]);
+
+/** The project's main link, typed for entries that have none. */
+export function projectExternalUrl(project: Project): string | undefined {
+  return project.externalUrl;
+}
+
+/** Public source repository: `repositoryUrl`, else a code-host `externalUrl`. */
+export function projectRepository(project: Project): string | undefined {
+  if (project.repositoryUrl) return project.repositoryUrl;
+  const url = project.externalUrl;
+  return url !== undefined && codeHosts.has(new URL(url).hostname)
+    ? url
+    : undefined;
 }
 
 export const projects = [
@@ -52,6 +76,7 @@ export const projects = [
       evidence: 5,
     },
     externalUrl: "https://www.xila.dev",
+    repositoryUrl: "https://github.com/xila-project/core",
   },
   {
     id: "infrastructure",
@@ -97,8 +122,8 @@ export const projects = [
     id: "model-railway",
     title: { en: "Model railway network", fr: "Réseau ferroviaire miniature" },
     description: {
-      en: "Electronics for a digital HO model railway, including ESP32 modules that detect occupied blocks by current and report them wirelessly over S88.",
-      fr: "L’électronique d’un réseau miniature numérique H0, dont des modules ESP32 qui détectent les cantons occupés par le courant et les signalent au bus S88.",
+      en: "Electronics for a digital HO model railway, including ESP32 modules that detect occupied blocks by current and report them over Wi-Fi to a gateway that feeds the S88 bus.",
+      fr: "L’électronique d’un réseau miniature numérique H0, dont des modules ESP32 qui détectent les cantons occupés en mesurant le courant et les signalent sans fil au bus S88.",
     },
     period: { start: "2019", end: "present" },
     group: "personal",
@@ -118,7 +143,7 @@ export const projects = [
     title: { en: "Connected speaker", fr: "Enceinte connectée" },
     description: {
       en: "An ESP32 that controls a hi-fi amplifier over Wi-Fi or with learned infrared remotes, from a web interface served by the board itself.",
-      fr: "Un ESP32 qui commande un amplificateur hi-fi en Wi-Fi ou par des télécommandes infrarouges apprises, depuis une interface web servie par la carte.",
+      fr: "Un ESP32 qui commande un amplificateur hi-fi en Wi-Fi ou par des télécommandes infrarouges dont il apprend les codes, depuis une interface web servie par la carte.",
     },
     period: { start: "2023" },
     group: "personal",
@@ -176,8 +201,8 @@ export const projects = [
     id: "lvgl-theme-shadcn",
     title: "lvgl_theme_shadcn",
     description: {
-      en: "A C99 theme that gives every LVGL 9 widget the shadcn/ui look, with light and dark palettes switchable at run time.",
-      fr: "Un thème C99 qui donne à chaque widget LVGL 9 le style shadcn/ui, avec des palettes claires et sombres changeables à l’exécution.",
+      en: "A C99 theme that gives every core LVGL 9 widget the shadcn/ui look, with light and dark palettes switchable at run time.",
+      fr: "Un thème C99 qui donne à chaque widget de base de LVGL 9 le style shadcn/ui, avec des palettes claires et sombres modifiables à l’exécution.",
     },
     period: { start: "2026", end: "present" },
     group: "library",
@@ -237,7 +262,7 @@ export const projects = [
     title: "embedded-i18n",
     description: {
       en: "Compile-time translations for no_std Rust firmware, stored in flash as plain strings, with missing keys caught at build time.",
-      fr: "Des traductions compilées pour micrologiciel Rust no_std, stockées en mémoire flash, avec les clés manquantes détectées à la compilation.",
+      fr: "Des traductions compilées pour micrologiciel Rust no_std, stockées en mémoire flash, et qui détecte les clés manquantes à la compilation.",
     },
     period: { start: "2026", end: "present" },
     group: "library",
@@ -319,7 +344,7 @@ export const projects = [
     id: "codinsa-2025",
     title: "Cod’INSA",
     description: {
-      en: "First place in the overall ranking of Cod'INSA 2025, a team programming contest that rewards fast, correct algorithmic solutions, with the INSA Rouen team.",
+      en: "With the INSA Rouen team, first place in the overall ranking of Cod'INSA 2025, a team programming contest that rewards fast, correct algorithmic solutions.",
       fr: "Première place au classement général de Cod’INSA 2025, un concours de programmation par équipes qui récompense des solutions algorithmiques rapides et justes.",
     },
     period: { start: "2025" },
@@ -426,10 +451,10 @@ export const projects = [
   },
   {
     id: "iti-adventure",
-    title: { en: "ITI Adventure", fr: "ITI Aventure" },
+    title: "ITI Aventure",
     description: {
       en: "A terminal text adventure in Java 21, built by a team of two at INSA Rouen Normandie: rooms, locked doors, keys and roaming monsters, loaded from a text file.",
-      fr: "Un jeu d’aventure textuel en Java 21, réalisé à deux à l’INSA Rouen Normandie : pièces, portes verrouillées, clés et monstres, avec des mondes décrits en texte.",
+      fr: "Un jeu d’aventure textuel en Java 21, écrit à deux à l’INSA Rouen Normandie : pièces, portes verrouillées, clés, monstres et mondes lus dans un fichier texte.",
     },
     period: { start: "2024" },
     group: "academic",
@@ -449,11 +474,11 @@ export const projects = [
     id: "huffman",
     title: {
       en: "Huffman compressor",
-      fr: "Compresseur Huffman",
+      fr: "Compresseur de Huffman",
     },
     description: {
       en: "A command-line Huffman compressor in C, built by a team of four at INSA Rouen Normandie, with its own file header, CUnit unit tests and round-trip tests.",
-      fr: "Un compresseur Huffman en C, écrit à quatre à l’INSA Rouen Normandie, avec son propre en-tête de fichier, des tests unitaires CUnit et des tests aller-retour.",
+      fr: "Un compresseur de Huffman en C, écrit à quatre à l’INSA Rouen Normandie, avec son en-tête de fichier, des tests unitaires CUnit et des tests aller-retour.",
     },
     period: { start: "2023" },
     group: "academic",
@@ -498,7 +523,7 @@ export const projects = [
     },
     description: {
       en: "A team data science project that models Spotify's danceability score with multiple linear regression on 160,000 songs, then tests it on tracks from the API.",
-      fr: "Projet d’équipe en science des données qui modélise la dansabilité Spotify par régression linéaire multiple sur 160 000 titres, puis la teste via l’API.",
+      fr: "Projet d’équipe en science des données qui modélise la dansabilité Spotify par régression linéaire multiple sur 160 000 titres, puis teste le modèle via l’API.",
     },
     period: { start: "2023" },
     group: "academic",
@@ -520,7 +545,7 @@ export const projects = [
     title: "INSAtram",
     description: {
       en: "A tram network game modeled on Mini Metro, written in Free Pascal with SDL 1.2 by a team of three at INSA Rouen, where each passenger is routed with Dijkstra.",
-      fr: "Un jeu de tramway inspiré de Mini Metro, écrit en Free Pascal avec SDL 1.2 par une équipe de trois à l’INSA Rouen, avec des trajets calculés par Dijkstra.",
+      fr: "Un jeu de tramway inspiré de Mini Metro, en Free Pascal avec SDL 1.2, écrit à trois à l’INSA Rouen, avec des trajets calculés par l’algorithme de Dijkstra.",
     },
     period: { start: "2022" },
     group: "academic",

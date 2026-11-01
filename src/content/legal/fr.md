@@ -32,7 +32,7 @@ Pour mesurer l’intérêt des projets présentés, le site charge **Umami**, un
 
 ### Contenus tiers
 
-- Certains logos d’organismes, dans le parcours, sont chargés depuis les sites de ces organismes (voir la section 5), sans transmettre la page d’origine.
+- Certains logos d’organismes, dans le parcours, sont chargés depuis les sites de ces organismes (voir la section 5), sans transmettre l’adresse de la page consultée (en-tête Referer).
 - La démonstration interactive de Xila est servie depuis `platforms.xila.dev` et ne se charge qu’après un clic pour la lancer.
 
 ## 4. Propriété intellectuelle

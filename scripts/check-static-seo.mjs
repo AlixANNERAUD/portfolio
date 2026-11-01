@@ -4,6 +4,7 @@ import { parse } from "node-html-parser";
 import {
   byScore,
   featuredProjects,
+  projectRepository,
   projects,
   projectUrl,
   relatedProjects,
@@ -14,6 +15,7 @@ import { site as siteData } from "../src/data/site.ts";
 import { skillDomains } from "../src/data/skills.ts";
 import { formatPeriod } from "../src/lib/format.ts";
 import { ui } from "../src/i18n/ui.ts";
+import { localizePath as localized } from "../src/i18n/locales.ts";
 import { findFrenchTypographyIssues } from "../src/lib/rehype-french-typography.mjs";
 
 /**
@@ -327,14 +329,12 @@ for (const [file, canonicalPath, translationPath] of cases) {
 // Structured data: each indexable page has one JSON-LD block, a schema.org
 // @graph with unique @ids and no raw "<". The homes share the Person,
 // WebSite and ProfilePage ids; project pages describe the project
-// (SoftwareSourceCode for a code host, otherwise CreativeWork) with the
-// Person as author; every inner page has a BreadcrumbList from Home.
+// (SoftwareSourceCode when it has a public repository, otherwise
+// CreativeWork) with the named Person as author; every inner page has a
+// BreadcrumbList from Home.
 {
   const personId = site + "/#person";
   const websiteId = site + "/#website";
-  const codeHosts = new Set(["github.com", "gitlab.com", "codeberg.org"]);
-  const localized = (path, lang) =>
-    lang === "en" ? path : path === "/" ? "/fr/" : "/fr" + path;
   /** The @graph nodes of the page, after recording any malformed block. */
   const graphOf = (file, html) => {
     const blocks = parse(html).querySelectorAll(
@@ -396,6 +396,9 @@ for (const [file, canonicalPath, translationPath] of cases) {
   const current = experiences.find(
     (entry) => entry.group === "professional" && entry.ongoing,
   );
+  const studying = experiences.filter(
+    (entry) => entry.group === "education" && entry.ongoing,
+  );
   for (const lang of ["en", "fr"]) {
     const t = ui[lang];
     const prefix = lang === "en" ? "" : "fr/";
@@ -417,8 +420,18 @@ for (const [file, canonicalPath, translationPath] of cases) {
       if (person?.worksFor?.name !== current.company) {
         failed.push(file + ": Person worksFor must be " + current.company);
       }
-      if (!Array.isArray(person?.alumniOf) || !person.alumniOf.length) {
-        failed.push(file + ": Person alumniOf missing");
+      // Studies in progress are an affiliation; alumniOf would claim a degree.
+      const affiliation = (person?.affiliation ?? []).map((org) => org.name);
+      const expected = studying.map((entry) =>
+        typeof entry.company === "string" ? entry.company : entry.company[lang],
+      );
+      if (JSON.stringify(affiliation) !== JSON.stringify(expected)) {
+        failed.push(
+          file + ": Person affiliation must list " + JSON.stringify(expected),
+        );
+      }
+      if (person && "alumniOf" in person) {
+        failed.push(file + ": Person alumniOf must not list ongoing studies");
       }
       const sameAs = Object.values(siteData.social);
       if (JSON.stringify(person?.sameAs) !== JSON.stringify(sameAs)) {
@@ -479,10 +492,8 @@ for (const [file, canonicalPath, translationPath] of cases) {
         { name: t["nav.projects"], item: site + localized("/projects", lang) },
         { name, item: url },
       ]);
-      const code =
-        project.externalUrl !== undefined &&
-        codeHosts.has(new URL(project.externalUrl).hostname);
-      const type = code ? "SoftwareSourceCode" : "CreativeWork";
+      const repository = projectRepository(project);
+      const type = repository ? "SoftwareSourceCode" : "CreativeWork";
       const nodes = ofType(graph, type);
       const node = nodes[0];
       const description = parse(html)
@@ -496,25 +507,30 @@ for (const [file, canonicalPath, translationPath] of cases) {
         node.description !== description ||
         node.inLanguage !== lang ||
         node.author?.["@id"] !== personId ||
-        Object.keys(node.author).length !== 1
+        node.author["@type"] !== "Person" ||
+        node.author.name !== siteData.name ||
+        node.isPartOf?.["@id"] !== websiteId ||
+        node.isPartOf["@type"] !== "WebSite" ||
+        node.isPartOf.name !== siteData.name
       ) {
         failed.push(
           file +
             ": expected one " +
             type +
-            " for the project, authored by " +
-            personId,
+            " for the project, authored by the named Person " +
+            personId +
+            " and part of the named WebSite",
         );
         continue;
       }
       if (
-        code
-          ? node.codeRepository !== project.externalUrl
+        repository
+          ? node.codeRepository !== repository
           : "codeRepository" in node
       ) {
-        failed.push(file + ": codeRepository must be the code host URL only");
+        failed.push(file + ": codeRepository must be the repository URL only");
       }
-      if (!code && "programmingLanguage" in node) {
+      if (!repository && "programmingLanguage" in node) {
         failed.push(
           file + ": CreativeWork must not declare a programmingLanguage",
         );

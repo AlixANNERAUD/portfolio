@@ -15,8 +15,8 @@ Pour notre projet d’apprentissage profond à l’INSA Rouen Normandie, en 2025
 
 Le dépôt consacre un répertoire à chaque modèle, avec son propre environnement Python, et intègre les implémentations d’origine sous forme de sous-modules Git :
 
-- **CellViT++.** Conversion des annotations PUMA, entraînement d’une tête de classification des noyaux sur un réseau de base CellViT-SAM-H, et recherche d’hyperparamètres suivie avec Weights & Biases.
-- **nnU-Net.** Préparation des jeux de données PUMA et NSCLC, un entraîneur et une fonction de perte personnalisés qui ignorent une valeur d’étiquette, et une chaîne qui préentraîne le modèle sur NSCLC avant de l’affiner sur PUMA.
+- **CellViT++.** Conversion des annotations PUMA, entraînement d’une tête de classification des noyaux sur un encodeur (backbone) CellViT-SAM-H, et recherche d’hyperparamètres suivie avec Weights & Biases.
+- **nnU-Net.** Préparation des jeux de données PUMA et NSCLC, une classe d’entraînement (trainer) et une fonction de perte personnalisées qui ignorent une valeur d’étiquette, et une chaîne qui préentraîne le modèle sur NSCLC avant de l’affiner sur PUMA.
 - **HoVer-Net.** Préparation de vignettes d’images et de masques d’annotation.
 
 Les entraînements ont tourné sous forme de tâches SLURM sur une grappe de GPU. Un carnet de présentation rassemble la motivation, le choix des modèles, les journaux d’expériences et les résultats.
@@ -30,7 +30,7 @@ Les entraînements ont tourné sous forme de tâches SLURM sur une grappe de GPU
 
 ## Résultats
 
-Notre principale expérience aboutie utilise CellViT++ avec une tête de classification entraînée. Sur le jeu de validation, notre présentation indique une AUROC d’environ 0,93, un score F1 d’environ 0,77 et une précision moyenne d’environ 0,45. Ce sont des observations de validation issues du projet, pas des résultats sur un jeu de test ni au classement de PUMA.
+Notre principale expérience aboutie utilise CellViT++ avec une tête de classification entraînée. Sur le jeu de validation, notre présentation indique une AUROC d’environ 0,93, un score F1 d’environ 0,77 et une précision moyenne d’environ 0,45. Ces valeurs ont été obtenues sur le jeu de validation : ce ne sont ni des résultats sur un jeu de test ni un classement PUMA.
 
 L’entraînement de nnU-Net s’est bloqué dans l’environnement de la grappe, et HoVer-Net est resté une intégration expérimentale : le projet ne compare donc pas les trois modèles.
 
