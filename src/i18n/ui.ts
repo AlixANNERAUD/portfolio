@@ -24,8 +24,9 @@ const en = {
   "locale.short": "EN",
   /** Invitation, written in this locale, to switch to it. */
   "locale.switchTo": "Switch to English",
-  /** Theme switch: the group label, then its three options. */
+  /** Theme menu: its label, its button's name, then its three choices. */
   "theme.label": "Theme",
+  "theme.current": "Theme: {choice}",
   "theme.auto": "Auto",
   "theme.light": "Light",
   "theme.dark": "Dark",
@@ -252,6 +253,7 @@ const fr: Record<UIKey, string> = {
   "locale.short": "FR",
   "locale.switchTo": "Passer en français",
   "theme.label": "Thème",
+  "theme.current": "Thème : {choice}",
   "theme.auto": "Auto",
   "theme.light": "Clair",
   "theme.dark": "Sombre",

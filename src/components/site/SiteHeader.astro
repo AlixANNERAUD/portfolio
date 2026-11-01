@@ -1,6 +1,6 @@
 ---
 import { Menu, X } from "@lucide/astro";
-import ThemeSwitch from "./ThemeSwitch.astro";
+import ThemeMenu from "./ThemeMenu.astro";
 import Monogram from "../../assets/monogram.svg";
 import { localizePath, locales, type Locale } from "../../i18n/locales.ts";
 import { useTranslations, type UIKey } from "../../i18n/ui.ts";
@@ -20,12 +20,12 @@ const tOther = useTranslations(other);
 const localeHref = Astro.props.localeHref ?? localizePath(path, other);
 const current = localizePath(path, lang);
 /*
- * Same breakpoint as the @media (max-width: 960px) rules below, in tokens.css
- * and in ThemeSwitch.astro. Wider than the 720px page breakpoint: the brand
- * and its monogram, four links, the locale switch and the three theme options
- * need about 920px in French, so below 960px they would overflow one row.
+ * Same breakpoint as the @media (max-width: 820px) rules below and in
+ * tokens.css. Measured: the brand, four links, the locale switch and the
+ * theme button need about 765px in French (more in Firefox), so below 820px they collapse
+ * behind the menu button.
  */
-const narrowQuery = "(max-width: 960px)";
+const narrowQuery = "(max-width: 820px)";
 const links: { key: UIKey; path: string }[] = [
   { key: "nav.experiences", path: "/experiences" },
   { key: "nav.projects", path: "/projects" },
@@ -70,10 +70,7 @@ const links: { key: UIKey; path: string }[] = [
       </span>
       <span class="visually-hidden">{t("nav.menu")}</span>
     </button>
-    {/*
-      The panel the menu button opens on narrow screens: the navigation,
-      then the theme switch as a sibling, outside the navigation landmark.
-    */}
+    {/* The panel the menu button opens on narrow screens. */}
     <div id="site-menu-panel" class="site-menu-panel">
       <nav class="site-main-nav" aria-label={t("nav.main")}>
         {links.map((link) => {
@@ -92,7 +89,6 @@ const links: { key: UIKey; path: string }[] = [
           );
         })}
       </nav>
-      <ThemeSwitch lang={lang} placement="menu" />
     </div>
     <div class="site-header-tools">
       <a
@@ -103,7 +99,7 @@ const links: { key: UIKey; path: string }[] = [
       >
         {tOther("locale.short")}
       </a>
-      <ThemeSwitch lang={lang} placement="header" />
+      <ThemeMenu lang={lang} />
     </div>
   </div>
 </header>
@@ -129,7 +125,15 @@ const links: { key: UIKey; path: string }[] = [
         }
       });
       document.addEventListener("click", (event) => {
-        if (isOpen() && !header.contains(event.target)) setOpen(false);
+        // Any click outside the button and its panel closes it, the theme
+        // menu button included: only one of the two menus is open at once.
+        if (
+          isOpen() &&
+          !button.contains(event.target) &&
+          !nav.contains(event.target)
+        ) {
+          setOpen(false);
+        }
       });
       header.addEventListener("focusout", (event) => {
         if (
@@ -286,7 +290,7 @@ const links: { key: UIKey; path: string }[] = [
     display: inline-flex;
   }
 
-  @media (max-width: 960px) {
+  @media (max-width: 820px) {
     .site-header-inner {
       flex-wrap: wrap;
       gap: var(--space-3xs);
@@ -342,7 +346,7 @@ const links: { key: UIKey; path: string }[] = [
       gap: 0;
     }
 
-    /* Links and the theme label share the panel's left edge. */
+    /* The links share the panel's left edge. */
     .site-header[data-menu="open"] .site-main-nav a {
       justify-content: flex-start;
       padding-inline: 0;

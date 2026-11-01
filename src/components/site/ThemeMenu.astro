@@ -1,0 +1,331 @@
+---
+import { Check, Monitor, Moon, Sun } from "@lucide/astro";
+import type { Locale } from "../../i18n/locales.ts";
+import { useTranslations } from "../../i18n/ui.ts";
+
+export interface Props {
+  lang: Locale;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const options = [
+  // Auto follows the device's setting, hence a screen rather than SunMoon,
+  // which reads as a second sun at icon size.
+  { value: "auto", icon: Monitor },
+  { value: "light", icon: Sun },
+  { value: "dark", icon: Moon },
+] as const;
+---
+
+<!--
+  One icon button in the header row opening a menu of Auto / Light / Dark,
+  following the ARIA menu button pattern: the button names the current
+  choice ("Theme: Auto"), the items are menuitemradio with aria-checked.
+  A menu rather than a native popover of radios: the button already owns
+  the open state through aria-expanded, and roving focus with arrows, Home
+  and End is what assistive technologies announce for a menu.
+  Auto is current in the HTML, matching the CSS default (color-scheme:
+  light dark). The control stays hidden until its script runs, since it
+  cannot work without JavaScript, and keeps its place meanwhile, so nothing
+  shifts when it shows.
+-->
+<div class="theme-menu" data-theme-menu data-choice="auto">
+  <button
+    class="theme-menu-button site-control"
+    type="button"
+    aria-haspopup="menu"
+    aria-expanded="false"
+    aria-controls="theme-menu-list"
+    aria-label={t("theme.current", { choice: t("theme.auto") })}
+    data-name={t("theme.current")}
+  >
+    {options.map(({ value, icon: Icon }) => (
+      <span class="theme-menu-icon" data-theme-icon={value} aria-hidden="true">
+        <Icon size={20} stroke-width={1.75} />
+      </span>
+    ))}
+  </button>
+  <div
+    id="theme-menu-list"
+    class="theme-menu-list"
+    role="menu"
+    aria-label={t("theme.label")}
+    hidden
+  >
+    {options.map(({ value, icon: Icon }) => (
+      <button
+        class="theme-menu-item"
+        type="button"
+        role="menuitemradio"
+        aria-checked={value === "auto" ? "true" : "false"}
+        tabindex="-1"
+        data-theme-choice={value}
+      >
+        <Icon size={18} stroke-width={1.75} aria-hidden="true" />
+        <span class="theme-menu-text">{t(`theme.${value}`)}</span>
+        <Check
+          class="theme-menu-check"
+          size={16}
+          stroke-width={2}
+          aria-hidden="true"
+        />
+      </button>
+    ))}
+  </div>
+</div>
+
+<script>
+  /*
+   * The head script in SiteHead.astro already applied the stored choice
+   * before paint; this keeps the menu, the html class and the theme-color
+   * metas in sync with later choices, other tabs included. Auto needs no
+   * listener: the CSS follows the system scheme live.
+   */
+  type Choice = "auto" | "light" | "dark";
+  const key = "portfolio-theme";
+  const root = document.documentElement;
+  const menus = [
+    ...document.querySelectorAll<HTMLElement>("[data-theme-menu]"),
+  ];
+  const isChoice = (value: unknown): value is Choice =>
+    value === "auto" || value === "light" || value === "dark";
+  const stored = (): Choice => {
+    try {
+      const value = localStorage.getItem(key);
+      return isChoice(value) ? value : "auto";
+    } catch {
+      return "auto";
+    }
+  };
+  const itemsOf = (menu: HTMLElement) => [
+    ...menu.querySelectorAll<HTMLElement>("[data-theme-choice]"),
+  ];
+  const apply = (choice: Choice) => {
+    root.classList.toggle("light", choice === "light");
+    root.classList.toggle("dark", choice === "dark");
+    for (const meta of document.querySelectorAll<HTMLMetaElement>(
+      "meta[data-theme-color]",
+    )) {
+      const scheme = meta.dataset.themeColor;
+      meta.media =
+        choice === "auto"
+          ? "(prefers-color-scheme: " + scheme + ")"
+          : scheme === choice
+            ? "all"
+            : "not all";
+    }
+    for (const menu of menus) {
+      menu.dataset.choice = choice;
+      let label = "";
+      for (const item of itemsOf(menu)) {
+        const current = item.dataset.themeChoice === choice;
+        item.setAttribute("aria-checked", String(current));
+        if (current) label = item.textContent?.trim() ?? "";
+      }
+      const button = menu.querySelector<HTMLElement>("[aria-haspopup]");
+      if (button?.dataset.name) {
+        button.setAttribute(
+          "aria-label",
+          button.dataset.name.replace("{choice}", label),
+        );
+      }
+    }
+  };
+
+  apply(stored());
+  for (const menu of menus) {
+    const button = menu.querySelector<HTMLButtonElement>("[aria-haspopup]");
+    const list = menu.querySelector<HTMLElement>('[role="menu"]');
+    if (!button || !list) continue;
+    const items = itemsOf(menu);
+    const isOpen = () => !list.hidden;
+    const close = (returnFocus: boolean) => {
+      if (!isOpen()) return;
+      list.hidden = true;
+      button.setAttribute("aria-expanded", "false");
+      if (returnFocus) button.focus();
+    };
+    // Opening focuses the current choice, like a radio group would.
+    const open = () => {
+      list.hidden = false;
+      button.setAttribute("aria-expanded", "true");
+      const current = items.find(
+        (item) => item.getAttribute("aria-checked") === "true",
+      );
+      (current ?? items[0])?.focus();
+    };
+    const move = (index: number) => {
+      const count = items.length;
+      items[((index % count) + count) % count]?.focus();
+    };
+
+    button.addEventListener("click", () => (isOpen() ? close(true) : open()));
+    button.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        open();
+      }
+    });
+    for (const item of items) {
+      item.addEventListener("click", () => {
+        const choice = item.dataset.themeChoice;
+        if (!isChoice(choice)) return;
+        apply(choice);
+        try {
+          localStorage.setItem(key, choice);
+        } catch {}
+        close(true);
+      });
+    }
+    list.addEventListener("keydown", (event) => {
+      const index = items.indexOf(document.activeElement as HTMLElement);
+      const target = {
+        ArrowDown: index + 1,
+        ArrowUp: index - 1,
+        Home: 0,
+        End: items.length - 1,
+      }[event.key];
+      if (target === undefined) return;
+      event.preventDefault();
+      move(target);
+    });
+    menu.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && isOpen()) {
+        event.preventDefault();
+        close(true);
+      }
+    });
+    // Tab, or any focus move, out of the control closes the menu.
+    menu.addEventListener("focusout", (event) => {
+      const next = event.relatedTarget;
+      if (next instanceof Node && !menu.contains(next)) close(false);
+    });
+    document.addEventListener("click", (event) => {
+      if (!menu.contains(event.target as Node)) close(false);
+    });
+    menu.dataset.ready = "";
+  }
+  addEventListener("storage", (event) => {
+    if (event.key === key || event.key === null) apply(stored());
+  });
+  // A page restored from the back/forward cache may hold an older choice.
+  addEventListener("pageshow", (event) => {
+    if (event.persisted) apply(stored());
+  });
+</script>
+
+<style>
+  .theme-menu {
+    position: relative;
+    display: inline-flex;
+  }
+
+  /* Hidden (and out of the tab order) yet keeping its width. */
+  .theme-menu:not([data-ready]) {
+    visibility: hidden;
+  }
+
+  /* The button shows the icon of the current choice only. */
+  .theme-menu-icon {
+    display: none;
+  }
+
+  .theme-menu[data-choice="auto"] [data-theme-icon="auto"],
+  .theme-menu[data-choice="light"] [data-theme-icon="light"],
+  .theme-menu[data-choice="dark"] [data-theme-icon="dark"] {
+    display: inline-flex;
+  }
+
+  .theme-menu-button[aria-expanded="true"] {
+    border-color: var(--color-border);
+    background: var(--color-surface-2);
+    color: var(--color-text);
+  }
+
+  /* Hangs under the button, right-aligned with it. */
+  .theme-menu-list {
+    position: absolute;
+    top: calc(100% + var(--space-3xs));
+    right: 0;
+    z-index: 50;
+    display: grid;
+    min-width: 10rem;
+    padding: var(--space-3xs);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-m);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-popover);
+  }
+
+  .theme-menu-list[hidden] {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .theme-menu-list {
+      animation: theme-menu-in var(--dur-fast) var(--ease-out);
+    }
+  }
+
+  @keyframes theme-menu-in {
+    from {
+      opacity: 0;
+      translate: 0 calc(-1 * var(--space-3xs));
+    }
+  }
+
+  .theme-menu-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    min-height: var(--control-size);
+    padding: 0 var(--space-xs);
+    border: 0;
+    border-radius: var(--radius-s);
+    background: transparent;
+    color: var(--color-text-muted);
+    font: inherit;
+    font-size: var(--step--1);
+    font-weight: 550;
+    text-align: start;
+    cursor: pointer;
+    transition:
+      color var(--dur-fast) var(--ease-out),
+      background-color var(--dur-fast) var(--ease-out);
+  }
+
+  .theme-menu-text {
+    flex: 1;
+  }
+
+  /* The check mark tells the current choice apart, not color alone. */
+  .theme-menu-item :global(.theme-menu-check) {
+    visibility: hidden;
+    color: var(--color-accent);
+  }
+
+  .theme-menu-item[aria-checked="true"] {
+    color: var(--color-text);
+  }
+
+  .theme-menu-item[aria-checked="true"] :global(.theme-menu-check) {
+    visibility: visible;
+  }
+
+  .theme-menu-item:focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: -3px;
+  }
+
+  @media (hover: hover) {
+    .theme-menu-item:hover {
+      background: var(--color-surface-2);
+      color: var(--color-text);
+    }
+  }
+
+  .theme-menu-item:focus {
+    background: var(--color-surface-2);
+    color: var(--color-text);
+  }
+</style>
