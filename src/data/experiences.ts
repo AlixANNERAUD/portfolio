@@ -252,9 +252,10 @@ export const experiences: readonly Experience[] = [
     id: "renault-cleon",
     group: "professional",
     earlier: true,
-    company: "Renault Cléon",
+    company: "Ampère Cléon",
     companyUrl: "https://www.renaultgroup.com/",
-    monogram: "R",
+    monogram: "A",
+    logo: "/images/logos/ampere.svg",
     role: {
       fr: "Stagiaire en production",
       en: "Production Intern",
@@ -262,8 +263,8 @@ export const experiences: readonly Experience[] = [
     period: { fr: "2022", en: "2022" },
     location: { fr: "Cléon, France", en: "Cléon, France" },
     summary: {
-      fr: "Stage ouvrier d’un mois sur une ligne de production de rotors et de stators.",
-      en: "One-month production internship on a rotor and stator manufacturing line.",
+      fr: "Stage ouvrier d’un mois sur une ligne de production de rotors et de stators, à l’usine de Cléon (alors Renault, aujourd’hui Ampère).",
+      en: "One-month production internship on a rotor and stator manufacturing line at the Cléon plant (then Renault, now part of Ampère).",
     },
     highlights: [
       {

@@ -51,6 +51,7 @@ Copies hosted on this website, taken from Wikimedia Commons:
 - **Amazon**: [Amazon_logo.svg](https://commons.wikimedia.org/wiki/File:Amazon_logo.svg), by Amazon.com, Inc., public domain on Wikimedia Commons, trademark; unmodified.
 - **New York University**: [Nyu_short_color.svg](https://commons.wikimedia.org/wiki/File:Nyu_short_color.svg), by New York University, public domain on Wikimedia Commons, trademark; unmodified. See also the [NYU Tandon identity guide](https://engineering.nyu.edu/marketing-and-communications/identity-guide/logos-lockups).
 - **INSA Rouen Normandie**: [Logo_INSA_RN.jpg](https://commons.wikimedia.org/wiki/File:Logo_INSA_RN.jpg), by Service communication INSA Rouen Normandie, licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0); resized and converted to WebP. This adapted copy is shared under the same licence.
+- **Ampère**: [Ampere 2023.svg](https://commons.wikimedia.org/wiki/File:Ampere_2023.svg), by WXDS, licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0); unmodified.
 
 Copies hosted on this website, taken from the organizations' own websites:
 
