@@ -1,0 +1,70 @@
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Hero from "../../components/ui/Hero.astro";
+import NextLink from "../../components/ui/NextLink.astro";
+import AboutFacts from "../../components/about/AboutFacts.astro";
+import ContactSection from "../../components/about/ContactSection.astro";
+import SkillsSection from "../../components/skills/SkillsSection.astro";
+import LanguagesSection from "../../components/skills/LanguagesSection.astro";
+import { localeStaticPaths, localizePath } from "../../i18n/locales.ts";
+import { useTranslations } from "../../i18n/ui.ts";
+import { aboutPageLd, personLd } from "../../lib/seo.ts";
+
+export const getStaticPaths = (() =>
+  localeStaticPaths()) satisfies GetStaticPaths;
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const description = t("about.description");
+
+// Page order is the single source of the section numbers (01, 02, …).
+const sections = [SkillsSection, LanguagesSection, ContactSection];
+---
+
+<BaseLayout
+  lang={lang}
+  path="/about"
+  title={t("about.metaTitle")}
+  trail={[{ name: t("nav.about"), path: "/about" }]}
+  description={description}
+  jsonLd={[aboutPageLd(lang, description), personLd(lang)]}
+>
+  <div class="about-page editorial-page">
+    <Hero
+      eyebrow={t("about.eyebrow")}
+      title={t("about.title")}
+      accent={t("about.accent")}
+      intro={t("about.intro")}
+      nav={{
+        label: t("about.navLabel"),
+        items: [
+          { href: "#domains", label: t("about.nav.skills") },
+          { href: "#languages", label: t("about.nav.languages") },
+          { href: "#contact", label: t("about.nav.contact") },
+        ],
+      }}
+    />
+    <AboutFacts lang={lang} />
+    {sections.map((Section, index) => (
+      <Section lang={lang} index={index + 1} />
+    ))}
+    <NextLink
+      lang={lang}
+      title={t("about.nextTitle")}
+      description={t("about.nextDescription")}
+      href={localizePath("/projects", lang)}
+      linkLabel={t("about.nextLink")}
+    />
+  </div>
+</BaseLayout>
+
+<style>
+  /* The facts strip below carries the rule that closes the hero. */
+  .about-page :global(.editorial-hero) {
+    margin-bottom: 0;
+    padding-bottom: var(--space-l);
+    border-bottom: 0;
+  }
+</style>

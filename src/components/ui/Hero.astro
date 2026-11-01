@@ -8,6 +8,7 @@ export interface HeroNavItem {
   label: string;
 }
 
+/** An optional `actions` slot (buttons) follows the intro. */
 type Props = HTMLAttributes<"header"> & {
   eyebrow: string;
   /** Position of the section on the page, numbering the eyebrow. */
@@ -50,6 +51,11 @@ const {
       {accent && <em>{accent}</em>}
     </Heading>
     <p class="editorial-hero__intro">{intro}</p>
+    {Astro.slots.has("actions") && (
+      <div class="editorial-hero__actions">
+        <slot name="actions" />
+      </div>
+    )}
   </div>
   {nav && nav.items.length > 0 && (
     <nav class="editorial-hero__nav" aria-label={nav.label}>
@@ -107,6 +113,9 @@ const {
     color: var(--color-text-muted);
     font-size: 1.01rem;
     line-height: 1.75;
+  }
+  .editorial-hero__actions {
+    margin-top: var(--space-m);
   }
   .editorial-hero--compact .editorial-hero__copy {
     display: grid;

@@ -1,0 +1,158 @@
+---
+import { ArrowUpRight } from "@lucide/astro";
+import SectionHeading from "../ui/SectionHeading.astro";
+import ResumeLinks from "../resume/ResumeLinks.astro";
+import { site } from "../../data/site.ts";
+import type { Locale } from "../../i18n/locales.ts";
+import { useTranslations } from "../../i18n/ui.ts";
+
+/** Email, public profiles and the resume PDFs, all from site.ts. */
+interface Props {
+  lang: Locale;
+  /** Position of the section on the page, numbering its overline. */
+  index: number;
+}
+
+const { lang, index } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section id="contact" class="about-contact" aria-labelledby="contact-heading">
+  <SectionHeading
+    headingId="contact-heading"
+    eyebrow={t("about.contact.eyebrow")}
+    index={index}
+    title={t("about.contact.title")}
+    description={t("about.contact.intro")}
+  />
+
+  <div class="about-contact-panel">
+    <div class="about-contact-block about-contact-block--email">
+      <h3>{t("about.contact.email")}</h3>
+      <a class="about-contact-email" href={`mailto:${site.email}`}>
+        {site.email}
+      </a>
+    </div>
+    <div class="about-contact-block">
+      <h3>{t("about.contact.profiles")}</h3>
+      <ul role="list">
+        {site.profiles.map((profile) => (
+          <li>
+            <a href={profile.href} target="_blank" rel="noopener noreferrer">
+              {profile.label}
+              <ArrowUpRight size={16} aria-hidden="true" />
+              <span class="visually-hidden"> {t("a11y.newTab")}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+    <div class="about-contact-block">
+      <h3>{t("about.contact.resume")}</h3>
+      <p>{t("about.contact.resumeText")}</p>
+      <ResumeLinks lang={lang} class="about-contact-resume" />
+    </div>
+  </div>
+</section>
+
+<style>
+  .about-contact {
+    margin-bottom: var(--space-2xl);
+  }
+  .about-contact-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr) minmax(0, 1fr);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-l);
+    background: var(--color-surface);
+  }
+  .about-contact-block {
+    min-width: 0;
+    padding: var(--space-m);
+  }
+  .about-contact-block + .about-contact-block {
+    border-left: 1px solid var(--color-border);
+  }
+  .about-contact-block h3 {
+    margin: 0 0 var(--space-s);
+    color: var(--color-text-muted);
+    font-size: var(--step--2);
+    font-weight: 600;
+    letter-spacing: var(--tracking-overline);
+    text-transform: uppercase;
+  }
+  .about-contact-block p {
+    margin: 0 0 var(--space-s);
+    color: var(--color-text-muted);
+    font-size: var(--step--1);
+  }
+  .about-contact-email {
+    color: var(--color-text);
+    font-family: var(--font-display);
+    font-size: var(--step-3);
+    letter-spacing: var(--tracking-heading);
+    line-height: var(--leading-snug);
+    overflow-wrap: anywhere;
+    text-decoration: underline;
+    text-decoration-color: var(--color-border-strong);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+  }
+  .about-contact-email:hover {
+    color: var(--color-accent);
+    text-decoration-color: currentColor;
+  }
+  .about-contact-block ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .about-contact-block li a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-xs);
+    min-height: var(--control-size);
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text);
+    font-weight: 600;
+    font-size: var(--step--1);
+    text-decoration: none;
+  }
+  .about-contact-block li:first-child a {
+    border-top: 1px solid var(--color-border);
+  }
+  .about-contact-block li a:hover {
+    color: var(--color-accent);
+  }
+  .about-contact-block li a svg {
+    color: var(--color-accent);
+  }
+  .about-contact :global(.about-contact-resume) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  @media (max-width: 960px) {
+    .about-contact-panel {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+    .about-contact-block--email {
+      grid-column: 1 / -1;
+    }
+    .about-contact-block + .about-contact-block {
+      border-left: 0;
+      border-top: 1px solid var(--color-border);
+    }
+    .about-contact-block:last-child {
+      border-left: 1px solid var(--color-border);
+    }
+  }
+  @media (max-width: 640px) {
+    .about-contact-panel {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .about-contact-block:last-child {
+      border-left: 0;
+    }
+  }
+</style>

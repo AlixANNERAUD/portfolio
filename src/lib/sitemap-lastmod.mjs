@@ -31,8 +31,12 @@ const sources = {
   ],
   experiences: [page("experiences"), "src/data/experiences.ts"],
   projects: [page("projects"), "src/data/projects.ts"],
-  skills: [page("skills"), "src/data/skills.ts"],
-  resume: [page("resume"), "src/data/experiences.ts", "src/data/skills.ts"],
+  about: [
+    page("about"),
+    "src/data/skills.ts",
+    "src/data/experiences.ts",
+    "src/data/site.ts",
+  ],
 };
 
 /** Source files of a page, from its English path and locale. */

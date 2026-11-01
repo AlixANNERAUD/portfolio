@@ -1,0 +1,208 @@
+---
+import { ArrowRight } from "@lucide/astro";
+import { experiences, type Experience } from "../../data/experiences.ts";
+import { getProject, projectUrl } from "../../data/projects.ts";
+import { localize } from "../../data/types.ts";
+import { localizePath, type Locale } from "../../i18n/locales.ts";
+import { useTranslations } from "../../i18n/ui.ts";
+import { formatPeriod } from "../../lib/format.ts";
+
+/**
+ * The short bio under the About hero: the current role, the studies, Xila,
+ * and the earlier roles shown on the homepage. Every value comes from the
+ * data, and every line links to its timeline card or project page.
+ */
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const professional = experiences.filter(
+  (entry) => entry.group === "professional",
+);
+const role = professional.find((entry) => entry.ongoing);
+const study = experiences.find((entry) => entry.id === "insa-engineering");
+if (!role || !study) throw new Error("Missing current role or studies");
+const previous = professional.filter(
+  (entry) => entry.homepage && !entry.ongoing,
+);
+const xila = getProject("xila");
+
+/** The text before its last word, and the last word, kept with the arrow. */
+const split = (text: string) => {
+  const at = text.lastIndexOf(" ") + 1;
+  return [text.slice(0, at), text.slice(at)];
+};
+const card = (entry: Experience) =>
+  `${localizePath("/experiences", lang)}#${entry.id}-title`;
+const roleAt = (entry: Experience) =>
+  t("home.now.role", {
+    role: entry.role[lang],
+    company: localize(entry.company, lang),
+  });
+
+const facts = [
+  {
+    term: t("about.facts.now"),
+    items: [{ text: roleAt(role), meta: role.period[lang], href: card(role) }],
+    live: true,
+  },
+  {
+    term: t("about.facts.study"),
+    items: [
+      {
+        text: t("home.now.study", {
+          degree: study.role[lang],
+          school: localize(study.company, lang),
+        }),
+        meta: study.period[lang],
+        href: card(study),
+      },
+    ],
+  },
+  {
+    term: t("about.facts.building"),
+    items: [
+      {
+        text: t("about.facts.xila", { project: localize(xila.title, lang) }),
+        meta: formatPeriod(xila.period, lang),
+        href: projectUrl(xila.id, lang),
+      },
+    ],
+  },
+  {
+    term: t("about.facts.before"),
+    items: previous.map((entry) => ({
+      text: roleAt(entry),
+      meta: entry.period[lang],
+      href: card(entry),
+    })),
+  },
+];
+---
+
+<section class="about-facts" aria-label={t("about.facts.label")}>
+  <dl>
+    {facts.map((fact) => (
+      <div class="about-fact">
+        <dt>
+          <span
+            class:list={[
+              "about-fact-dot",
+              { "about-fact-dot--live": fact.live },
+            ]}
+            aria-hidden="true"
+          />
+          {fact.term}
+        </dt>
+        {fact.items.map((item) => (
+          <dd>
+            <a href={item.href}>
+              {split(item.text)[0]}
+              <span class="about-fact-end">
+                {split(item.text)[1]}
+                <ArrowRight size={15} aria-hidden="true" />
+              </span>
+            </a>
+            <span class="about-fact-meta">{item.meta}</span>
+          </dd>
+        ))}
+      </div>
+    ))}
+  </dl>
+</section>
+
+<style>
+  .about-facts {
+    margin: 0 0 var(--space-2xl);
+  }
+  .about-facts dl {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-l) var(--space-m);
+    margin: 0;
+  }
+  .about-fact {
+    min-width: 0;
+    padding-top: var(--space-xs);
+    border-top: 1px solid var(--color-text);
+  }
+  .about-fact dt {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    margin-bottom: var(--space-xs);
+    color: var(--color-text-muted);
+    font-size: var(--step--2);
+    font-weight: 600;
+    letter-spacing: var(--tracking-overline);
+    text-transform: uppercase;
+  }
+  .about-fact-dot {
+    flex: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-border-strong);
+  }
+  .about-fact-dot--live {
+    background: var(--color-accent);
+  }
+  .about-fact dd {
+    margin: 0;
+  }
+  .about-fact dd + dd {
+    margin-top: var(--space-xs);
+  }
+  /* The arrow stays on the line of the last word when the text wraps. */
+  .about-fact-end {
+    white-space: nowrap;
+  }
+  .about-fact a {
+    color: var(--color-text);
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    line-height: var(--leading-snug);
+    text-decoration: none;
+  }
+  .about-fact a:hover {
+    color: var(--color-accent);
+  }
+  .about-fact a svg {
+    margin-left: var(--space-3xs);
+    color: var(--color-accent);
+    vertical-align: -0.1em;
+  }
+  .about-fact-meta {
+    display: block;
+    margin-top: var(--space-3xs);
+    color: var(--color-text-subtle);
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: var(--tracking-tight);
+  }
+  @keyframes about-fact-pulse {
+    50% {
+      opacity: 0.35;
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .about-fact-dot--live {
+      animation: about-fact-pulse 2.4s ease-in-out infinite;
+    }
+  }
+  @media (max-width: 960px) {
+    .about-facts dl {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 560px) {
+    .about-facts dl {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-m);
+    }
+  }
+</style>

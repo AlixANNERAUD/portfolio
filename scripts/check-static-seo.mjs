@@ -33,10 +33,8 @@ const cases = [
   ["fr/projects/xila.html", "/fr/projects/xila", "/projects/xila"],
   ["experiences.html", "/experiences", "/fr/experiences"],
   ["fr/experiences.html", "/fr/experiences", "/experiences"],
-  ["skills.html", "/skills", "/fr/skills"],
-  ["fr/skills.html", "/fr/skills", "/skills"],
-  ["resume.html", "/resume", "/fr/resume"],
-  ["fr/resume.html", "/fr/resume", "/resume"],
+  ["about.html", "/about", "/fr/about"],
+  ["fr/about.html", "/fr/about", "/about"],
   ["legal-notice.html", "/legal-notice", "/fr/legal-notice"],
   ["fr/legal-notice.html", "/fr/legal-notice", "/legal-notice"],
 ];
@@ -62,6 +60,14 @@ for (const removed of ["projects/archive.html", "fr/projects/archive.html"]) {
     throw new Error("The old project archive was published: " + removed);
   }
 }
+// Former pages, folded into About and Experience: static redirect pages
+// (astro.config.mjs `redirects`), checked below.
+const redirects = [
+  ["skills.html", "/about"],
+  ["fr/skills.html", "/fr/about"],
+  ["resume.html", "/experiences"],
+  ["fr/resume.html", "/fr/experiences"],
+];
 
 const required = [
   /<meta[^>]+property="og:title"/,
@@ -146,6 +152,17 @@ function checkHeader(file, root) {
     failed.push(file + ': expected a menu button with aria-expanded="false"');
   } else if (!controls || !root.querySelector("#" + controls + " > nav")) {
     failed.push(file + ": menu button aria-controls must name the nav panel");
+  }
+  const lang =
+    root.querySelector("html")?.getAttribute("lang") === "fr" ? "fr" : "en";
+  const nav = root
+    .querySelectorAll("#site-menu-panel nav a")
+    .map((link) => link.getAttribute("href"));
+  const expectedNav = ["/projects", "/experiences", "/about"].map((path) =>
+    localized(path, lang),
+  );
+  if (nav.join() !== expectedNav.join()) {
+    failed.push(file + ": main navigation must be " + expectedNav.join(", "));
   }
   const themeColors = root
     .querySelectorAll('head meta[name="theme-color"]')
@@ -271,8 +288,7 @@ function checkPng(path, width, height) {
       "/",
       "/experiences",
       "/projects",
-      "/skills",
-      "/resume",
+      "/about",
       ...projects.map((project) => "/projects/" + project.id),
     ]) {
       const href = site + localized(path, lang);
@@ -718,8 +734,7 @@ for (const [file, canonicalPath, translationPath] of cases) {
     for (const [path, key] of [
       ["/projects", "nav.projects"],
       ["/experiences", "nav.experiences"],
-      ["/skills", "nav.skills"],
-      ["/resume", "nav.resume"],
+      ["/about", "nav.about"],
       ["/legal-notice", "footer.legalNotice"],
     ]) {
       const file = prefix + path.slice(1) + ".html";
@@ -727,6 +742,37 @@ for (const [file, canonicalPath, translationPath] of cases) {
         home,
         { name: t[key], item: site + localized(path, lang) },
       ]);
+    }
+
+    // About: an AboutPage about the Person, with the full Person node.
+    {
+      const file = prefix + "about.html";
+      const html = read(file);
+      const graph = graphOf(file, html);
+      const url = site + localized("/about", lang);
+      const pages = ofType(graph, "AboutPage");
+      const [person] = ofType(graph, "Person");
+      const description = parse(html)
+        .querySelector('meta[name="description"]')
+        ?.getAttribute("content");
+      if (
+        pages.length !== 1 ||
+        pages[0]["@id"] !== url + "#aboutpage" ||
+        pages[0].url !== url ||
+        pages[0].inLanguage !== lang ||
+        pages[0].description !== description ||
+        pages[0].mainEntity?.["@id"] !== personId ||
+        pages[0].isPartOf?.["@id"] !== websiteId
+      ) {
+        failed.push(file + ": expected one AboutPage about the Person");
+      }
+      if (
+        person?.["@id"] !== personId ||
+        person.name !== siteData.name ||
+        person.jobTitle !== current.role[lang]
+      ) {
+        failed.push(file + ": the About graph needs the full Person node");
+      }
     }
 
     // Project pages: project node + Home > Projects > project.
@@ -896,9 +942,12 @@ for (const [file, lang] of [
   const doors = now
     .querySelectorAll(".home-doors a")
     .map((a) => a.getAttribute("href"));
-  const expectedDoors = ["/experiences", "/projects", "/projects/xila"].map(
-    (path) => localized(path, lang),
-  );
+  const expectedDoors = [
+    "/projects",
+    "/experiences",
+    "/about",
+    "/projects/xila",
+  ].map((path) => localized(path, lang));
   if (doors.join() !== expectedDoors.join()) {
     failed.push(file + ": doorways must be " + expectedDoors.join(", "));
   }
@@ -930,8 +979,8 @@ for (const [file, marker] of [
   ["fr/projects.html", "portfolio-showcase--catalogue"],
   ["experiences.html", "career-timeline"],
   ["fr/experiences.html", "career-timeline"],
-  ["skills.html", "skills-domain-grid"],
-  ["fr/skills.html", "skills-domain-grid"],
+  ["about.html", "skills-domain-grid"],
+  ["fr/about.html", "skills-domain-grid"],
 ]) {
   const html = read(file);
   if (!html) continue;
@@ -952,8 +1001,8 @@ for (const file of [
   "fr/projects.html",
   "experiences.html",
   "fr/experiences.html",
-  "skills.html",
-  "fr/skills.html",
+  "about.html",
+  "fr/about.html",
 ]) {
   const html = read(file);
   if (!html.includes("editorial-hero")) {
@@ -966,8 +1015,8 @@ for (const file of [
 for (const file of [
   "experiences.html",
   "fr/experiences.html",
-  "skills.html",
-  "fr/skills.html",
+  "about.html",
+  "fr/about.html",
 ]) {
   const html = read(file);
   if (
@@ -978,17 +1027,89 @@ for (const file of [
   }
 }
 
-// Skills must be real SSR content rather than hidden client-only cards.
-for (const [file, projectPrefix] of [
-  ["skills.html", "/projects/"],
-  ["fr/skills.html", "/fr/projects/"],
+// About: the short bio, then skills as real SSR content rather than hidden
+// client-only cards, each domain linking the projects and the roles that
+// show it (a role links a card visible on the timeline), languages, and the
+// contact block (email, profiles, both resume PDFs).
+for (const [file, projectPrefix, lang] of [
+  ["about.html", "/projects/", "en"],
+  ["fr/about.html", "/fr/projects/", "fr"],
 ]) {
   const html = read(file);
+  if (!html) continue;
+  const root = parse(html);
+  const timeline = parse(
+    read(lang === "fr" ? "fr/experiences.html" : "experiences.html"),
+  );
+  const experiencePath = localized("/experiences", lang);
+  const facts = root.querySelectorAll(".about-facts dt");
+  if (facts.length !== 4) {
+    failed.push(file + ": the short bio needs its four facts");
+  }
+  for (const link of root.querySelectorAll(
+    ".about-facts a, .skills-evidence a",
+  )) {
+    const href = link.getAttribute("href") ?? "";
+    const anchor = href.match(/^(\/(?:fr\/)?experiences)#(.+)$/);
+    if (!anchor) continue;
+    const entry = experiences.find(({ id }) => id + "-title" === anchor[2]);
+    if (
+      anchor[1] !== experiencePath ||
+      !entry ||
+      entry.earlier ||
+      !timeline.getElementById(anchor[2])
+    ) {
+      failed.push(file + ": role link must reach a visible card: " + href);
+    }
+  }
+  for (const domain of skillDomains) {
+    const card = root.getElementById("skill-" + domain.id);
+    const links = card?.querySelectorAll(".skills-evidence a") ?? [];
+    if (links.length !== domain.examples.length) {
+      failed.push(file + ": " + domain.id + " misses evidence links");
+    }
+    const kinds = card?.querySelectorAll(".skills-evidence-kind") ?? [];
+    if (kinds.length !== domain.examples.length) {
+      failed.push(file + ": " + domain.id + " evidence needs kind labels");
+    }
+  }
+  const roles = new Set(
+    skillDomains.flatMap((domain) =>
+      domain.examples.flatMap((example) =>
+        example.kind === "experience" ? [example.experienceId] : [],
+      ),
+    ),
+  );
+  for (const id of roles) {
+    if (!html.includes('href="' + experiencePath + "#" + id + '-title"')) {
+      failed.push(file + ": missing evidence link to the role " + id);
+    }
+  }
+  const contact = root.querySelector("section#contact");
+  if (!contact?.querySelector('a[href="mailto:' + siteData.email + '"]')) {
+    failed.push(file + ": contact block needs the email link");
+  }
+  for (const profile of siteData.profiles) {
+    if (!contact?.querySelector('a[href="' + profile.href + '"]')) {
+      failed.push(file + ": contact block misses " + profile.label);
+    }
+  }
+  for (const pdf of Object.values(siteData.resumePdf)) {
+    if (!contact?.querySelector('a.resume-link[href="' + pdf + '"]')) {
+      failed.push(file + ": contact block misses the resume " + pdf);
+    }
+  }
   const cards = [
     ...html.matchAll(/<article[^>]+class="[^"]*skills-domain-card[^"]*"/g),
   ].length;
-  if (cards !== 6) {
-    failed.push(file + ": expected six skill domain cards, found " + cards);
+  if (cards !== skillDomains.length) {
+    failed.push(
+      file +
+        ": expected " +
+        skillDomains.length +
+        " skill domain cards, found " +
+        cards,
+    );
   }
   if (!html.includes("skills-language-grid") || !html.includes("TOEIC 975")) {
     failed.push(file + ": language proficiency section missing");
@@ -1235,8 +1356,16 @@ for (const file of ["experiences.html", "fr/experiences.html"]) {
     ["fr/index.html", ["00 / Introduction", "01 / En ce moment"], null],
     ["experiences.html", ["01 / ", "02 / "], "Up next"],
     ["fr/experiences.html", ["01 / ", "02 / "], "À suivre"],
-    ["skills.html", ["01 / Expertise", "02 / Communication"], "Up next"],
-    ["fr/skills.html", ["01 / Expertise", "02 / Communication"], "À suivre"],
+    [
+      "about.html",
+      ["01 / Expertise", "02 / Communication", "03 / Contact"],
+      "Up next",
+    ],
+    [
+      "fr/about.html",
+      ["01 / Expertise", "02 / Communication", "03 / Contact"],
+      "À suivre",
+    ],
   ]) {
     const html = read(file);
     if (!html) continue;
@@ -1442,54 +1571,71 @@ for (const file of ["experiences.html", "fr/experiences.html"]) {
   }
 }
 
-// Resume: one H1, an HTML summary built from the data (roles, education,
-// skills), Download/Open buttons for the PDF, an <object> preview with a
-// fallback link, and the site footer.
+// Experience holds the resume: its hero offers this locale's PDF first,
+// then the other locale's, each opening in a new tab and saying so.
 for (const [file, lang] of [
-  ["resume.html", "en"],
-  ["fr/resume.html", "fr"],
+  ["experiences.html", "en"],
+  ["fr/experiences.html", "fr"],
 ]) {
   const html = read(file);
   if (!html) continue;
-  const root = parse(html);
-  const main = root.querySelector("main");
-  const pdf = siteData.resumePdf[lang];
-  if (main?.querySelectorAll("h1").length !== 1) {
-    failed.push(file + ": resume must have exactly one H1");
-  }
-  const summary = main?.querySelector(".resume-summary");
-  const summaryText = summary?.text.replace(/\s+/g, " ") ?? "";
-  const expected = [
-    ...experiences.map((entry) => entry.role[lang]),
-    ...skillDomains.map((domain) => domain.title[lang]),
-  ];
-  const missing = expected.filter((value) => !summaryText.includes(value));
-  if (!summary || missing.length) {
-    failed.push(file + ": resume summary misses " + JSON.stringify(missing));
-  }
-  if ((summary?.querySelectorAll("h2").length ?? 0) < 3) {
-    failed.push(file + ": resume summary needs experience/education/skills");
-  }
-  const download = main?.querySelector(
-    'a.resume-action[download][href="' + pdf + '"]',
+  const other = lang === "fr" ? "en" : "fr";
+  const links = parse(html).querySelectorAll(
+    "main .editorial-hero .resume-links a.resume-link",
   );
-  const open = main?.querySelector(
-    'a.resume-action[target="_blank"][href="' + pdf + '"]',
-  );
-  if (!download || !open) {
-    failed.push(file + ": resume needs Download and Open PDF buttons");
+  const hrefs = links.map((link) => link.getAttribute("href"));
+  if (
+    hrefs.join() !==
+    [siteData.resumePdf[lang], siteData.resumePdf[other]].join()
+  ) {
+    failed.push(file + ": the hero must offer both resume PDFs, own first");
   }
-  const preview = main?.querySelector(
-    'object.resume-preview[type="application/pdf"][data="' + pdf + '"]',
-  );
-  if (!preview?.querySelector('a[href="' + pdf + '"]')) {
-    failed.push(file + ": resume <object> preview with a fallback link");
+  for (const link of links) {
+    const note = link.querySelector(".visually-hidden")?.text.trim();
+    if (
+      link.getAttribute("target") !== "_blank" ||
+      !link.hasAttribute("download") ||
+      note !== ui[lang]["a11y.newTab"]
+    ) {
+      failed.push(file + ": resume links download in a new tab, and say so");
+    }
   }
-  if (main?.querySelector("iframe")) {
-    failed.push(file + ": resume must not use the old full-page iframe");
+  if (!links[0]?.classList.contains("button-link--primary")) {
+    failed.push(file + ": this locale's resume is the primary button");
   }
-  if (!root.querySelector("footer.site-footer")) {
-    failed.push(file + ": resume must show the site footer");
+}
+
+// Redirect pages: a meta refresh to the target, a canonical to its absolute
+// URL, noindex and a visible link; never listed in the sitemap.
+{
+  const listed = parse(read("sitemap-0.xml"))
+    .getElementsByTagName("loc")
+    .map((loc) => loc.text.trim());
+  for (const [file, target] of redirects) {
+    const html = read(file);
+    if (!html) continue;
+    const root = parse(html);
+    const refresh = root
+      .querySelector('meta[http-equiv="refresh"]')
+      ?.getAttribute("content");
+    const canonical = root
+      .querySelector('link[rel="canonical"]')
+      ?.getAttribute("href");
+    const robots = root
+      .querySelector('meta[name="robots"]')
+      ?.getAttribute("content");
+    if (
+      refresh !== "0;url=" + target ||
+      canonical !== site + target ||
+      robots !== "noindex" ||
+      !root.querySelector('a[href="' + target + '"]')
+    ) {
+      failed.push(file + ": expected a static redirect to " + target);
+    }
+    const source = site + "/" + file.replace(/\.html$/, "");
+    if (listed.includes(source)) {
+      failed.push("sitemap: lists the redirect " + source);
+    }
   }
 }
 
@@ -1514,9 +1660,7 @@ for (const [file, lang] of [
     const html = read(file);
     if (!html) continue;
     const lang = file.startsWith("fr/") ? "fr" : "en";
-    for (const tag of parse(html).querySelectorAll(
-      "main .editorial-tags li, main .resume-inline li",
-    )) {
+    for (const tag of parse(html).querySelectorAll("main .editorial-tags li")) {
       const text = tag.text.replace(/\s+/g, " ").trim();
       if (
         foreign[lang].has(text) ||

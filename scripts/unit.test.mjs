@@ -126,12 +126,12 @@ test("useTranslations translates and interpolates variables", () => {
   assert.equal(en("nav.projects"), "Projects");
   assert.equal(fr("nav.projects"), "Projets");
   assert.equal(
-    en("meta.pageTitle", { title: "Skills" }),
-    "Skills | Alix ANNERAUD",
+    en("meta.pageTitle", { title: "About" }),
+    "About | Alix ANNERAUD",
   );
   assert.equal(
-    fr("meta.pageTitle", { title: "Compétences" }),
-    "Compétences | Alix ANNERAUD",
+    fr("meta.pageTitle", { title: "À propos" }),
+    "À propos | Alix ANNERAUD",
   );
   assert.equal(en("meta.pageTitle"), "{title} | Alix ANNERAUD");
   assert.equal(

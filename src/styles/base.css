@@ -80,7 +80,7 @@ svg {
   padding-inline: var(--page-inline);
 }
 
-/* Editorial pages (Skills, Experience, Resume). */
+/* Editorial pages (Experience, About). */
 .editorial-page {
   padding-block: var(--space-xl) var(--space-3xl);
   color: var(--color-text);
@@ -121,7 +121,7 @@ svg {
 }
 
 /*
- * Outline button link (project external link, resume actions, Xila demo):
+ * Outline button link (project external link, resume links, Xila demo):
  * a 44px target with an accent outline; --primary fills it.
  */
 .button-link {

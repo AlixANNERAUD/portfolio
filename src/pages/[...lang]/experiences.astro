@@ -4,6 +4,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import Hero from "../../components/ui/Hero.astro";
 import NextLink from "../../components/ui/NextLink.astro";
 import ExperienceTimeline from "../../components/experience/ExperienceTimeline.astro";
+import ResumeLinks from "../../components/resume/ResumeLinks.astro";
 import { experiences, type ExperienceGroup } from "../../data/experiences.ts";
 import { localeStaticPaths, localizePath } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
@@ -37,7 +38,9 @@ const creditsHref = `${localizePath("/legal-notice", lang)}#${t("legal.logoCredi
       accent={t("experiences.accent")}
       intro={t("experiences.intro")}
       nav={{ label: t("experiences.navLabel"), items: navItems }}
-    />
+    >
+      <ResumeLinks slot="actions" lang={lang} />
+    </Hero>
 
     {groups.map((group, index) => (
       <ExperienceTimeline
@@ -52,7 +55,7 @@ const creditsHref = `${localizePath("/legal-notice", lang)}#${t("legal.logoCredi
       lang={lang}
       title={t("experiences.nextTitle")}
       description={t("experiences.nextDescription")}
-      href={localizePath("/projects", lang)}
+      href={localizePath("/about", lang)}
       linkLabel={t("experiences.nextLink")}
     />
     <p class="career-logo-credits">
