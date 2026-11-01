@@ -12,19 +12,19 @@ import { useTranslations, type UIKey } from "../i18n/ui.ts";
  * then the French pages under their own heading.
  */
 
+// In the order of the main navigation.
 const hubs: { path: string; title: UIKey; description: UIKey }[] = [
-  {
-    path: "/experiences",
-    title: "nav.experiences",
-    description: "experiences.description",
-  },
   {
     path: "/projects",
     title: "nav.projects",
     description: "projects.description",
   },
-  { path: "/skills", title: "nav.skills", description: "skills.description" },
-  { path: "/resume", title: "nav.resume", description: "resume.description" },
+  {
+    path: "/experiences",
+    title: "nav.experiences",
+    description: "experiences.description",
+  },
+  { path: "/about", title: "nav.about", description: "about.description" },
 ];
 
 const url = (path: string, lang: Locale) => site.url + localizePath(path, lang);

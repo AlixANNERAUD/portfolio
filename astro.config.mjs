@@ -19,6 +19,15 @@ export default defineConfig({
   output: "static",
   trailingSlash: "ignore",
   build: { format: "preserve", inlineStylesheets: "auto" },
+  // Former pages, folded into About and Experience. GitHub Pages has no
+  // server redirects: Astro writes a static page per path (meta refresh,
+  // canonical to the target, noindex), left out of the sitemap.
+  redirects: {
+    "/skills": "/about",
+    "/fr/skills": "/fr/about",
+    "/resume": "/experiences",
+    "/fr/resume": "/fr/experiences",
+  },
   // English is served unprefixed (`/`), French under `/fr/`; pages live once
   // in src/pages/[...lang]/ and get their locale from getStaticPaths props.
   i18n: {

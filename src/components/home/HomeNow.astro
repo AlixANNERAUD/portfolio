@@ -9,7 +9,7 @@ import { localizePath, type Locale } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
 
 /**
- * What is going on now (role, studies, Xila), the three ways into the site,
+ * What is going on now (role, studies, Xila), the four ways into the site,
  * and how to get in touch. Every value comes from the data.
  */
 interface Props {
@@ -53,16 +53,22 @@ const now = [
 const professional = experiences.filter(
   (entry) => entry.group === "professional",
 ).length;
+// The main navigation's order (Projects, Experience, About), then Xila.
 const doors = [
+  {
+    title: t("home.doors.projects"),
+    meta: t("home.doors.projectsMeta", { count: number(projects.length) }),
+    href: localizePath("/projects", lang),
+  },
   {
     title: t("home.doors.experience"),
     meta: t("home.doors.experienceMeta", { count: number(professional) }),
     href: localizePath("/experiences", lang),
   },
   {
-    title: t("home.doors.projects"),
-    meta: t("home.doors.projectsMeta", { count: number(projects.length) }),
-    href: localizePath("/projects", lang),
+    title: t("home.doors.about"),
+    meta: t("home.doors.aboutMeta"),
+    href: localizePath("/about", lang),
   },
   {
     title: t("home.doors.xila"),

@@ -350,6 +350,37 @@ if (editorialIssues.length > 0) {
   throw new Error("Project editorial rules:\n" + editorialIssues.join("\n"));
 }
 
+// Skill evidence: a project link names a known project, and a role link a
+// timeline entry whose card is visible by default (not an earlier one).
+{
+  const evidenceIssues = [];
+  const projectIds = new Set(projects.map((project) => project.id));
+  for (const domain of skillDomains) {
+    for (const example of domain.examples) {
+      if (example.kind === "project" && !projectIds.has(example.projectId)) {
+        evidenceIssues.push(
+          `${domain.id}: unknown project ${example.projectId}`,
+        );
+      }
+      if (example.kind === "experience") {
+        const entry = experiences.find(({ id }) => id === example.experienceId);
+        if (!entry) {
+          evidenceIssues.push(
+            `${domain.id}: unknown experience ${example.experienceId}`,
+          );
+        } else if (entry.earlier) {
+          evidenceIssues.push(
+            `${domain.id}: ${entry.id} is an earlier card, collapsed by default`,
+          );
+        }
+      }
+    }
+  }
+  if (evidenceIssues.length > 0) {
+    throw new Error("Skill evidence:\n" + evidenceIssues.join("\n"));
+  }
+}
+
 // French typography. Markdown bodies are typeset at build time by
 // src/lib/rehype-french-typography.mjs (verify:static checks the result), but
 // plain strings never go through it: the UI dictionary, data `Localized.fr`

@@ -126,12 +126,12 @@ test("useTranslations translates and interpolates variables", () => {
   assert.equal(en("nav.projects"), "Projects");
   assert.equal(fr("nav.projects"), "Projets");
   assert.equal(
-    en("meta.pageTitle", { title: "Skills" }),
-    "Skills | Alix ANNERAUD",
+    en("meta.pageTitle", { title: "About" }),
+    "About | Alix ANNERAUD",
   );
   assert.equal(
-    fr("meta.pageTitle", { title: "Compétences" }),
-    "Compétences | Alix ANNERAUD",
+    fr("meta.pageTitle", { title: "À propos" }),
+    "À propos | Alix ANNERAUD",
   );
   assert.equal(en("meta.pageTitle"), "{title} | Alix ANNERAUD");
   assert.equal(
@@ -300,12 +300,18 @@ test("homepage experiences are flagged in the data", () => {
   );
 });
 
-test("skill evidence is a project reference or an explicit link", () => {
+test("skill evidence is a project, a visible role or an explicit link", () => {
   const ids = new Set(projects.map((project) => project.id));
   for (const domain of skillDomains) {
     for (const evidence of domain.examples) {
       if (evidence.kind === "project") {
         assert.ok(ids.has(evidence.projectId), evidence.projectId);
+      } else if (evidence.kind === "experience") {
+        // A role or degree whose timeline card is visible by default.
+        const entry = experiences.find(
+          ({ id }) => id === evidence.experienceId,
+        );
+        assert.ok(entry && !entry.earlier, evidence.experienceId);
       } else {
         assert.equal(evidence.kind, "link");
         assert.ok(evidence.href && evidence.label.en && evidence.label.fr);

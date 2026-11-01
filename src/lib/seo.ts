@@ -1,6 +1,7 @@
 /**
  * Schema.org JSON-LD builders. Every page emits one `@graph`; the Person,
- * WebSite and home ProfilePage keep the same `@id` in both locales. Project
+ * WebSite and home ProfilePage keep the same `@id` in both locales. The
+ * About page adds an AboutPage whose main entity is that Person. Project
  * nodes inline a minimal Person author and WebSite (same `@id`, name, URL) so
  * each project page's graph stands on its own.
  */
@@ -106,6 +107,25 @@ export function profilePageLd(lang: Locale): JsonLdNode {
     name: useTranslations(lang)("meta.homeTitle"),
     inLanguage: lang,
     isPartOf: ref(websiteId),
+    mainEntity: ref(personId),
+  };
+}
+
+/**
+ * The About page, about the Person; the page graph carries the full Person
+ * node (same `@id` as on the home page) so it stands on its own.
+ */
+export function aboutPageLd(lang: Locale, description: string): JsonLdNode {
+  const t = useTranslations(lang);
+  const url = absolute("/about", lang);
+  return {
+    "@type": "AboutPage",
+    "@id": `${url}#aboutpage`,
+    url,
+    name: t("meta.pageTitle", { title: t("about.metaTitle") }),
+    description,
+    inLanguage: lang,
+    isPartOf: websiteSummary(),
     mainEntity: ref(personId),
   };
 }

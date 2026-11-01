@@ -18,10 +18,8 @@ const targets = [
   "/fr/projects/huffman",
   "/experiences",
   "/fr/experiences",
-  "/skills",
-  "/fr/skills",
-  "/resume",
-  "/fr/resume",
+  "/about",
+  "/fr/about",
 ];
 const widths = [320, 375, 768, 1440];
 // Header collapse breakpoint: same value as narrowQuery in SiteHeader.astro.
@@ -623,8 +621,8 @@ for (const [engineName, engine] of [
     for (const path of [
       "/experiences",
       "/fr/experiences",
-      "/skills",
-      "/fr/skills",
+      "/about",
+      "/fr/about",
     ]) {
       try {
         await page.setViewportSize({ width: 1440, height: 900 });
@@ -962,8 +960,7 @@ for (const [engineName, engine] of [
       "/projects",
       "/projects/xila",
       "/experiences",
-      "/skills",
-      "/resume",
+      "/about",
     ]) {
       try {
         await page.setViewportSize({ width: 1440, height: 900 });
@@ -990,7 +987,7 @@ for (const [engineName, engine] of [
           ".orbit-tile",
           ".home-doors a",
           ".editorial-next a",
-          ".resume-action",
+          ".resume-link",
         ]) {
           const target = page.locator(selector).filter({ visible: true });
           if ((await target.count()) === 0) continue;
@@ -1021,54 +1018,66 @@ for (const [engineName, engine] of [
     }
     await page.emulateMedia({ reducedMotion: "no-preference" });
 
-    // Resume: the PDF preview only appears on wide screens; the download and
-    // open buttons and the site footer are always there.
-    for (const path of ["/resume", "/fr/resume"]) {
+    // Experience holds the resume: both PDF links sit in the hero, in view
+    // without scrolling on a wide screen, and stay 44px targets on a phone.
+    // About repeats them in its contact block.
+    for (const [path, scope, inView] of [
+      ["/experiences", ".editorial-hero", true],
+      ["/fr/experiences", ".editorial-hero", true],
+      ["/about", "#contact", false],
+      ["/fr/about", "#contact", false],
+    ]) {
       try {
-        await page.setViewportSize({ width: 1440, height: 900 });
-        await page.goto(base + path, {
-          waitUntil: "domcontentloaded",
-          timeout: 10000,
-        });
-        // Firefox reports <object> as hidden to isVisible(): read its box.
-        const preview = page.locator("object.resume-preview");
-        const shown = () =>
-          preview.evaluate((node) =>
-            getComputedStyle(node).display === "none"
-              ? 0
-              : node.getBoundingClientRect().height,
-          );
-        // Firefox sizes the <object> once it has resolved it, after DOM load.
-        await page.waitForFunction(
-          () => {
-            const node = document.querySelector("object.resume-preview");
-            return node && node.getBoundingClientRect().height >= 600;
-          },
-          null,
-          { timeout: 5000 },
-        );
-        await page.setViewportSize({ width: 390, height: 844 });
-        await page.waitForTimeout(60);
-        assert.equal(
-          await shown(),
-          0,
-          path + " preview must be hidden on narrow screens",
-        );
-        const actions = page.locator(".resume-action");
-        assert.equal(await actions.count(), 2);
-        for (const action of await actions.all()) {
-          assert.equal(await action.isVisible(), true);
-          const actionBox = await action.boundingBox();
-          assert.ok(actionBox.height >= 44, path + " action under 44px");
+        for (const [width, height] of [
+          [1440, 900],
+          [390, 844],
+        ]) {
+          await page.setViewportSize({ width, height });
+          await page.goto(base + path, {
+            waitUntil: "domcontentloaded",
+            timeout: 10000,
+          });
+          const links = page.locator(scope + " .resume-link");
+          assert.equal(await links.count(), 2, path + " resume links");
+          for (const link of await links.all()) {
+            assert.equal(await link.isVisible(), true, path + " link hidden");
+            const box = await link.boundingBox();
+            assert.ok(box && box.height >= 44, path + " link under 44px");
+            assert.ok(
+              box.x >= 0 && box.x + box.width <= width,
+              path + " resume link overflows at " + width + "px",
+            );
+            if (inView && width === 1440) {
+              assert.ok(
+                box.y + box.height <= height,
+                path + " resume link below the fold",
+              );
+            }
+          }
         }
-        assert.equal(
-          await page.locator("footer.site-footer").isVisible(),
-          true,
-          path + " footer missing",
-        );
         checked++;
       } catch (error) {
-        failures.push(engineName + " " + path + " resume layout: " + error);
+        failures.push(engineName + " " + path + " resume links: " + error);
+      }
+    }
+
+    // Former pages redirect to their new home (static meta refresh).
+    for (const [from, to] of [
+      ["/skills", "/about"],
+      ["/fr/skills", "/fr/about"],
+      ["/resume", "/experiences"],
+      ["/fr/resume", "/fr/experiences"],
+    ]) {
+      try {
+        await page.goto(base + from, { waitUntil: "commit", timeout: 10000 });
+        await page.waitForURL(
+          (url) => url.pathname.replace(/\.html$/, "") === to,
+          { timeout: 7000 },
+        );
+        await page.locator("main h1").first().waitFor({ timeout: 7000 });
+        checked++;
+      } catch (error) {
+        failures.push(engineName + " " + from + " redirect: " + error);
       }
     }
 
@@ -1093,6 +1102,8 @@ for (const [engineName, engine] of [
         ["/fr/projects", ".showcase-card", 26],
         ["/experiences", ".career-card", 11],
         ["/fr/experiences", ".career-card", 11],
+        ["/about", ".skills-domain-card", 6],
+        ["/fr/about", ".about-fact", 4],
       ]) {
         try {
           // Wait for the load event so styles apply before checking visibility.
@@ -1124,7 +1135,7 @@ for (const [engineName, engine] of [
           );
           const navLinks = staticPage.locator(".site-main-nav a[href]");
           assert.ok(
-            (await navLinks.count()) >= 4,
+            (await navLinks.count()) >= 3,
             path + " without JS: main navigation links missing",
           );
           for (const link of await navLinks.all()) {
@@ -1450,7 +1461,7 @@ for (const [engineName, engine] of [
         await menuButton.focus();
         await mobilePage.keyboard.press("Enter");
         assert.equal(await menuButton.getAttribute("aria-expanded"), "true");
-        assert.ok((await navLinks.count()) >= 4, path + " nav links missing");
+        assert.ok((await navLinks.count()) >= 3, path + " nav links missing");
         for (const link of await navLinks.all()) {
           assert.equal(await link.isVisible(), true, path + " nav link hidden");
           const box = await link.boundingBox();

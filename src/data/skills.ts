@@ -3,11 +3,14 @@ import type { ProjectId } from "./projects.ts";
 import type { Label, Localized } from "./types.ts";
 
 /**
- * Links to a dedicated EN/FR project page, or to an explicit resource
- * (`href` is an English site path, localized when rendered, or an absolute URL).
+ * Links to a dedicated EN/FR project page, to a role or degree on the
+ * experience timeline (`experienceId` from experiences.ts, never an `earlier`
+ * one, whose card starts collapsed), or to an explicit resource (`href` is an
+ * English site path, localized when rendered, or an absolute URL).
  */
 export type SkillEvidence = (
   | { kind: "project"; projectId: ProjectId }
+  | { kind: "experience"; experienceId: string }
   | { kind: "link"; href: string; label: Localized }
 ) & { detail: Localized };
 
@@ -55,6 +58,14 @@ export const skillDomains: readonly SkillDomain[] = [
           en: "no_std audio processing and codecs.",
         },
       },
+      {
+        kind: "experience",
+        experienceId: "insa-engineering",
+        detail: {
+          fr: "Cours de systèmes d’exploitation, d’électronique et de capteurs.",
+          en: "Operating systems, electronics and sensors coursework.",
+        },
+      },
     ],
   },
   {
@@ -92,6 +103,22 @@ export const skillDomains: readonly SkillDomain[] = [
         detail: {
           fr: "Plateforme étudiante en Rust.",
           en: "Student platform built with Rust.",
+        },
+      },
+      {
+        kind: "experience",
+        experienceId: "amazon",
+        detail: {
+          fr: "Performance des recherches et prise en charge multirégion, en Java, Python et AWS.",
+          en: "Search performance and multi-region support on Java, Python and AWS.",
+        },
+      },
+      {
+        kind: "experience",
+        experienceId: "nyu",
+        detail: {
+          fr: "Acquisition de données et analyse statistique en recherche.",
+          en: "Data acquisition and statistical analysis for research.",
         },
       },
     ],
@@ -133,6 +160,14 @@ export const skillDomains: readonly SkillDomain[] = [
           en: "Interactive exploration of music data.",
         },
       },
+      {
+        kind: "experience",
+        experienceId: "linkt",
+        detail: {
+          fr: "Extension Vue/WXT pour enrichir les tickets de support.",
+          en: "Vue/WXT extension to enrich support tickets.",
+        },
+      },
     ],
   },
   {
@@ -172,6 +207,14 @@ export const skillDomains: readonly SkillDomain[] = [
           en: "Self-hosted Odoo for a real business.",
         },
       },
+      {
+        kind: "experience",
+        experienceId: "therapic",
+        detail: {
+          fr: "Environnement Docker, tests et CI.",
+          en: "Docker environment, testing and CI.",
+        },
+      },
     ],
   },
   {
@@ -204,9 +247,16 @@ export const skillDomains: readonly SkillDomain[] = [
         },
       },
       {
-        kind: "link",
-        href: "/experiences#professional",
-        label: { fr: "Expérience chez Linkt", en: "Linkt experience" },
+        kind: "experience",
+        experienceId: "memo-bank",
+        detail: {
+          fr: "Ingénierie sécurité dans l’environnement d’une banque.",
+          en: "Security engineering in a banking environment.",
+        },
+      },
+      {
+        kind: "experience",
+        experienceId: "linkt",
         detail: {
           fr: "Support réseau, diagnostic et automatisation.",
           en: "Network operations, diagnostics and automation.",

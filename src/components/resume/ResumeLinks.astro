@@ -1,0 +1,65 @@
+---
+import { Download } from "@lucide/astro";
+import { site } from "../../data/site.ts";
+import { locales, type Locale } from "../../i18n/locales.ts";
+import { useTranslations } from "../../i18n/ui.ts";
+
+/**
+ * The resume PDFs: this locale's version as the primary button, the other
+ * locale's beside it. The PDFs live on another origin, where browsers ignore
+ * `download`, so each link also opens in a new tab and says so.
+ */
+interface Props {
+  lang: Locale;
+  class?: string;
+}
+
+const { lang, class: className } = Astro.props;
+const t = useTranslations(lang);
+const other = locales.find((locale) => locale !== lang)!;
+const links = [
+  { label: t("resume.download"), href: site.resumePdf[lang], hreflang: lang },
+  {
+    label: t("resume.otherVersion"),
+    href: site.resumePdf[other],
+    hreflang: other,
+  },
+];
+---
+
+<div class:list={["resume-links", className]}>
+  {links.map((link, index) => (
+    <a
+      class:list={[
+        "resume-link button-link",
+        { "button-link--primary": index === 0 },
+      ]}
+      href={link.href}
+      hreflang={link.hreflang}
+      type="application/pdf"
+      download
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <Download size={17} aria-hidden="true" />
+      {link.label}
+      <span class="visually-hidden"> {t("a11y.newTab")}</span>
+    </a>
+  ))}
+</div>
+
+<style>
+  .resume-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+  }
+  .resume-link {
+    gap: var(--space-2xs);
+  }
+  @media (max-width: 560px) {
+    .resume-links {
+      flex-direction: column;
+    }
+  }
+</style>

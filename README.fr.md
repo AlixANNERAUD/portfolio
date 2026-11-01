@@ -37,7 +37,7 @@ astro.config.mjs          Sortie statique en fichiers .html, MDX, sitemap, polic
 src/
   pages/
     [...lang]/            Chaque page une seule fois, générée pour / (anglais) et /fr/ (français) :
-                          index, projects, experiences, skills, resume, legal-notice, projects/[slug]
+                          index, projects, experiences, about, legal-notice, projects/[slug]
     404.astro
     llms.txt.ts           /llms.txt, index Markdown de toutes les pages pour les modèles de langage
     .well-known/          security.txt (contact, renouvelé à chaque build)
@@ -47,10 +47,11 @@ src/
   components/
     ui/                   Primitives : Hero, SectionHeading, Card, Tags, NextLink, Eyebrow
     home/                 Accueil : introduction, parcours, projets mis en avant
+    about/                Page À propos : bio courte (AboutFacts) et ContactSection
     experience/           ExperienceCard et ExperienceTimeline
     projects/             ProjectCard, ProjectCatalogue (filtrable), Breadcrumb, RelatedProjects
-    resume/               ResumeSummary (résumé HTML) et PdfEmbed
-    skills/ xila/ mdx/    Sections de pages et composants MDX
+    resume/               ResumeLinks : les CV PDF anglais et français (Expériences et À propos)
+    skills/ xila/ mdx/    Sections de pages (domaines de compétences, langues) et composants MDX
     site/                 SiteHead, SiteHeader, SiteFooter, ThemeMenu (Auto / Clair / Sombre), JsonLd
   content.config.ts       Collection de projets typée
   content/
@@ -66,7 +67,7 @@ scripts/                  Validation des sources, vérification du HTML compilé
 tools/browser-checks/     Test de fumée Playwright
 ```
 
-**Routes :** les pages anglaises sont à la racine, les pages françaises sous `/fr/`. `build.format = "preserve"` produit `dist/<page>.html` ; les URL `/projects/<id>` restent stables. Chaque projet a une fiche dans les deux langues, avec liens canoniques et `hreflang`.
+**Routes :** les pages anglaises sont à la racine, les pages françaises sous `/fr/`. `build.format = "preserve"` produit `dist/<page>.html` ; les URL `/projects/<id>` restent stables. Chaque projet a une fiche dans les deux langues, avec liens canoniques et `hreflang`. La navigation principale est Projets · Expériences · À propos. Les anciennes pages `/skills` et `/resume` (et leurs versions `/fr/`) sont des pages de redirection statiques vers `/about` et `/experiences`, générées par l’option `redirects` d’Astro : un meta refresh, un lien canonique vers la cible et `noindex`, hors du sitemap.
 
 **Données structurées :** chaque page indexable contient un seul `@graph` JSON-LD construit par `src/lib/seo.ts` ; les nœuds Person et WebSite gardent le même `@id` dans les deux langues.
 

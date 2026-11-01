@@ -97,8 +97,19 @@ function tagsNamed(html, name) {
   );
 }
 
+/**
+ * The document head; without a <head> tag (Astro's redirect pages), the
+ * implied head: everything before <body>.
+ */
+function headOf(html) {
+  return (
+    html.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i)?.[1] ??
+    html.split(/<body\b/i)[0]
+  );
+}
+
 function snapshotPage(file, html) {
-  const head = html.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i)?.[1] ?? "";
+  const head = headOf(html);
   const links = tagsNamed(head, "link");
   const metas = tagsNamed(head, "meta");
   const alternate = (lang) =>
@@ -124,7 +135,7 @@ function snapshotPage(file, html) {
 
 /** Duplicate canonical/hreflang links, which the snapshot record would hide. */
 function duplicateLinks(file, html) {
-  const head = html.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i)?.[1] ?? "";
+  const head = headOf(html);
   const counts = new Map();
   for (const link of tagsNamed(head, "link")) {
     const key =
