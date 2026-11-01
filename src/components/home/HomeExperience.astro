@@ -1,4 +1,5 @@
 ---
+import Eyebrow from "../ui/Eyebrow.astro";
 import ExperienceCard from "../experience/ExperienceCard.astro";
 import { homepageExperiences } from "../../data/experiences.ts";
 import { localizePath, type Locale } from "../../i18n/locales.ts";
@@ -6,8 +7,10 @@ import { useTranslations } from "../../i18n/ui.ts";
 
 interface Props {
   lang: Locale;
+  /** Position of the section on the page, numbering its overline. */
+  index: number;
 }
-const { lang } = Astro.props;
+const { lang, index } = Astro.props;
 const t = useTranslations(lang);
 ---
 
@@ -18,7 +21,9 @@ const t = useTranslations(lang);
 >
   <div class="home-experience-heading">
     <div>
-      <p class="home-experience-eyebrow">{t("home.experience.eyebrow")}</p>
+      <Eyebrow class="home-experience-eyebrow" index={index}>
+        {t("home.experience.eyebrow")}
+      </Eyebrow>
       <h2 id="home-experience-heading">{t("home.experience.title")}</h2>
     </div>
     <p class="home-experience-intro">{t("home.experience.intro")}</p>

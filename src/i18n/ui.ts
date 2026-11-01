@@ -63,7 +63,7 @@ const en = {
   "category.data": "Data / ML",
   "count.milestone.one": "{count} milestone",
   "count.milestone.other": "{count} milestones",
-  "next.eyebrow": "Next / 03",
+  "next.eyebrow": "Up next",
   "legal.logoCreditsId": "logo-credits",
   "experience.ongoing": "Ongoing",
   "experience.technologies": "Technologies and domains",
@@ -90,12 +90,12 @@ const en = {
   "experiences.nextLink": "Explore my projects",
   "experiences.logoCredits":
     "Logos and trademarks belong to their respective owners. Sources and credits",
-  "home.experience.eyebrow": "Experience / 01",
+  "home.experience.eyebrow": "Experience",
   "home.experience.title": "Built on real experience.",
   "home.experience.intro":
     "Security, software engineering, networking and research: different environments with the same focus on understanding systems and building useful tools.",
   "home.experience.more": "Explore my experience",
-  "home.hero.index": "01 / Introduction",
+  "home.hero.index": "Introduction",
   "home.hero.discipline": "Software engineering · Systems · Security",
   "home.hero.job": "Software engineer",
   "home.hero.lineOne": "Software, systems",
@@ -110,7 +110,7 @@ const en = {
   "home.hero.scrollLabel": "Explore further",
   "home.hero.footnote": "Design · Build · Operate",
   "home.projects.label": "Selected projects",
-  "home.projects.eyebrow": "Selected projects / 02",
+  "home.projects.eyebrow": "Projects",
   "home.projects.title": "From ideas to",
   "home.projects.accent": "systems.",
   "home.projects.intro":
@@ -139,7 +139,7 @@ const en = {
   "projects.view.list": "List",
   "projects.search": "Search projects",
   "projects.empty": "No projects match your search.",
-  "xila.topology.eyebrow": "Technical deep dive - Xila / 03",
+  "xila.topology.eyebrow": "Xila",
   "xila.topology.title": "Inside Xila: from drivers to apps.",
   "xila.topology.intro":
     "A glimpse of Xila's architecture: drivers connect hardware to Rust services, WebAssembly guest bindings and applications.",
@@ -173,7 +173,7 @@ const en = {
     "Rust, web, infrastructure and networking: I work across different layers, often in the same project. Here is what I use and where to see it.",
   "skills.navLabel": "Explore",
   "skills.domains.nav": "Technical domains",
-  "skills.domains.eyebrow": "01 / Expertise",
+  "skills.domains.eyebrow": "Expertise",
   "skills.domains.title": "What I build.",
   "skills.domains.intro":
     "Six complementary domains backed by code and projects you can explore.",
@@ -181,7 +181,7 @@ const en = {
   "skills.evidence": "In practice",
   "skills.technologies": "Technologies in use",
   "skills.languages.nav": "Languages",
-  "skills.languages.eyebrow": "02 / Communication",
+  "skills.languages.eyebrow": "Communication",
   "skills.languages.title": "Working across borders.",
   "skills.languages.intro":
     "Experience studying, researching and working with international teams.",
@@ -247,7 +247,7 @@ const fr: Record<UIKey, string> = {
   "category.data": "Data / ML",
   "count.milestone.one": "{count} étape",
   "count.milestone.other": "{count} étapes",
-  "next.eyebrow": "Suite / 03",
+  "next.eyebrow": "À suivre",
   "legal.logoCreditsId": "credits-des-logos",
   "experience.ongoing": "En cours",
   "experience.technologies": "Technologies et domaines",
@@ -275,12 +275,12 @@ const fr: Record<UIKey, string> = {
   "experiences.nextLink": "Découvrir mes projets",
   "experiences.logoCredits":
     "Logos et marques : propriété de leurs organismes respectifs. Sources et crédits",
-  "home.experience.eyebrow": "Parcours / 01",
+  "home.experience.eyebrow": "Parcours",
   "home.experience.title": "L’expérience du terrain.",
   "home.experience.intro":
     "Sécurité, développement logiciel, exploitation réseau et recherche : des environnements différents, avec un même souci de comprendre et de construire.",
   "home.experience.more": "Voir tout mon parcours",
-  "home.hero.index": "01 / Introduction",
+  "home.hero.index": "Introduction",
   "home.hero.discipline": "Ingénierie logicielle · Systèmes · Sécurité",
   "home.hero.job": "Ingénieur logiciel",
   "home.hero.lineOne": "Logiciel, systèmes",
@@ -295,7 +295,7 @@ const fr: Record<UIKey, string> = {
   "home.hero.scrollLabel": "Découvrir la suite",
   "home.hero.footnote": "Concevoir · Construire · Exploiter",
   "home.projects.label": "Projets sélectionnés",
-  "home.projects.eyebrow": "Projets / 02",
+  "home.projects.eyebrow": "Projets",
   "home.projects.title": "Des idées aux",
   "home.projects.accent": "systèmes.",
   "home.projects.intro":
@@ -324,7 +324,7 @@ const fr: Record<UIKey, string> = {
   "projects.view.list": "Liste",
   "projects.search": "Rechercher un projet",
   "projects.empty": "Aucun projet ne correspond à cette recherche.",
-  "xila.topology.eyebrow": "Focus technique - Xila / 03",
+  "xila.topology.eyebrow": "Xila",
   "xila.topology.title": "Xila, du matériel aux applications.",
   "xila.topology.intro":
     "Un aperçu de l’architecture de Xila : les pilotes relient le matériel aux services Rust, puis à la frontière WebAssembly et aux applications.",
@@ -358,7 +358,7 @@ const fr: Record<UIKey, string> = {
     "Rust, web, infrastructure, réseau : je travaille sur des couches différentes, souvent dans les mêmes projets. Voici ce que je pratique et où le retrouver.",
   "skills.navLabel": "Explorer",
   "skills.domains.nav": "Domaines techniques",
-  "skills.domains.eyebrow": "01 / Expertise",
+  "skills.domains.eyebrow": "Expertise",
   "skills.domains.title": "Ce que je construis.",
   "skills.domains.intro":
     "Six domaines complémentaires, illustrés par du code et des projets accessibles.",
@@ -366,7 +366,7 @@ const fr: Record<UIKey, string> = {
   "skills.evidence": "Voir en pratique",
   "skills.technologies": "Technologies pratiquées",
   "skills.languages.nav": "Langues",
-  "skills.languages.eyebrow": "02 / Communication",
+  "skills.languages.eyebrow": "Communication",
   "skills.languages.title": "Travailler sans frontières.",
   "skills.languages.intro":
     "Une expérience de travail et de recherche dans des équipes internationales.",

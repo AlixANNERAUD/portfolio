@@ -784,6 +784,57 @@ for (const [engineName, engine] of [
       }
     }
 
+    // Timeline dates and section numbers are machine metadata: JetBrains
+    // Mono with tabular figures, in the rail at 1440 and inside the card at
+    // 390 (where the rail hides). The earlier-roles toggle keeps the
+    // "NN — Label" overline format while it updates the count.
+    for (const [path, width, selector] of [
+      ["/experiences", 1440, ".career-timeline-date"],
+      ["/fr/experiences", 390, ".career-period"],
+      ["/", 1440, ".home-experience-period"],
+      ["/fr/", 1440, "[data-section-index] .eyebrow__index"],
+    ]) {
+      try {
+        await page.setViewportSize({ width, height: 900 });
+        await page.goto(base + path, {
+          waitUntil: "load",
+          timeout: 10000,
+        });
+        const date = page.locator(selector).first();
+        assert.equal(await date.isVisible(), true, selector + " hidden");
+        const style = await date.evaluate((node) => {
+          const computed = getComputedStyle(node);
+          return {
+            family: computed.fontFamily,
+            numeric: computed.fontVariantNumeric,
+          };
+        });
+        assert.match(style.family, /JetBrains Mono/, selector + " font");
+        assert.match(style.numeric, /tabular-nums/, selector + " figures");
+        if (path.endsWith("experiences")) {
+          const eyebrow = page.locator(
+            "#professional [data-section-index] .eyebrow__label",
+          );
+          const numbered = page.locator("#professional [data-section-index]");
+          const before = (await numbered.textContent()).replace(/\s+/g, " ");
+          assert.match(before, /^01 — \d+ /, "collapsed overline " + before);
+          await page.locator("#professional .career-earlier-toggle").click();
+          const after = (await numbered.textContent()).replace(/\s+/g, " ");
+          assert.match(after, /^01 — \d+ /, "expanded overline " + after);
+          assert.notEqual(
+            await eyebrow.textContent(),
+            before.slice(5),
+            "the count must change when earlier roles are shown",
+          );
+        }
+        checked++;
+      } catch (error) {
+        failures.push(
+          engineName + " " + path + " " + width + " mono metadata: " + error,
+        );
+      }
+    }
+
     // Project cards: the whole card opens the project page through one
     // stretched title link, keyboard focus rings the card, hovering dims the
     // neighbours (motion allowed only), and numbers are stable ranks.

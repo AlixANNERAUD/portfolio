@@ -24,3 +24,16 @@ export function formatCount(n: number, key: CountKey, lang: Locale): string {
     lang,
   );
 }
+
+/** Two-digit section number derived from the section's position: `03`. */
+export function sectionNumber(index: number): string {
+  return String(index).padStart(2, "0");
+}
+
+/**
+ * Numbered section overline, `03 — Xila`. The no-break space keeps the dash
+ * on the number's line, as French typography requires.
+ */
+export function sectionLabel(index: number, label: string): string {
+  return `${sectionNumber(index)} — ${label}`;
+}

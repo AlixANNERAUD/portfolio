@@ -36,10 +36,11 @@ const t = useTranslations(lang);
         ],
       }}
     />
-    <SkillsSection lang={lang} />
-    <LanguagesSection lang={lang} />
+    {[SkillsSection, LanguagesSection].map((Section, index) => (
+      <Section lang={lang} index={index + 1} />
+    ))}
     <NextLink
-      eyebrow={t("next.eyebrow")}
+      lang={lang}
       title={t("skills.nextTitle")}
       description={t("skills.nextDescription")}
       href={localizePath("/projects", lang)}

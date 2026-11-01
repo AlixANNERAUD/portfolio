@@ -8,9 +8,11 @@ import { useTranslations } from "../../i18n/ui.ts";
 /** Homepage selection: the top-ranked projects, then a link to the catalogue. */
 interface Props {
   lang: Locale;
+  /** Position of the section on the page, numbering its overline. */
+  index: number;
 }
 
-const { lang } = Astro.props;
+const { lang, index } = Astro.props;
 const t = useTranslations(lang);
 ---
 
@@ -19,6 +21,7 @@ const t = useTranslations(lang);
     variant="compact"
     headingLevel="h2"
     eyebrow={t("home.projects.eyebrow")}
+    index={index}
     title={t("home.projects.title")}
     accent={t("home.projects.accent")}
     intro={t("home.projects.intro")}

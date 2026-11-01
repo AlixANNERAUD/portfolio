@@ -1,15 +1,34 @@
 ---
 import type { HTMLAttributes } from "astro/types";
+import { sectionNumber } from "../../lib/format.ts";
 
-/** Small uppercase overline above a heading. */
-type Props = HTMLAttributes<"p">;
+/**
+ * Small uppercase overline above a heading. With `index`, it becomes a
+ * numbered section overline, `03 — Label`: the number is set in the mono
+ * face and the label stays in its own span so scripts can update it.
+ */
+type Props = HTMLAttributes<"p"> & {
+  as?: "p" | "span";
+  /** Position of the section on the page; omitted for plain overlines. */
+  index?: number;
+};
 
-const { class: className, ...rest } = Astro.props;
+const { as: Tag = "p", index, class: className, ...rest } = Astro.props;
+const number = index === undefined ? undefined : sectionNumber(index);
 ---
 
-<p class:list={["eyebrow", className]} {...rest}>
-  <slot />
-</p>
+<Tag class:list={["eyebrow", className]} data-section-index={number} {...rest}>
+  {number === undefined ? (
+    <slot />
+  ) : (
+    <>
+      <span class="eyebrow__index">{number}</span>&nbsp;—{" "}
+      <span class="eyebrow__label">
+        <slot />
+      </span>
+    </>
+  )}
+</Tag>
 
 <style>
   /* Low specificity so callers can adjust spacing with their own class. */
@@ -20,5 +39,15 @@ const { class: className, ...rest } = Astro.props;
     font-weight: 600;
     letter-spacing: 0.13em;
     text-transform: uppercase;
+  }
+  .eyebrow__index {
+    color: var(--color-accent);
+    font-family: var(--font-mono);
+    /* Mono figures run smaller than the overline capitals: match them. */
+    font-size: 1.1em;
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: 0.02em;
   }
 </style>

@@ -24,9 +24,11 @@ import { useTranslations } from "../../i18n/ui.ts";
 /** Technical domains, each backed by links to the projects that show it. */
 interface Props {
   lang: Locale;
+  /** Position of the section on the page, numbering its overline. */
+  index: number;
 }
 
-const { lang } = Astro.props;
+const { lang, index } = Astro.props;
 const t = useTranslations(lang);
 const domains = skillDomains;
 
@@ -67,6 +69,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
   <SectionHeading
     headingId="skills-domains-heading"
     eyebrow={t("skills.domains.eyebrow")}
+    index={index}
     title={t("skills.domains.title")}
     description={t("skills.domains.intro")}
   >

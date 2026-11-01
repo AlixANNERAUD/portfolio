@@ -1,11 +1,13 @@
 ---
 import type { HTMLAttributes } from "astro/types";
-import { ArrowUpRight } from "@lucide/astro";
+import { ArrowRight } from "@lucide/astro";
 import Eyebrow from "./Eyebrow.astro";
+import type { Locale } from "../../i18n/locales.ts";
+import { useTranslations } from "../../i18n/ui.ts";
 
 /** Closing call to action pointing to the next page to read. */
 type Props = HTMLAttributes<"footer"> & {
-  eyebrow: string;
+  lang: Locale;
   title: string;
   description: string;
   href: string;
@@ -13,7 +15,7 @@ type Props = HTMLAttributes<"footer"> & {
 };
 
 const {
-  eyebrow,
+  lang,
   title,
   description,
   href,
@@ -21,17 +23,18 @@ const {
   class: className,
   ...rest
 } = Astro.props;
+const t = useTranslations(lang);
 ---
 
 <footer class:list={["editorial-next", className]} {...rest}>
   <div>
-    <Eyebrow class="editorial-next__eyebrow">{eyebrow}</Eyebrow>
+    <Eyebrow class="editorial-next__eyebrow">{t("next.eyebrow")}</Eyebrow>
     <h2>{title}</h2>
     <p class="editorial-next__description">{description}</p>
   </div>
   <a href={href}>
     {linkLabel}
-    <ArrowUpRight size={19} aria-hidden="true" />
+    <ArrowRight size={19} aria-hidden="true" />
   </a>
 </footer>
 
@@ -69,6 +72,14 @@ const {
     font-size: 0.85rem;
     font-weight: 600;
     text-decoration: none;
+  }
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .editorial-next a svg {
+      transition: transform var(--dur-fast) var(--ease-out);
+    }
+    .editorial-next a:hover svg {
+      transform: translateX(3px);
+    }
   }
   @media (max-width: 680px) {
     .editorial-next {

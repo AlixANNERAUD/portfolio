@@ -8,9 +8,11 @@ import { useTranslations } from "../../i18n/ui.ts";
 /** Spoken languages and their proficiency. */
 interface Props {
   lang: Locale;
+  /** Position of the section on the page, numbering its overline. */
+  index: number;
 }
 
-const { lang } = Astro.props;
+const { lang, index } = Astro.props;
 const t = useTranslations(lang);
 const languages = spokenLanguages;
 ---
@@ -23,6 +25,7 @@ const languages = spokenLanguages;
   <SectionHeading
     headingId="skills-languages-heading"
     eyebrow={t("skills.languages.eyebrow")}
+    index={index}
     title={t("skills.languages.title")}
     description={t("skills.languages.intro")}
   >

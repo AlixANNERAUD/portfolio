@@ -15,6 +15,9 @@ type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 
 const { lang } = Astro.props;
 const t = useTranslations(lang);
+
+// Page order is the single source of the section numbers (00, 01, …).
+const sections = [HomeHero, HomeExperience, FeaturedProjects, XilaTopology];
 ---
 
 <BaseLayout
@@ -24,8 +27,7 @@ const t = useTranslations(lang);
   home
   jsonLd={[personJsonLd]}
 >
-  <HomeHero lang={lang} />
-  <HomeExperience lang={lang} />
-  <FeaturedProjects lang={lang} />
-  <XilaTopology lang={lang} />
+  {sections.map((Section, index) => (
+    <Section lang={lang} index={index} />
+  ))}
 </BaseLayout>

@@ -26,8 +26,7 @@ const t = useTranslations(lang);
 
 const recent = entries.filter((entry) => !entry.earlier);
 const earlier = entries.filter((entry) => entry.earlier);
-const eyebrow = (count: number) =>
-  `${String(index).padStart(2, "0")} / ${formatCount(count, "milestone", lang)}`;
+const eyebrow = (count: number) => formatCount(count, "milestone", lang);
 const headingId = `${group}-heading`;
 const earlierId = `earlier-${group}`;
 const Icon = group === "professional" ? BriefcaseBusiness : GraduationCap;
@@ -37,6 +36,7 @@ const Icon = group === "professional" ? BriefcaseBusiness : GraduationCap;
   <SectionHeading
     headingId={headingId}
     eyebrow={eyebrow(entries.length)}
+    index={index}
     title={t(`experiences.${group}.title`)}
     description={t(`experiences.${group}.description`)}
   >
@@ -98,7 +98,7 @@ const Icon = group === "professional" ? BriefcaseBusiness : GraduationCap;
     const label = button.querySelector("span");
     const eyebrow = button
       .closest(".career-group")
-      ?.querySelector(".editorial-section-heading__eyebrow");
+      ?.querySelector(".editorial-section-heading__eyebrow .eyebrow__label");
     if (!list || !label) continue;
 
     const render = (expanded: boolean) => {
@@ -165,7 +165,10 @@ const Icon = group === "professional" ? BriefcaseBusiness : GraduationCap;
   }
   .career-timeline-date {
     color: var(--color-text-muted);
-    font-size: 0.76rem;
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
     line-height: 1.5;
     text-align: right;
   }

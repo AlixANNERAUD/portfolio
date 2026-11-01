@@ -10,6 +10,8 @@ export interface HeroNavItem {
 
 type Props = HTMLAttributes<"header"> & {
   eyebrow: string;
+  /** Position of the section on the page, numbering the eyebrow. */
+  index?: number;
   title: string;
   /** Emphasized end of the title, rendered in italics. */
   accent?: string;
@@ -22,6 +24,7 @@ type Props = HTMLAttributes<"header"> & {
 
 const {
   eyebrow,
+  index,
   title,
   accent,
   intro,
@@ -38,7 +41,9 @@ const {
   {...rest}
 >
   <div class="editorial-hero__copy">
-    <Eyebrow class="editorial-hero__eyebrow">{eyebrow}</Eyebrow>
+    <Eyebrow class="editorial-hero__eyebrow" index={index}>
+      {eyebrow}
+    </Eyebrow>
     <Heading class="editorial-hero__title">
       {title}
       {accent && " "}

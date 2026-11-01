@@ -1,4 +1,5 @@
 ---
+import Eyebrow from "../ui/Eyebrow.astro";
 import { localizePath, type Locale } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
 import {
@@ -15,9 +16,11 @@ import {
  */
 interface Props {
   lang: Locale;
+  /** Position of the section on the page, numbering its overline. */
+  index: number;
 }
 
-const { lang } = Astro.props;
+const { lang, index } = Astro.props;
 const t = useTranslations(lang);
 
 const toSvg = ([x, y]: Point) => ({
@@ -30,7 +33,9 @@ const svgNodes = NODES.map((node) => toSvg(node.position));
 <section class="xila-topology" aria-label={t("xila.topology.title")}>
   <div class="xila-topology-heading">
     <div>
-      <p class="xila-topology-kicker">{t("xila.topology.eyebrow")}</p>
+      <Eyebrow class="xila-topology-kicker" index={index}>
+        {t("xila.topology.eyebrow")}
+      </Eyebrow>
       <h2>{t("xila.topology.title")}</h2>
     </div>
     <p class="xila-topology-intro">{t("xila.topology.intro")}</p>

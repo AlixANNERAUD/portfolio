@@ -727,6 +727,81 @@ for (const file of ["experiences.html", "fr/experiences.html"]) {
   }
 }
 
+// Section numbering: every numbered overline reads "NN — Label", and the
+// numbers follow the order of the sections on the page (home: Introduction 00,
+// Experience 01, Projects 02, Xila 03). No overline keeps the old "NN / X" or
+// "X / NN" format, and the closing link's overline is in the page language.
+{
+  for (const [file, expected, next] of [
+    [
+      "index.html",
+      ["00 — Introduction", "01 — Experience", "02 — Projects", "03 — Xila"],
+      null,
+    ],
+    [
+      "fr/index.html",
+      ["00 — Introduction", "01 — Parcours", "02 — Projets", "03 — Xila"],
+      null,
+    ],
+    ["experiences.html", ["01 — ", "02 — "], "Up next"],
+    ["fr/experiences.html", ["01 — ", "02 — "], "À suivre"],
+    ["skills.html", ["01 — Expertise", "02 — Communication"], "Up next"],
+    ["fr/skills.html", ["01 — Expertise", "02 — Communication"], "À suivre"],
+  ]) {
+    const html = read(file);
+    if (!html) continue;
+    const root = parse(html);
+    const labels = root
+      .querySelectorAll("[data-section-index]")
+      .map((node) => ({
+        index: node.getAttribute("data-section-index"),
+        text: node.text.replace(/\s+/g, " ").trim(),
+      }));
+    const ok =
+      labels.length === expected.length &&
+      labels.every(
+        ({ index, text }, i) =>
+          /^\d{2} — \S/.test(text) &&
+          text.startsWith(index + " — ") &&
+          text.startsWith(expected[i]),
+      );
+    if (!ok) {
+      failed.push(
+        file +
+          ": section numbering must be " +
+          JSON.stringify(expected) +
+          ", found " +
+          JSON.stringify(labels.map(({ text }) => text)),
+      );
+    }
+    for (const node of root.querySelectorAll(
+      ".eyebrow, .home-hero-overline-index",
+    )) {
+      const text = node.text.replace(/\s+/g, " ").trim();
+      if (/\b\d{2} \/|\/ \d{2}\b/.test(text)) {
+        failed.push(
+          file + ": old section number format " + JSON.stringify(text),
+        );
+      }
+    }
+    if (next) {
+      const eyebrow = root
+        .querySelector(".editorial-next__eyebrow")
+        ?.text.replace(/\s+/g, " ")
+        .trim();
+      if (eyebrow !== next) {
+        failed.push(
+          file +
+            ": next link overline must read " +
+            JSON.stringify(next) +
+            ", found " +
+            JSON.stringify(eyebrow),
+        );
+      }
+    }
+  }
+}
+
 // → marks internal links and ↗ external ones: no same-site, anchor or mailto
 // link may show the external arrow.
 for (const [file] of cases) {

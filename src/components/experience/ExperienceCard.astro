@@ -188,7 +188,10 @@ const location = entry.location[lang];
   }
   .home-experience-period {
     color: var(--color-text-muted);
-    font-size: 0.77rem;
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
     text-align: right;
   }
   .home-experience-organization {
@@ -352,7 +355,9 @@ const location = entry.location[lang];
     overflow: hidden;
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
-    font-weight: 600;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
   }
   .career-location {
     display: inline-flex;

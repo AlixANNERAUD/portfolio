@@ -1,13 +1,16 @@
 ---
+import Eyebrow from "../ui/Eyebrow.astro";
 import { site } from "../../data/site.ts";
 import { localizePath, type Locale } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
 
 interface Props {
   lang: Locale;
+  /** Position of the section on the page, numbering its overline. */
+  index: number;
 }
 
-const { lang } = Astro.props;
+const { lang, index } = Astro.props;
 const t = useTranslations(lang);
 
 const actions = [
@@ -32,7 +35,9 @@ const actions = [
 <section class="home-hero" aria-labelledby="home-hero-title">
   <div class="home-hero-inner">
     <div class="home-hero-overline" aria-hidden="true">
-      <span class="home-hero-overline-index">{t("home.hero.index")}</span>
+      <Eyebrow as="span" class="home-hero-overline-index" index={index}>
+        {t("home.hero.index")}
+      </Eyebrow>
       <span class="home-hero-overline-discipline">
         {t("home.hero.discipline")}
       </span>
@@ -144,6 +149,15 @@ const actions = [
     letter-spacing: var(--tracking-overline);
     line-height: 1.5;
     text-transform: uppercase;
+  }
+
+  /* The shared overline inherits the hero's own overline type. */
+  .home-hero-overline-index {
+    margin: 0;
+    color: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
   }
 
   .home-hero-overline::after {
