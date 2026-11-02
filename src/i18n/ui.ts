@@ -187,8 +187,15 @@ const en = {
   "about.title": "Alix,",
   "about.accent": "in short.",
   "about.intro":
-    "I enjoy understanding how things work and building tools that make them more reliable and easier to use. My background connects software, networking, security and research.",
+    "It started when I was nine: my mother brought home an old refurbished PC that I was allowed to take apart. I have been taking things apart to see how they work ever since, from computers to microcontrollers to operating systems, which led to Xila.",
   "about.navLabel": "On this page",
+  "about.nav.openSource": "Open source",
+  "about.contributions.eyebrow": "Open source",
+  "about.contributions.title": "Upstream contributions.",
+  "about.contributions.intro":
+    "Merged changes to the open-source projects I rely on, most of them made while building Xila.",
+  "about.contributions.count": "projects",
+  "about.contributions.pull": "Pull request",
   "about.nav.skills": "Skills",
   "about.nav.languages": "Languages",
   "about.nav.contact": "Contact",
@@ -388,8 +395,15 @@ const fr: Record<UIKey, string> = {
   "about.title": "Alix,",
   "about.accent": "en bref.",
   "about.intro":
-    "J’aime comprendre comment les choses fonctionnent, puis concevoir les outils qui les rendent plus fiables et plus simples à utiliser. Mon parcours mêle développement, réseaux, sécurité et recherche.",
+    "Tout a commencé quand j’avais neuf ans : ma mère a ramené à la maison un vieux PC reconditionné que j’avais le droit de démonter. Depuis, je démonte les choses pour comprendre comment elles marchent, des ordinateurs aux microcontrôleurs puis aux systèmes d’exploitation, jusqu’à Xila.",
   "about.navLabel": "Sur cette page",
+  "about.nav.openSource": "Open source",
+  "about.contributions.eyebrow": "Open source",
+  "about.contributions.title": "Contributions aux projets que j’utilise.",
+  "about.contributions.intro":
+    "Des modifications intégrées aux projets open source sur lesquels je m’appuie, la plupart faites pendant le développement de Xila.",
+  "about.contributions.count": "projets",
+  "about.contributions.pull": "Pull request",
   "about.nav.skills": "Compétences",
   "about.nav.languages": "Langues",
   "about.nav.contact": "Contact",

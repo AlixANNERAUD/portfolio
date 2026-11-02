@@ -4,6 +4,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import Hero from "../../components/ui/Hero.astro";
 import NextLink from "../../components/ui/NextLink.astro";
 import AboutFacts from "../../components/about/AboutFacts.astro";
+import ContributionsSection from "../../components/about/ContributionsSection.astro";
 import ContactSection from "../../components/about/ContactSection.astro";
 import SkillsSection from "../../components/skills/SkillsSection.astro";
 import LanguagesSection from "../../components/skills/LanguagesSection.astro";
@@ -20,7 +21,12 @@ const t = useTranslations(lang);
 const description = t("about.description");
 
 // Page order is the single source of the section numbers (01, 02, …).
-const sections = [SkillsSection, LanguagesSection, ContactSection];
+const sections = [
+  ContributionsSection,
+  SkillsSection,
+  LanguagesSection,
+  ContactSection,
+];
 ---
 
 <BaseLayout
@@ -40,6 +46,7 @@ const sections = [SkillsSection, LanguagesSection, ContactSection];
       nav={{
         label: t("about.navLabel"),
         items: [
+          { href: "#open-source", label: t("about.nav.openSource") },
           { href: "#domains", label: t("about.nav.skills") },
           { href: "#languages", label: t("about.nav.languages") },
           { href: "#contact", label: t("about.nav.contact") },

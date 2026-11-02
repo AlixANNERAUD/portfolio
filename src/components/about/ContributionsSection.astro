@@ -1,0 +1,148 @@
+---
+import SectionHeading from "../ui/SectionHeading.astro";
+import { contributions } from "../../data/contributions.ts";
+import type { Locale } from "../../i18n/locales.ts";
+import { useTranslations } from "../../i18n/ui.ts";
+
+/**
+ * Merged contributions to other open-source projects, one row each: the
+ * project and its years, what changed, and links to the pull requests.
+ */
+interface Props {
+  lang: Locale;
+  /** Position of the section on the page, numbering its overline. */
+  index: number;
+}
+
+const { lang, index } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section
+  id="open-source"
+  class="about-contributions"
+  aria-labelledby="open-source-heading"
+>
+  <SectionHeading
+    headingId="open-source-heading"
+    eyebrow={t("about.contributions.eyebrow")}
+    index={index}
+    title={t("about.contributions.title")}
+    description={t("about.contributions.intro")}
+    count={{
+      value: contributions.length,
+      label: t("about.contributions.count"),
+    }}
+  />
+
+  <ul class="about-contributions-list" role="list">
+    {contributions.map((entry) => (
+      <li>
+        <div class="about-contributions-project">
+          <a
+            href={`https://github.com/${entry.repository}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {entry.project}
+            <span class="visually-hidden"> {t("a11y.newTab")}</span>
+          </a>
+          <span class="about-contributions-period">{entry.period}</span>
+        </div>
+        <p>{entry.summary[lang]}</p>
+        <ul class="about-contributions-pulls" role="list">
+          {entry.pulls.map((pull) => (
+            <li>
+              <a href={pull.url} target="_blank" rel="noopener noreferrer">
+                <span class="visually-hidden">
+                  {t("about.contributions.pull")}{" "}
+                </span>
+                #{pull.number}
+                <span aria-hidden="true">↗</span>
+                <span class="visually-hidden"> {t("a11y.newTab")}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .about-contributions {
+    margin-bottom: var(--space-2xl);
+  }
+  .about-contributions-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+  /* One editorial row per project: name and years, then what changed. */
+  .about-contributions-list > li {
+    display: grid;
+    grid-template-columns: 14rem minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: var(--space-2xs) var(--space-m);
+    padding: var(--space-s) 0;
+    border-top: 1px solid var(--color-border);
+  }
+  .about-contributions-project {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xs);
+  }
+  .about-contributions-project a {
+    color: var(--color-text);
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    text-decoration: none;
+  }
+  .about-contributions-project a:hover {
+    color: var(--color-accent);
+    text-decoration: underline;
+  }
+  .about-contributions-period,
+  .about-contributions-pulls {
+    color: var(--color-text-subtle);
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: var(--tracking-mono);
+  }
+  .about-contributions-list p {
+    margin: 0;
+    color: var(--color-text-muted);
+    max-width: 60ch;
+  }
+  .about-contributions-pulls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--space-3xs) var(--space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .about-contributions-pulls a {
+    color: var(--color-text-muted);
+    text-underline-offset: 0.2em;
+  }
+  .about-contributions-pulls a:hover {
+    color: var(--color-accent);
+  }
+  @media (max-width: 720px) {
+    .about-contributions-list > li {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .about-contributions-project {
+      flex-direction: row;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+    .about-contributions-pulls {
+      justify-content: flex-start;
+    }
+  }
+</style>

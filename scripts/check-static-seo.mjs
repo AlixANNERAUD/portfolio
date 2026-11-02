@@ -1354,12 +1354,22 @@ for (const file of ["experiences.html", "fr/experiences.html"]) {
     ["fr/experiences.html", ["01 / ", "02 / "], "À suivre"],
     [
       "about.html",
-      ["01 / Expertise", "02 / Communication", "03 / Contact"],
+      [
+        "01 / Open source",
+        "02 / Expertise",
+        "03 / Communication",
+        "04 / Contact",
+      ],
       "Up next",
     ],
     [
       "fr/about.html",
-      ["01 / Expertise", "02 / Communication", "03 / Contact"],
+      [
+        "01 / Open source",
+        "02 / Expertise",
+        "03 / Communication",
+        "04 / Contact",
+      ],
       "À suivre",
     ],
   ]) {
