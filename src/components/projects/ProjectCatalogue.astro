@@ -1,25 +1,18 @@
 ---
-import { ChevronDown, LayoutGrid, List, Search } from "@lucide/astro";
 import Hero from "../ui/Hero.astro";
 import ProjectCard from "./ProjectCard.astro";
 import {
   byScore,
   projects,
-  projectScore,
-  type Project,
   type ProjectCategory,
-  type ProjectGroup,
 } from "../../data/projects.ts";
-import { technologyLabel } from "../../data/technologies.ts";
-import { localize } from "../../data/types.ts";
 import type { Locale } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
 import { formatCount } from "../../lib/format.ts";
 
 /**
- * Every project card is server-rendered in relevance order, as an index list
- * (the art-panel grid is an option). A module script reveals the filter,
- * search, sort and grid/list controls and toggles `hidden` on the cards;
+ * Every project card is server-rendered in relevance order. One row of area
+ * filters, revealed by a module script, toggles `hidden` on the cards;
  * without JavaScript the full list stays visible.
  */
 interface Props {
@@ -29,15 +22,7 @@ interface Props {
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 
-const groups = [
-  "all",
-  "personal",
-  "library",
-  "competition",
-  "academic",
-] as const satisfies readonly (ProjectGroup | "all")[];
-const categories = [
-  "all",
+const categoryOrder = [
   "systems",
   "software",
   "web",
@@ -45,20 +30,20 @@ const categories = [
   "embedded",
   "security",
   "data",
-] as const satisfies readonly (ProjectCategory | "all")[];
-
-const categoryLabel = (id: (typeof categories)[number]) =>
-  id === "all" ? t("projects.category.all") : t(`category.${id}`);
+] as const satisfies readonly ProjectCategory[];
 
 const sorted = [...projects].sort(byScore);
-const searchText = (project: Project) =>
-  [
-    localize(project.title, lang),
-    project.description[lang],
-    ...project.tags.map((tag) => technologyLabel(tag, lang)),
-  ]
-    .join(" ")
-    .toLocaleLowerCase(lang);
+// Only areas that hold a project get a filter, each with its count.
+const filters = [
+  { id: "all", label: t("projects.all"), count: sorted.length },
+  ...categoryOrder
+    .map((id) => ({
+      id,
+      label: t(`category.${id}`),
+      count: sorted.filter((project) => project.category === id).length,
+    }))
+    .filter(({ count }) => count > 0),
+];
 ---
 
 <section
@@ -75,95 +60,26 @@ const searchText = (project: Project) =>
     intro={t("projects.intro")}
   />
 
-  <div class="showcase-toolbar" hidden>
-    <div class="showcase-controls">
-      <div class="showcase-control">
-        <span class="showcase-control-label" aria-hidden="true">
-          {t("projects.kind")}
-        </span>
-        <div
-          class="showcase-filters"
-          role="group"
-          aria-label={t("projects.kind")}
-          data-filter="group"
-        >
-          {groups.map((id) => (
-            <button
-              type="button"
-              value={id}
-              aria-pressed={id === "all" ? "true" : "false"}
-            >
-              {t(`projects.group.${id}`)}
-            </button>
-          ))}
-        </div>
-      </div>
-      <div class="showcase-control">
-        <span class="showcase-control-label" aria-hidden="true">
-          {t("projects.area")}
-        </span>
-        <div
-          class="showcase-filters"
-          role="group"
-          aria-label={t("projects.area")}
-          data-filter="category"
-        >
-          {categories.map((id) => (
-            <button
-              type="button"
-              value={id}
-              aria-pressed={id === "all" ? "true" : "false"}
-            >
-              {categoryLabel(id)}
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-    <div class="showcase-toolbar-actions">
-      <label class="showcase-search">
-        <span class="visually-hidden">{t("projects.search")}</span>
-        <Search class="showcase-search-icon" size={16} aria-hidden="true" />
-        <input
-          type="search"
-          placeholder={t("projects.search")}
-          data-catalogue-search
-        />
-      </label>
-      <label class="showcase-sort">
-        <span class="showcase-sort-label">{t("projects.sortLabel")}</span>
-        <span class="showcase-select">
-          <select data-catalogue-sort>
-            <option value="relevance">{t("projects.sort.relevance")}</option>
-            <option value="name">{t("projects.sort.name")}</option>
-          </select>
-          <ChevronDown
-            class="showcase-select-icon"
-            size={16}
-            aria-hidden="true"
-          />
-        </span>
-      </label>
-      <div
-        class="showcase-view"
-        role="group"
-        aria-label={t("projects.view")}
-        data-catalogue-view
+  <div
+    class="showcase-filters"
+    role="group"
+    aria-label={t("projects.filter")}
+    hidden
+  >
+    {filters.map(({ id, label, count }) => (
+      <button
+        type="button"
+        value={id}
+        aria-pressed={id === "all" ? "true" : "false"}
       >
-        <button type="button" value="grid" aria-pressed="false">
-          <LayoutGrid size={16} aria-hidden="true" />
-          {t("projects.view.grid")}
-        </button>
-        <button type="button" value="list" aria-pressed="true">
-          <List size={16} aria-hidden="true" />
-          {t("projects.view.list")}
-        </button>
-      </div>
-    </div>
+        {label}
+        <span class="showcase-filter-count">{count}</span>
+      </button>
+    ))}
   </div>
 
   <p
-    class="showcase-count"
+    class="visually-hidden"
     role="status"
     data-count-one={t("count.project.one")}
     data-count-other={t("count.project.other")}
@@ -177,130 +93,46 @@ const searchText = (project: Project) =>
         project={project}
         lang={lang}
         headingLevel="h2"
-        data-group={project.group}
         data-category={project.category}
-        data-search={searchText(project)}
-        data-score={projectScore(project)}
-        data-title={localize(project.title, lang)}
       />
     ))}
   </div>
-
-  <p class="showcase-empty" hidden>
-    {t("projects.empty")}
-  </p>
 </section>
 
 <script>
   import { formatPlural } from "../../lib/plural.ts";
   import type { Locale } from "../../i18n/locales.ts";
 
-  const VIEW_KEY = "portfolio-catalogue-view";
-
   for (const root of document.querySelectorAll<HTMLElement>(
     "[data-catalogue]",
   )) {
     const lang = root.dataset.lang as Locale | undefined;
-    const toolbar = root.querySelector<HTMLElement>(".showcase-toolbar");
+    const bar = root.querySelector<HTMLElement>(".showcase-filters");
     const grid = root.querySelector<HTMLElement>("[data-catalogue-grid]");
     const status = root.querySelector<HTMLElement>("[role=status]");
-    const empty = root.querySelector<HTMLElement>(".showcase-empty");
-    const search = root.querySelector<HTMLInputElement>(
-      "[data-catalogue-search]",
-    );
-    const sort = root.querySelector<HTMLSelectElement>("[data-catalogue-sort]");
-    const viewButtons = [
-      ...root.querySelectorAll<HTMLButtonElement>(
-        "[data-catalogue-view] button",
-      ),
-    ];
     const { countOne, countOther } = status?.dataset ?? {};
     // Broken markup leaves the server-rendered list untouched.
-    if (
-      !lang ||
-      !countOne ||
-      !countOther ||
-      !toolbar ||
-      !grid ||
-      !status ||
-      !empty ||
-      !search ||
-      !sort ||
-      viewButtons.length === 0
-    )
-      continue;
+    if (!lang || !countOne || !countOther || !bar || !grid || !status) continue;
 
-    // Server order is the relevance ranking; keep it for "relevance".
     const cards = [...grid.querySelectorAll<HTMLElement>(".showcase-card")];
-    const collator = new Intl.Collator(lang);
-    const byTitle = [...cards].sort((a, b) =>
-      collator.compare(a.dataset.title ?? "", b.dataset.title ?? ""),
-    );
-    const filters = { group: "all", category: "all" };
+    const buttons = [...bar.querySelectorAll("button")];
     const forms = { one: countOne, other: countOther };
 
-    const update = () => {
-      const term = search.value.trim().toLocaleLowerCase(lang);
-      const ordered = sort.value === "name" ? byTitle : cards;
-      let shown = 0;
-      for (const card of ordered) {
-        const visible =
-          (filters.group === "all" || card.dataset.group === filters.group) &&
-          (filters.category === "all" ||
-            card.dataset.category === filters.category) &&
-          (!term || (card.dataset.search ?? "").includes(term));
-        card.hidden = !visible;
-        grid.append(card);
-        if (visible) shown++;
-      }
-      status.textContent = formatPlural(shown, forms, lang);
-      empty.hidden = shown > 0;
-    };
-
-    for (const group of root.querySelectorAll<HTMLElement>("[data-filter]")) {
-      const key = group.dataset.filter as keyof typeof filters;
-      const buttons = [...group.querySelectorAll("button")];
-      for (const button of buttons) {
-        button.addEventListener("click", () => {
-          filters[key] = button.value;
-          for (const other of buttons) {
-            other.setAttribute("aria-pressed", String(other === button));
-          }
-          update();
-        });
-      }
-    }
-    // The layout choice is a per-visitor convenience: storage may be blocked.
-    const setView = (view: string) => {
-      grid.dataset.view = view;
-      for (const button of viewButtons) {
-        button.setAttribute("aria-pressed", String(button.value === view));
-      }
-    };
-    let storedView: string | null = null;
-    try {
-      storedView = localStorage.getItem(VIEW_KEY);
-    } catch {
-      // Keep the default list.
-    }
-    if (viewButtons.some((button) => button.value === storedView)) {
-      setView(storedView!);
-    }
-    for (const button of viewButtons) {
+    for (const button of buttons) {
       button.addEventListener("click", () => {
-        setView(button.value);
-        try {
-          localStorage.setItem(VIEW_KEY, button.value);
-        } catch {
-          // Not remembered; the choice still applies to this page.
+        let shown = 0;
+        for (const card of cards) {
+          card.hidden =
+            button.value !== "all" && card.dataset.category !== button.value;
+          if (!card.hidden) shown++;
         }
+        for (const other of buttons) {
+          other.setAttribute("aria-pressed", String(other === button));
+        }
+        status.textContent = formatPlural(shown, forms, lang);
       });
     }
-
-    search.addEventListener("input", update);
-    sort.addEventListener("change", update);
-    toolbar.hidden = false;
-    update();
+    bar.hidden = false;
   }
 </script>
 
@@ -308,225 +140,84 @@ const searchText = (project: Project) =>
   .portfolio-showcase {
     margin-block: var(--space-xl) var(--space-2xl);
   }
-  .showcase-toolbar {
-    display: grid;
-    gap: var(--space-s);
-    margin: 0 0 var(--space-s);
-    padding-bottom: var(--space-s);
-    border-bottom: 1px solid var(--color-border);
-  }
   /*
-   * With scripts (html.js, set before paint in SiteHead), the toolbar takes
-   * its place in the first frame instead of pushing the cards down later.
+   * One row of plain text filters, like a table of contents: the active area
+   * is underlined in the accent colour, each one shows how many projects it
+   * holds.
    */
-  :global(html.js) .showcase-toolbar[hidden] {
-    display: grid;
-  }
-  .showcase-toolbar[hidden],
-  .showcase-empty[hidden],
-  .showcase-grid > :global([hidden]) {
-    display: none;
-  }
-  .showcase-controls {
-    display: grid;
-    gap: var(--space-xs);
-  }
-  .showcase-control {
-    display: grid;
-    grid-template-columns: 7rem minmax(0, 1fr);
-    align-items: baseline;
-    gap: var(--space-2xs) var(--space-s);
-  }
-  .showcase-control-label,
-  .showcase-sort-label {
-    color: var(--color-text-subtle);
-    font-size: var(--step--2);
-    font-weight: 600;
-    letter-spacing: var(--tracking-overline);
-    text-transform: uppercase;
-  }
   .showcase-filters {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-3xs) var(--space-2xs);
+    gap: var(--space-3xs) var(--space-m);
+    margin: 0 0 var(--space-m);
   }
-  .showcase-filters button,
-  .showcase-view button {
+  /*
+   * With scripts (html.js, set before paint in SiteHead), the filters take
+   * their place in the first frame instead of pushing the cards down later.
+   */
+  :global(html.js) .showcase-filters[hidden] {
+    display: flex;
+  }
+  .showcase-filters[hidden],
+  .showcase-grid > :global([hidden]) {
+    display: none;
+  }
+  .showcase-filters button {
     display: inline-flex;
     min-height: var(--control-size);
-    align-items: center;
+    align-items: baseline;
     gap: var(--space-3xs);
-    padding: 0 var(--space-xs);
+    padding: var(--space-2xs) 0;
     border: 0;
-    border-radius: var(--radius-full);
-    background: var(--color-surface-2);
+    background: none;
     color: var(--color-text-muted);
     font: inherit;
     font-size: var(--step--1);
-    font-weight: 500;
+    text-decoration: underline 2px transparent;
+    text-underline-offset: 0.45em;
     cursor: pointer;
     transition:
-      background-color var(--dur-fast) var(--ease-out),
-      color var(--dur-fast) var(--ease-out);
+      color var(--dur-fast) var(--ease-out),
+      text-decoration-color var(--dur-fast) var(--ease-out);
   }
-  .showcase-filters button:hover,
-  .showcase-view button:hover {
+  .showcase-filters button:hover {
     color: var(--color-text);
+    text-decoration-color: var(--color-border-strong);
   }
-  /*
-   * Pressed: a solid accent fill with heavier text, so the state does not
-   * rely on hue alone (the fill is far darker or lighter than surface-2).
-   */
-  .showcase-filters button[aria-pressed="true"],
-  .showcase-view button[aria-pressed="true"] {
-    background: var(--color-accent);
-    color: var(--color-bg);
+  /* Pressed: darker, heavier text and an underline, not hue alone. */
+  .showcase-filters button[aria-pressed="true"] {
+    color: var(--color-text);
     font-weight: 600;
+    text-decoration-color: var(--color-accent);
   }
-  .showcase-toolbar-actions {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-xs) var(--space-s);
-  }
-  .showcase-search {
-    position: relative;
-    flex: 1 1 16rem;
-    max-width: 22rem;
-  }
-  .showcase-search :global(.showcase-search-icon) {
-    position: absolute;
-    top: 50%;
-    left: var(--space-xs);
-    color: var(--color-text-subtle);
-    transform: translateY(-50%);
-    pointer-events: none;
-  }
-  .showcase-search input,
-  .showcase-sort select {
-    box-sizing: border-box;
-    min-height: var(--control-size);
-    /* A control boundary: at least 3:1 against the page (WCAG 1.4.11). */
-    border: 1px solid var(--color-border-strong);
-    border-radius: var(--radius-m);
-    background: var(--color-bg);
-    color: var(--color-text);
-    font: inherit;
-    font-size: var(--step--1);
-  }
-  .showcase-search input {
-    width: 100%;
-    padding: 0 var(--space-xs) 0 calc(var(--space-xs) + 1.5rem);
-  }
-  .showcase-search input:hover,
-  .showcase-sort select:hover {
-    border-color: var(--color-accent);
-  }
-  .showcase-sort {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2xs);
-    margin-left: auto;
-  }
-  /*
-   * The native arrow sits flush against the border and differs per browser;
-   * draw a Lucide chevron instead, with the same inset as the search icon.
-   */
-  .showcase-select {
-    position: relative;
-    display: inline-flex;
-  }
-  .showcase-sort select {
-    appearance: none;
-    min-width: 9.5rem;
-    padding: 0 calc(var(--space-xs) + 1.5rem) 0 var(--space-xs);
-    text-align: start;
-    cursor: pointer;
-  }
-  .showcase-select :global(.showcase-select-icon) {
-    position: absolute;
-    top: 50%;
-    right: var(--space-xs);
-    color: var(--color-text-subtle);
-    transform: translateY(-50%);
-    pointer-events: none;
-  }
-  .showcase-select:hover :global(.showcase-select-icon) {
-    color: var(--color-accent);
-  }
-  .showcase-view {
-    display: flex;
-    gap: var(--space-3xs);
-  }
-  .showcase-count {
-    margin: 0 0 var(--space-s);
+  .showcase-filter-count {
     color: var(--color-text-subtle);
     font-family: var(--font-mono);
     font-size: var(--step--2);
     font-variant-numeric: tabular-nums;
-    letter-spacing: var(--tracking-mono);
+    font-weight: 400;
   }
   .showcase-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-s);
-  }
-  .showcase-grid[data-view="list"] {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-xs);
-  }
-  .showcase-empty {
-    padding: var(--space-l);
-    border: 1px dashed var(--color-border);
-    border-radius: var(--radius-l);
-    color: var(--color-text-muted);
-    text-align: center;
   }
   @media (max-width: 600px) {
     .portfolio-showcase {
       margin-block: var(--space-l) var(--space-xl);
     }
-    .showcase-grid {
-      grid-template-columns: minmax(0, 1fr);
-    }
-    .showcase-control {
-      grid-template-columns: minmax(0, 1fr);
-      gap: var(--space-3xs);
-    }
-    /*
-     * Each chip group is one row that scrolls sideways, so the filters take
-     * two short rows instead of the whole first screen.
-     */
+    /* One row that scrolls sideways instead of taking the first screen. */
     .showcase-filters {
       flex-wrap: nowrap;
       margin-inline: calc(-1 * var(--page-inline));
       /* Room for the focus outline, which the scroller would clip. */
-      padding: var(--space-2xs) var(--page-inline);
+      padding-inline: var(--page-inline);
       overflow-x: auto;
       overscroll-behavior-x: contain;
       scrollbar-width: none;
     }
     .showcase-filters button {
       flex: none;
-    }
-    .showcase-search {
-      flex-basis: 100%;
-      max-width: none;
-    }
-    .showcase-sort {
-      margin-left: 0;
-    }
-    /* The select names its own options; keep the label for screen readers. */
-    .showcase-sort-label {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-    }
-    .showcase-view {
-      margin-left: auto;
     }
   }
 </style>
