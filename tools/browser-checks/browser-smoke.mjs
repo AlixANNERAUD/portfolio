@@ -123,47 +123,12 @@ for (const [engineName, engine] of [
       }
     }
 
-    for (const [path, name] of [
-      ["/projects", "Libraries"],
-      ["/fr/projects", "Bibliothèques"],
-    ]) {
-      try {
-        await page.goto(base + path, {
-          waitUntil: "domcontentloaded",
-          timeout: 10000,
-        });
-        const library = page.getByRole("button", { name, exact: true });
-        await library.waitFor({ timeout: 10000 });
-        await library.click();
-        const cards = page.locator(".showcase-card:visible");
-        await page.waitForTimeout(100);
-        assert.equal(
-          await cards.count(),
-          6,
-          "Expected six open-source libraries",
-        );
-        const search = page.locator('input[type="search"]');
-        await search.fill("nanoexpr");
-        assert.equal(
-          await cards.count(),
-          1,
-          "Expected a single matching library",
-        );
-        assert.match(await cards.first().innerText(), /nanoexpr/i);
-        checked++;
-      } catch (error) {
-        failures.push(engineName + " " + path + " filters: " + error);
-      }
-    }
-
-    // A filter combination with no match shows the empty state and a zero
-    // count; resetting every control restores the full catalogue.
-    for (const [path, labels] of [
-      ["/projects", ["Libraries", "Security", "All", "All areas"]],
-      [
-        "/fr/projects",
-        ["Bibliothèques", "Sécurité", "Tous", "Tous les domaines"],
-      ],
+    // Area filters: one row of buttons, each count matching the cards it
+    // shows, a single pressed button, the live count announced, "All"
+    // restoring every card, and no overflow at 390px.
+    for (const [path, allName] of [
+      ["/projects", "All"],
+      ["/fr/projects", "Tous"],
     ]) {
       try {
         await page.setViewportSize({ width: 1440, height: 900 });
@@ -171,164 +136,63 @@ for (const [engineName, engine] of [
           waitUntil: "domcontentloaded",
           timeout: 10000,
         });
-        const [library, security, allGroups, allAreas] = labels.map((name) =>
-          page.getByRole("button", { name, exact: true }),
-        );
-        await library.waitFor({ timeout: 10000 });
+        const bar = page.locator(".showcase-filters");
+        await bar.waitFor({ state: "visible", timeout: 10000 });
+        const buttons = bar.getByRole("button");
         const cards = page.locator(".showcase-card");
         const visibleCards = page.locator(".showcase-card:visible");
-        const status = page.locator(".showcase-count[role=status]");
-        const empty = page.locator(".showcase-empty");
-        const search = page.locator('input[type="search"]');
+        const status = page.locator("[data-catalogue] [role=status]");
         const total = await cards.count();
         assert.ok(total >= 26, path + " should list every project");
-
-        await library.click();
-        await security.click();
-        await search.fill("zzz");
-        assert.equal(await visibleCards.count(), 0, path + " should be empty");
-        assert.equal(await empty.isVisible(), true, path + " empty state");
-        assert.match(await status.innerText(), /\b0\b/, path + " zero count");
-
-        await allGroups.click();
-        await allAreas.click();
-        await search.fill("");
+        assert.ok((await buttons.count()) >= 5, path + " needs area filters");
         assert.equal(
-          await visibleCards.count(),
-          total,
-          path + " clearing filters should restore every card",
+          await page
+            .locator("[data-catalogue] select, [data-catalogue] input")
+            .count(),
+          0,
+          path + " should have no search or sort controls",
         );
-        assert.equal(await empty.isVisible(), false, path + " empty hidden");
+
+        for (let i = (await buttons.count()) - 1; i >= 0; i--) {
+          const button = buttons.nth(i);
+          await button.click();
+          const expected = Number(
+            await button.locator(".showcase-filter-count").innerText(),
+          );
+          assert.equal(
+            await visibleCards.count(),
+            expected,
+            path + " " + (await button.innerText()) + " count",
+          );
+          assert.equal(await button.getAttribute("aria-pressed"), "true");
+          assert.equal(
+            await bar.locator('button[aria-pressed="true"]').count(),
+            1,
+          );
+          assert.match(
+            await status.textContent(),
+            new RegExp("\\b" + expected + "\\b"),
+          );
+        }
+        // The loop ends on the first button, "All".
         assert.match(
-          await status.innerText(),
-          new RegExp("\\b" + total + "\\b"),
-          path + " count should be restored",
+          await buttons.first().innerText(),
+          new RegExp("^" + allName),
         );
-        checked++;
-      } catch (error) {
-        failures.push(engineName + " " + path + " empty filters: " + error);
-      }
-    }
-
-    // Grid/list view toggle: aria-pressed buttons, a single-column list, the
-    // choice remembered across reloads, and no overflow at 390px.
-    for (const [path, gridName, listName] of [
-      ["/projects", "Grid", "List"],
-      ["/fr/projects", "Grille", "Liste"],
-    ]) {
-      try {
-        await page.setViewportSize({ width: 1440, height: 900 });
-        await page.goto(base + path, {
-          waitUntil: "domcontentloaded",
-          timeout: 10000,
-        });
-        await page.evaluate(() => localStorage.clear());
-        await page.reload({ waitUntil: "domcontentloaded" });
-        const gridButton = page.getByRole("button", {
-          name: gridName,
-          exact: true,
-        });
-        const listButton = page.getByRole("button", {
-          name: listName,
-          exact: true,
-        });
-        const grid = page.locator("[data-catalogue-grid]");
-        await listButton.waitFor({ timeout: 10000 });
-        // The index list is the default way to browse the catalogue.
-        assert.equal(await listButton.getAttribute("aria-pressed"), "true");
-        assert.equal(await gridButton.getAttribute("aria-pressed"), "false");
-        assert.equal(await grid.getAttribute("data-view"), "list");
-        const rects = () =>
-          page
-            .locator(".showcase-card")
-            .evaluateAll((cards) =>
-              cards.slice(0, 2).map((card) => card.getBoundingClientRect()),
-            );
-        let [first, second] = await rects();
-        assert.ok(
-          Math.abs(first.left - second.left) < 1 && second.top > first.top,
-          path + " list view should stack cards in one column",
-        );
-
-        await gridButton.click();
-        assert.equal(await gridButton.getAttribute("aria-pressed"), "true");
-        assert.equal(await listButton.getAttribute("aria-pressed"), "false");
-        assert.equal(await grid.getAttribute("data-view"), "grid");
-        // Move the pointer off the cards: a hovered card lifts a few pixels.
-        await page.mouse.move(0, 0);
-        await page.waitForTimeout(400);
-        [first, second] = await rects();
-        assert.ok(
-          Math.abs(first.top - second.top) < 1 && second.left > first.left,
-          path + " grid view should place cards side by side",
-        );
-
-        await page.reload({ waitUntil: "domcontentloaded" });
-        await gridButton.waitFor({ timeout: 10000 });
-        assert.equal(
-          await gridButton.getAttribute("aria-pressed"),
-          "true",
-          path + " should remember the grid view",
-        );
-        assert.equal(await grid.getAttribute("data-view"), "grid");
+        assert.equal(await visibleCards.count(), total);
 
         await page.setViewportSize({ width: 390, height: 844 });
         await page.waitForTimeout(60);
-        for (const view of [gridButton, listButton]) {
-          await view.click();
-          assert.equal(
-            await page.evaluate(
-              () =>
-                document.documentElement.scrollWidth > window.innerWidth + 2,
-            ),
-            false,
-            path + " catalogue overflows at 390px",
-          );
-        }
-        assert.equal(await grid.getAttribute("data-view"), "list");
-        await page.evaluate(() => localStorage.clear());
-        checked++;
-      } catch (error) {
-        failures.push(engineName + " " + path + " view toggle: " + error);
-      }
-    }
-
-    // Blocked storage must not break the catalogue script.
-    {
-      const blocked = await browser.newContext({
-        viewport: { width: 1440, height: 900 },
-      });
-      try {
-        await blocked.addInitScript(() => {
-          Object.defineProperty(window, "localStorage", {
-            get() {
-              throw new DOMException("blocked", "SecurityError");
-            },
-          });
-        });
-        const blockedPage = await blocked.newPage();
-        await blockedPage.goto(base + "/projects", {
-          waitUntil: "domcontentloaded",
-          timeout: 10000,
-        });
-        const gridView = blockedPage.getByRole("button", {
-          name: "Grid",
-          exact: true,
-        });
-        await gridView.waitFor({ timeout: 10000 });
-        await gridView.click();
-        assert.equal(await gridView.getAttribute("aria-pressed"), "true");
         assert.equal(
-          await blockedPage
-            .locator("[data-catalogue-grid]")
-            .getAttribute("data-view"),
-          "grid",
+          await page.evaluate(
+            () => document.documentElement.scrollWidth > window.innerWidth + 2,
+          ),
+          false,
+          path + " catalogue overflows at 390px",
         );
         checked++;
       } catch (error) {
-        failures.push(engineName + " blocked storage view toggle: " + error);
-      } finally {
-        await blocked.close();
+        failures.push(engineName + " " + path + " filters: " + error);
       }
     }
 
@@ -858,8 +722,8 @@ for (const [engineName, engine] of [
     // neighbours' art panels (motion allowed only), and numbers are stable
     // ranks.
     for (const [path, filter] of [
-      ["/projects", null],
-      ["/fr/projects", "Bibliothèques"],
+      ["/projects", false],
+      ["/fr/projects", true],
     ]) {
       try {
         await page.setViewportSize({ width: 1440, height: 900 });
@@ -912,7 +776,10 @@ for (const [engineName, engine] of [
           const rank = () =>
             target.locator(".showcase-art-position").innerText();
           const before = await rank();
-          await page.getByRole("button", { name: filter, exact: true }).click();
+          const area = await target.getAttribute("data-category");
+          await page
+            .locator(`.showcase-filters button[value="${area}"]`)
+            .click();
           assert.equal(
             await rank(),
             before,

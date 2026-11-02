@@ -1314,34 +1314,30 @@ for (const file of ["experiences.html", "fr/experiences.html"]) {
       previous = level;
     }
   }
-  for (const [file, sortLabels, viewLabels] of [
-    ["projects.html", ["Relevance", "Name"], ["Grid", "List"]],
-    ["fr/projects.html", ["Pertinence", "Nom"], ["Grille", "Liste"]],
+  // The catalogue offers one row of area filters ("All" pressed first),
+  // hidden until the script runs, and no search, sort or layout controls.
+  for (const [file, allLabel] of [
+    ["projects.html", "All"],
+    ["fr/projects.html", "Tous"],
   ]) {
     const html = read(file);
     if (!html) continue;
     const root = parse(html);
-    const options = root
-      .querySelectorAll("select[data-catalogue-sort] option")
-      .map((option) => option.text.trim());
-    if (options.join("|") !== sortLabels.join("|")) {
-      failed.push(file + ": sort options must be " + sortLabels.join(" / "));
-    }
-    const view = root.querySelectorAll(
-      ".showcase-toolbar [data-catalogue-view] button[aria-pressed]",
-    );
+    const bar = root.querySelector("[data-catalogue] .showcase-filters");
+    const buttons = bar?.querySelectorAll("button[aria-pressed]") ?? [];
     if (
-      view.length !== 2 ||
-      view.map((button) => button.getAttribute("value")).join("|") !==
-        "grid|list" ||
-      view.map((button) => button.text.trim()).join("|") !==
-        viewLabels.join("|") ||
-      view[0].getAttribute("aria-pressed") !== "false" ||
-      view[1].getAttribute("aria-pressed") !== "true" ||
-      root.querySelector("[data-catalogue-grid]")?.getAttribute("data-view") !==
-        "list"
+      !bar ||
+      !bar.hasAttribute("hidden") ||
+      buttons.length < 5 ||
+      buttons[0].getAttribute("value") !== "all" ||
+      !buttons[0].text.trim().startsWith(allLabel) ||
+      buttons[0].getAttribute("aria-pressed") !== "true" ||
+      buttons.slice(1).some((b) => b.getAttribute("aria-pressed") !== "false")
     ) {
-      failed.push(file + ": missing grid/list view toggle (list by default)");
+      failed.push(file + ": missing area filters (All pressed by default)");
+    }
+    if (root.querySelector("[data-catalogue] select, [data-catalogue] input")) {
+      failed.push(file + ": the catalogue should not offer search or sort");
     }
   }
 }
