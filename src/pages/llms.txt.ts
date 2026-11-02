@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+import { contributions } from "../data/contributions.ts";
 import { experiences } from "../data/experiences.ts";
 import { byScore, projects, projectUrl } from "../data/projects.ts";
 import { site } from "../data/site.ts";
@@ -64,6 +65,16 @@ function roles(lang: Locale): string[] {
     );
 }
 
+function contributionLinks(lang: Locale): string[] {
+  return contributions.map((entry) =>
+    link(
+      `${entry.project} (${entry.period})`,
+      `https://github.com/${entry.repository}`,
+      entry.summary[lang],
+    ),
+  );
+}
+
 export const GET: APIRoute = () => {
   const en = useTranslations("en");
   const fr = useTranslations("fr");
@@ -83,6 +94,10 @@ export const GET: APIRoute = () => {
     `## ${en("nav.projects")}`,
     "",
     ...projectLinks("en"),
+    "",
+    `## ${en("about.contributions.title").replace(/\.$/, "")}`,
+    "",
+    ...contributionLinks("en"),
     "",
     `## ${fr("llms.locale")}`,
     "",
