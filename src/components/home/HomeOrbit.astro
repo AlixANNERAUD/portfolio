@@ -273,7 +273,32 @@ const position = (i: number) => {
     let fy = 0;
     let sx = 0;
     let sy = 0;
+    /*
+     * Keep every tile on screen. The layout is computed at build time for
+     * the default text size; a larger system font size or a wider fallback
+     * font makes tiles wider, and one near an edge would leave the screen
+     * (and drag its connectors with it). Shift such a node back inside.
+     */
+    const EDGE = 8;
+    const fit = () => {
+      for (const n of nodes) n.el.style.marginLeft = "";
+      const right = document.documentElement.clientWidth - EDGE;
+      const shifts = nodes.map((n) => {
+        const r = n.tile.getBoundingClientRect();
+        if (!r.width) return 0;
+        const left = r.left - n.ox;
+        if (left < EDGE) return EDGE - left;
+        if (left + r.width > right) {
+          return Math.max(right - left - r.width, EDGE - left);
+        }
+        return 0;
+      });
+      nodes.forEach((n, i) => {
+        if (shifts[i]) n.el.style.marginLeft = `${shifts[i]}px`;
+      });
+    };
     const measure = () => {
+      fit();
       const f = field.getBoundingClientRect();
       const s = root.getBoundingClientRect();
       fx = f.left + scrollX;
@@ -289,6 +314,8 @@ const position = (i: number) => {
       drawLines(false);
     };
     new ResizeObserver(measure).observe(field);
+    // Web fonts change tile widths without resizing the field.
+    document.fonts?.ready.then(measure);
 
     /* Physics: spring back to rest, pushed away from the pointer. */
     const STEP = 1 / 120;

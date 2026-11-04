@@ -481,6 +481,46 @@ for (const [engineName, engine] of [
       }
     }
 
+    // A larger system text size widens the tiles: none may leave the screen.
+    for (const width of [360, 390]) {
+      const scaled = await browser.newContext({
+        viewport: { width, height: 800 },
+        hasTouch: true,
+      });
+      try {
+        await scaled.addInitScript(() => {
+          document.addEventListener("DOMContentLoaded", () => {
+            document.documentElement.style.fontSize = "130%";
+          });
+        });
+        const scaledPage = await scaled.newPage();
+        await scaledPage.goto(base + "/", {
+          waitUntil: "load",
+          timeout: 10000,
+        });
+        await scaledPage.waitForTimeout(600);
+        const outside = await scaledPage.evaluate(() =>
+          [...document.querySelectorAll(".orbit-tile")]
+            .map((tile) => [
+              tile.textContent.trim(),
+              tile.getBoundingClientRect(),
+            ])
+            .filter(
+              ([, r]) =>
+                r.width > 0 &&
+                (r.left < 0 || r.right > document.documentElement.clientWidth),
+            )
+            .map(([text]) => text),
+        );
+        assert.deepEqual(outside, [], width + "px tiles off screen");
+        checked++;
+      } catch (error) {
+        failures.push(engineName + " orbit large text: " + error);
+      } finally {
+        await scaled.close();
+      }
+    }
+
     // Astro migration must preserve the centered editorial layout on wide screens.
     for (const path of [
       "/experiences",
