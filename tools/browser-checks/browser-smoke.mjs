@@ -498,20 +498,29 @@ for (const [engineName, engine] of [
           waitUntil: "load",
           timeout: 10000,
         });
-        await scaledPage.waitForTimeout(600);
-        const outside = await scaledPage.evaluate(() =>
-          [...document.querySelectorAll(".orbit-tile")]
-            .map((tile) => [
-              tile.textContent.trim(),
-              tile.getBoundingClientRect(),
-            ])
-            .filter(
-              ([, r]) =>
-                r.width > 0 &&
-                (r.left < 0 || r.right > document.documentElement.clientWidth),
-            )
-            .map(([text]) => text),
-        );
+        // The orbit script shifts edge tiles back inside once the web fonts
+        // are ready: poll for that instead of a fixed wait, which a busy CI
+        // runner can outlast.
+        const offScreen = () =>
+          scaledPage.evaluate(() =>
+            [...document.querySelectorAll(".orbit-tile")]
+              .map((tile) => [
+                tile.textContent.trim(),
+                tile.getBoundingClientRect(),
+              ])
+              .filter(
+                ([, r]) =>
+                  r.width > 0 &&
+                  (r.left < 0 ||
+                    r.right > document.documentElement.clientWidth),
+              )
+              .map(([text]) => text),
+          );
+        let outside = await offScreen();
+        for (let waited = 0; outside.length && waited < 3000; waited += 200) {
+          await scaledPage.waitForTimeout(200);
+          outside = await offScreen();
+        }
         assert.deepEqual(outside, [], width + "px tiles off screen");
         checked++;
       } catch (error) {
