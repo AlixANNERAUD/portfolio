@@ -6,6 +6,7 @@ import "../styles/motion.css";
 import SiteHead from "../components/site/SiteHead.astro";
 import SiteHeader from "../components/site/SiteHeader.astro";
 import SiteFooter from "../components/site/SiteFooter.astro";
+import Cursor from "../components/site/Cursor.astro";
 import type { Locale } from "../i18n/locales.ts";
 import { useTranslations } from "../i18n/ui.ts";
 import type { JsonLdNode } from "../lib/seo.ts";
@@ -47,5 +48,6 @@ const t = useTranslations(lang);
       </main>
       <SiteFooter lang={lang} />
     </div>
+    <Cursor />
   </body>
 </html>

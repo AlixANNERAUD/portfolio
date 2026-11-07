@@ -1,0 +1,243 @@
+---
+/**
+ * Adaptive cursor, after the iPadOS pointer: a small translucent dot follows
+ * the mouse and, over a link or a button, morphs into a rounded highlight
+ * that takes the shape of the hovered element, with a slight parallax toward
+ * the pointer. Large targets (project cards, which have their own hover) only
+ * grow the dot.
+ *
+ * Progressive enhancement only: it starts for a fine hovering pointer without
+ * `prefers-reduced-motion`; the native cursor is hidden only once it runs, and
+ * GSAP is imported dynamically at that point.
+ */
+---
+
+<div class="site-cursor" aria-hidden="true"></div>
+
+<script>
+  const cursor = document.querySelector<HTMLElement>(".site-cursor");
+  const canRun =
+    window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
+    !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (cursor && canRun) {
+    // GSAP is loaded only here, as its own vendor chunk: touch and
+    // reduced-motion visitors never download it.
+    const { gsap } = await import("gsap");
+    const root = document.documentElement;
+    root.classList.add("has-cursor");
+    // Centered on (x, y). GSAP owns the transform, so the centering lives
+    // here rather than in a CSS `translate` it would reset.
+    gsap.set(cursor, { xPercent: -50, yPercent: -50 });
+
+    const DOT = 18;
+    const DOT_LARGE = 30;
+    // Targets up to this size get the highlight; larger ones only grow the dot.
+    const MAX_W = 480;
+    const MAX_H = 96;
+    const PAD_X = 8;
+    const PAD_Y = 4;
+    // Share of the pointer offset from the target's center that the
+    // highlight follows.
+    const PARALLAX = 0.12;
+
+    const interactive = "a, button, summary, [role='button'], label[for]";
+    const ease = { duration: 0.32, ease: "power3" };
+    const to = {
+      x: gsap.quickTo(cursor, "x", ease),
+      y: gsap.quickTo(cursor, "y", ease),
+      width: gsap.quickTo(cursor, "width", ease),
+      height: gsap.quickTo(cursor, "height", ease),
+    };
+    // quickTo only drives single numeric properties: the corner radius, a
+    // shorthand, gets a regular tween whenever its target value changes.
+    let radius = DOT / 2;
+    const setRadius = (value: number) => {
+      if (Math.abs(value - radius) < 0.5) return;
+      radius = value;
+      gsap.to(cursor, { borderRadius: value, ...ease, overwrite: "auto" });
+    };
+
+    /** The element's corner radius in px (`%` included), plus the padding. */
+    const shapeRadius = (element: HTMLElement, box: DOMRect) => {
+      const value = getComputedStyle(element).borderTopLeftRadius;
+      const own = value.endsWith("%")
+        ? (parseFloat(value) / 100) * Math.min(box.width, box.height)
+        : parseFloat(value) || 6;
+      return own + PAD_Y;
+    };
+
+    let pointerX = 0;
+    let pointerY = 0;
+    let target: HTMLElement | null = null;
+    let snapped = false;
+
+    const update = () => {
+      if (target && snapped) {
+        const box = target.getBoundingClientRect();
+        const centerX = box.left + box.width / 2;
+        const centerY = box.top + box.height / 2;
+        const width = box.width + 2 * PAD_X;
+        const height = box.height + 2 * PAD_Y;
+        to.x(centerX + (pointerX - centerX) * PARALLAX);
+        to.y(centerY + (pointerY - centerY) * PARALLAX);
+        to.width(width);
+        to.height(height);
+        // A pill (999px) stays a pill: never more than half the short side.
+        setRadius(
+          Math.min(shapeRadius(target, box), Math.min(width, height) / 2),
+        );
+        return;
+      }
+      const size = target ? DOT_LARGE : DOT;
+      to.x(pointerX);
+      to.y(pointerY);
+      to.width(size);
+      to.height(size);
+      setRadius(size / 2);
+    };
+
+    // While snapped, follow the target every frame: it may drift, scale on
+    // hover or be pushed away (homepage orbit tiles).
+    let following = false;
+    const follow = (on: boolean) => {
+      if (on === following) return;
+      following = on;
+      if (on) gsap.ticker.add(update);
+      else gsap.ticker.remove(update);
+    };
+
+    const setTarget = (element: HTMLElement | null) => {
+      target = element;
+      if (element) {
+        const box = element.getBoundingClientRect();
+        // A link stretched over a card by a pseudo-element is hovered outside
+        // its own box: highlighting it would jump away from the pointer.
+        const inside =
+          pointerX >= box.left - 4 &&
+          pointerX <= box.right + 4 &&
+          pointerY >= box.top - 4 &&
+          pointerY <= box.bottom + 4;
+        snapped = inside && box.width <= MAX_W && box.height <= MAX_H;
+      } else {
+        snapped = false;
+      }
+      cursor.classList.toggle("is-snapped", snapped);
+      cursor.classList.toggle("is-large", Boolean(element) && !snapped);
+      follow(snapped);
+      update();
+    };
+
+    /** Show the dot at (x, y) at once: quickTo would glide in from (0, 0). */
+    const appear = (x: number, y: number) => {
+      pointerX = x;
+      pointerY = y;
+      to.x(x, x);
+      to.y(y, y);
+      to.width(DOT, DOT);
+      to.height(DOT, DOT);
+      gsap.set(cursor, { borderRadius: DOT / 2 });
+      radius = DOT / 2;
+      cursor.classList.add("is-visible");
+    };
+
+    window.addEventListener(
+      "pointermove",
+      (event) => {
+        if (event.pointerType !== "mouse") return;
+        if (!cursor.classList.contains("is-visible")) {
+          appear(event.clientX, event.clientY);
+        }
+        pointerX = event.clientX;
+        pointerY = event.clientY;
+        update();
+      },
+      { passive: true },
+    );
+
+    // Each page is a new document: keep the pointer where it was across a
+    // navigation (a click, then a page load within a few seconds), instead of
+    // waiting for the next mouse move.
+    const STORE = "cursor-position";
+    const MAX_AGE = 5000;
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(STORE) ?? "null");
+      if (saved && Date.now() - saved.at < MAX_AGE) {
+        appear(saved.x, saved.y);
+        const under = document.elementFromPoint(saved.x, saved.y);
+        setTarget(under?.closest<HTMLElement>(interactive) ?? null);
+      }
+    } catch {
+      // Storage unavailable: the dot appears on the next mouse move.
+    }
+    window.addEventListener("pagehide", () => {
+      if (!cursor.classList.contains("is-visible")) return;
+      try {
+        sessionStorage.setItem(
+          STORE,
+          JSON.stringify({ x: pointerX, y: pointerY, at: Date.now() }),
+        );
+      } catch {
+        // Ignore: same fallback as above.
+      }
+    });
+    document.addEventListener("pointerover", (event) => {
+      // pointerover fires before pointermove: take the position from it.
+      pointerX = event.clientX;
+      pointerY = event.clientY;
+      setTarget((event.target as Element).closest<HTMLElement>(interactive));
+    });
+    // The page moves under a still pointer: follow the target, or drop it.
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (!cursor.classList.contains("is-visible")) return;
+        const under = document.elementFromPoint(pointerX, pointerY);
+        const next = under?.closest<HTMLElement>(interactive) ?? null;
+        if (next !== target) setTarget(next);
+        else update();
+      },
+      { passive: true },
+    );
+    root.addEventListener("mouseleave", () => {
+      cursor.classList.remove("is-visible");
+      setTarget(null);
+    });
+  }
+</script>
+
+<style is:global>
+  html.has-cursor,
+  html.has-cursor * {
+    cursor: none !important;
+  }
+</style>
+
+<style>
+  .site-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2147483647;
+    /* GSAP drives x, y (centered), width, height and the radius. */
+    background: color-mix(in oklch, var(--color-text) 38%, transparent);
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity var(--dur-base) var(--ease-out),
+      background-color var(--dur-base) var(--ease-out);
+  }
+
+  .site-cursor.is-visible {
+    opacity: 1;
+  }
+
+  /* The highlight sits over the target: a light veil that keeps it legible. */
+  .site-cursor.is-snapped {
+    background: color-mix(in oklch, var(--color-text) 10%, transparent);
+  }
+
+  .site-cursor.is-large {
+    background: color-mix(in oklch, var(--color-text) 22%, transparent);
+  }
+</style>
