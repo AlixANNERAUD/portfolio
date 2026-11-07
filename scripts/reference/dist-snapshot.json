@@ -435,6 +435,20 @@
       "ogType": "article"
     },
     {
+      "file": "fr/projects/nanoglia.html",
+      "lang": "fr",
+      "title": "nanoglia : TinyML Rust sur microcontrôleur | Alix ANNERAUD",
+      "canonical": "https://alix.anneraud.fr/fr/projects/nanoglia",
+      "hreflang": {
+        "en": "https://alix.anneraud.fr/projects/nanoglia",
+        "fr": "https://alix.anneraud.fr/fr/projects/nanoglia",
+        "x-default": "https://alix.anneraud.fr/projects/nanoglia"
+      },
+      "robots": null,
+      "h1Count": 1,
+      "ogType": "article"
+    },
+    {
       "file": "fr/projects/odor-localization.html",
       "lang": "fr",
       "title": "Localisation de sources de gaz sur ESP32 | Alix ANNERAUD",
@@ -883,6 +897,20 @@
       "ogType": "article"
     },
     {
+      "file": "projects/nanoglia.html",
+      "lang": "en",
+      "title": "nanoglia: Rust TinyML for microcontrollers | Alix ANNERAUD",
+      "canonical": "https://alix.anneraud.fr/projects/nanoglia",
+      "hreflang": {
+        "en": "https://alix.anneraud.fr/projects/nanoglia",
+        "fr": "https://alix.anneraud.fr/fr/projects/nanoglia",
+        "x-default": "https://alix.anneraud.fr/projects/nanoglia"
+      },
+      "robots": null,
+      "h1Count": 1,
+      "ogType": "article"
+    },
+    {
       "file": "projects/odor-localization.html",
       "lang": "en",
       "title": "Gas source localization with MQ sensors | Alix ANNERAUD",
@@ -999,6 +1027,7 @@
     "https://alix.anneraud.fr/fr/projects/music-danceability",
     "https://alix.anneraud.fr/fr/projects/nanoaudio",
     "https://alix.anneraud.fr/fr/projects/nanoexpr",
+    "https://alix.anneraud.fr/fr/projects/nanoglia",
     "https://alix.anneraud.fr/fr/projects/odor-localization",
     "https://alix.anneraud.fr/fr/projects/robot-mouche",
     "https://alix.anneraud.fr/fr/projects/tracs-2024",
@@ -1028,6 +1057,7 @@
     "https://alix.anneraud.fr/projects/music-danceability",
     "https://alix.anneraud.fr/projects/nanoaudio",
     "https://alix.anneraud.fr/projects/nanoexpr",
+    "https://alix.anneraud.fr/projects/nanoglia",
     "https://alix.anneraud.fr/projects/odor-localization",
     "https://alix.anneraud.fr/projects/robot-mouche",
     "https://alix.anneraud.fr/projects/tracs-2024",

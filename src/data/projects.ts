@@ -258,6 +258,26 @@ export const projects = [
     externalUrl: "https://github.com/AlixANNERAUD/nanoaudio",
   },
   {
+    id: "nanoglia",
+    title: "nanoglia",
+    description: {
+      en: "A no_std Rust TinyML engine that loads TensorFlow Lite models at run time and runs them on microcontrollers with CMSIS-NN and ESP-NN kernels.",
+      fr: "Un moteur TinyML Rust no_std qui charge des modèles TensorFlow Lite à l’exécution et les fait tourner sur microcontrôleur avec CMSIS-NN et ESP-NN.",
+    },
+    period: { start: "2026", end: "present" },
+    group: "library",
+    category: "embedded",
+    symbol: "⊛",
+    tags: ["Rust", "no_std", "ML", "MCU"],
+    ranking: {
+      technicalDepth: 4.8,
+      originality: 4.5,
+      practicalImpact: 3.4,
+      evidence: 4.8,
+    },
+    externalUrl: "https://github.com/AlixANNERAUD/nanoglia",
+  },
+  {
     id: "embedded-i18n",
     title: "embedded-i18n",
     description: {
