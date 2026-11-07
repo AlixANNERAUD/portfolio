@@ -19,6 +19,19 @@ export default defineConfig({
   output: "static",
   trailingSlash: "ignore",
   build: { format: "preserve", inlineStylesheets: "auto" },
+  vite: {
+    build: {
+      rollupOptions: {
+        output: {
+          // GSAP gets its own chunk (`vendor-gsap.*.js`), lazy-loaded by
+          // site/Cursor; check-static-seo exempts exactly this file from the
+          // client script budget.
+          manualChunks: (id) =>
+            id.includes("/node_modules/gsap/") ? "vendor-gsap" : undefined,
+        },
+      },
+    },
+  },
   // Former pages, folded into About and Experience. GitHub Pages has no
   // server redirects: Astro writes a static page per path (meta refresh,
   // canonical to the target, noindex), left out of the sitemap.
