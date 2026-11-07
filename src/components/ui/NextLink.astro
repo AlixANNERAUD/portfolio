@@ -32,7 +32,7 @@ const t = useTranslations(lang);
     <h2>{title}</h2>
     <p class="editorial-next__description">{description}</p>
   </div>
-  <a href={href}>
+  <a href={href} data-cursor={t("cursor.next")}>
     {linkLabel}
     <ArrowRight size={19} aria-hidden="true" />
   </a>
