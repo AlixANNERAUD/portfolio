@@ -9,8 +9,6 @@ import Eyebrow from "./Eyebrow.astro";
  */
 type Props = HTMLAttributes<"header"> & {
   eyebrow: string;
-  /** Position of the section on the page, numbering the eyebrow. */
-  index?: number;
   title: string;
   description: string;
   headingId: string;
@@ -20,7 +18,6 @@ type Props = HTMLAttributes<"header"> & {
 
 const {
   eyebrow,
-  index,
   title,
   description,
   headingId,
@@ -47,9 +44,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
       </span>
     )}
     <div>
-      <Eyebrow class="editorial-section-heading__eyebrow" index={index}>
-        {eyebrow}
-      </Eyebrow>
+      <Eyebrow class="editorial-section-heading__eyebrow">{eyebrow}</Eyebrow>
       <h2 id={headingId}>{title}</h2>
       <p class="editorial-section-heading__description">{description}</p>
     </div>

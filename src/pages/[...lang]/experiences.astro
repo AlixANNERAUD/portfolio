@@ -42,10 +42,9 @@ const creditsHref = `${localizePath("/legal-notice", lang)}#${t("legal.logoCredi
       <ResumeLinks slot="actions" lang={lang} />
     </Hero>
 
-    {groups.map((group, index) => (
+    {groups.map((group) => (
       <ExperienceTimeline
         group={group}
-        index={index + 1}
         entries={experiences.filter((entry) => entry.group === group)}
         lang={lang}
       />

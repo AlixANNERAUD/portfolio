@@ -15,13 +15,11 @@ import { formatCount } from "../../lib/format.ts";
  */
 interface Props {
   group: ExperienceGroup;
-  /** Position of the section on the page, from 1. */
-  index: number;
   entries: readonly Experience[];
   lang: Locale;
 }
 
-const { group, index, entries, lang } = Astro.props;
+const { group, entries, lang } = Astro.props;
 const t = useTranslations(lang);
 
 const recent = entries.filter((entry) => !entry.earlier);
@@ -47,7 +45,6 @@ const Icon = group === "professional" ? BriefcaseBusiness : GraduationCap;
   <SectionHeading
     headingId={headingId}
     eyebrow={t(`experiences.${group}.eyebrow`)}
-    index={index}
     title={t(`experiences.${group}.title`)}
     description={t(`experiences.${group}.description`)}
   >

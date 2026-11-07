@@ -14,11 +14,9 @@ import { useTranslations } from "../../i18n/ui.ts";
  */
 interface Props {
   lang: Locale;
-  /** Position of the section on the page, numbering its overline. */
-  index: number;
 }
 
-const { lang, index } = Astro.props;
+const { lang } = Astro.props;
 const t = useTranslations(lang);
 const number = (n: number) => new Intl.NumberFormat(lang).format(n);
 
@@ -81,7 +79,7 @@ const doors = [
 <section class="home-now container" aria-labelledby="home-now-title">
   <div class="home-now-top">
     <div>
-      <Eyebrow index={index}>{t("home.now.eyebrow")}</Eyebrow>
+      <Eyebrow>{t("home.now.eyebrow")}</Eyebrow>
       <h2 id="home-now-title">{t("home.now.title")}</h2>
     </div>
     <ul class="home-now-list" role="list">

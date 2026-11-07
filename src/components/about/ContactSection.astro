@@ -9,11 +9,9 @@ import { useTranslations } from "../../i18n/ui.ts";
 /** Email, public profiles and the resume PDFs, all from site.ts. */
 interface Props {
   lang: Locale;
-  /** Position of the section on the page, numbering its overline. */
-  index: number;
 }
 
-const { lang, index } = Astro.props;
+const { lang } = Astro.props;
 const t = useTranslations(lang);
 ---
 
@@ -21,7 +19,6 @@ const t = useTranslations(lang);
   <SectionHeading
     headingId="contact-heading"
     eyebrow={t("about.contact.eyebrow")}
-    index={index}
     title={t("about.contact.title")}
     description={t("about.contact.intro")}
   />
