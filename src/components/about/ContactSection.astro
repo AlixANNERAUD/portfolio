@@ -29,11 +29,7 @@ const t = useTranslations(lang);
   <div class="about-contact-panel">
     <div class="about-contact-block about-contact-block--email">
       <h3>{t("about.contact.email")}</h3>
-      <a
-        class="about-contact-email"
-        href={`mailto:${site.email}`}
-        data-cursor={t("cursor.write")}
-      >
+      <a class="about-contact-email" href={`mailto:${site.email}`}>
         {site.email}
       </a>
     </div>
@@ -42,12 +38,7 @@ const t = useTranslations(lang);
       <ul role="list">
         {site.profiles.map((profile) => (
           <li>
-            <a
-              href={profile.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              data-cursor={t("cursor.visit")}
-            >
+            <a href={profile.href} target="_blank" rel="noopener noreferrer">
               {profile.label}
               <ArrowUpRight size={16} aria-hidden="true" />
               <span class="visually-hidden"> {t("a11y.newTab")}</span>

@@ -63,12 +63,7 @@ const externalUrl = projectExternalUrl(project);
   <div class="showcase-card-body">
     <p class="showcase-card-category">{t(`category.${project.category}`)}</p>
     <Heading class="showcase-card-title">
-      <a
-        class="showcase-card-link"
-        href={projectUrl(project.id, lang)}
-        data-cursor={t("cursor.read")}
-        style={`--cursor-accent: var(--category-${project.category}); --cursor-ink: var(--color-on-category)`}
-      >
+      <a class="showcase-card-link" href={projectUrl(project.id, lang)}>
         {localize(project.title, lang)}
       </a>
     </Heading>
@@ -88,7 +83,6 @@ const externalUrl = projectExternalUrl(project);
         <a
           class="showcase-external-link"
           href={externalUrl}
-          data-cursor={t("cursor.visit")}
           target="_blank"
           rel="noopener noreferrer"
         >

@@ -101,7 +101,7 @@ const doors = [
     <ul role="list">
       {doors.map((door) => (
         <li>
-          <a href={door.href} data-cursor={t("cursor.open")}>
+          <a href={door.href}>
             <span class="home-door-title">{door.title}</span>
             <span class="home-door-meta">{door.meta}</span>
             <ArrowRight class="home-door-arrow" size={22} aria-hidden="true" />
@@ -115,17 +115,12 @@ const doors = [
     <h3>{t("home.contact.title")}</h3>
     <p>{t("home.contact.text")}</p>
     <div class="home-contact-links">
-      <a
-        class="home-contact-email"
-        href={`mailto:${site.email}`}
-        data-cursor={t("cursor.write")}
-      >
+      <a class="home-contact-email" href={`mailto:${site.email}`}>
         {site.email}
       </a>
       <a
         class="button-link"
         href={site.resumePdf[lang]}
-        data-cursor={t("cursor.open")}
         target="_blank"
         rel="noopener noreferrer"
       >
