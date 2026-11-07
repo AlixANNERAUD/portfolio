@@ -1,19 +1,18 @@
 ---
 /**
- * Contextual cursor: a small dot that follows the mouse, grows over links and
- * buttons, and turns into a filled badge that names the action over any
- * element with `data-cursor="…"` (labels come from `cursor.*` in ui.ts).
+ * Adaptive cursor, after the iPadOS pointer: a small translucent dot follows
+ * the mouse and, over a link or a button, morphs into a rounded highlight
+ * that takes the shape of the hovered element, with a slight parallax toward
+ * the pointer. Large targets (project cards, which have their own hover) only
+ * grow the dot.
  *
  * Progressive enhancement only: it starts for a fine hovering pointer without
- * `prefers-reduced-motion`, and the native cursor is hidden only once it runs.
- * The badge takes `--cursor-accent` / `--cursor-ink` from the hovered element
- * when it defines them (project cards use their category color).
+ * `prefers-reduced-motion`; the native cursor is hidden only once it runs, and
+ * GSAP is imported dynamically at that point.
  */
 ---
 
-<div class="site-cursor" aria-hidden="true">
-  <span class="site-cursor__label"></span>
-</div>
+<div class="site-cursor" aria-hidden="true"></div>
 
 <script>
   const cursor = document.querySelector<HTMLElement>(".site-cursor");
@@ -22,51 +21,124 @@
     !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   if (cursor && canRun) {
-    const label = cursor.querySelector<HTMLElement>(".site-cursor__label")!;
-    const root = document.documentElement;
-    // GSAP is loaded only here (fine pointer, no reduced motion), as its own
-    // vendor chunk: touch and reduced-motion visitors never download it.
+    // GSAP is loaded only here, as its own vendor chunk: touch and
+    // reduced-motion visitors never download it.
     const { gsap } = await import("gsap");
+    const root = document.documentElement;
     root.classList.add("has-cursor");
+    // Centered on (x, y). GSAP owns the transform, so the centering lives
+    // here rather than in a CSS `translate` it would reset.
+    gsap.set(cursor, { xPercent: -50, yPercent: -50 });
 
-    // Follow with a little inertia.
-    const moveX = gsap.quickTo(cursor, "x", { duration: 0.35, ease: "power3" });
-    const moveY = gsap.quickTo(cursor, "y", { duration: 0.35, ease: "power3" });
+    const DOT = 18;
+    const DOT_LARGE = 30;
+    // Targets up to this size get the highlight; larger ones only grow the dot.
+    const MAX_W = 480;
+    const MAX_H = 96;
+    const PAD_X = 8;
+    const PAD_Y = 4;
+    // Share of the pointer offset from the target's center that the
+    // highlight follows.
+    const PARALLAX = 0.12;
+
+    const interactive = "a, button, summary, [role='button'], label[for]";
+    const ease = { duration: 0.32, ease: "power3" };
+    const to = {
+      x: gsap.quickTo(cursor, "x", ease),
+      y: gsap.quickTo(cursor, "y", ease),
+      width: gsap.quickTo(cursor, "width", ease),
+      height: gsap.quickTo(cursor, "height", ease),
+      radius: gsap.quickTo(cursor, "borderRadius", ease),
+    };
+
+    let pointerX = 0;
+    let pointerY = 0;
+    let target: HTMLElement | null = null;
+    let snapped = false;
+
+    const update = () => {
+      if (target && snapped) {
+        const box = target.getBoundingClientRect();
+        const centerX = box.left + box.width / 2;
+        const centerY = box.top + box.height / 2;
+        const radius =
+          parseFloat(getComputedStyle(target).borderTopLeftRadius) || 6;
+        to.x(centerX + (pointerX - centerX) * PARALLAX);
+        to.y(centerY + (pointerY - centerY) * PARALLAX);
+        to.width(box.width + 2 * PAD_X);
+        to.height(box.height + 2 * PAD_Y);
+        to.radius(radius + PAD_Y);
+        return;
+      }
+      const size = target ? DOT_LARGE : DOT;
+      to.x(pointerX);
+      to.y(pointerY);
+      to.width(size);
+      to.height(size);
+      to.radius(size / 2);
+    };
+
+    const setTarget = (element: HTMLElement | null) => {
+      target = element;
+      if (element) {
+        const box = element.getBoundingClientRect();
+        // A link stretched over a card by a pseudo-element is hovered outside
+        // its own box: highlighting it would jump away from the pointer.
+        const inside =
+          pointerX >= box.left - 4 &&
+          pointerX <= box.right + 4 &&
+          pointerY >= box.top - 4 &&
+          pointerY <= box.bottom + 4;
+        snapped = inside && box.width <= MAX_W && box.height <= MAX_H;
+      } else {
+        snapped = false;
+      }
+      cursor.classList.toggle("is-snapped", snapped);
+      cursor.classList.toggle("is-large", Boolean(element) && !snapped);
+      update();
+    };
 
     window.addEventListener(
       "pointermove",
       (event) => {
         if (event.pointerType !== "mouse") return;
+        pointerX = event.clientX;
+        pointerY = event.clientY;
         if (!cursor.classList.contains("is-visible")) {
-          gsap.set(cursor, { x: event.clientX, y: event.clientY });
+          gsap.set(cursor, {
+            x: pointerX,
+            y: pointerY,
+            width: DOT,
+            height: DOT,
+            borderRadius: DOT / 2,
+          });
           cursor.classList.add("is-visible");
         }
-        moveX(event.clientX);
-        moveY(event.clientY);
+        update();
+      },
+      { passive: true },
+    );
+    document.addEventListener("pointerover", (event) => {
+      // pointerover fires before pointermove: take the position from it.
+      pointerX = event.clientX;
+      pointerY = event.clientY;
+      setTarget((event.target as Element).closest<HTMLElement>(interactive));
+    });
+    // The page moves under a still pointer: follow the target, or drop it.
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (!cursor.classList.contains("is-visible")) return;
+        const under = document.elementFromPoint(pointerX, pointerY);
+        const next = under?.closest<HTMLElement>(interactive) ?? null;
+        if (next !== target) setTarget(next);
+        else update();
       },
       { passive: true },
     );
     root.addEventListener("mouseleave", () =>
       cursor.classList.remove("is-visible"),
     );
-
-    const interactive = "a, button, summary, [role='button'], [data-cursor]";
-    document.addEventListener("pointerover", (event) => {
-      const target = (event.target as Element).closest<HTMLElement>(
-        interactive,
-      );
-      const text = target?.dataset.cursor ?? "";
-      cursor.classList.toggle("is-hover", Boolean(target));
-      cursor.classList.toggle("has-label", Boolean(text));
-      label.textContent = text;
-      if (!target) return;
-      const style = getComputedStyle(target);
-      for (const name of ["--cursor-accent", "--cursor-ink"]) {
-        const value = style.getPropertyValue(name).trim();
-        if (value) cursor.style.setProperty(name, value);
-        else cursor.style.removeProperty(name);
-      }
-    });
   }
 </script>
 
@@ -83,19 +155,11 @@
     top: 0;
     left: 0;
     z-index: 2147483647;
-    display: grid;
-    place-items: center;
-    width: 0.875rem;
-    height: 0.875rem;
-    translate: -50% -50%;
-    border-radius: var(--radius-full);
-    background: oklch(1 0 0);
-    mix-blend-mode: difference;
+    /* GSAP drives x, y (centered), width, height and the radius. */
+    background: color-mix(in oklch, var(--color-text) 38%, transparent);
     opacity: 0;
     pointer-events: none;
     transition:
-      width var(--dur-base) var(--ease-out),
-      height var(--dur-base) var(--ease-out),
       opacity var(--dur-base) var(--ease-out),
       background-color var(--dur-base) var(--ease-out);
   }
@@ -104,30 +168,12 @@
     opacity: 1;
   }
 
-  .site-cursor.is-hover {
-    width: 3.5rem;
-    height: 3.5rem;
+  /* The highlight sits over the target: a light veil that keeps it legible. */
+  .site-cursor.is-snapped {
+    background: color-mix(in oklch, var(--color-text) 10%, transparent);
   }
 
-  .site-cursor.has-label {
-    width: 6rem;
-    height: 6rem;
-    background: var(--cursor-accent, var(--color-accent));
-    mix-blend-mode: normal;
-  }
-
-  .site-cursor__label {
-    font-family: var(--font-mono);
-    font-size: 0.62rem;
-    letter-spacing: var(--tracking-overline);
-    text-transform: uppercase;
-    white-space: nowrap;
-    color: var(--cursor-ink, var(--color-bg));
-    opacity: 0;
-    transition: opacity var(--dur-fast) var(--ease-out);
-  }
-
-  .site-cursor.has-label .site-cursor__label {
-    opacity: 1;
+  .site-cursor.is-large {
+    background: color-mix(in oklch, var(--color-text) 22%, transparent);
   }
 </style>
