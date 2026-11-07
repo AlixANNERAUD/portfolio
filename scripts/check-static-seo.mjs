@@ -1342,62 +1342,25 @@ for (const file of ["experiences.html", "fr/experiences.html"]) {
   }
 }
 
-// Section numbering: every numbered overline reads "NN / Label", and the
-// numbers follow the order of the sections on the page (home: Introduction 00,
-// Now 01). No overline keeps the old "NN / X" or
-// "X / NN" format, and the closing link's overline is in the page language.
+// Section overlines are plain labels: no "NN / Label" numbering, no em dash,
+// and the closing link's overline is in the page language.
 {
-  for (const [file, expected, next] of [
-    ["index.html", ["00 / Introduction", "01 / Now"], null],
-    ["fr/index.html", ["00 / Introduction", "01 / En ce moment"], null],
-    ["experiences.html", ["01 / ", "02 / "], "Up next"],
-    ["fr/experiences.html", ["01 / ", "02 / "], "À suivre"],
-    [
-      "about.html",
-      [
-        "01 / Open source",
-        "02 / Expertise",
-        "03 / Communication",
-        "04 / Contact",
-      ],
-      "Up next",
-    ],
-    [
-      "fr/about.html",
-      [
-        "01 / Open source",
-        "02 / Expertise",
-        "03 / Communication",
-        "04 / Contact",
-      ],
-      "À suivre",
-    ],
+  for (const [file, next] of [
+    ["index.html", null],
+    ["fr/index.html", null],
+    ["experiences.html", "Up next"],
+    ["fr/experiences.html", "À suivre"],
+    ["about.html", "Up next"],
+    ["fr/about.html", "À suivre"],
   ]) {
     const html = read(file);
     if (!html) continue;
     const root = parse(html);
-    const labels = root
-      .querySelectorAll("[data-section-index]")
-      .map((node) => ({
-        index: node.getAttribute("data-section-index"),
-        text: node.text.replace(/\s+/g, " ").trim(),
-      }));
-    const ok =
-      labels.length === expected.length &&
-      labels.every(
-        ({ index, text }, i) =>
-          /^\d{2} \/ \S/.test(text) &&
-          text.startsWith(index + " / ") &&
-          text.startsWith(expected[i]),
-      );
-    if (!ok) {
-      failed.push(
-        file +
-          ": section numbering must be " +
-          JSON.stringify(expected) +
-          ", found " +
-          JSON.stringify(labels.map(({ text }) => text)),
-      );
+    for (const node of root.querySelectorAll(".eyebrow")) {
+      const text = node.text.replace(/\s+/g, " ").trim();
+      if (/^\d{2}\s*\//.test(text)) {
+        failed.push(file + ": numbered section label " + JSON.stringify(text));
+      }
     }
     for (const node of root.querySelectorAll(".eyebrow")) {
       const text = node.text.replace(/\s+/g, " ").trim();

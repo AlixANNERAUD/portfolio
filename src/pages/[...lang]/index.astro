@@ -25,7 +25,7 @@ const sections = [HomeOrbit, HomeNow];
   home
   jsonLd={[personLd(lang), websiteLd(), profilePageLd(lang)]}
 >
-  {sections.map((Section, index) => (
-    <Section lang={lang} index={index} />
+  {sections.map((Section) => (
+    <Section lang={lang} />
   ))}
 </BaseLayout>

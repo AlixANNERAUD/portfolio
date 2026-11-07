@@ -22,11 +22,9 @@ import {
  */
 interface Props {
   lang: Locale;
-  /** Position of the section on the page, numbering its overline. */
-  index: number;
 }
 
-const { lang, index } = Astro.props;
+const { lang } = Astro.props;
 const t = useTranslations(lang);
 
 const current = experiences.find(
@@ -63,7 +61,7 @@ const position = (i: number) => {
 <section class="orbit" aria-labelledby="home-title" data-orbit>
   <div class="orbit-copy-wrap container">
     <div class="orbit-copy">
-      <Eyebrow as="span" class="orbit-eyebrow" index={index} aria-hidden="true">
+      <Eyebrow as="span" class="orbit-eyebrow" aria-hidden="true">
         {t("home.orbit.eyebrow")}
       </Eyebrow>
       <h1 id="home-title" class="orbit-title">

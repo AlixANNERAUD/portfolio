@@ -10,11 +10,9 @@ import { useTranslations } from "../../i18n/ui.ts";
  */
 interface Props {
   lang: Locale;
-  /** Position of the section on the page, numbering its overline. */
-  index: number;
 }
 
-const { lang, index } = Astro.props;
+const { lang } = Astro.props;
 const t = useTranslations(lang);
 ---
 
@@ -26,7 +24,6 @@ const t = useTranslations(lang);
   <SectionHeading
     headingId="open-source-heading"
     eyebrow={t("about.contributions.eyebrow")}
-    index={index}
     title={t("about.contributions.title")}
     description={t("about.contributions.intro")}
     count={{
