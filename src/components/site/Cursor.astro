@@ -1,0 +1,133 @@
+---
+/**
+ * Contextual cursor: a small dot that follows the mouse, grows over links and
+ * buttons, and turns into a filled badge that names the action over any
+ * element with `data-cursor="…"` (labels come from `cursor.*` in ui.ts).
+ *
+ * Progressive enhancement only: it starts for a fine hovering pointer without
+ * `prefers-reduced-motion`, and the native cursor is hidden only once it runs.
+ * The badge takes `--cursor-accent` / `--cursor-ink` from the hovered element
+ * when it defines them (project cards use their category color).
+ */
+---
+
+<div class="site-cursor" aria-hidden="true">
+  <span class="site-cursor__label"></span>
+</div>
+
+<script>
+  const cursor = document.querySelector<HTMLElement>(".site-cursor");
+  const canRun =
+    window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
+    !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (cursor && canRun) {
+    const label = cursor.querySelector<HTMLElement>(".site-cursor__label")!;
+    const root = document.documentElement;
+    // GSAP is loaded only here (fine pointer, no reduced motion), as its own
+    // vendor chunk: touch and reduced-motion visitors never download it.
+    const { gsap } = await import("gsap");
+    root.classList.add("has-cursor");
+
+    // Follow with a little inertia.
+    const moveX = gsap.quickTo(cursor, "x", { duration: 0.35, ease: "power3" });
+    const moveY = gsap.quickTo(cursor, "y", { duration: 0.35, ease: "power3" });
+
+    window.addEventListener(
+      "pointermove",
+      (event) => {
+        if (event.pointerType !== "mouse") return;
+        if (!cursor.classList.contains("is-visible")) {
+          gsap.set(cursor, { x: event.clientX, y: event.clientY });
+          cursor.classList.add("is-visible");
+        }
+        moveX(event.clientX);
+        moveY(event.clientY);
+      },
+      { passive: true },
+    );
+    root.addEventListener("mouseleave", () =>
+      cursor.classList.remove("is-visible"),
+    );
+
+    const interactive = "a, button, summary, [role='button'], [data-cursor]";
+    document.addEventListener("pointerover", (event) => {
+      const target = (event.target as Element).closest<HTMLElement>(
+        interactive,
+      );
+      const text = target?.dataset.cursor ?? "";
+      cursor.classList.toggle("is-hover", Boolean(target));
+      cursor.classList.toggle("has-label", Boolean(text));
+      label.textContent = text;
+      if (!target) return;
+      const style = getComputedStyle(target);
+      for (const name of ["--cursor-accent", "--cursor-ink"]) {
+        const value = style.getPropertyValue(name).trim();
+        if (value) cursor.style.setProperty(name, value);
+        else cursor.style.removeProperty(name);
+      }
+    });
+  }
+</script>
+
+<style is:global>
+  html.has-cursor,
+  html.has-cursor * {
+    cursor: none !important;
+  }
+</style>
+
+<style>
+  .site-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2147483647;
+    display: grid;
+    place-items: center;
+    width: 0.875rem;
+    height: 0.875rem;
+    translate: -50% -50%;
+    border-radius: var(--radius-full);
+    background: oklch(1 0 0);
+    mix-blend-mode: difference;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      width var(--dur-base) var(--ease-out),
+      height var(--dur-base) var(--ease-out),
+      opacity var(--dur-base) var(--ease-out),
+      background-color var(--dur-base) var(--ease-out);
+  }
+
+  .site-cursor.is-visible {
+    opacity: 1;
+  }
+
+  .site-cursor.is-hover {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+
+  .site-cursor.has-label {
+    width: 6rem;
+    height: 6rem;
+    background: var(--cursor-accent, var(--color-accent));
+    mix-blend-mode: normal;
+  }
+
+  .site-cursor__label {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: var(--tracking-overline);
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--cursor-ink, var(--color-bg));
+    opacity: 0;
+    transition: opacity var(--dur-fast) var(--ease-out);
+  }
+
+  .site-cursor.has-label .site-cursor__label {
+    opacity: 1;
+  }
+</style>
