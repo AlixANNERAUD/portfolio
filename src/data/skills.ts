@@ -59,6 +59,14 @@ export const skillDomains: readonly SkillDomain[] = [
         },
       },
       {
+        kind: "project",
+        projectId: "nanoglia",
+        detail: {
+          fr: "Inférence TinyML sur microcontrôleur, sans tas.",
+          en: "Heap-free TinyML inference on microcontrollers.",
+        },
+      },
+      {
         kind: "experience",
         experienceId: "insa-engineering",
         detail: {
