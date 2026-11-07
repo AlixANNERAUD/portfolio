@@ -48,7 +48,23 @@
       y: gsap.quickTo(cursor, "y", ease),
       width: gsap.quickTo(cursor, "width", ease),
       height: gsap.quickTo(cursor, "height", ease),
-      radius: gsap.quickTo(cursor, "borderRadius", ease),
+    };
+    // quickTo only drives single numeric properties: the corner radius, a
+    // shorthand, gets a regular tween whenever its target value changes.
+    let radius = DOT / 2;
+    const setRadius = (value: number) => {
+      if (Math.abs(value - radius) < 0.5) return;
+      radius = value;
+      gsap.to(cursor, { borderRadius: value, ...ease, overwrite: "auto" });
+    };
+
+    /** The element's corner radius in px (`%` included), plus the padding. */
+    const shapeRadius = (element: HTMLElement, box: DOMRect) => {
+      const value = getComputedStyle(element).borderTopLeftRadius;
+      const own = value.endsWith("%")
+        ? (parseFloat(value) / 100) * Math.min(box.width, box.height)
+        : parseFloat(value) || 6;
+      return own + PAD_Y;
     };
 
     let pointerX = 0;
@@ -61,13 +77,16 @@
         const box = target.getBoundingClientRect();
         const centerX = box.left + box.width / 2;
         const centerY = box.top + box.height / 2;
-        const radius =
-          parseFloat(getComputedStyle(target).borderTopLeftRadius) || 6;
+        const width = box.width + 2 * PAD_X;
+        const height = box.height + 2 * PAD_Y;
         to.x(centerX + (pointerX - centerX) * PARALLAX);
         to.y(centerY + (pointerY - centerY) * PARALLAX);
-        to.width(box.width + 2 * PAD_X);
-        to.height(box.height + 2 * PAD_Y);
-        to.radius(radius + PAD_Y);
+        to.width(width);
+        to.height(height);
+        // A pill (999px) stays a pill: never more than half the short side.
+        setRadius(
+          Math.min(shapeRadius(target, box), Math.min(width, height) / 2),
+        );
         return;
       }
       const size = target ? DOT_LARGE : DOT;
@@ -75,7 +94,17 @@
       to.y(pointerY);
       to.width(size);
       to.height(size);
-      to.radius(size / 2);
+      setRadius(size / 2);
+    };
+
+    // While snapped, follow the target every frame: it may drift, scale on
+    // hover or be pushed away (homepage orbit tiles).
+    let following = false;
+    const follow = (on: boolean) => {
+      if (on === following) return;
+      following = on;
+      if (on) gsap.ticker.add(update);
+      else gsap.ticker.remove(update);
     };
 
     const setTarget = (element: HTMLElement | null) => {
@@ -95,6 +124,7 @@
       }
       cursor.classList.toggle("is-snapped", snapped);
       cursor.classList.toggle("is-large", Boolean(element) && !snapped);
+      follow(snapped);
       update();
     };
 
@@ -136,9 +166,10 @@
       },
       { passive: true },
     );
-    root.addEventListener("mouseleave", () =>
-      cursor.classList.remove("is-visible"),
-    );
+    root.addEventListener("mouseleave", () => {
+      cursor.classList.remove("is-visible");
+      setTarget(null);
+    });
   }
 </script>
 
