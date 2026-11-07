@@ -128,26 +128,59 @@
       update();
     };
 
+    /** Show the dot at (x, y) at once: quickTo would glide in from (0, 0). */
+    const appear = (x: number, y: number) => {
+      pointerX = x;
+      pointerY = y;
+      to.x(x, x);
+      to.y(y, y);
+      to.width(DOT, DOT);
+      to.height(DOT, DOT);
+      gsap.set(cursor, { borderRadius: DOT / 2 });
+      radius = DOT / 2;
+      cursor.classList.add("is-visible");
+    };
+
     window.addEventListener(
       "pointermove",
       (event) => {
         if (event.pointerType !== "mouse") return;
+        if (!cursor.classList.contains("is-visible")) {
+          appear(event.clientX, event.clientY);
+        }
         pointerX = event.clientX;
         pointerY = event.clientY;
-        if (!cursor.classList.contains("is-visible")) {
-          gsap.set(cursor, {
-            x: pointerX,
-            y: pointerY,
-            width: DOT,
-            height: DOT,
-            borderRadius: DOT / 2,
-          });
-          cursor.classList.add("is-visible");
-        }
         update();
       },
       { passive: true },
     );
+
+    // Each page is a new document: keep the pointer where it was across a
+    // navigation (a click, then a page load within a few seconds), instead of
+    // waiting for the next mouse move.
+    const STORE = "cursor-position";
+    const MAX_AGE = 5000;
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(STORE) ?? "null");
+      if (saved && Date.now() - saved.at < MAX_AGE) {
+        appear(saved.x, saved.y);
+        const under = document.elementFromPoint(saved.x, saved.y);
+        setTarget(under?.closest<HTMLElement>(interactive) ?? null);
+      }
+    } catch {
+      // Storage unavailable: the dot appears on the next mouse move.
+    }
+    window.addEventListener("pagehide", () => {
+      if (!cursor.classList.contains("is-visible")) return;
+      try {
+        sessionStorage.setItem(
+          STORE,
+          JSON.stringify({ x: pointerX, y: pointerY, at: Date.now() }),
+        );
+      } catch {
+        // Ignore: same fallback as above.
+      }
+    });
     document.addEventListener("pointerover", (event) => {
       // pointerover fires before pointermove: take the position from it.
       pointerX = event.clientX;
