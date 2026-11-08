@@ -90,8 +90,10 @@
         return;
       }
       const size = target ? DOT_LARGE : DOT;
-      to.x(pointerX);
-      to.y(pointerY);
+      // The dot sits on the pointer at once: easing its position would make
+      // it trail the mouse. Only its size and shape ease.
+      to.x(pointerX, pointerX);
+      to.y(pointerY, pointerY);
       to.width(size);
       to.height(size);
       setRadius(size / 2);
