@@ -255,6 +255,14 @@ export const skillDomains: readonly SkillDomain[] = [
         },
       },
       {
+        kind: "project",
+        projectId: "nanobom",
+        detail: {
+          fr: "Sécurité de la chaîne d’approvisionnement logicielle : SBOM, CISA KEV et EPSS.",
+          en: "Software supply-chain security: SBOMs, CISA KEV and EPSS.",
+        },
+      },
+      {
         kind: "experience",
         experienceId: "memo-bank",
         detail: {

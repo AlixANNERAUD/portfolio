@@ -211,6 +211,26 @@ export const projects = [
     externalUrl: "https://dera.page",
   },
   {
+    id: "nanobom",
+    title: "nanobom",
+    description: {
+      en: "A self-hosted SBOM vulnerability tracker in Rust: matches CI uploads against OSV, flags exploited CVEs (CISA KEV, EPSS) and fails risky builds.",
+      fr: "Un outil Rust autohébergé de suivi des vulnérabilités des SBOM, qui confronte les envois de la CI à OSV, signale les CVE exploitées et bloque les builds.",
+    },
+    period: { start: "2026", end: "present" },
+    group: "personal",
+    category: "security",
+    symbol: "⊞",
+    tags: ["Rust", "Leptos", "SBOM", "SQLite"],
+    ranking: {
+      technicalDepth: 4.6,
+      originality: 3.9,
+      practicalImpact: 3.8,
+      evidence: 4.4,
+    },
+    externalUrl: "https://github.com/AlixANNERAUD/nanobom",
+  },
+  {
     id: "lvgl-theme-shadcn",
     title: "lvgl_theme_shadcn",
     description: {
