@@ -10,6 +10,7 @@ import { experiences, homepageExperiences } from "../data/experiences.ts";
 import type { Experience } from "../data/experiences.ts";
 import {
   byScore,
+  projectLogo,
   projectRank,
   projectUrl,
   projects,
@@ -41,6 +42,8 @@ export interface OrgNode extends NodeBase {
 export interface ProjectNode extends NodeBase {
   kind: "project";
   symbol: string;
+  /** The project's official symbol, shown instead of `symbol`. */
+  logo?: string;
   category: ProjectCategory;
   /** 1-based catalogue rank. */
   rank: number;
@@ -172,6 +175,7 @@ export function buildOrbitNodes(
     href: projectUrl(project.id, lang),
     caption: `${project.description[lang]} · ${formatPeriod(project.period, lang)}`,
     symbol: project.symbol,
+    logo: projectLogo(project),
     category: project.category,
     rank: projectRank(project.id),
     related: relatedProjects(project.id, 3)

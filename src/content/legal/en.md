@@ -61,3 +61,7 @@ Copies hosted on this website, taken from the organizations' own websites:
 - **Guénola Sahut**: [original logo file](https://guenola-sahut.fr/web/image/website/1/logo/Gu%C3%A9nola%20SAHUT), converted to WebP; [website](https://guenola-sahut.fr/).
 - **Institution Jean-Paul II**: [original logo file](https://www.institutionjeanpaul2.fr/wp-content/themes/jp2mdl/img/logo.png), resized and converted to WebP; [website](https://www.institutionjeanpaul2.fr/).
 - **Cambridge English**: [original logo file](https://www.cambridgeenglish.org/images/icons/apple-touch-icon.png), resized and converted to WebP; [website](https://www.cambridgeenglish.org/).
+
+Project symbol, hosted on this website:
+
+- **Xila**: [xila-symbol-white.svg](https://github.com/xila-project/brand/blob/main/assets/symbol/xila-symbol-white.svg), from the official [Xila visual identity](https://github.com/xila-project/brand), logo design by [Martin Legand](https://www.behance.net/martinlegand), licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0); unmodified.

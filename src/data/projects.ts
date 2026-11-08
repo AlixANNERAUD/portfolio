@@ -23,7 +23,14 @@ export interface Project {
   period: Period;
   group: ProjectGroup;
   category: ProjectCategory;
+  /** Short text glyph shown on the project's art panel. */
   symbol: string;
+  /**
+   * The project's official symbol, self-hosted under `/images/logos/`, shown
+   * instead of `symbol`. The art panels are dark in both themes, so it is the
+   * variant made for a dark background.
+   */
+  logo?: string;
   tags: readonly Technology[];
   /** Human-reviewed editorial factors, scored 0-5; not external quality metrics. */
   ranking: Record<RankFactor, number>;
@@ -47,6 +54,11 @@ export function projectExternalUrl(project: Project): string | undefined {
   return project.externalUrl;
 }
 
+/** The project's official symbol, typed for entries that have none. */
+export function projectLogo(project: Project): string | undefined {
+  return project.logo;
+}
+
 /** Public source repository: `repositoryUrl`, else a code-host `externalUrl`. */
 export function projectRepository(project: Project): string | undefined {
   if (project.repositoryUrl) return project.repositoryUrl;
@@ -68,6 +80,7 @@ export const projects = [
     group: "personal",
     category: "systems",
     symbol: "X",
+    logo: "/images/logos/xila-symbol-white.svg",
     tags: ["Rust", "WebAssembly", "LVGL"],
     ranking: {
       technicalDepth: 5,
