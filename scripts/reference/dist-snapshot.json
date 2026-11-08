@@ -421,6 +421,20 @@
       "ogType": "article"
     },
     {
+      "file": "fr/projects/nanobom.html",
+      "lang": "fr",
+      "title": "nanobom : suivi des vulnérabilités des SBOM | Alix ANNERAUD",
+      "canonical": "https://alix.anneraud.fr/fr/projects/nanobom",
+      "hreflang": {
+        "en": "https://alix.anneraud.fr/projects/nanobom",
+        "fr": "https://alix.anneraud.fr/fr/projects/nanobom",
+        "x-default": "https://alix.anneraud.fr/projects/nanobom"
+      },
+      "robots": null,
+      "h1Count": 1,
+      "ogType": "article"
+    },
+    {
       "file": "fr/projects/nanoexpr.html",
       "lang": "fr",
       "title": "nanoexpr : évaluateur d’expressions embarqué | Alix ANNERAUD",
@@ -883,6 +897,20 @@
       "ogType": "article"
     },
     {
+      "file": "projects/nanobom.html",
+      "lang": "en",
+      "title": "nanobom: SBOM vulnerability tracking in Rust | Alix ANNERAUD",
+      "canonical": "https://alix.anneraud.fr/projects/nanobom",
+      "hreflang": {
+        "en": "https://alix.anneraud.fr/projects/nanobom",
+        "fr": "https://alix.anneraud.fr/fr/projects/nanobom",
+        "x-default": "https://alix.anneraud.fr/projects/nanobom"
+      },
+      "robots": null,
+      "h1Count": 1,
+      "ogType": "article"
+    },
+    {
       "file": "projects/nanoexpr.html",
       "lang": "en",
       "title": "nanoexpr: heap-free math expression parser | Alix ANNERAUD",
@@ -1026,6 +1054,7 @@
     "https://alix.anneraud.fr/fr/projects/model-railway",
     "https://alix.anneraud.fr/fr/projects/music-danceability",
     "https://alix.anneraud.fr/fr/projects/nanoaudio",
+    "https://alix.anneraud.fr/fr/projects/nanobom",
     "https://alix.anneraud.fr/fr/projects/nanoexpr",
     "https://alix.anneraud.fr/fr/projects/nanoglia",
     "https://alix.anneraud.fr/fr/projects/odor-localization",
@@ -1056,6 +1085,7 @@
     "https://alix.anneraud.fr/projects/model-railway",
     "https://alix.anneraud.fr/projects/music-danceability",
     "https://alix.anneraud.fr/projects/nanoaudio",
+    "https://alix.anneraud.fr/projects/nanobom",
     "https://alix.anneraud.fr/projects/nanoexpr",
     "https://alix.anneraud.fr/projects/nanoglia",
     "https://alix.anneraud.fr/projects/odor-localization",
