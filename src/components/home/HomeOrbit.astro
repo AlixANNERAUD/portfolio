@@ -168,7 +168,19 @@ const position = (i: number) => {
                   style={`--cat:var(--category-${node.category})`}
                 >
                   <span class="orbit-glyph" aria-hidden="true">
-                    {node.symbol}
+                    {node.logo ? (
+                      <img
+                        class="orbit-glyph-logo"
+                        src={node.logo}
+                        alt=""
+                        width="64"
+                        height="64"
+                        loading="eager"
+                        decoding="async"
+                      />
+                    ) : (
+                      node.symbol
+                    )}
                   </span>
                   <span class="orbit-label">{node.label}</span>
                 </a>
@@ -933,6 +945,11 @@ const position = (i: number) => {
     font-weight: 500;
     box-shadow: 0 1px 0 color-mix(in oklch, var(--color-text) 12%, transparent);
     transition: box-shadow var(--dur-base) var(--ease-out);
+  }
+  /* An official symbol: half the tile, leaving the brand's clear space. */
+  .orbit-glyph-logo {
+    width: 50%;
+    height: 50%;
   }
   .orbit-tile--project {
     border-radius: var(--radius-m);

@@ -20,7 +20,14 @@ const DEMO_URL = `https://platforms.xila.dev/demonstrations/wasm/${lang}/`;
 <section class="xila-demo" aria-label={t("xila.demo.title")}>
   <div class="xila-demo-heading">
     <div class="xila-demo-illustration" aria-hidden="true">
-      <span class="xila-demo-mark">X</span>
+      <img
+        class="xila-demo-mark"
+        src="/images/logos/xila-symbol-white.svg"
+        alt=""
+        width="64"
+        height="64"
+        decoding="async"
+      />
       <span class="xila-demo-terminal">xila&gt; _</span>
     </div>
     <div>
@@ -161,9 +168,8 @@ const DEMO_URL = `https://platforms.xila.dev/demonstrations/wasm/${lang}/`;
     color: var(--xila-tile-text);
   }
   .xila-demo-mark {
-    font-family: var(--font-display);
-    font-size: var(--step-5);
-    line-height: 1;
+    width: 2.25rem;
+    height: 2.25rem;
   }
   .xila-demo-terminal {
     font-family: var(--font-mono);

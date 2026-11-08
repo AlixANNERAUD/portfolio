@@ -61,3 +61,7 @@ Copies hébergées sur ce site, issues des sites des organismes :
 - **Guénola Sahut :** [fichier d’origine](https://guenola-sahut.fr/web/image/website/1/logo/Gu%C3%A9nola%20SAHUT), converti en WebP ; [site](https://guenola-sahut.fr/).
 - **Institution Jean-Paul II :** [fichier d’origine](https://www.institutionjeanpaul2.fr/wp-content/themes/jp2mdl/img/logo.png), redimensionné et converti en WebP ; [site](https://www.institutionjeanpaul2.fr/).
 - **Cambridge English :** [fichier d’origine](https://www.cambridgeenglish.org/images/icons/apple-touch-icon.png), redimensionné et converti en WebP ; [site](https://www.cambridgeenglish.org/).
+
+Symbole de projet hébergé sur ce site :
+
+- **Xila :** [xila-symbol-white.svg](https://github.com/xila-project/brand/blob/main/assets/symbol/xila-symbol-white.svg), issu de l’[identité visuelle officielle de Xila](https://github.com/xila-project/brand), logo conçu par [Martin Legand](https://www.behance.net/martinlegand), sous [licence Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0) ; sans modification.
