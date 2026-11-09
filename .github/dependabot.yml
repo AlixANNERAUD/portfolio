@@ -9,3 +9,11 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+  - package-ecosystem: "npm" # Playwright smoke test (tools/browser-checks)
+    directory: "/tools/browser-checks"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "github-actions" # Workflows in .github/workflows
+    directory: "/"
+    schedule:
+      interval: "weekly"

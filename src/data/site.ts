@@ -33,13 +33,11 @@ export const site = {
   social,
   /**
    * Person `sameAs` in structured data: the social profiles, plus the
-   * crates.io profile and the Xila GitHub organization, not shown as links.
+   * crates.io profile, not shown as a link. Only profiles of the person:
+   * an organization (such as the Xila GitHub organization) is another
+   * entity.
    */
-  sameAs: [
-    ...Object.values(social),
-    "https://crates.io/users/AlixANNERAUD",
-    "https://github.com/xila-project",
-  ],
+  sameAs: [...Object.values(social), "https://crates.io/users/AlixANNERAUD"],
   /** Profiles listed in the footer, in display order (brand names). */
   profiles: [
     { label: "GitHub", href: social.github },

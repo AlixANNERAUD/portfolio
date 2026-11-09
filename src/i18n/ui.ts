@@ -74,7 +74,7 @@ const en = {
     "Alix ANNERAUD's experience and resume: security at Memo Bank, networking at Linkt, software at Amazon, research at NYU, and INSA education.",
   "projects.metaTitle": "Projects: Rust, embedded systems and web",
   "projects.description":
-    "Alix ANNERAUD's software projects: a Rust operating system for microcontrollers, embedded libraries, web apps and data work, with search and filters.",
+    "Alix ANNERAUD's software projects: a Rust operating system for microcontrollers, embedded libraries, web applications and data work.",
   "resume.pdfTitle": "Resume (PDF)",
   /** Resume links: this locale's PDF, then the other locale's. */
   "resume.download": "Download my resume (PDF)",
