@@ -45,23 +45,35 @@ jobs:
         with:
           node-version: "24"
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            tools/browser-checks/package-lock.json
       - name: Build Astro
         run: |
           npm ci
           npm run validate:portfolio
           npm run build
       - name: Install browser test dependencies
-        run: npm install --prefix tools/browser-checks --no-audit --no-fund
+        run: npm ci --prefix tools/browser-checks --no-audit --no-fund
       - name: Install test browsers
         working-directory: tools/browser-checks
         run: npx playwright install --with-deps chromium firefox
       - name: Start preview server and run tests
         run: |
           npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/portfolio-preview.log 2>&1 &
+          ready=false
           for i in $(seq 1 40); do
-            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then break; fi
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then
+              ready=true
+              break
+            fi
             sleep 1
           done
+          if [ "$ready" != true ]; then
+            echo "::error::The preview server did not answer on http://127.0.0.1:4173/ within 40 seconds."
+            cat /tmp/portfolio-preview.log
+            exit 1
+          fi
           node tools/browser-checks/browser-smoke.mjs
       - name: Upload screenshots and logs
         if: always()

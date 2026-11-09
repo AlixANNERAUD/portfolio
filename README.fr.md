@@ -26,7 +26,7 @@ npm run preview   # sert le dossier dist/ compilé
 
 `npm run check` enchaîne `format:check` (Prettier), `check:types` (`astro check`), `test:unit`, `validate:portfolio`, `build`, `verify:static` et la comparaison des pages compilées et du sitemap avec `scripts/reference/dist-snapshot.json`. Le lancer avant chaque commit ; la CI exécute la même commande.
 
-Le test de fumée facultatif dans le navigateur (Playwright) se trouve dans `tools/browser-checks/` : lancer `npm run preview`, puis `npm install` et `TEST_BASE_URL=<URL de prévisualisation> npm test` dans ce dossier.
+Le test de fumée facultatif dans le navigateur (Playwright) se trouve dans `tools/browser-checks/` : lancer `npm run preview`, puis `npm ci` et `TEST_BASE_URL=<URL de prévisualisation> npm test` dans ce dossier.
 
 **Images :** les cartes sociales (`public/images/og-default.png`, `og-default.fr.png`), les favicons (`public/images/favicon.svg`, `public/favicon.ico`), l’icône Apple et le monogramme de l’en-tête (`src/assets/monogram.svg`) sont générés par `scripts/generate-images.mjs`. Lancer `npm run images` après avoir modifié `meta.homeTitle` ou `home.hero.discipline` dans `src/i18n/ui.ts`, un jeton de couleur ou une police, puis committer les fichiers régénérés. Le résultat ne dépend que des paquets de polices figés : il est identique sur toutes les machines.
 
