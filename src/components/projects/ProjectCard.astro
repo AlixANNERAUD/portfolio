@@ -165,6 +165,19 @@ const logo = projectLogo(project);
     width: 0.75em;
     height: 0.75em;
   }
+  /*
+   * Forced colors (Windows High Contrast) drop the category tint: a system
+   * text color border keeps the panel's edge. A panel with an official
+   * symbol (white artwork) keeps its own colors so the symbol stays visible.
+   */
+  @media (forced-colors: active) {
+    .showcase-art {
+      border: 1px solid CanvasText;
+    }
+    .showcase-art:has(.showcase-art-logo) {
+      forced-color-adjust: none;
+    }
+  }
   .showcase-art-index {
     position: absolute;
     right: var(--space-s);

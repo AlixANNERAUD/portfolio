@@ -76,6 +76,11 @@
    */
   --control-size: 2.75rem;
   --header-h: calc(var(--control-size) + 2 * var(--space-2xs) + 1px);
+  /*
+   * Room kept above anchored and focused elements (html scroll-padding in
+   * base.css), so the sticky header never covers them (WCAG 2.4.11).
+   */
+  --scroll-offset: calc(var(--header-h) + var(--space-s));
 
   /* Radius */
   --radius-s: 0.375rem;
@@ -175,5 +180,29 @@
     --header-h: calc(
       2 * var(--control-size) + var(--space-3xs) + 2 * var(--space-2xs) + 1px
     );
+  }
+}
+
+/*
+ * Short viewports (landscape phones, 400% zoom): the header scrolls away
+ * with the page instead of covering a third of it (SiteHeader.astro), so
+ * scrolled-to elements only keep a small margin.
+ */
+@media (max-height: 30rem) {
+  :root {
+    --scroll-offset: var(--space-s);
+  }
+}
+
+/*
+ * More contrast requested: rules and card outlines take the control
+ * boundary color, and secondary text the body text color. Both tokens are
+ * light-dark() pairs, so each theme keeps its own values.
+ */
+@media (prefers-contrast: more) {
+  :root {
+    --color-border: var(--color-border-strong);
+    --color-text-muted: var(--color-text);
+    --color-text-subtle: var(--color-text);
   }
 }

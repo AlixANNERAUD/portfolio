@@ -14,6 +14,8 @@ const en = {
   /** Visually hidden suffix of links opening in a new tab. */
   "a11y.newTab": "(opens in a new tab)",
   "nav.home": "Home",
+  /** Name of the header brand link: starts with its visible text (WCAG 2.5.3). */
+  "nav.brand": "{name}, home",
   "nav.main": "Main navigation",
   "nav.menu": "Menu",
   "nav.experiences": "Experience",
@@ -21,8 +23,11 @@ const en = {
   "nav.about": "About",
   /** Short name of this locale, shown on the switcher pointing to it. */
   "locale.short": "EN",
-  /** Invitation, written in this locale, to switch to it. */
-  "locale.switchTo": "Switch to English",
+  /**
+   * Invitation, written in this locale, to switch to it: the switcher's name,
+   * which starts with its visible short name (WCAG 2.5.3).
+   */
+  "locale.switchTo": "{short}, switch to English",
   /** Theme menu: its label, its button's name, then its three choices. */
   "theme.label": "Theme",
   "theme.current": "Theme: {choice}",
@@ -231,13 +236,14 @@ const fr: Record<UIKey, string> = {
   "a11y.skipToContent": "Aller au contenu",
   "a11y.newTab": "(s’ouvre dans un nouvel onglet)",
   "nav.home": "Accueil",
+  "nav.brand": "{name}, accueil",
   "nav.main": "Navigation principale",
   "nav.menu": "Menu",
   "nav.experiences": "Expériences",
   "nav.projects": "Projets",
   "nav.about": "À propos",
   "locale.short": "FR",
-  "locale.switchTo": "Passer en français",
+  "locale.switchTo": "{short}, passer en français",
   "theme.label": "Thème",
   "theme.current": "Thème : {choice}",
   "theme.auto": "Auto",

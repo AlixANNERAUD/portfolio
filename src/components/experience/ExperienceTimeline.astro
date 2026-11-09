@@ -95,6 +95,9 @@ const Icon = group === "professional" ? BriefcaseBusiness : GraduationCap;
 </section>
 
 <script>
+  /** Expands an earlier list, keyed by the list. */
+  const expanders = new Map<HTMLElement, () => void>();
+
   for (const button of document.querySelectorAll<HTMLButtonElement>(
     ".career-earlier-toggle",
   )) {
@@ -116,7 +119,31 @@ const Icon = group === "professional" ? BriefcaseBusiness : GraduationCap;
     button.addEventListener("click", () =>
       render(button.getAttribute("aria-expanded") !== "true"),
     );
+    expanders.set(list, () => render(true));
   }
+
+  /*
+   * Links to a role (/experiences#<id>-title, from the homepage tiles) target
+   * its heading. The whole card is scrolled into view instead, so the logo and
+   * the company line above the heading show below the sticky header, and an
+   * earlier card is first expanded: the browser cannot scroll into a
+   * collapsed list.
+   */
+  const reveal = () => {
+    let target: HTMLElement | null = null;
+    try {
+      const id = decodeURIComponent(location.hash.slice(1));
+      target = id ? document.getElementById(id) : null;
+    } catch {}
+    const card = target?.closest<HTMLElement>(".career-card");
+    if (!target || !card) return;
+    for (const [list, expand] of expanders) {
+      if (list.contains(card)) expand();
+    }
+    card.scrollIntoView();
+  };
+  reveal();
+  addEventListener("hashchange", reveal);
 </script>
 
 <style>

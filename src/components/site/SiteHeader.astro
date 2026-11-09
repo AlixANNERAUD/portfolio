@@ -44,13 +44,13 @@ const links: { key: UIKey; path: string }[] = [
     <a
       class="site-brand"
       href={localizePath("/", lang)}
-      aria-label={t("nav.home")}
+      aria-label={t("nav.brand", { name: site.name })}
     >
       {/* The favicon and social card monogram, drawn with the theme tokens. */}
       <span class="site-brand-mark" aria-hidden="true">
         <Monogram width={20} height={20} />
       </span>
-      {site.name}
+      <span class="site-brand-name">{site.name}</span>
     </a>
     {/*
       The menu button precedes the navigation it opens, so Tab goes from the
@@ -95,7 +95,9 @@ const links: { key: UIKey; path: string }[] = [
         class="site-locale site-control"
         href={localeHref}
         lang={other}
-        aria-label={tOther("locale.switchTo")}
+        aria-label={tOther("locale.switchTo", {
+          short: tOther("locale.short"),
+        })}
       >
         {tOther("locale.short")}
       </a>
@@ -119,6 +121,9 @@ const links: { key: UIKey; path: string }[] = [
       setOpen(false);
       button.addEventListener("click", () => setOpen(!isOpen()));
       document.addEventListener("keydown", (event) => {
+        // An Escape already handled inside the panel (the theme menu closing
+        // itself) must not also close the menu and move the focus.
+        if (event.defaultPrevented) return;
         if (event.key === "Escape" && isOpen()) {
           setOpen(false);
           button.focus();
@@ -158,6 +163,18 @@ const links: { key: UIKey; path: string }[] = [
     background: var(--color-bg);
   }
 
+  /*
+   * Short viewports (landscape phones, 400% zoom): a sticky header would
+   * cover a third of the page, so it scrolls away with it. It stays the
+   * containing block of the open menu panel. Same query as --scroll-offset
+   * in tokens.css.
+   */
+  @media (max-height: 30rem) {
+    .site-header {
+      position: relative;
+    }
+  }
+
   .site-header-inner {
     display: flex;
     align-items: center;
@@ -180,6 +197,25 @@ const links: { key: UIKey; path: string }[] = [
 
   .site-brand:hover {
     color: var(--color-accent);
+  }
+
+  /*
+   * Below 360px the name, the menu button and the two tools do not fit on
+   * one row: the brand shows the monogram only and keeps its full name.
+   */
+  @media (max-width: 22.49rem) {
+    .site-brand-name {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+    }
+
+    .site-brand-mark {
+      margin-right: 0;
+    }
   }
 
   .site-brand-mark {
