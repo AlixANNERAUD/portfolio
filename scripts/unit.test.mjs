@@ -18,18 +18,24 @@ import {
   templateParts,
 } from "../src/lib/format.ts";
 import {
-  DESKTOP_FIELD,
+  COPY_ZONE,
   DESKTOP_GAP,
-  EXCLUSION,
-  MOBILE_FIELD,
+  DRIFT_X,
+  DRIFT_Y,
+  MOBILE_DRIFT,
   MOBILE_GAP,
+  ORBIT_FIELDS,
   buildOrbitNodes,
   footprint,
   layoutOrbit,
   orbitCategories,
+  percentRect,
   rectGap,
+  relax,
+  shownIn,
   tileRect,
   visibleOnMobile,
+  wrapLabel,
 } from "../src/lib/home-orbit.ts";
 import {
   RANK_WEIGHTS,
@@ -366,55 +372,135 @@ test("home orbit: every tile links a built route or a visible card", () => {
   }
 });
 
-test("home orbit: the layout is deterministic, spaced and clear of the copy", () => {
+test("home orbit: the layout is deterministic", () => {
+  const layout = layoutOrbit(buildOrbitNodes("fr"));
+  assert.deepEqual(layoutOrbit(buildOrbitNodes("en")), layout);
+  assert.deepEqual(layoutOrbit(buildOrbitNodes("fr")), layout);
+});
+
+test("home orbit: tiles are spaced and clear of the copy in every composition", () => {
   const nodes = buildOrbitNodes("fr");
   const layout = layoutOrbit(nodes);
-  assert.deepEqual(layoutOrbit(buildOrbitNodes("en")), layout);
-  assert.deepEqual(layoutOrbit(nodes), layout);
-  const desktop = nodes.map((node, i) =>
-    tileRect(
-      layout[i].x,
-      layout[i].y,
-      footprint(node, "desktop"),
-      DESKTOP_FIELD,
-    ),
-  );
-  const mobile = nodes.map((node, i) =>
-    tileRect(
-      layout[i].mx,
-      layout[i].my,
-      footprint(node, "mobile"),
-      MOBILE_FIELD,
-    ),
-  );
-  for (let i = 0; i < nodes.length; i++) {
-    const { x, y } = layout[i];
-    assert.ok(
-      !(
-        x > EXCLUSION.x0 &&
-        x < EXCLUSION.x1 &&
-        y > EXCLUSION.y0 &&
-        y < EXCLUSION.y1
-      ),
-      nodes[i].id + " sits on the copy",
+  const at = { desktop: ["x", "y"], touch: ["tx", "ty"], mobile: ["mx", "my"] };
+  for (const [mode, [kx, ky]] of Object.entries(at)) {
+    const field = ORBIT_FIELDS[mode];
+    const shown = nodes.flatMap((node, i) =>
+      shownIn(node, mode)
+        ? [
+            {
+              id: node.id,
+              rect: tileRect(
+                layout[i][kx],
+                layout[i][ky],
+                footprint(node, mode),
+                field,
+              ),
+            },
+          ]
+        : [],
     );
-    assert.ok(x >= 0 && x <= 100 && y >= 0 && y <= 100);
-    for (let j = i + 1; j < nodes.length; j++) {
+    assert.equal(
+      shown.length,
+      mode === "desktop" ? nodes.length : nodes.filter(visibleOnMobile).length,
+    );
+    const zones = field.blocked.map((zone) => percentRect(zone, field));
+    const mx = (field.margin / 100) * field.width;
+    const my = (field.margin / 100) * field.height;
+    for (let i = 0; i < shown.length; i++) {
+      const { id, rect } = shown[i];
+      // The whole box, not only its centre, stays inside the margins...
       assert.ok(
-        rectGap(desktop[i], desktop[j]) >= DESKTOP_GAP - 0.5,
-        `${nodes[i].id} / ${nodes[j].id} too close on desktop`,
+        rect.x0 >= mx - 0.5 &&
+          rect.y0 >= my - 0.5 &&
+          rect.x1 <= field.width - mx + 0.5 &&
+          rect.y1 <= field.height - my + 0.5,
+        `${id} leaves the ${mode} field`,
       );
-      if (visibleOnMobile(nodes[i]) && visibleOnMobile(nodes[j])) {
+      // ...keeps the gap to the copy column...
+      for (const zone of zones) {
+        const gap = rectGap(rect, zone);
         assert.ok(
-          rectGap(mobile[i], mobile[j]) >= MOBILE_GAP - 0.5,
-          `${nodes[i].id} / ${nodes[j].id} too close on mobile`,
+          gap >= field.gap - 0.5,
+          `${id} is ${gap.toFixed(1)}px from the copy on ${mode}`,
+        );
+      }
+      // ...and to every other tile.
+      for (let j = i + 1; j < shown.length; j++) {
+        const gap = rectGap(rect, shown[j].rect);
+        assert.ok(
+          gap >= field.gap - 0.5,
+          `${id} / ${shown[j].id} are ${gap.toFixed(1)}px apart on ${mode}`,
         );
       }
     }
-    const p = layout[i];
-    assert.ok(p.dx >= 5 && p.dx <= 11 && p.dy >= 4 && p.dy <= 9);
+  }
+  // The copy column covers the copy block, the caption and the name.
+  assert.deepEqual(ORBIT_FIELDS.desktop.blocked, [COPY_ZONE]);
+  assert.deepEqual(ORBIT_FIELDS.touch.blocked, [COPY_ZONE]);
+  assert.ok(COPY_ZONE.x0 <= 0 && COPY_ZONE.y0 <= 0 && COPY_ZONE.y1 >= 100);
+});
+
+test("home orbit: the drift never closes the gap between two tiles", () => {
+  for (const p of layoutOrbit(buildOrbitNodes("en"))) {
+    assert.ok(p.dx >= DRIFT_X / 2 && p.dx <= DRIFT_X);
+    assert.ok(p.dy >= DRIFT_Y / 2 && p.dy <= DRIFT_Y);
     assert.ok(p.dd >= 9 && p.dd <= 17 && p.dl <= 0 && -p.dl <= p.dd);
   }
+  // Two neighbours drifting towards each other, at most DRIFT_X each.
+  assert.ok(2 * DRIFT_X < DESKTOP_GAP && 2 * DRIFT_Y < DESKTOP_GAP);
+  assert.ok(2 * DRIFT_X * MOBILE_DRIFT < MOBILE_GAP);
+});
+
+test("home orbit: footprints follow the wrapped labels", () => {
+  assert.deepEqual(wrapLabel("Jeanne d’Hack CTF 2026", 10), [
+    "Jeanne",
+    "d’Hack CTF",
+    "2026",
+  ]);
+  assert.deepEqual(wrapLabel("embedded-i18n", 10), ["embedded-", "i18n"]);
+  assert.deepEqual(wrapLabel("Infrastructure", 10), ["Infrastructure"]);
+  const nodes = buildOrbitNodes("en");
+  const node = (id) => nodes.find((n) => n.id === id);
+  // A long word widens the tile; a third line makes it taller.
+  assert.ok(
+    footprint(node("infrastructure"), "mobile").width >
+      footprint(node("nanoexpr"), "mobile").width,
+  );
+  assert.ok(
+    footprint(node("jeanne-hack-2026"), "mobile").height >
+      footprint(node("mini-train-store"), "mobile").height,
+  );
+});
+
+test("home orbit: relax throws when the tiles cannot fit", () => {
+  const field = {
+    width: 100,
+    height: 100,
+    gap: 10,
+    margin: 0,
+    blocked: [],
+  };
+  const tile = (index) => ({
+    index,
+    x: 50,
+    y: 50,
+    size: { width: 80, height: 80 },
+    pinned: false,
+  });
+  assert.throws(() => relax([tile(0), tile(1)], field), /do not fit/);
+  // A clean layout is left as it is.
+  const apart = [
+    { ...tile(0), x: 25, size: { width: 20, height: 20 } },
+    { ...tile(1), x: 75, size: { width: 20, height: 20 } },
+  ];
+  relax(apart, field);
+  assert.deepEqual(
+    apart.map((t) => [t.x, t.y]),
+    [
+      [25, 50],
+      [75, 50],
+    ],
+  );
 });
 
 test("templateParts splits a template around its placeholders", () => {

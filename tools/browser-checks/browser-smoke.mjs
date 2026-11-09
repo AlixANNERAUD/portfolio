@@ -231,7 +231,7 @@ for (const [engineName, engine] of [
           const tiles = hero.locator(".orbit-tile:visible");
           assert.equal(
             await tiles.count(),
-            width >= 720 ? 19 : 13,
+            width >= 960 ? 19 : 13,
             path + " visible tiles at " + width,
           );
           assert.equal(
@@ -268,7 +268,27 @@ for (const [engineName, engine] of [
             [],
             path + " tiles cover the copy at " + width,
           );
-          if (width < 720) {
+          // No tile covers another, so no logo or link is ever hidden.
+          const covered = await page.evaluate(() => {
+            const boxes = [...document.querySelectorAll(".orbit-tile")]
+              .filter((tile) => tile.getClientRects().length)
+              .map((tile) => [
+                tile.closest(".orbit-node").dataset.id,
+                tile.getBoundingClientRect(),
+              ]);
+            return boxes.flatMap(([a, r], i) =>
+              boxes
+                .slice(i + 1)
+                .filter(
+                  ([, s]) =>
+                    Math.min(r.right, s.right) - Math.max(r.left, s.left) > 1 &&
+                    Math.min(r.bottom, s.bottom) - Math.max(r.top, s.top) > 1,
+                )
+                .map(([b]) => a + "/" + b),
+            );
+          });
+          assert.deepEqual(covered, [], path + " tiles overlap at " + width);
+          if (width < 960) {
             const small = await page.evaluate(
               () =>
                 [...document.querySelectorAll(".orbit-tile")]
@@ -529,6 +549,84 @@ for (const [engineName, engine] of [
         failures.push(engineName + " orbit large text: " + error);
       } finally {
         await scaled.close();
+      }
+    }
+
+    // Touch screens: every name is visible (nothing depends on hover), the
+    // chips are there from the first frame without the mouse hint, and a
+    // category's connectors only join tiles that are shown.
+    for (const [width, height] of [
+      [390, 844],
+      [1024, 768],
+    ]) {
+      const touch = await browser.newContext({
+        viewport: { width, height },
+        hasTouch: true,
+      });
+      try {
+        const touchPage = await touch.newPage();
+        await touchPage.goto(base + "/", { waitUntil: "load", timeout: 10000 });
+        if (
+          !(await touchPage.evaluate(() => matchMedia("(hover: none)").matches))
+        ) {
+          continue; // This engine does not emulate a touch-only screen.
+        }
+        assert.equal(
+          await touchPage.locator(".orbit-tile:visible").count(),
+          13,
+          width + "px touch tiles",
+        );
+        const unnamed = await touchPage.evaluate(
+          () =>
+            [...document.querySelectorAll(".orbit-tile")]
+              .filter((tile) => tile.getClientRects().length)
+              .filter((tile) => {
+                const label = tile.querySelector(".orbit-label");
+                return (
+                  getComputedStyle(label).clipPath !== "none" ||
+                  getComputedStyle(label).position === "absolute"
+                );
+              }).length,
+        );
+        assert.equal(unnamed, 0, width + "px touch tiles without a name");
+        assert.equal(
+          await touchPage.locator(".orbit-hint").isVisible(),
+          false,
+          width + "px touch hint",
+        );
+        await touchPage.locator(".orbit-chips button[data-cat=systems]").tap();
+        await touchPage.waitForTimeout(300);
+        const stray = await touchPage.evaluate(() => {
+          const stage = document
+            .querySelector(".orbit-stage")
+            .getBoundingClientRect();
+          const tiles = [...document.querySelectorAll(".orbit-tile")]
+            .filter((tile) => tile.getClientRects().length)
+            .map((tile) => tile.getBoundingClientRect());
+          // Each end of a line sits on a shown tile.
+          const onTile = (x, y) =>
+            tiles.some(
+              (r) =>
+                x >= r.left - stage.left - 2 &&
+                x <= r.right - stage.left + 2 &&
+                y >= r.top - stage.top - 2 &&
+                y <= r.bottom - stage.top + 2,
+            );
+          return [...document.querySelectorAll(".orbit-links line")].filter(
+            (line) => {
+              const [x1, y1, x2, y2] = ["x1", "y1", "x2", "y2"].map((name) =>
+                Number(line.getAttribute(name)),
+              );
+              return !onTile(x1, y1) || !onTile(x2, y2);
+            },
+          ).length;
+        });
+        assert.equal(stray, 0, width + "px connectors to hidden tiles");
+        checked++;
+      } catch (error) {
+        failures.push(engineName + " orbit touch: " + error);
+      } finally {
+        await touch.close();
       }
     }
 
@@ -1123,6 +1221,20 @@ for (const [engineName, engine] of [
             total,
             path + " without JS: every " + cardSelector + " must be visible",
           );
+          if (path === "/") {
+            // The chips and the hint need the script: hidden without it.
+            assert.equal(
+              await staticPage.locator(".orbit-chips, .orbit-hint").count(),
+              2,
+            );
+            assert.equal(
+              await staticPage
+                .locator(".orbit-chips:visible, .orbit-hint:visible")
+                .count(),
+              0,
+              path + " without JS: the chips and the hint stay hidden",
+            );
+          }
           const navLinks = staticPage.locator(".site-main-nav a[href]");
           assert.ok(
             (await navLinks.count()) >= 3,

@@ -28,8 +28,8 @@ interface NodeBase {
   href: string;
   /** Shown, decoded, under the field while the tile is hovered or focused. */
   caption: string;
-  /** Longest label across locales: the layout is the same in every locale. */
-  labelLength: number;
+  /** The label in every locale: the layout is the same in every locale. */
+  labels: string[];
 }
 
 export interface OrgNode extends NodeBase {
@@ -128,10 +128,6 @@ function logoOf(entry: Experience): OrgNode["logo"] {
   };
 }
 
-function maxLength(values: readonly string[]): number {
-  return Math.max(...values.map((value) => [...value].length));
-}
-
 /** The organizations: homepage roles, in data order, then INSA engineering. */
 export function orbitOrganizations(): Experience[] {
   const education = experiences.find((entry) => entry.id === EDUCATION_ID);
@@ -154,9 +150,7 @@ export function buildOrbitNodes(
     kind: "org",
     id: entry.id,
     label: localize(entry.company, lang),
-    labelLength: maxLength(
-      locales.map((code) => localize(entry.company, code)),
-    ),
+    labels: locales.map((code) => localize(entry.company, code)),
     href: `${experiencesPath}#${entry.id}-title`,
     caption: `${entry.role[lang]} · ${entry.period[lang]}`,
     monogram: entry.monogram,
@@ -169,9 +163,7 @@ export function buildOrbitNodes(
     kind: "project",
     id: project.id,
     label: localize(project.title, lang),
-    labelLength: maxLength(
-      locales.map((code) => localize(project.title, code)),
-    ),
+    labels: locales.map((code) => localize(project.title, code)),
     href: projectUrl(project.id, lang),
     caption: `${project.description[lang]} · ${formatPeriod(project.period, lang)}`,
     symbol: project.symbol,
@@ -200,10 +192,25 @@ export function orbitCategories(
 /* Layout                                                              */
 /* ------------------------------------------------------------------ */
 
+/**
+ * The hero has three compositions, each laid out at build time for the
+ * smallest field it is shown in. Positions are percentages while tiles keep
+ * their pixel size, so a larger field only adds room.
+ * - `desktop` (960px and wider, with hover): the copy on the left, every
+ *   tile in the right column, projects as glyphs whose name unfolds on hover.
+ * - `touch` (960px and wider, without hover): the same field with the
+ *   narrow-screen set of tiles, every name always visible.
+ * - `mobile` (narrower screens): the copy, then the field as its own box.
+ */
+export type OrbitMode = "desktop" | "touch" | "mobile";
+
 export interface OrbitPlacement {
   /** Desktop centre, percent of the hero. */
   x: number;
   y: number;
+  /** Touch centre, percent of the hero. */
+  tx: number;
+  ty: number;
   /** Narrow-screen centre, percent of the field box. */
   mx: number;
   my: number;
@@ -222,66 +229,121 @@ export interface Rect {
 }
 
 /**
- * Reference fields the layout is computed for (px). Tiles keep their pixel
- * size while positions are percentages, so the references are the smallest
- * fields of each composition: larger screens only add room.
+ * Reference fields (px): the smallest of each composition. The desktop hero
+ * is at least DESKTOP_FIELD.height tall, and 960px wide less a scrollbar; the
+ * narrow field box is at least MOBILE_FIELD.height tall.
  */
-export const DESKTOP_FIELD = { width: 1040, height: 680 };
-export const MOBILE_FIELD = { width: 360, height: 500 };
+export const DESKTOP_FIELD = { width: 940, height: 600 };
+export const MOBILE_FIELD = { width: 320, height: 520 };
 
-/** The copy block (desktop, percent): no tile may cover it. */
-export const EXCLUSION: Rect = { x0: 6, y0: 20, x1: 58, y1: 76 };
 /**
- * The left of the hero, above and below the copy: kept clear so that no
- * connector crosses the name (percent).
+ * The copy column on desktop (percent of the hero), top to bottom: the copy
+ * is at most 7/12 of the page column (58% of the hero at 960px, less on wider
+ * screens) and nearly as tall as the hero on a laptop, the caption sits under
+ * it, and no connector may cross the name. No tile comes within the gap.
  */
-export const LEFT_ZONE: Rect = { x0: 0, y0: 0, x1: 48, y1: 100 };
-/** The caption, bottom left of the hero on desktop (percent). */
-export const CAPTION_ZONE: Rect = { x0: 0, y0: 84, x1: 60, y1: 100 };
+export const COPY_ZONE: Rect = { x0: 0, y0: 0, x1: 58, y1: 100 };
 
-/** Minimum clear gap between two tiles, px. */
+/** Minimum clear gap between two tiles, and to a blocked zone, px. */
 export const DESKTOP_GAP = 18;
-export const MOBILE_GAP = 10;
-/** Edge margin, percent: desktop, then narrow screens. */
+export const MOBILE_GAP = 12;
+/** Edge margin, percent: desktop and touch, then narrow screens. */
 export const MARGIN = 5;
-export const MOBILE_MARGIN = 3;
-/** Xila, the core, on desktop and on narrow screens (percent). */
-export const CORE = { x: 72, y: 50, mx: 50, my: 50 };
+export const MOBILE_MARGIN = 4;
+/** Xila, the core, on desktop and touch, then on narrow screens (percent). */
+export const CORE = { x: 76, y: 50, mx: 50, my: 50 };
 
-const MONO_CHAR = 6.7; // JetBrains Mono at --step--2, px per character
-const MOBILE_LABEL_CHARS = 12;
+/**
+ * Largest idle drift either way (px), and its scale on narrow screens: two
+ * neighbours drifting towards each other never close the gap between them.
+ */
+export const DRIFT_X = 8;
+export const DRIFT_Y = 6;
+export const MOBILE_DRIFT = 0.5;
 
-/** Approximate tile size in px, used to keep tiles apart. */
+/* Label metrics, px, at the largest --step--2 (0.72rem) and --step--1. */
+const CH = 7.2; // JetBrains Mono, letter spacing included
+const CORE_CH = 9.2;
+const LINE = 14.5;
+/** A wrapped label is 12ch wide. */
+const WRAP_WIDTH = 84;
+
+/**
+ * Greedy wrap, like the browser's: breaks at spaces and after hyphens,
+ * `limit` characters per line, a longer word on a line of its own.
+ */
+export function wrapLabel(label: string, limit: number): string[] {
+  const lines: string[] = [];
+  let line = "";
+  for (const word of label.split(" ")) {
+    word.split(/(?<=-)/).forEach((part, i) => {
+      const joined = line + (i === 0 && line ? " " : "") + part;
+      if (line && [...joined].length > limit) {
+        lines.push(line);
+        line = part;
+      } else {
+        line = joined;
+      }
+    });
+  }
+  lines.push(line);
+  return lines;
+}
+
+/** Size of a label wrapped at 12ch, in its widest locale. */
+function wrappedLabel(
+  labels: readonly string[],
+  limit: number,
+  padding: number,
+): { width: number; lines: number } {
+  let width = 0;
+  let lines = 0;
+  for (const label of labels) {
+    const wrapped = wrapLabel(label, limit);
+    const longest = Math.max(...wrapped.map((line) => [...line].length));
+    // The label is at least as wide as its longest word (min-content).
+    width = Math.max(
+      width,
+      wrapped.length > 1 ? WRAP_WIDTH : 0,
+      longest * CH + padding,
+    );
+    lines = Math.max(lines, wrapped.length);
+  }
+  return { width, lines };
+}
+
+const longest = (labels: readonly string[]) =>
+  Math.max(...labels.map((label) => [...label].length));
+
+/** Tile size in px, as rendered in each composition (see HomeOrbit). */
 export function footprint(
   node: OrbitNode,
-  mode: "desktop" | "mobile",
+  mode: OrbitMode,
 ): { width: number; height: number } {
   if (node.kind === "org") {
-    const logo = node.logo ? node.logo.width + 12 : 28;
-    const chars =
-      mode === "mobile"
-        ? Math.min(node.labelLength, MOBILE_LABEL_CHARS)
-        : node.labelLength;
-    const twoLines = mode === "mobile" && node.labelLength > MOBILE_LABEL_CHARS;
+    // Logo plate (at least 1.75rem), padding, gap and border around the name.
+    const plate = Math.max(28, (node.logo?.width ?? 0) + 12);
+    if (mode === "desktop") {
+      return { width: plate + longest(node.labels) * CH + 30, height: 40 };
+    }
+    const label = wrappedLabel(node.labels, 11, 0);
     return {
-      width: 4 + logo + 8 + chars * MONO_CHAR + 14,
-      height: twoLines ? 48 : 40,
+      width: plate + label.width + 30,
+      height: Math.max(44, 10 + label.lines * LINE),
     };
   }
   if (mode === "desktop") {
-    // The core keeps its label visible; other labels unfold on hover.
+    // The core keeps its name beside it; other names unfold on hover.
     return node.core
-      ? { width: 60 + 10 + node.labelLength * MONO_CHAR + 16, height: 60 }
+      ? { width: 60 + 10 + longest(node.labels) * CORE_CH + 2, height: 60 }
       : { width: 44, height: 44 };
   }
-  const size = node.core ? 56 : 44;
-  const lines = node.labelLength > MOBILE_LABEL_CHARS ? 2 : 1;
+  // Glyph above its name, always visible.
+  const glyph = node.core ? 56 : 44;
+  const label = wrappedLabel(node.labels, 10, 8);
   return {
-    width: Math.max(
-      size,
-      Math.min(node.labelLength, MOBILE_LABEL_CHARS) * MONO_CHAR,
-    ),
-    height: size + 4 + lines * 15,
+    width: Math.max(glyph, label.width),
+    height: glyph + (node.core ? 10 : 4) + label.lines * LINE,
   };
 }
 
@@ -321,7 +383,8 @@ export function rectGap(a: Rect, b: Rect): number {
   return Math.max(dx, dy);
 }
 
-function percentRect(
+/** A percent rectangle in px of a field. */
+export function percentRect(
   rect: Rect,
   field: { width: number; height: number },
 ): Rect {
@@ -333,31 +396,49 @@ function percentRect(
   };
 }
 
-interface Field {
+export interface OrbitField {
   width: number;
   height: number;
   gap: number;
   /** Edge margin, percent. */
   margin: number;
-  /** Zones no tile may cover (percent). */
+  /** Zones no tile may come within the gap of (percent). */
   blocked: readonly Rect[];
 }
 
-const DESKTOP: Field = {
-  ...DESKTOP_FIELD,
-  gap: DESKTOP_GAP,
-  margin: MARGIN,
-  blocked: [EXCLUSION, LEFT_ZONE, CAPTION_ZONE],
-};
-const MOBILE: Field = {
-  ...MOBILE_FIELD,
-  gap: MOBILE_GAP,
-  margin: MOBILE_MARGIN,
-  blocked: [],
+/** The reference field of each composition. */
+export const ORBIT_FIELDS: Record<OrbitMode, OrbitField> = {
+  desktop: {
+    ...DESKTOP_FIELD,
+    gap: DESKTOP_GAP,
+    margin: MARGIN,
+    blocked: [COPY_ZONE],
+  },
+  touch: {
+    ...DESKTOP_FIELD,
+    gap: DESKTOP_GAP,
+    margin: MARGIN,
+    blocked: [COPY_ZONE],
+  },
+  mobile: {
+    ...MOBILE_FIELD,
+    gap: MOBILE_GAP,
+    margin: MOBILE_MARGIN,
+    blocked: [],
+  },
 };
 
+/** Whether the node is shown in a composition. */
+export function shownIn(node: OrbitNode, mode: OrbitMode): boolean {
+  return mode === "desktop" || visibleOnMobile(node);
+}
+
 /** Clearance of a candidate: its smallest gap to the edges, zones and tiles. */
-function clearance(rect: Rect, field: Field, placed: readonly Rect[]): number {
+function clearance(
+  rect: Rect,
+  field: OrbitField,
+  placed: readonly Rect[],
+): number {
   const marginX = (field.margin / 100) * field.width;
   const marginY = (field.margin / 100) * field.height;
   let gap =
@@ -380,10 +461,10 @@ function clearance(rect: Rect, field: Field, placed: readonly Rect[]): number {
  */
 function place(
   size: { width: number; height: number },
-  field: Field,
+  field: OrbitField,
   placed: readonly Rect[],
   sample: () => [number, number],
-  tries = 200,
+  tries = 400,
 ): [number, number] {
   let best: [number, number] = sample();
   let bestGap = -Infinity;
@@ -404,109 +485,7 @@ const round = (value: number, digits = 1) => {
   return Math.round(value * factor) / factor;
 };
 
-/**
- * Deterministic positions for every node: the organizations on an arc
- * around the core (Xila), the other projects scattered around the copy.
- * `mobileVisible` nodes (organizations and the first projects) are spaced
- * on narrow screens too; the rest are hidden there.
- */
-export function layoutOrbit(
-  nodes: readonly OrbitNode[],
-  seed = 0xa11c5,
-): OrbitPlacement[] {
-  const random = mulberry32(seed);
-  const orgCount = nodes.filter((node) => node.kind === "org").length;
-  let orgIndex = 0;
-
-  // The core goes first, so the organizations' arc wraps around it.
-  const order = [...nodes.keys()].sort(
-    (a, b) => Number(isCore(nodes[b])) - Number(isCore(nodes[a])),
-  );
-  const desktop: Tile[] = [];
-  const mobile: Tile[] = [];
-  const drift = new Map<
-    number,
-    Omit<OrbitPlacement, "x" | "y" | "mx" | "my">
-  >();
-
-  for (const index of order) {
-    const node = nodes[index];
-    const size = footprint(node, "desktop");
-    const mobileSize = footprint(node, "mobile");
-    const core = isCore(node);
-    let at: [number, number];
-    if (core) {
-      at = [CORE.x, CORE.y];
-    } else if (node.kind === "org") {
-      // An arc opening towards the copy: -126° to 126°, jittered ±8°.
-      const step = 252 / Math.max(1, orgCount - 1);
-      const base = -126 + step * orgIndex++;
-      at = place(size, DESKTOP, desktop.map(rectOf(DESKTOP)), () => {
-        const angle = ((base + (random() * 2 - 1) * 8) * Math.PI) / 180;
-        const reach = 1 + random() * 0.12;
-        return [
-          CORE.x + Math.cos(angle) * 20 * reach,
-          CORE.y + Math.sin(angle) * 30 * reach,
-        ];
-      });
-    } else {
-      // Biased to the right half, around the core.
-      at = place(size, DESKTOP, desktop.map(rectOf(DESKTOP)), () => [
-        MARGIN + (100 - 2 * MARGIN) * random() ** 0.55,
-        MARGIN + (100 - 2 * MARGIN) * random(),
-      ]);
-    }
-    desktop.push({ index, x: at[0], y: at[1], size, pinned: core });
-
-    if (core) {
-      mobile.push({
-        index,
-        x: CORE.mx,
-        y: CORE.my,
-        size: mobileSize,
-        pinned: true,
-      });
-    } else if (visibleOnMobile(node)) {
-      const [mx, my] = place(
-        mobileSize,
-        MOBILE,
-        mobile.map(rectOf(MOBILE)),
-        () => [
-          MOBILE_MARGIN + (100 - 2 * MOBILE_MARGIN) * random(),
-          MOBILE_MARGIN + (100 - 2 * MOBILE_MARGIN) * random(),
-        ],
-      );
-      mobile.push({ index, x: mx, y: my, size: mobileSize, pinned: false });
-    }
-
-    const dd = 9 + random() * 8;
-    drift.set(index, {
-      dx: round(5 + random() * 6),
-      dy: round(4 + random() * 5),
-      dd: round(dd),
-      dl: round(-random() * dd),
-    });
-  }
-
-  relax(desktop, DESKTOP);
-  relax(mobile, MOBILE);
-  const desktopAt = new Map(desktop.map((tile) => [tile.index, tile]));
-  const mobileAt = new Map(mobile.map((tile) => [tile.index, tile]));
-  return nodes.map((_, index) => {
-    const d = desktopAt.get(index)!;
-    // Hidden on narrow screens: any position will do.
-    const m = mobileAt.get(index) ?? { x: 50, y: 50 };
-    return {
-      x: round(d.x),
-      y: round(d.y),
-      mx: round(m.x),
-      my: round(m.y),
-      ...drift.get(index)!,
-    };
-  });
-}
-
-interface Tile {
+export interface Tile {
   index: number;
   /** Centre, percent. */
   x: number;
@@ -515,31 +494,164 @@ interface Tile {
   pinned: boolean;
 }
 
-const rectOf = (field: Field) => (tile: Tile) =>
+const rectOf = (field: OrbitField) => (tile: Tile) =>
   tileRect(tile.x, tile.y, tile.size, field);
+
+/**
+ * One attempt at a composition: the core first, then the organizations on an
+ * arc around it (desktop and touch) and the projects by rank, each placed by
+ * rejection sampling, then relaxed until every gap holds (or relax throws).
+ */
+function attemptField(
+  nodes: readonly OrbitNode[],
+  mode: OrbitMode,
+  random: () => number,
+): Map<number, Tile> {
+  const field = ORBIT_FIELDS[mode];
+  const wide = mode !== "mobile";
+  const shown = [...nodes.keys()].filter((i) => shownIn(nodes[i], mode));
+  const order = [
+    ...shown.filter((i) => isCore(nodes[i])),
+    ...shown.filter((i) => !isCore(nodes[i])),
+  ];
+  const orgCount = shown.filter((i) => nodes[i].kind === "org").length;
+  const { margin } = field;
+  const left = wide ? COPY_ZONE.x1 : margin;
+  let orgIndex = 0;
+  const tiles: Tile[] = [];
+  for (const index of order) {
+    const node = nodes[index];
+    const size = footprint(node, mode);
+    const placed = tiles.map(rectOf(field));
+    let at: [number, number];
+    if (isCore(node)) {
+      at = wide ? [CORE.x, CORE.y] : [CORE.mx, CORE.my];
+    } else if (wide && node.kind === "org") {
+      // An arc opening towards the copy: -126° to 126°, jittered ±8°.
+      const step = 252 / Math.max(1, orgCount - 1);
+      const base = -126 + step * orgIndex++;
+      at = place(size, field, placed, () => {
+        const angle = ((base + (random() * 2 - 1) * 8) * Math.PI) / 180;
+        const reach = 1 + random() * 0.12;
+        return [
+          CORE.x + Math.cos(angle) * 16 * reach,
+          CORE.y + Math.sin(angle) * 34 * reach,
+        ];
+      });
+    } else {
+      at = place(size, field, placed, () => [
+        left + (100 - margin - left) * random(),
+        margin + (100 - 2 * margin) * random(),
+      ]);
+    }
+    tiles.push({ index, x: at[0], y: at[1], size, pinned: isCore(node) });
+  }
+  relax(tiles, field, mode);
+  return new Map(tiles.map((tile) => [tile.index, tile]));
+}
+
+/** Attempts per composition before the build gives up. */
+const ATTEMPTS = 64;
+
+/**
+ * A composition from the first of the seeds after `seed` that relaxes into
+ * a clean layout: still deterministic, and a new or renamed tile only moves
+ * to the next seed instead of failing the build.
+ */
+function layoutField(
+  nodes: readonly OrbitNode[],
+  mode: OrbitMode,
+  seed: number,
+): Map<number, Tile> {
+  let failure: unknown;
+  for (let attempt = 0; attempt < ATTEMPTS; attempt++) {
+    try {
+      return attemptField(nodes, mode, mulberry32(seed + attempt));
+    } catch (error) {
+      failure = error;
+    }
+  }
+  throw failure;
+}
+
+/**
+ * Deterministic positions for every node in the three compositions, and its
+ * idle drift. A node hidden in a composition gets its core's position.
+ */
+export function layoutOrbit(
+  nodes: readonly OrbitNode[],
+  seed = 0xa11c5,
+): OrbitPlacement[] {
+  const desktop = layoutField(nodes, "desktop", seed);
+  const touch = layoutField(nodes, "touch", seed + 0x100);
+  const mobile = layoutField(nodes, "mobile", seed + 0x200);
+  const random = mulberry32(seed + 0x300);
+  return nodes.map((_, index) => {
+    const d = desktop.get(index)!;
+    const t = touch.get(index) ?? { x: CORE.x, y: CORE.y };
+    const m = mobile.get(index) ?? { x: CORE.mx, y: CORE.my };
+    const dd = 9 + random() * 8;
+    return {
+      x: round(d.x),
+      y: round(d.y),
+      tx: round(t.x),
+      ty: round(t.y),
+      mx: round(m.x),
+      my: round(m.y),
+      dx: round((DRIFT_X * (1 + random())) / 2, 0),
+      dy: round((DRIFT_Y * (1 + random())) / 2, 0),
+      dd: round(dd),
+      dl: round(-random() * dd),
+    };
+  });
+}
 
 /**
  * Resolves what rejection sampling could not: overlapping tiles, or tiles
  * on a blocked zone, are pushed apart along their shallowest axis until
  * every gap holds. Deterministic, and a no-op on an already clean layout.
+ * Throws when the tiles do not fit: the build never ships an overlap.
  */
-function relax(tiles: Tile[], field: Field): void {
+export function relax(tiles: Tile[], field: OrbitField, name = "orbit"): void {
   const { width, height, gap } = field;
   const mx = (field.margin / 100) * width;
   const my = (field.margin / 100) * height;
+  const zones = field.blocked.map((zone) => percentRect(zone, field));
+  // Where tile edges may go: inside the margins, and clear of any zone that
+  // spans the whole field from an edge (the desktop copy column).
+  const edges = { x0: mx, x1: width - mx, y0: my, y1: height - my };
+  for (const zone of zones) {
+    const tall = zone.y0 <= 0 && zone.y1 >= height;
+    const wide = zone.x0 <= 0 && zone.x1 >= width;
+    if (tall && zone.x0 <= 0) edges.x0 = Math.max(edges.x0, zone.x1 + gap);
+    if (tall && zone.x1 >= width) edges.x1 = Math.min(edges.x1, zone.x0 - gap);
+    if (wide && zone.y0 <= 0) edges.y0 = Math.max(edges.y0, zone.y1 + gap);
+    if (wide && zone.y1 >= height) edges.y1 = Math.min(edges.y1, zone.y0 - gap);
+  }
+  /** How far (px) a tile can move along an axis, -1 or 1, before an edge. */
+  const room = (tile: Tile, axis: "x" | "y", dir: number) => {
+    if (tile.pinned) return 0;
+    const r = tileRect(tile.x, tile.y, tile.size, field);
+    const free =
+      axis === "x"
+        ? dir < 0
+          ? r.x0 - edges.x0
+          : edges.x1 - r.x1
+        : dir < 0
+          ? r.y0 - edges.y0
+          : edges.y1 - r.y1;
+    return Math.max(0, free);
+  };
   const clamp = (tile: Tile) => {
     const hw = tile.size.width / 2;
     const hh = tile.size.height / 2;
+    const cx = (tile.x / 100) * width;
+    const cy = (tile.y / 100) * height;
     tile.x =
-      (Math.min(Math.max((tile.x / 100) * width, mx + hw), width - mx - hw) /
-        width) *
-      100;
+      (Math.min(Math.max(cx, edges.x0 + hw), edges.x1 - hw) / width) * 100;
     tile.y =
-      (Math.min(Math.max((tile.y / 100) * height, my + hh), height - my - hh) /
-        height) *
-      100;
+      (Math.min(Math.max(cy, edges.y0 + hh), edges.y1 - hh) / height) * 100;
   };
-  const zones = field.blocked.map((zone) => percentRect(zone, field));
   for (let pass = 0; pass < 400; pass++) {
     let moved = false;
     for (let i = 0; i < tiles.length; i++) {
@@ -552,16 +664,25 @@ function relax(tiles: Tile[], field: Field): void {
         const oy = (a.size.height + b.size.height) / 2 + gap - Math.abs(dy);
         if (ox <= 0.01 || oy <= 0.01) continue;
         moved = true;
-        const share = a.pinned ? [0, 1] : b.pinned ? [1, 0] : [0.5, 0.5];
-        if (ox < oy) {
-          const push = ((ox + 0.1) / width) * 100 * (dx < 0 ? -1 : 1);
-          a.x -= push * share[0];
-          b.x += push * share[1];
-        } else {
-          const push = ((oy + 0.1) / height) * 100 * (dy < 0 ? -1 : 1);
-          a.y -= push * share[0];
-          b.y += push * share[1];
-        }
+        if (a.pinned && b.pinned) continue;
+        // Along the shallower axis, unless the edges leave no room there.
+        const sx = dx < 0 ? -1 : 1;
+        const sy = dy < 0 ? -1 : 1;
+        const roomX = room(a, "x", -sx) + room(b, "x", sx);
+        const roomY = room(a, "y", -sy) + room(b, "y", sy);
+        const alongX = roomX > ox === roomY > oy ? ox < oy : roomX > ox;
+        const axis = alongX ? "x" : "y";
+        const need = (alongX ? ox : oy) + 0.1;
+        const s = alongX ? sx : sy;
+        // Split the push, each tile within its own room.
+        const ra = room(a, axis, -s);
+        const rb = room(b, axis, s);
+        let pa = a.pinned ? 0 : b.pinned ? need : need / 2;
+        pa = Math.min(Math.max(pa, need - rb), ra);
+        const pb = b.pinned ? 0 : need - pa;
+        const scale = 100 / (alongX ? width : height);
+        a[axis] -= pa * s * scale;
+        b[axis] += pb * s * scale;
       }
     }
     for (const tile of tiles) {
@@ -574,23 +695,34 @@ function relax(tiles: Tile[], field: Field): void {
         const down = zone.y1 + gap - r.y0;
         if (left <= 0 || right <= 0 || up <= 0 || down <= 0) continue;
         moved = true;
-        const least = Math.min(left, right, up, down);
-        if (least === left) tile.x -= ((left + 0.1) / width) * 100;
-        else if (least === right) tile.x += ((right + 0.1) / width) * 100;
-        else if (least === up) tile.y -= ((up + 0.1) / height) * 100;
-        else tile.y += ((down + 0.1) / height) * 100;
+        // The shallowest way out that stays inside the margins (a zone may
+        // span the whole field one way).
+        const ways = [
+          { d: left, ok: r.x0 - left >= mx, x: -1, y: 0 },
+          { d: right, ok: r.x1 + right <= width - mx, x: 1, y: 0 },
+          { d: up, ok: r.y0 - up >= my, x: 0, y: -1 },
+          { d: down, ok: r.y1 + down <= height - my, x: 0, y: 1 },
+        ];
+        const way = (
+          ways.some((w) => w.ok) ? ways.filter((w) => w.ok) : ways
+        ).sort((a, b) => a.d - b.d)[0];
+        tile.x += ((way.d + 0.1) / width) * 100 * way.x;
+        tile.y += ((way.d + 0.1) / height) * 100 * way.y;
       }
       clamp(tile);
     }
     if (!moved) return;
   }
+  throw new Error(
+    `Home orbit: the ${name} tiles do not fit in ${width}×${height}px`,
+  );
 }
 
 function isCore(node: OrbitNode): boolean {
   return node.kind === "project" && node.core;
 }
 
-/** Whether the node is shown on narrow screens. */
+/** Whether the node is shown on narrow and touch screens. */
 export function visibleOnMobile(node: OrbitNode): boolean {
   return node.kind === "org" || node.rank <= MOBILE_PROJECTS;
 }
