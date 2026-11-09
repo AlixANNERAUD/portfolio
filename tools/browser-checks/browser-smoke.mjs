@@ -934,6 +934,78 @@ for (const [engineName, engine] of [
     }
     await page.emulateMedia({ reducedMotion: "no-preference" });
 
+    // Hover highlight (site/Cursor): the system pointer always shows; with a
+    // fine pointer, hovering a nav link brings in the highlight; with reduced
+    // motion, nothing is created. Headless Chromium has no fine pointer: it
+    // is emulated through CDP. Firefox checks the highlight only when its
+    // headless pointer already reports as fine.
+    {
+      const cursorContext = await browser.newContext({
+        viewport: { width: 1440, height: 900 },
+      });
+      const cursorPage = await cursorContext.newPage();
+      const cdp =
+        engineName === "chromium"
+          ? await cursorContext.newCDPSession(cursorPage)
+          : null;
+      const emulate = async (reducedMotion) => {
+        await cursorPage.emulateMedia({ reducedMotion });
+        await cdp?.send("Emulation.setEmulatedMedia", {
+          features: [
+            { name: "hover", value: "hover" },
+            { name: "pointer", value: "fine" },
+            { name: "prefers-reduced-motion", value: reducedMotion },
+          ],
+        });
+      };
+      const hoverNav = async () => {
+        await cursorPage.goto(base + "/about", { waitUntil: "load" });
+        await cursorPage.mouse.move(5, 600);
+        const box = await cursorPage
+          .locator(".site-main-nav a")
+          .first()
+          .boundingBox();
+        await cursorPage.mouse.move(
+          box.x + box.width / 2,
+          box.y + box.height / 2,
+          { steps: 4 },
+        );
+        await cursorPage.waitForTimeout(400);
+        return cursorPage.evaluate(() => {
+          const highlight = document.querySelector(".site-cursor-highlight");
+          return {
+            fine: matchMedia("(hover: hover) and (pointer: fine)").matches,
+            cursors: [document.body, document.querySelector("main p")].map(
+              (node) => getComputedStyle(node).cursor,
+            ),
+            opacity: highlight ? +getComputedStyle(highlight).opacity : null,
+          };
+        });
+      };
+      try {
+        await emulate("no-preference");
+        const shown = await hoverNav();
+        assert.ok(
+          !shown.cursors.includes("none"),
+          "the system pointer is hidden: " + shown.cursors,
+        );
+        if (shown.fine) {
+          assert.ok(shown.opacity > 0.9, "hovered nav link has no highlight");
+        }
+        await emulate("reduce");
+        const reduced = await hoverNav();
+        assert.equal(
+          reduced.opacity,
+          null,
+          "reduced motion still creates the highlight",
+        );
+        checked++;
+      } catch (error) {
+        failures.push(engineName + " hover highlight: " + error);
+      }
+      await cursorContext.close();
+    }
+
     // Experience holds the resume: both PDF links sit in the hero, in view
     // without scrolling on a wide screen, and stay 44px targets on a phone.
     // About repeats them in its contact block.

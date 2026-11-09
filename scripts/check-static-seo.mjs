@@ -1667,10 +1667,6 @@ for (const [file] of cases) {
 // client script stays a small progressive enhancement.
 {
   const MAX_SCRIPT_BYTES = 20 * 1024;
-  // Vetted vendor chunks, lazy-loaded behind a feature check: GSAP for the
-  // contextual cursor (site/Cursor.astro), downloaded only on desktop
-  // without reduced motion. Our own scripts keep the 20 KB budget.
-  const VENDOR_CHUNK = /^_astro\/vendor-gsap\.[\w-]+\.js$/;
   const files = readdirSync(dist, { recursive: true }).map(String);
   for (const file of files.filter((name) => name.endsWith(".html"))) {
     if (/<astro-island\b/.test(read(file))) {
@@ -1678,10 +1674,7 @@ for (const [file] of cases) {
     }
   }
   for (const file of files.filter(
-    (name) =>
-      name.startsWith("_astro/") &&
-      name.endsWith(".js") &&
-      !VENDOR_CHUNK.test(name),
+    (name) => name.startsWith("_astro/") && name.endsWith(".js"),
   )) {
     const { size } = statSync(resolve(dist, file));
     if (size > MAX_SCRIPT_BYTES) {
