@@ -44,10 +44,13 @@ export const experiences: readonly Experience[] = [
     monogram: "M",
     role: { fr: "Ingénieur sécurité", en: "Security Engineer" },
     period: { fr: "Sept. 2026 – Août 2027", en: "Sep 2026 – Aug 2027" },
-    location: { fr: "Paris, France", en: "Paris, France" },
+    location: {
+      fr: "Alternance · Paris, France",
+      en: "Work-study · Paris, France",
+    },
     summary: {
-      fr: "Ingénierie sécurité dans l’environnement d’une banque.",
-      en: "Security engineering in a banking environment.",
+      fr: "Alternance pendant la dernière année de mon cycle ingénieur à l’INSA Rouen Normandie : ingénierie sécurité dans l’environnement d’une banque.",
+      en: "Work-study during the final year of my engineering degree at INSA Rouen Normandie: security engineering in a banking environment.",
     },
     highlights: [],
     technologies: [
@@ -213,8 +216,8 @@ export const experiences: readonly Experience[] = [
     },
     highlights: [
       {
-        fr: "Coordination de l’équipe, recueil des besoins et pilotage des livrables.",
-        en: "Coordinated the team, requirements and delivery milestones.",
+        fr: "Direction d’une équipe de six personnes (environ 20 h par semaine) : coordination, recueil des besoins et pilotage des livrables.",
+        en: "Led a team of six (about 20 hours a week): coordination, requirements and delivery milestones.",
       },
       {
         fr: "Architecture Django REST / Vue.js, environnement Docker, tests et CI.",
@@ -343,8 +346,8 @@ export const experiences: readonly Experience[] = [
     period: { fr: "2021", en: "2021" },
     location: { fr: "Rouen, France", en: "Rouen, France" },
     summary: {
-      fr: "Baccalauréat général de la réforme de 2020, avec les spécialités mathématiques et physique-chimie, en section européenne.",
-      en: "General baccalaureate under the 2020 reform, with mathematics and physics-chemistry as specialties, in the European section.",
+      fr: "Baccalauréat général de la réforme de 2020, avec les spécialités mathématiques et physique-chimie, en section européenne, avec mention très bien.",
+      en: "General baccalaureate under the 2020 reform, with mathematics and physics-chemistry as specialties, in the European section, with highest honours.",
     },
     highlights: [
       {

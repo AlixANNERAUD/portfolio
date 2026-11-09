@@ -14,6 +14,8 @@ Microcontrollers impose tight memory, storage and CPU budgets, and most firmware
 
 The core of the work is therefore to **define reusable contracts** between system services, hardware and programs, rather than to target one board.
 
+Xila started in 2019 as C++ firmware for ESP32 boards. Since 2023 it has been rewritten in Rust as the modular system described here.
+
 ## Architecture
 
 <ArchitectureFlow title="Main layers of Xila" steps={[{ title: 'Drivers', detail: 'Native Linux, browser and hardware targets, assembled in the Platforms repository.' }, { title: 'Subsystems', detail: 'Tasks, VFS, networking, graphics, memory and time, written in Rust.' }, { title: 'Execution boundary', detail: 'Wasmi runtime and guest/host bindings.' }, { title: 'Applications', detail: 'WebAssembly guests such as Calculator and Weather, plus the graphical shell.' }]} />
@@ -38,7 +40,7 @@ Xila is open source under the Apache 2.0 license and documented on [xila.dev](ht
 
 ## Limitations
 
-Xila is under active development, and hardware support varies by target. The native and browser examples are development environments: they do not prove that a given board is supported, and checks run on the Linux host do not prove that the code is correct on ESP32, nRF or STM32 hardware. The Wasm interpreter, the abstraction layers and LVGL all cost memory and CPU time, which has to be measured on the target device.
+Xila is under active development, and hardware support varies by target. The native and browser examples are development environments: they do not prove that a given board is supported, and checks run on the Linux host do not prove that the code is correct on hardware. Today, the only hardware drivers target Espressif chips (the ESP32 family). The Wasm interpreter, the abstraction layers and LVGL all cost memory and CPU time, which has to be measured on the target device.
 
 ## Explore the project
 

@@ -194,8 +194,8 @@ export const projects = [
     id: "dera",
     title: "dera.page",
     description: {
-      en: "A self-hosted Rust platform for INSA Rouen Normandie students, with a calendar, instant messaging and a social network, built with privacy in mind.",
-      fr: "Une plateforme Rust auto-hébergée pour les étudiants de l’INSA Rouen Normandie, avec agenda, messagerie instantanée et réseau social, respectueuse de la vie privée.",
+      en: "Shared services for INSA Rouen Normandie students, run with two friends who wrote most of the code; I contributed to the Genda calendar and its Matrix server.",
+      fr: "Des services pour les étudiants de l’INSA Rouen Normandie, menés avec deux amis qui en ont écrit l’essentiel ; j’ai contribué à Genda et au serveur Matrix.",
     },
     period: { start: "2022", end: "present" },
     group: "personal",
@@ -203,11 +203,12 @@ export const projects = [
     symbol: "d.",
     tags: ["Rust", "Docker"],
     ranking: {
-      technicalDepth: 4.2,
-      originality: 4.1,
-      practicalImpact: 4.3,
-      evidence: 3.8,
+      technicalDepth: 3,
+      originality: 3.5,
+      practicalImpact: 4,
+      evidence: 3.5,
     },
+    team: 3,
     externalUrl: "https://dera.page",
   },
   {
@@ -215,7 +216,7 @@ export const projects = [
     title: "nanobom",
     description: {
       en: "A self-hosted SBOM vulnerability tracker in Rust: matches CI uploads against OSV, flags exploited CVEs (CISA KEV, EPSS) and fails risky builds.",
-      fr: "Un outil Rust autohébergé de suivi des vulnérabilités des SBOM, qui confronte les envois de la CI à OSV, signale les CVE exploitées et bloque les builds.",
+      fr: "Un outil Rust auto-hébergé de suivi des vulnérabilités des SBOM : il confronte la CI à OSV, signale les CVE exploitées et bloque les builds à risque.",
     },
     period: { start: "2026", end: "present" },
     group: "personal",
@@ -315,7 +316,7 @@ export const projects = [
     title: "embedded-i18n",
     description: {
       en: "Compile-time translations for no_std Rust firmware, stored in flash as plain strings, with missing keys caught at build time.",
-      fr: "Des traductions compilées pour micrologiciel Rust no_std, stockées en mémoire flash, et qui détecte les clés manquantes à la compilation.",
+      fr: "Des traductions compilées pour micrologiciel Rust no_std, stockées en mémoire flash ; les clés manquantes sont détectées à la compilation.",
     },
     period: { start: "2026", end: "present" },
     group: "library",

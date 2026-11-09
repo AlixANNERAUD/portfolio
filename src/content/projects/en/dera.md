@@ -1,19 +1,20 @@
 ---
-title: "dera.page: self-hosted student services"
-description: "A privacy-focused platform for INSA Rouen Normandie students that brings a calendar, instant messaging and a social network together, self-hosted in Rust."
+title: "dera.page: shared services for INSA students"
+description: "Shared services for INSA Rouen Normandie students, run with two friends who wrote most of the code. I contributed to the Genda calendar and its Matrix server."
 ---
 
 # dera.page: shared services for INSA Rouen Normandie students
 
 ## Overview
 
-dera.page offers INSA Rouen Normandie students several shared services in one place: a calendar, instant messaging and a social network. The platform is designed to respect its users' privacy.
+dera.page brings several services for INSA Rouen Normandie students together in one place, among them **Genda**, a class calendar written in Rust, and a **Matrix** instant-messaging server. It is a team project with two friends, who wrote most of the code.
 
-## Technical choices
+## My part
 
-- **Self-hosted.** The services run on infrastructure I manage, which keeps control of the data and of deployment.
-- **Written in Rust**, chosen for performance and reliability.
+- **Genda.** A few contributions to the Rust web app and API: calendar display fixes, and endpoints that send the campus Wi-Fi credentials with notifications.
+- **Matrix server.** It is deployed by the Ansible playbooks of my self-hosted infrastructure.
 
 ## Explore the project
 
 - [Visit dera.page](https://dera.page)
+- [Genda source code](https://github.com/INSAgenda)

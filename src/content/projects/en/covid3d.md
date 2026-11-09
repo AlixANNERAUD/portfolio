@@ -7,7 +7,7 @@ description: During the first 2020 lockdown, I printed about 1,000 face shields 
 
 ## Overview
 
-During the first lockdown in 2020, I took part in the Covid3D platform of Le Labo d'Héliox. I made about 1,000 face shields, each consisting of a printed frame and a plastic sheet, for around twenty recipients. Most of them were public institutions, such as medical centers and medico-psychological centers (CMPP).
+During the first lockdown in 2020, I took part in the Covid3D platform of Le Labo d'Héliox. I made about 1,000 face shields, each consisting of a printed frame and a plastic sheet, for around twenty recipients. Most of them were public institutions, such as medical centers and child guidance centers (CMPP, *centres médico-psycho-pédagogiques*).
 
 ## Technical choices
 

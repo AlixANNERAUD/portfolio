@@ -14,6 +14,8 @@ Sur un microcontrôleur, la mémoire, le stockage et le processeur sont comptés
 
 L’essentiel du travail consiste donc à **définir des contrats réutilisables** entre les services du système, le matériel et les programmes, plutôt qu’à viser une carte en particulier.
 
+Xila a commencé en 2019 comme un micrologiciel C++ pour cartes ESP32. Depuis 2023, il est réécrit en Rust sous la forme du système modulaire décrit ici.
+
 ## Architecture
 
 <ArchitectureFlow title="Couches principales de Xila" steps={[{ title: 'Pilotes', detail: 'Cibles Linux natif, navigateur et matériel, assemblées dans le dépôt Platforms.' }, { title: 'Sous-systèmes', detail: 'Tâches, VFS, réseau, graphisme, mémoire et temps, écrits en Rust.' }, { title: 'Frontière d’exécution', detail: 'Moteur Wasmi et liaisons entre invité et hôte.' }, { title: 'Applications', detail: 'Invités WebAssembly comme Calculator et Weather, et le shell graphique.' }]} />
@@ -38,7 +40,7 @@ Xila est un logiciel libre sous licence Apache 2.0, documenté sur [xila.dev](ht
 
 ## Limites
 
-Xila est en développement actif, et la prise en charge du matériel varie selon la cible. Les exemples natif et navigateur sont des environnements de développement : ils ne prouvent pas qu’une carte donnée soit prise en charge, et les vérifications lancées sur l’hôte Linux ne prouvent pas que le code soit correct sur ESP32, nRF ou STM32. L’interpréteur Wasm, les couches d’abstraction et LVGL coûtent de la mémoire et du temps de calcul, à mesurer sur l’appareil visé.
+Xila est en développement actif, et la prise en charge du matériel varie selon la cible. Les exemples natif et navigateur sont des environnements de développement : ils ne prouvent pas qu’une carte donnée soit prise en charge, et les vérifications lancées sur l’hôte Linux ne prouvent pas que le code soit correct sur du matériel. Aujourd’hui, les seuls pilotes matériels ciblent les puces Espressif (famille ESP32). L’interpréteur Wasm, les couches d’abstraction et LVGL coûtent de la mémoire et du temps de calcul, à mesurer sur l’appareil visé.
 
 ## Explorer le projet
 
