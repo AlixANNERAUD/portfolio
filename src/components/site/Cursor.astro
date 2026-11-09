@@ -1,245 +1,314 @@
 ---
 /**
- * Adaptive cursor, after the iPadOS pointer: a small translucent dot follows
- * the mouse and, over a link or a button, morphs into a rounded highlight
- * that takes the shape of the hovered element, with a slight parallax toward
- * the pointer. Large targets (project cards, which have their own hover) only
- * grow the dot.
+ * Hover highlight, after the iPadOS pointer: when a mouse rests on a link or
+ * a button, a rounded translucent highlight takes the shape of the target
+ * (padding, corner radius, a slight parallax toward the pointer), then fades
+ * out when the pointer leaves. Large targets (project cards, which have their
+ * own hover) get nothing. The system pointer always stays visible.
  *
- * Progressive enhancement only: it starts for a fine hovering pointer without
- * `prefers-reduced-motion`; the native cursor is hidden only once it runs, and
- * GSAP is imported dynamically at that point.
+ * Progressive enhancement only: it runs for a fine hovering mouse, never
+ * under reduced motion, forced colors or a high-contrast preference, and
+ * creates its element only on first use. A small requestAnimationFrame loop
+ * eases the shape and stops once it settles.
  */
 ---
 
-<div class="site-cursor" aria-hidden="true"></div>
-
 <script>
-  const cursor = document.querySelector<HTMLElement>(".site-cursor");
-  const canRun =
-    window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
-    !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const queries = {
+    fine: window.matchMedia("(hover: hover) and (pointer: fine)"),
+    reduce: window.matchMedia("(prefers-reduced-motion: reduce)"),
+    forced: window.matchMedia("(forced-colors: active)"),
+    contrast: window.matchMedia("(prefers-contrast: more)"),
+  };
+  const allowed = () =>
+    queries.fine.matches &&
+    !queries.reduce.matches &&
+    !queries.forced.matches &&
+    !queries.contrast.matches;
 
-  if (cursor && canRun) {
-    // GSAP is loaded only here, as its own vendor chunk: touch and
-    // reduced-motion visitors never download it.
-    const { gsap } = await import("gsap");
-    const root = document.documentElement;
-    root.classList.add("has-cursor");
-    // Centered on (x, y). GSAP owns the transform, so the centering lives
-    // here rather than in a CSS `translate` it would reset.
-    gsap.set(cursor, { xPercent: -50, yPercent: -50 });
+  // Targets up to this size get the highlight; larger ones get nothing.
+  const MAX_W = 480;
+  const MAX_H = 96;
+  const PAD_X = 8;
+  const PAD_Y = 4;
+  // Share of the pointer offset from the target's center that the
+  // highlight follows.
+  const PARALLAX = 0.12;
+  // Easing time constant: about 95% of the way in three of them.
+  const TAU = 70;
+  const interactive = "a, button, summary, [role='button'], label[for]";
 
-    const DOT = 18;
-    const DOT_LARGE = 30;
-    // Targets up to this size get the highlight; larger ones only grow the dot.
-    const MAX_W = 480;
-    const MAX_H = 96;
-    const PAD_X = 8;
-    const PAD_Y = 4;
-    // Share of the pointer offset from the target's center that the
-    // highlight follows.
-    const PARALLAX = 0.12;
+  let enabled = allowed();
+  let highlight: HTMLElement | null = null;
+  let pointerX = 0;
+  let pointerY = 0;
+  // The mouse is over this document (not outside the window or in an iframe).
+  let hasPointer = false;
+  let target: HTMLElement | null = null;
+  let snapped = false;
+  // The target's own corner radius, read once per target: a length in px, or
+  // a share of its short side for a percentage.
+  let ownRadius = 0;
+  let radiusIsShare = false;
 
-    const interactive = "a, button, summary, [role='button'], label[for]";
-    const ease = { duration: 0.32, ease: "power3" };
-    const to = {
-      x: gsap.quickTo(cursor, "x", ease),
-      y: gsap.quickTo(cursor, "y", ease),
-      width: gsap.quickTo(cursor, "width", ease),
-      height: gsap.quickTo(cursor, "height", ease),
-    };
-    // quickTo only drives single numeric properties: the corner radius, a
-    // shorthand, gets a regular tween whenever its target value changes.
-    let radius = DOT / 2;
-    const setRadius = (value: number) => {
-      if (Math.abs(value - radius) < 0.5) return;
-      radius = value;
-      gsap.to(cursor, { borderRadius: value, ...ease, overwrite: "auto" });
-    };
+  type Shape = {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    r: number;
+    o: number;
+  };
+  const keys = ["x", "y", "w", "h", "r", "o"] as const;
+  const current: Shape = { x: 0, y: 0, w: 0, h: 0, r: 0, o: 0 };
+  const goal: Shape = { x: 0, y: 0, w: 0, h: 0, r: 0, o: 0 };
 
-    /** The element's corner radius in px (`%` included), plus the padding. */
-    const shapeRadius = (element: HTMLElement, box: DOMRect) => {
-      const value = getComputedStyle(element).borderTopLeftRadius;
-      const own = value.endsWith("%")
-        ? (parseFloat(value) / 100) * Math.min(box.width, box.height)
-        : parseFloat(value) || 6;
-      return own + PAD_Y;
-    };
+  const ensureHighlight = () => {
+    if (!highlight) {
+      highlight = document.createElement("div");
+      highlight.className = "site-cursor-highlight";
+      highlight.setAttribute("aria-hidden", "true");
+      document.body.append(highlight);
+    }
+    return highlight;
+  };
 
-    let pointerX = 0;
-    let pointerY = 0;
-    let target: HTMLElement | null = null;
-    let snapped = false;
+  const render = () => {
+    if (!highlight) return;
+    const { x, y, w, h, r, o } = current;
+    highlight.style.transform = `translate(${x - w / 2}px, ${y - h / 2}px)`;
+    highlight.style.width = `${w}px`;
+    highlight.style.height = `${h}px`;
+    highlight.style.borderRadius = `${r}px`;
+    highlight.style.opacity = String(o);
+  };
 
-    const update = () => {
-      if (target && snapped) {
-        const box = target.getBoundingClientRect();
-        const centerX = box.left + box.width / 2;
-        const centerY = box.top + box.height / 2;
-        const width = box.width + 2 * PAD_X;
-        const height = box.height + 2 * PAD_Y;
-        to.x(centerX + (pointerX - centerX) * PARALLAX);
-        to.y(centerY + (pointerY - centerY) * PARALLAX);
-        to.width(width);
-        to.height(height);
-        // A pill (999px) stays a pill: never more than half the short side.
-        setRadius(
-          Math.min(shapeRadius(target, box), Math.min(width, height) / 2),
-        );
-        return;
-      }
-      const size = target ? DOT_LARGE : DOT;
-      // The dot sits on the pointer at once: easing its position would make
-      // it trail the mouse. Only its size and shape ease.
-      to.x(pointerX, pointerX);
-      to.y(pointerY, pointerY);
-      to.width(size);
-      to.height(size);
-      setRadius(size / 2);
-    };
+  /** The element under the pointer that can take the highlight, if any. */
+  const hitTest = () =>
+    document
+      .elementFromPoint(pointerX, pointerY)
+      ?.closest<HTMLElement>(interactive) ?? null;
 
+  /**
+   * Aim the goal at the target's current box. False when the target has
+   * been removed or hidden (a theme menu item after a choice, for instance).
+   */
+  const measure = () => {
+    if (!target?.isConnected) return false;
+    const box = target.getBoundingClientRect();
+    if (box.width === 0 && box.height === 0) return false;
+    const centerX = box.left + box.width / 2;
+    const centerY = box.top + box.height / 2;
+    goal.x = centerX + (pointerX - centerX) * PARALLAX;
+    goal.y = centerY + (pointerY - centerY) * PARALLAX;
+    goal.w = box.width + 2 * PAD_X;
+    goal.h = box.height + 2 * PAD_Y;
+    const own = radiusIsShare
+      ? ownRadius * Math.min(box.width, box.height)
+      : ownRadius;
+    // A pill (999px) stays a pill: never more than half the short side.
+    goal.r = Math.min(own + PAD_Y, Math.min(goal.w, goal.h) / 2);
+    return true;
+  };
+
+  let frame = 0;
+  let last = 0;
+  const tick = (now: number) => {
+    frame = 0;
     // While snapped, follow the target every frame: it may drift, scale on
     // hover or be pushed away (homepage orbit tiles).
-    let following = false;
-    const follow = (on: boolean) => {
-      if (on === following) return;
-      following = on;
-      if (on) gsap.ticker.add(update);
-      else gsap.ticker.remove(update);
-    };
+    if (snapped && !measure()) {
+      const next = hitTest();
+      setTarget(next === target ? null : next);
+    }
+    const dt = last ? Math.min(now - last, 64) : 16;
+    last = now;
+    const k = 1 - Math.exp(-dt / TAU);
+    let moving = false;
+    let changed = false;
+    for (const key of keys) {
+      const gap = goal[key] - current[key];
+      if (gap === 0) continue;
+      changed = true;
+      const settled = Math.abs(gap) < (key === "o" ? 0.004 : 0.1);
+      current[key] = settled ? goal[key] : current[key] + gap * k;
+      if (!settled) moving = true;
+    }
+    if (changed) render();
+    if (moving || snapped) frame = requestAnimationFrame(tick);
+    else last = 0;
+  };
+  const wake = () => {
+    if (!frame) frame = requestAnimationFrame(tick);
+  };
 
-    const setTarget = (element: HTMLElement | null) => {
-      target = element;
-      if (element) {
-        const box = element.getBoundingClientRect();
-        // A link stretched over a card by a pseudo-element is hovered outside
-        // its own box: highlighting it would jump away from the pointer.
-        const inside =
-          pointerX >= box.left - 4 &&
-          pointerX <= box.right + 4 &&
-          pointerY >= box.top - 4 &&
-          pointerY <= box.bottom + 4;
-        snapped = inside && box.width <= MAX_W && box.height <= MAX_H;
-      } else {
-        snapped = false;
+  function setTarget(element: HTMLElement | null) {
+    if (element !== target && element) {
+      const value = getComputedStyle(element).borderTopLeftRadius;
+      radiusIsShare = value.endsWith("%");
+      ownRadius = radiusIsShare
+        ? parseFloat(value) / 100
+        : parseFloat(value) || 6;
+    }
+    target = element;
+    const wasSnapped = snapped;
+    snapped = false;
+    if (element) {
+      const box = element.getBoundingClientRect();
+      // A link stretched over a card by a pseudo-element is hovered outside
+      // its own box: highlighting it would jump away from the pointer.
+      const inside =
+        pointerX >= box.left - 4 &&
+        pointerX <= box.right + 4 &&
+        pointerY >= box.top - 4 &&
+        pointerY <= box.bottom + 4;
+      snapped =
+        inside && box.width <= MAX_W && box.height <= MAX_H && measure();
+    }
+    if (snapped) {
+      ensureHighlight();
+      // Appearing: grow out of the target's own box instead of gliding in
+      // from wherever the last highlight faded.
+      if (current.o < 0.05) {
+        Object.assign(current, goal, {
+          w: goal.w - 2 * PAD_X,
+          h: goal.h - 2 * PAD_Y,
+          o: 0,
+        });
       }
-      cursor.classList.toggle("is-snapped", snapped);
-      cursor.classList.toggle("is-large", Boolean(element) && !snapped);
-      follow(snapped);
-      update();
-    };
+      goal.o = 1;
+    } else {
+      goal.o = 0;
+    }
+    if (snapped || wasSnapped) wake();
+  }
 
-    /** Show the dot at (x, y) at once: quickTo would glide in from (0, 0). */
-    const appear = (x: number, y: number) => {
-      pointerX = x;
-      pointerY = y;
-      to.x(x, x);
-      to.y(y, y);
-      to.width(DOT, DOT);
-      to.height(DOT, DOT);
-      gsap.set(cursor, { borderRadius: DOT / 2 });
-      radius = DOT / 2;
-      cursor.classList.add("is-visible");
-    };
+  /** Hide at once and forget the target (disabled, or back from bfcache). */
+  const reset = () => {
+    if (frame) cancelAnimationFrame(frame);
+    frame = 0;
+    last = 0;
+    target = null;
+    snapped = false;
+    hasPointer = false;
+    current.o = goal.o = 0;
+    render();
+  };
 
-    window.addEventListener(
-      "pointermove",
-      (event) => {
-        if (event.pointerType !== "mouse") return;
-        if (!cursor.classList.contains("is-visible")) {
-          appear(event.clientX, event.clientY);
-        }
-        pointerX = event.clientX;
-        pointerY = event.clientY;
-        update();
-      },
-      { passive: true },
-    );
+  const sync = () => {
+    enabled = allowed();
+    if (!enabled) reset();
+  };
+  for (const query of Object.values(queries)) {
+    query.addEventListener("change", sync);
+  }
 
-    // Each page is a new document: keep the pointer where it was across a
-    // navigation (a click, then a page load within a few seconds), instead of
-    // waiting for the next mouse move.
-    const STORE = "cursor-position";
-    const MAX_AGE = 5000;
+  document.addEventListener("pointerover", (event) => {
+    if (!enabled) return;
+    // Pen and touch keep the system behaviour, with no highlight.
+    if (event.pointerType !== "mouse") {
+      setTarget(null);
+      return;
+    }
+    // pointerover fires before pointermove: take the position from it.
+    pointerX = event.clientX;
+    pointerY = event.clientY;
+    hasPointer = true;
+    // An iframe is not interactive here: entering one hides the highlight.
+    setTarget((event.target as Element).closest<HTMLElement>(interactive));
+  });
+  window.addEventListener(
+    "pointermove",
+    (event) => {
+      if (!enabled || event.pointerType !== "mouse") return;
+      pointerX = event.clientX;
+      pointerY = event.clientY;
+      hasPointer = true;
+    },
+    { passive: true },
+  );
+  document.addEventListener("pointerdown", (event) => {
+    if (enabled && event.pointerType !== "mouse") setTarget(null);
+  });
+  // Leaving the window, or entering a frame that takes the events.
+  document.addEventListener("pointerout", (event) => {
+    if (!enabled || event.relatedTarget) return;
+    hasPointer = false;
+    setTarget(null);
+  });
+  // The page moves under a still pointer: follow the target, or drop it.
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (!enabled || !hasPointer) return;
+      const next = hitTest();
+      if (next !== target) setTarget(next);
+    },
+    { passive: true },
+  );
+
+  // Each page is a new document: after a click that navigates, keep the
+  // highlight on whatever sits under the pointer instead of waiting for the
+  // next mouse move.
+  const STORE = "cursor-position";
+  const MAX_AGE = 5000;
+  if (enabled) {
     try {
       const saved = JSON.parse(sessionStorage.getItem(STORE) ?? "null");
       if (saved && Date.now() - saved.at < MAX_AGE) {
-        appear(saved.x, saved.y);
-        const under = document.elementFromPoint(saved.x, saved.y);
-        setTarget(under?.closest<HTMLElement>(interactive) ?? null);
+        pointerX = saved.x;
+        pointerY = saved.y;
+        hasPointer = true;
+        setTarget(hitTest());
       }
     } catch {
-      // Storage unavailable: the dot appears on the next mouse move.
+      // Storage unavailable: the highlight waits for the next mouse move.
     }
-    window.addEventListener("pagehide", () => {
-      if (!cursor.classList.contains("is-visible")) return;
-      try {
-        sessionStorage.setItem(
-          STORE,
-          JSON.stringify({ x: pointerX, y: pointerY, at: Date.now() }),
-        );
-      } catch {
-        // Ignore: same fallback as above.
-      }
-    });
-    document.addEventListener("pointerover", (event) => {
-      // pointerover fires before pointermove: take the position from it.
-      pointerX = event.clientX;
-      pointerY = event.clientY;
-      setTarget((event.target as Element).closest<HTMLElement>(interactive));
-    });
-    // The page moves under a still pointer: follow the target, or drop it.
-    window.addEventListener(
-      "scroll",
-      () => {
-        if (!cursor.classList.contains("is-visible")) return;
-        const under = document.elementFromPoint(pointerX, pointerY);
-        const next = under?.closest<HTMLElement>(interactive) ?? null;
-        if (next !== target) setTarget(next);
-        else update();
-      },
-      { passive: true },
-    );
-    root.addEventListener("mouseleave", () => {
-      cursor.classList.remove("is-visible");
-      setTarget(null);
-    });
   }
+  window.addEventListener("pagehide", () => {
+    if (!enabled || !hasPointer) return;
+    try {
+      sessionStorage.setItem(
+        STORE,
+        JSON.stringify({ x: pointerX, y: pointerY, at: Date.now() }),
+      );
+    } catch {
+      // Ignore: same fallback as above.
+    }
+  });
+  // Back from the back-forward cache: the pointer may be anywhere.
+  window.addEventListener("pageshow", (event) => {
+    if (!event.persisted) return;
+    reset();
+    sync();
+  });
 </script>
 
 <style is:global>
-  html.has-cursor,
-  html.has-cursor * {
-    cursor: none !important;
-  }
-</style>
-
-<style>
-  .site-cursor {
+  /*
+   * Created by the script on first use, so global. A faint fill keeps the
+   * target's text legible; two hairlines, one in the text color and one in
+   * the page color, keep the outline visible on the page and on the dark
+   * category panels in both themes.
+   */
+  .site-cursor-highlight {
     position: fixed;
     top: 0;
     left: 0;
     z-index: 2147483647;
-    /* GSAP drives x, y (centered), width, height and the radius. */
-    background: color-mix(in oklch, var(--color-text) 38%, transparent);
+    box-sizing: border-box;
+    border: 1px solid color-mix(in oklch, var(--color-text) 45%, transparent);
+    background: color-mix(in oklch, var(--color-text) 8%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in oklch, var(--color-bg) 60%, transparent);
     opacity: 0;
     pointer-events: none;
-    transition:
-      opacity var(--dur-base) var(--ease-out),
-      background-color var(--dur-base) var(--ease-out);
   }
 
-  .site-cursor.is-visible {
-    opacity: 1;
-  }
-
-  /* The highlight sits over the target: a light veil that keeps it legible. */
-  .site-cursor.is-snapped {
-    background: color-mix(in oklch, var(--color-text) 10%, transparent);
-  }
-
-  .site-cursor.is-large {
-    background: color-mix(in oklch, var(--color-text) 22%, transparent);
+  @media (prefers-reduced-motion: reduce),
+    (forced-colors: active),
+    (prefers-contrast: more) {
+    .site-cursor-highlight {
+      display: none;
+    }
   }
 </style>
