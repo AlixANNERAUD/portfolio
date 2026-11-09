@@ -44,7 +44,12 @@ export function periodParts(
 }
 
 export type CountKey =
-  "project" | "role" | "milestone" | "earlierRole" | "earlierMilestone";
+  | "project"
+  | "role"
+  | "milestone"
+  | "earlierRole"
+  | "earlierMilestone"
+  | "earlierProject";
 
 /** `1 projet`, `12 projets`: the noun follows the locale's plural rules. */
 export function formatCount(n: number, key: CountKey, lang: Locale): string {
