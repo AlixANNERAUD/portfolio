@@ -24,6 +24,8 @@ export interface Props {
   jsonLd?: JsonLdNode[];
   /** Breadcrumb after Home, as English paths (see SiteHead). */
   trail?: readonly { name: string; path: string }[];
+  /** Preload the display italic: set by pages whose hero has an accent. */
+  preloadItalic?: boolean;
   /** Locale switch target, for pages without a counterpart in the other locale. */
   localeHref?: string;
 }
