@@ -8,6 +8,9 @@ import type { Locale } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
 import { templateParts } from "../../lib/format.ts";
 import {
+  DESKTOP_FIELD,
+  MOBILE_DRIFT,
+  MOBILE_FIELD,
   buildOrbitNodes,
   layoutOrbit,
   orbitCategories,
@@ -47,6 +50,8 @@ const position = (i: number) => {
   return [
     `--x:${p.x}%`,
     `--y:${p.y}%`,
+    `--tx:${p.tx}%`,
+    `--ty:${p.ty}%`,
     `--mx:${p.mx}%`,
     `--my:${p.my}%`,
     `--dx:${p.dx}px`,
@@ -58,7 +63,16 @@ const position = (i: number) => {
 };
 ---
 
-<section class="orbit" aria-labelledby="home-title" data-orbit>
+<section
+  class="orbit"
+  aria-labelledby="home-title"
+  data-orbit
+  style={[
+    `--field-min:${DESKTOP_FIELD.height}px`,
+    `--narrow-field-min:${MOBILE_FIELD.height}px`,
+    `--drift-narrow:${MOBILE_DRIFT}`,
+  ].join(";")}
+>
   <div class="orbit-copy-wrap container">
     <div class="orbit-copy">
       <Eyebrow as="span" class="orbit-eyebrow" aria-hidden="true">
@@ -230,7 +244,6 @@ const position = (i: number) => {
     const caption = root.querySelector<HTMLElement>(".orbit-caption")!;
     const [capLabel, capText] = caption.children as unknown as HTMLElement[];
     const chips = root.querySelector<HTMLElement>(".orbit-chips")!;
-    const hint = root.querySelector<HTMLElement>(".orbit-hint")!;
     const SVG = "http://www.w3.org/2000/svg";
     const nodes: Node[] = [];
     const byId = new Map<string, Node>();
@@ -269,13 +282,12 @@ const position = (i: number) => {
     const syncMedia = () => {
       motion = !reduce.matches;
       push = motion && fine.matches;
-      hint.hidden = !fine.matches;
       if (!push) settle();
     };
     reduce.addEventListener("change", syncMedia);
     fine.addEventListener("change", syncMedia);
-    chips.hidden = false;
-    hint.hidden = !fine.matches;
+    // The chips and the hint are shown by CSS (html.js) from the first
+    // frame, so nothing shifts when this script runs.
     root.dataset.ready = "";
 
     /* Geometry: one read pass at init and on resize. */
@@ -289,17 +301,23 @@ const position = (i: number) => {
      * font makes tiles wider, and one near an edge would leave the screen
      * (and drag its connectors with it). Shift such a node back inside.
      */
-    const EDGE = 8;
+    const EDGE = 4;
     const fit = () => {
       for (const n of nodes) n.el.style.marginLeft = "";
-      const right = document.documentElement.clientWidth - EDGE;
+      const page = document.documentElement.clientWidth;
+      const drift =
+        parseFloat(getComputedStyle(root).getPropertyValue("--drift")) || 1;
+      // Untransformed sizes around the anchor: neither the entrance scale
+      // nor the drift skews them, and the drift's reach is kept clear.
       const shifts = nodes.map((n) => {
-        const r = n.tile.getBoundingClientRect();
-        if (!r.width) return 0;
-        const left = r.left - n.ox;
-        if (left < EDGE) return EDGE - left;
-        if (left + r.width > right) {
-          return Math.max(right - left - r.width, EDGE - left);
+        const width = n.tile.offsetWidth;
+        if (!width) return 0;
+        const dx = parseFloat(n.el.style.getPropertyValue("--dx")) || 0;
+        const edge = EDGE + dx * drift;
+        const left = n.el.getBoundingClientRect().left - n.ox - width / 2;
+        if (left < edge) return edge - left;
+        if (left + width > page - edge) {
+          return Math.max(page - edge - left - width, edge - left);
         }
         return 0;
       });
@@ -326,6 +344,15 @@ const position = (i: number) => {
     new ResizeObserver(measure).observe(field);
     // Web fonts change tile widths without resizing the field.
     document.fonts?.ready.then(measure);
+    // The composition follows the width and hover (narrow and touch screens
+    // hide some tiles): measure again, and redraw without hidden tiles.
+    matchMedia("(max-width: 959px), (hover: none)").addEventListener(
+      "change",
+      () => {
+        measure();
+        apply();
+      },
+    );
 
     /* Physics: spring back to rest, pushed away from the pointer. */
     const STEP = 1 / 120;
@@ -547,11 +574,11 @@ const position = (i: number) => {
         n.el.toggleAttribute("data-hold", lit.has(n) || match(n));
       }
       pairs = [];
-      if (active) {
+      if (active && shown(active)) {
         for (const r of relatedOf(active)) pairs.push([active, r]);
       } else if (filter !== "all") {
         for (const a of nodes) {
-          if (!match(a)) continue;
+          if (!match(a) || !shown(a)) continue;
           for (const r of relatedOf(a)) {
             // Each related pair once.
             if (match(r) && !pairs.some(([x, y]) => x === r && y === a)) {
@@ -563,8 +590,12 @@ const position = (i: number) => {
       measureTiles();
       drawLines();
     };
+    /** Whether a tile is rendered: narrow and touch screens hide some. */
+    const shown = (n: Node) => n.el.getClientRects().length > 0;
     const relatedOf = (n: Node) =>
-      n.related.map((id) => byId.get(id)).filter((r): r is Node => !!r);
+      n.related
+        .map((id) => byId.get(id))
+        .filter((r): r is Node => !!r && shown(r));
 
     const nodeOf = (target: EventTarget | null) =>
       target instanceof Element
@@ -639,7 +670,8 @@ const position = (i: number) => {
   .orbit {
     position: relative;
     display: grid;
-    min-height: calc(100svh - var(--header-h));
+    /* At least the reference field the layout is computed for. */
+    min-height: max(var(--field-min), calc(100svh - var(--header-h)));
     isolation: isolate;
     overflow: clip;
     color: var(--color-text);
@@ -712,6 +744,19 @@ const position = (i: number) => {
   .orbit-hint[hidden] {
     display: none;
   }
+  /*
+   * With scripts (html.js, set before paint in SiteHead), the chips take
+   * their place in the first frame instead of pushing the field down when
+   * the module script runs. The hint is about a mouse: fine pointers only.
+   */
+  :global(html.js) .orbit-chips[hidden] {
+    display: flex;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    :global(html.js) .orbit-hint[hidden] {
+      display: block;
+    }
+  }
   .orbit-chips button {
     display: inline-flex;
     align-items: center;
@@ -781,7 +826,7 @@ const position = (i: number) => {
     background: radial-gradient(var(--color-border) 1px, transparent 1.5px) 0
       0 / 24px 24px;
     mask-image: radial-gradient(
-      ellipse 50% 62% at 72% 50%,
+      ellipse 50% 62% at 76% 50%,
       #000 35%,
       transparent 100%
     );
@@ -803,7 +848,7 @@ const position = (i: number) => {
   /* Orbits through the organizations and around the core. */
   .orbit-ring {
     position: absolute;
-    left: 52%;
+    left: 56%;
     top: 20%;
     width: 40%;
     height: 60%;
@@ -811,7 +856,7 @@ const position = (i: number) => {
     border-radius: 50%;
   }
   .orbit-ring--inner {
-    left: 63%;
+    left: 67%;
     top: 34%;
     width: 18%;
     height: 32%;
@@ -1059,6 +1104,12 @@ const position = (i: number) => {
       translate: 0 105%;
     }
   }
+  /* The tagline is painted from the first frame (it is the LCP element). */
+  @keyframes orbit-lift {
+    from {
+      translate: 0 12px;
+    }
+  }
   @keyframes orbit-fade {
     from {
       opacity: 0;
@@ -1071,15 +1122,19 @@ const position = (i: number) => {
       scale: 0.6;
     }
   }
+  /* Scaled down on narrow screens, where the tiles sit closer. */
   @keyframes orbit-drift {
     0% {
-      translate: calc(var(--dx) * -1) calc(var(--dy) * -1);
+      translate: calc(var(--dx) * var(--drift, 1) * -1)
+        calc(var(--dy) * var(--drift, 1) * -1);
     }
     50% {
-      translate: var(--dx) calc(var(--dy) * -1);
+      translate: calc(var(--dx) * var(--drift, 1))
+        calc(var(--dy) * var(--drift, 1) * -1);
     }
     100% {
-      translate: var(--dx) var(--dy);
+      translate: calc(var(--dx) * var(--drift, 1))
+        calc(var(--dy) * var(--drift, 1));
     }
   }
 
@@ -1091,7 +1146,7 @@ const position = (i: number) => {
       animation-delay: 160ms;
     }
     .orbit-tagline {
-      animation: orbit-fade var(--dur-slow) var(--ease-out) 320ms backwards;
+      animation: orbit-lift var(--dur-slow) var(--ease-out) 320ms backwards;
     }
     .orbit-chips,
     .orbit-hint {
@@ -1118,19 +1173,61 @@ const position = (i: number) => {
     }
   }
 
-  /* Tablet: the same composition with a narrower copy column. */
-  @media (max-width: 959px) {
-    .orbit-copy {
-      max-width: 52%;
+  /*
+   * Narrow and touch screens: the narrow set of tiles, every name always
+   * visible, since nothing may depend on hover. home-orbit.ts lays these
+   * tiles out at these sizes (footprint, "touch" and "mobile").
+   */
+  @media (max-width: 959px), (hover: none) {
+    .orbit-node[data-extra] {
+      display: none;
     }
-    .orbit-title {
-      font-size: var(--step-5);
+    .orbit-tile--org {
+      min-height: var(--control-size);
+    }
+    .orbit-tile--org .orbit-label {
+      max-width: 12ch;
+      /* A long word widens the tile instead of spilling out of it. */
+      min-width: min-content;
+      white-space: normal;
+    }
+    .orbit-tile--project {
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .orbit-tile--project .orbit-label,
+    .orbit-node[data-core] .orbit-label {
+      position: static;
+      pointer-events: auto;
+      max-width: 12ch;
+      min-width: min-content;
+      padding: 0 0.25rem;
+      font-size: var(--step--2);
+      text-align: center;
+      white-space: normal;
+      clip-path: none;
+    }
+    .orbit-node[data-core] .orbit-glyph {
+      width: 3.5rem;
+      height: 3.5rem;
     }
   }
 
-  /* Phones: the copy, then the field as its own box. */
-  @media (max-width: 719px) {
+  /* Touch screens, 960px and wider: the desktop composition. */
+  @media (min-width: 960px) and (hover: none) {
+    .orbit-node {
+      left: var(--tx);
+      top: var(--ty);
+    }
+  }
+
+  /*
+   * Narrow screens: the copy, then the field as its own box. Below 960px
+   * the copy column leaves too little room beside it for the tiles.
+   */
+  @media (max-width: 959px) {
     .orbit {
+      --drift: var(--drift-narrow);
       display: block;
       min-height: 0;
     }
@@ -1143,27 +1240,17 @@ const position = (i: number) => {
     .orbit-title {
       font-size: var(--step-display-narrow);
     }
-    .orbit-chips {
-      flex-wrap: nowrap;
-      margin-inline: calc(var(--page-inline) * -1);
-      padding-inline: var(--page-inline);
-      overflow-x: auto;
-      scroll-snap-type: x proximity;
-      scroll-padding-inline: var(--page-inline);
-      scrollbar-width: none;
-    }
-    .orbit-chips button {
-      flex: none;
-      min-height: var(--control-size);
-      scroll-snap-align: start;
-    }
     .orbit-field {
       position: relative;
       inset: auto;
     }
     .orbit-stage {
       position: relative;
-      height: clamp(440px, 64svh, 540px);
+      /* At least the reference field the layout is computed for. */
+      height: clamp(var(--narrow-field-min), 64svh, 560px);
+      /* Tablets: the composition keeps its proportions instead of spreading. */
+      max-width: 36rem;
+      margin-inline: auto;
     }
     .orbit-stage::before {
       mask-image: radial-gradient(
@@ -1188,36 +1275,6 @@ const position = (i: number) => {
       left: var(--mx);
       top: var(--my);
     }
-    .orbit-node[data-extra] {
-      display: none;
-    }
-    .orbit-tile--org {
-      min-height: var(--control-size);
-    }
-    .orbit-tile--org .orbit-label {
-      max-width: 12ch;
-      white-space: normal;
-    }
-    /* Labels are always visible: nothing depends on hover. */
-    .orbit-tile--project {
-      flex-direction: column;
-      gap: 0.25rem;
-    }
-    .orbit-tile--project .orbit-label,
-    .orbit-node[data-core] .orbit-label {
-      position: static;
-      pointer-events: auto;
-      max-width: 12ch;
-      padding: 0 0.25rem;
-      font-size: var(--step--2);
-      text-align: center;
-      white-space: normal;
-      clip-path: none;
-    }
-    .orbit-node[data-core] .orbit-glyph {
-      width: 3.5rem;
-      height: 3.5rem;
-    }
     /* Touch taps navigate: the caption only shows for keyboard focus. */
     .orbit-caption {
       position: static;
@@ -1227,6 +1284,24 @@ const position = (i: number) => {
     }
     .orbit-caption:not([data-on]) {
       display: none;
+    }
+  }
+
+  /* Phones: the chips scroll in one row. */
+  @media (max-width: 719px) {
+    .orbit-chips {
+      flex-wrap: nowrap;
+      margin-inline: calc(var(--page-inline) * -1);
+      padding-inline: var(--page-inline);
+      overflow-x: auto;
+      scroll-snap-type: x proximity;
+      scroll-padding-inline: var(--page-inline);
+      scrollbar-width: none;
+    }
+    .orbit-chips button {
+      flex: none;
+      min-height: var(--control-size);
+      scroll-snap-align: start;
     }
   }
 </style>
