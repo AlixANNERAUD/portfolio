@@ -93,7 +93,7 @@ export const skillDomains: readonly SkillDomain[] = [
       "Java",
       "SQL",
       "PostgreSQL",
-      "Rust / Actix",
+      "Rust / axum",
       "NumPy",
     ],
     examples: [
@@ -107,10 +107,10 @@ export const skillDomains: readonly SkillDomain[] = [
       },
       {
         kind: "project",
-        projectId: "dera",
+        projectId: "nanobom",
         detail: {
-          fr: "Plateforme étudiante en Rust.",
-          en: "Student platform built with Rust.",
+          fr: "Serveur Rust avec axum, SQLite ou PostgreSQL, API d’envoi et webhooks.",
+          en: "Rust server with axum, SQLite or PostgreSQL, an upload API and webhooks.",
         },
       },
       {

@@ -467,10 +467,12 @@ for (const [engineName, engine] of [
           "none",
           path + " no drift under reduced motion",
         );
-        await page.locator("[data-id=dera] a").focus();
+        await page.locator("[data-id=mini-train-store] a").focus();
         assert.equal(
           await page.locator(".orbit-caption-text").innerText(),
-          await page.locator("[data-id=dera] a").getAttribute("data-caption"),
+          await page
+            .locator("[data-id=mini-train-store] a")
+            .getAttribute("data-caption"),
           path + " caption is instant under reduced motion",
         );
         checked++;

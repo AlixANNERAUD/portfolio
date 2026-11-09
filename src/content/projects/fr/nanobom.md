@@ -1,13 +1,13 @@
 ---
 title: "nanobom : suivi des vulnérabilités des SBOM"
-description: "Outil autohébergé de suivi des vulnérabilités des SBOM en un conteneur : envois de la CI confrontés à OSV, failles exploitées en tête, builds risqués bloqués."
+description: "Outil auto-hébergé de suivi des vulnérabilités des SBOM en un conteneur : envois de la CI confrontés à OSV, failles exploitées en tête, builds risqués bloqués."
 ---
 
 # nanobom : savoir ce que l’on livre, et ce qui est vraiment exploité
 
 ## Présentation
 
-`nanobom` est un outil léger et autohébergé de suivi des vulnérabilités des SBOM. La CI de chaque projet envoie un SBOM CycloneDX ou SPDX ; nanobom confronte chaque composant à [OSV](https://osv.dev) après chaque envoi et chaque nuit, garde l’historique de chaque vulnérabilité, montre celles qui sont réellement exploitées et peut faire échouer le pipeline avant qu’un build vulnérable ne soit livré. Il est publié sous la forme d’un seul conteneur, pour amd64 et arm64, avec un fichier SQLite ou PostgreSQL, sous licence Apache-2.0.
+`nanobom` est un outil léger et auto-hébergé de suivi des vulnérabilités des SBOM. La CI de chaque projet envoie un SBOM CycloneDX ou SPDX ; nanobom confronte chaque composant à [OSV](https://osv.dev) après chaque envoi et chaque nuit, garde l’historique de chaque vulnérabilité, montre celles qui sont réellement exploitées et peut faire échouer le pipeline avant qu’un build vulnérable ne soit livré. Il est publié sous la forme d’un seul conteneur, pour amd64 et arm64, avec un fichier SQLite ou PostgreSQL, sous licence Apache-2.0. La version 0.1.0, la première, est sortie en novembre 2026.
 
 L’analyse de composition logicielle passe d’habitude par une plateforme lourde : OWASP Dependency-Track repose sur une pile Java, un serveur de base de données et un miroir des bases de vulnérabilités. nanobom s’adresse aux petites équipes et aux homelabs qui veulent les réponses sans l’exploitation qui va avec.
 

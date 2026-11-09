@@ -7,7 +7,7 @@ description: "A self-hosted SBOM vulnerability tracker in one container: CI uplo
 
 ## Overview
 
-`nanobom` is a lightweight, self-hosted SBOM vulnerability tracker. Each project's CI uploads a CycloneDX or SPDX SBOM; nanobom checks every component against [OSV](https://osv.dev) after each upload and every night, keeps the history of each vulnerability, shows which ones are actually exploited, and can fail the pipeline before a vulnerable build ships. It is published as one container, for amd64 and arm64, with a SQLite file or PostgreSQL, under the Apache-2.0 license.
+`nanobom` is a lightweight, self-hosted SBOM vulnerability tracker. Each project's CI uploads a CycloneDX or SPDX SBOM; nanobom checks every component against [OSV](https://osv.dev) after each upload and every night, keeps the history of each vulnerability, shows which ones are actually exploited, and can fail the pipeline before a vulnerable build ships. It is published as one container, for amd64 and arm64, with a SQLite file or PostgreSQL, under the Apache-2.0 license. Version 0.1.0, the first release, came out in November 2026.
 
 Software composition analysis usually means a heavy platform: OWASP Dependency-Track runs on a Java stack with a database server and a mirror of the vulnerability databases. nanobom is for small teams and homelabs that want the answers without the operations.
 
