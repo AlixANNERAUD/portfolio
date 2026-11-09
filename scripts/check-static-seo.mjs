@@ -80,8 +80,9 @@ const required = [
 const failed = [];
 
 /**
- * Every page preloads exactly one font file, and it must be a Newsreader face
- * declared in the same document; other families load on demand.
+ * Every page preloads the upright Newsreader face declared in the same
+ * document, plus the italic face exactly when its H1 has an italic accent
+ * (the hero accent); other families load on demand.
  */
 function checkFontPreload(file, html) {
   const headEnd = html.indexOf("</head>");
@@ -93,22 +94,32 @@ function checkFontPreload(file, html) {
   const fontPreloads = [...head.matchAll(/<link\b[^>]*>/g)]
     .map(([tag]) => tag)
     .filter((tag) => /\brel="preload"/.test(tag) && /\bas="font"/.test(tag));
-  if (fontPreloads.length !== 1) {
+  const faces = [...html.matchAll(/@font-face\s*\{([^}]*)\}/g)].map(
+    ([, body]) => body,
+  );
+  const styles = [];
+  for (const tag of fontPreloads) {
+    const href = tag.match(/\bhref="([^"]+)"/)?.[1];
+    const face = faces.find(
+      (body) => href && body.includes('url("' + href + '")'),
+    );
+    const family = face?.match(/font-family:\s*"?([^;"]+)/)?.[1] ?? "";
+    if (!family.startsWith("Newsreader")) {
+      failed.push(
+        file + ": preloaded font " + href + " is not a Newsreader face",
+      );
+    }
+    styles.push(face?.match(/font-style:\s*(\w+)/)?.[1] ?? "normal");
+  }
+  const h1 = html.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/)?.[1] ?? "";
+  const expected = /<em\b/.test(h1) ? ["normal", "italic"] : ["normal"];
+  if (styles.sort().join() !== expected.sort().join()) {
     failed.push(
       file +
-        ": expected exactly one font preload, found " +
-        fontPreloads.length,
-    );
-    return;
-  }
-  const href = fontPreloads[0].match(/\bhref="([^"]+)"/)?.[1];
-  const face = [...html.matchAll(/@font-face\s*\{([^}]*)\}/g)]
-    .map(([, body]) => body)
-    .find((body) => href && body.includes('url("' + href + '")'));
-  const family = face?.match(/font-family:\s*"?([^;"]+)/)?.[1] ?? "";
-  if (!family.startsWith("Newsreader")) {
-    failed.push(
-      file + ": preloaded font " + href + " is not a Newsreader face",
+        ": expected font preloads " +
+        expected.join(" + ") +
+        ", found " +
+        (styles.join(" + ") || "none"),
     );
   }
 }

@@ -83,18 +83,33 @@ export default defineConfig({
       },
     }),
   ],
-  // Fontsource serves Newsreader as one variable file per style, so the
-  // emitted @font-face declares the file's full 200-800 weight axis. Astro
-  // only has fallback metrics for generic families: the metric-adjusted
-  // fallback is "Times New Roman" (from `serif`); Georgia stays unadjusted.
+  // Self-hosted latin files instanced from Fontsource's variable fonts by
+  // `npm run fonts` (scripts/generate-fonts.mjs): Fontsource only serves the
+  // full axes, about twice the size. Each declared weight range matches the
+  // range kept in its file; Newsreader keeps its optical size axis, which
+  // the browser sets from the font size. Astro only has fallback metrics for
+  // generic families: the metric-adjusted fallback is "Times New Roman"
+  // (from `serif`); Georgia stays unadjusted.
   fonts: [
     {
-      provider: fontProviders.fontsource(),
+      provider: fontProviders.local(),
       name: "Newsreader",
       cssVariable: "--font-display",
-      weights: ["400 700"],
-      styles: ["normal", "italic"],
-      subsets: ["latin"],
+      options: {
+        variants: [
+          {
+            src: ["./src/assets/fonts/newsreader-latin-normal.woff2"],
+            weight: "400 600",
+            style: "normal",
+          },
+          {
+            // Only the hero accent is italic; pages with one preload it.
+            src: ["./src/assets/fonts/newsreader-latin-italic.woff2"],
+            weight: "400",
+            style: "italic",
+          },
+        ],
+      },
       fallbacks: ["Georgia", "serif"],
       // Preloaded, so it is almost always ready for the first paint. If not,
       // keep the fallback for this view rather than swapping: the metric
@@ -104,12 +119,18 @@ export default defineConfig({
       display: "optional",
     },
     {
-      provider: fontProviders.fontsource(),
+      provider: fontProviders.local(),
       name: "JetBrains Mono",
       cssVariable: "--font-mono",
-      weights: ["400 600"],
-      styles: ["normal"],
-      subsets: ["latin"],
+      options: {
+        variants: [
+          {
+            src: ["./src/assets/fonts/jetbrains-mono-latin-normal.woff2"],
+            weight: "400 700",
+            style: "normal",
+          },
+        ],
+      },
       fallbacks: ["ui-monospace", "monospace"],
     },
   ],

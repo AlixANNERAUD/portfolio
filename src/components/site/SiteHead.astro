@@ -28,6 +28,8 @@ export interface Props {
    * Not emitted on the home page nor on a noindex page.
    */
   trail?: readonly { name: string; path: string }[];
+  /** Preload the display italic: set by pages whose hero has an accent. */
+  preloadItalic?: boolean;
 }
 const {
   lang,
@@ -39,6 +41,7 @@ const {
   ogType = "website",
   jsonLd = [],
   trail,
+  preloadItalic = false,
 } = Astro.props;
 const t = useTranslations(lang);
 if (!home && !title) throw new Error(`Missing page title for ${path}`);
@@ -87,7 +90,10 @@ const graph =
 />
 <Font
   cssVariable="--font-display"
-  preload={[{ style: "normal", subset: "latin" }]}
+  preload={[
+    { style: "normal" },
+    ...(preloadItalic ? [{ style: "italic" as const }] : []),
+  ]}
 />
 <Font cssVariable="--font-mono" />
 <title>{titleText}</title>
