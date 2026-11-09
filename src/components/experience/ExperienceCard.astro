@@ -217,6 +217,12 @@ const tags = entry.technologies.map((tag) => localize(tag, lang));
     line-height: var(--leading-snug);
     letter-spacing: var(--tracking-heading);
     text-wrap: balance;
+    /*
+     * Links such as the homepage tiles target the role (#<id>-title): keep
+     * the card's top padding and the company line above it in view too.
+     * Without JavaScript only; ExperienceTimeline then scrolls to the card.
+     */
+    scroll-margin-top: 4rem;
   }
   .career-current-label {
     display: inline-flex;
@@ -275,6 +281,17 @@ const tags = entry.technologies.map((tag) => localize(tag, lang));
   }
   .career-highlights li::marker {
     color: var(--color-accent);
+  }
+  /*
+   * Forced colors (Windows High Contrast) would repaint the plate with the
+   * system background and hide white or dark artwork: the plate keeps its
+   * own colors, outlined in the system text color.
+   */
+  @media (forced-colors: active) {
+    .career-company-mark {
+      border-color: CanvasText;
+      forced-color-adjust: none;
+    }
   }
   @media (max-width: 680px) {
     .career-period {

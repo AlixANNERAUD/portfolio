@@ -12,6 +12,11 @@
 
 html {
   scroll-behavior: smooth;
+  /*
+   * Keeps anchored targets and keyboard-focused elements clear of the
+   * sticky header, whatever its height (see --scroll-offset in tokens.css).
+   */
+  scroll-padding-top: var(--scroll-offset);
 }
 
 html,
@@ -46,11 +51,6 @@ svg {
 :where(a, button, summary, input, select, [tabindex]):focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: 2px;
-}
-
-/* Keep anchored targets clear of the sticky header. */
-[id] {
-  scroll-margin-top: calc(var(--header-h) + var(--space-s));
 }
 
 /* Shell */
