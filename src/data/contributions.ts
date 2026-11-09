@@ -3,7 +3,8 @@ import type { Localized } from "./types.ts";
 /**
  * Merged pull requests to other people's open-source projects, newest
  * project first. Only merged work is listed, each with links to the pull
- * requests themselves so every line can be checked.
+ * requests themselves so every line can be checked. The About page shows
+ * the first `RECENT_CONTRIBUTIONS` and folds the rest behind a toggle.
  */
 export interface Contribution {
   project: string;
@@ -14,6 +15,9 @@ export interface Contribution {
   pulls: readonly { number: number; url: string }[];
 }
 
+/** Projects shown before the "show earlier" toggle on the About page. */
+export const RECENT_CONTRIBUTIONS = 4;
+
 const pull = (repository: string, number: number) => ({
   number,
   url: `https://github.com/${repository}/pull/${number}`,
@@ -21,19 +25,78 @@ const pull = (repository: string, number: number) => ({
 
 export const contributions = [
   {
+    project: "mbrman",
+    repository: "rust-disk-partition-management/mbrman",
+    period: "2026",
+    summary: {
+      en: "no_std support for this MBR partition table crate, and hand-written encoding of the boot records in place of the unmaintained bincode dependency.",
+      fr: "La prise en charge de no_std pour cette crate de tables de partitions MBR, et un encodage écrit à la main des enregistrements d’amorçage à la place de la dépendance bincode, qui n’est plus maintenue.",
+    },
+    pulls: [
+      pull("rust-disk-partition-management/mbrman", 41),
+      pull("rust-disk-partition-management/mbrman", 40),
+    ],
+  },
+  {
+    project: "LVGL",
+    repository: "lvgl/lvgl",
+    period: "2026",
+    summary: {
+      en: "A fix to the dropdown widget, whose open list kept reading its options after they were freed or replaced.",
+      fr: "Une correction du widget de liste déroulante, dont la liste ouverte continuait de lire ses options après leur libération ou leur remplacement.",
+    },
+    pulls: [pull("lvgl/lvgl", 10898)],
+  },
+  {
+    project: "progress-bar",
+    repository: "Mubelotix/progress-bar",
+    period: "2026",
+    summary: {
+      en: "Support for the NO_COLOR convention, and fixes to the estimated time left and to a panic on non-ASCII names.",
+      fr: "La prise en charge de la convention NO_COLOR, et des corrections du temps restant estimé et d’une panique sur les noms non ASCII.",
+    },
+    pulls: [
+      pull("Mubelotix/progress-bar", 16),
+      pull("Mubelotix/progress-bar", 15),
+    ],
+  },
+  {
     project: "smolvm",
     repository: "smol-machines/smolvm",
     period: "2026",
     summary: {
-      en: "CPU and memory stats for running machines, published ports that change without a restart, chosen UDP destinations, and additions to the Rust SDK.",
-      fr: "Statistiques CPU et mémoire des machines en cours d’exécution, ports publiés modifiables sans redémarrage, destinations UDP choisies, et ajouts au SDK Rust.",
+      en: "CPU and memory stats for running machines, with macOS CPU time fixed, published ports that change without a restart, chosen UDP destinations, and additions to the Rust SDK.",
+      fr: "Statistiques CPU et mémoire des machines en cours d’exécution, avec un temps CPU corrigé sur macOS, ports publiés modifiables sans redémarrage, destinations UDP choisies, et ajouts au SDK Rust.",
     },
     pulls: [
       pull("smol-machines/smolvm", 1808),
+      pull("smol-machines/smolvm", 1807),
       pull("smol-machines/smolvm", 1682),
       pull("smol-machines/smolvm", 1941),
       pull("smol-machines/smol", 315),
+      pull("smol-machines/smol", 316),
+      pull("smol-machines/smol", 317),
     ],
+  },
+  {
+    project: "tar-no-std",
+    repository: "phip1611/tar-no-std",
+    period: "2026",
+    summary: {
+      en: "Modification times read as octal, as the tar format defines them, and header parsing made reusable for a streaming reader.",
+      fr: "Des dates de modification lues en octal, comme le définit le format tar, et une analyse des en-têtes réutilisable par un lecteur en flux.",
+    },
+    pulls: [pull("phip1611/tar-no-std", 72), pull("phip1611/tar-no-std", 74)],
+  },
+  {
+    project: "opus-rs",
+    repository: "restsend/opus-rs",
+    period: "2026",
+    summary: {
+      en: "Builds of this pure-Rust Opus codec for microcontrollers: targets without compare-and-swap, and a decoder built in place rather than on the stack.",
+      fr: "La compilation de ce codec Opus en Rust pour microcontrôleurs, sur les cibles sans compare-and-swap, et un décodeur construit en place plutôt que sur la pile.",
+    },
+    pulls: [pull("restsend/opus-rs", 64), pull("restsend/opus-rs", 65)],
   },
   {
     project: "WAMR",

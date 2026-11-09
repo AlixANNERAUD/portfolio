@@ -1,12 +1,20 @@
 ---
+import { ChevronDown } from "@lucide/astro";
 import SectionHeading from "../ui/SectionHeading.astro";
-import { contributions } from "../../data/contributions.ts";
+import {
+  RECENT_CONTRIBUTIONS,
+  contributions,
+} from "../../data/contributions.ts";
 import type { Locale } from "../../i18n/locales.ts";
 import { useTranslations } from "../../i18n/ui.ts";
+import { formatCount } from "../../lib/format.ts";
 
 /**
  * Merged contributions to other open-source projects, one row each: the
  * project and its years, what changed, and links to the pull requests.
+ * The most recent projects come first; earlier ones sit behind a toggle,
+ * like the experience timeline. Without JavaScript every row stays visible
+ * and the toggle stays hidden.
  */
 interface Props {
   lang: Locale;
@@ -14,6 +22,18 @@ interface Props {
 
 const { lang } = Astro.props;
 const t = useTranslations(lang);
+
+const recent = contributions.slice(0, RECENT_CONTRIBUTIONS);
+const earlier = contributions.slice(RECENT_CONTRIBUTIONS);
+// "Show 7 earlier projects": the toggle says how many rows it reveals.
+const earlierItems = formatCount(earlier.length, "earlierProject", lang);
+const showLabel = t("about.contributions.showEarlier", { items: earlierItems });
+const hideLabel = t("about.contributions.hideEarlier", { items: earlierItems });
+const earlierId = "earlier-contributions";
+const lists = [
+  { entries: recent, id: undefined },
+  { entries: earlier, id: earlierId },
+].filter((list) => list.entries.length > 0);
 ---
 
 <section
@@ -32,39 +52,89 @@ const t = useTranslations(lang);
     }}
   />
 
-  <ul class="about-contributions-list" role="list">
-    {contributions.map((entry) => (
-      <li>
-        <div class="about-contributions-project">
-          <a
-            href={`https://github.com/${entry.repository}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {entry.project}
-            <span class="visually-hidden"> {t("a11y.newTab")}</span>
-          </a>
-          <span class="about-contributions-period">{entry.period}</span>
-        </div>
-        <p>{entry.summary[lang]}</p>
-        <ul class="about-contributions-pulls" role="list">
-          {entry.pulls.map((pull) => (
-            <li>
-              <a href={pull.url} target="_blank" rel="noopener noreferrer">
-                <span class="visually-hidden">
-                  {t("about.contributions.pull")}{" "}
-                </span>
-                #{pull.number}
-                <span aria-hidden="true">↗</span>
+  {lists.map((list) => (
+    <>
+      {list.id && (
+        <button
+          type="button"
+          class="about-contributions-toggle"
+          aria-expanded="false"
+          aria-controls={list.id}
+          data-label-show={showLabel}
+          data-label-hide={hideLabel}
+          hidden
+        >
+          <span>{showLabel}</span>
+          <ChevronDown size={17} aria-hidden="true" />
+        </button>
+      )}
+      <ul
+        id={list.id}
+        class:list={[
+          "about-contributions-list",
+          { "about-contributions-list--earlier": list.id },
+        ]}
+        role="list"
+      >
+        {list.entries.map((entry) => (
+          <li>
+            <div class="about-contributions-project">
+              <a
+                href={`https://github.com/${entry.repository}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {entry.project}
                 <span class="visually-hidden"> {t("a11y.newTab")}</span>
               </a>
-            </li>
-          ))}
-        </ul>
-      </li>
-    ))}
-  </ul>
+              <span class="about-contributions-period">{entry.period}</span>
+            </div>
+            <p>{entry.summary[lang]}</p>
+            <ul class="about-contributions-pulls" role="list">
+              {entry.pulls.map((pull) => (
+                <li>
+                  <a href={pull.url} target="_blank" rel="noopener noreferrer">
+                    <span class="visually-hidden">
+                      {t("about.contributions.pull")}{" "}
+                    </span>
+                    #{pull.number}
+                    <span aria-hidden="true">↗</span>
+                    <span class="visually-hidden"> {t("a11y.newTab")}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </li>
+        ))}
+      </ul>
+    </>
+  ))}
 </section>
+
+<script>
+  for (const button of document.querySelectorAll<HTMLButtonElement>(
+    ".about-contributions-toggle",
+  )) {
+    const list = document.getElementById(
+      button.getAttribute("aria-controls") ?? "",
+    );
+    const label = button.querySelector("span");
+    if (!list || !label) continue;
+
+    const render = (expanded: boolean) => {
+      button.setAttribute("aria-expanded", String(expanded));
+      list.hidden = !expanded;
+      const { labelShow, labelHide } = button.dataset;
+      label.textContent = (expanded ? labelHide : labelShow) ?? "";
+    };
+
+    render(false);
+    button.hidden = false;
+    button.addEventListener("click", () =>
+      render(button.getAttribute("aria-expanded") !== "true"),
+    );
+  }
+</script>
 
 <style>
   .about-contributions {
@@ -75,6 +145,60 @@ const t = useTranslations(lang);
     padding: 0;
     list-style: none;
     border-bottom: 1px solid var(--color-border);
+  }
+  .about-contributions-list[hidden] {
+    display: none;
+  }
+  /*
+   * With scripts (html.js, set before paint in SiteHead), the earlier list
+   * starts collapsed in the first frame instead of collapsing on load.
+   */
+  :global(html.js)
+    .about-contributions-toggle[aria-expanded="false"]
+    + .about-contributions-list--earlier {
+    display: none;
+  }
+  /* The same editorial pill as the experience timeline's toggle. */
+  .about-contributions-toggle {
+    display: inline-flex;
+    min-height: var(--control-size);
+    align-items: center;
+    gap: var(--space-2xs);
+    margin: var(--space-s) 0;
+    padding: 0 var(--space-s);
+    border: 1px dashed var(--color-border-strong);
+    border-radius: var(--radius-full);
+    background: transparent;
+    color: var(--color-accent);
+    font-size: var(--step--1);
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      border-color var(--dur-fast) var(--ease-out),
+      background-color var(--dur-fast) var(--ease-out);
+  }
+  .about-contributions-toggle[hidden] {
+    display: none;
+  }
+  :global(html.js) .about-contributions-toggle[hidden] {
+    display: inline-flex;
+  }
+  .about-contributions-toggle:hover {
+    border-style: solid;
+    border-color: var(--color-accent);
+    background: var(--color-accent-soft);
+  }
+  .about-contributions-toggle > span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    text-align: left;
+  }
+  .about-contributions-toggle svg {
+    flex: none;
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+  .about-contributions-toggle[aria-expanded="true"] svg {
+    transform: rotate(180deg);
   }
   /* One editorial row per project: name and years, then what changed. */
   .about-contributions-list > li {
