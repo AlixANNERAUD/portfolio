@@ -1034,11 +1034,12 @@ for (const [engineName, engine] of [
     }
     await page.emulateMedia({ reducedMotion: "no-preference" });
 
-    // Hover highlight (site/Cursor): the system pointer always shows; with a
-    // fine pointer, hovering a nav link brings in the highlight; with reduced
-    // motion, nothing is created. Headless Chromium has no fine pointer: it
-    // is emulated through CDP. Firefox checks the highlight only when its
-    // headless pointer already reports as fine.
+    // Adaptive pointer (site/Cursor): with a fine pointer, the dot replaces
+    // the system pointer, turns into the highlight over a nav link and into
+    // a text bar over prose; with reduced motion, nothing is created and the
+    // system pointer stays. Headless Chromium has no fine pointer: it is
+    // emulated through CDP. Firefox checks the dot only when its headless
+    // pointer already reports as fine.
     {
       const cursorContext = await browser.newContext({
         viewport: { width: 1440, height: 900 },
@@ -1058,7 +1059,19 @@ for (const [engineName, engine] of [
           ],
         });
       };
-      const hoverNav = async () => {
+      const probe = () =>
+        cursorPage.evaluate(() => {
+          const cursor = document.querySelector(".site-cursor");
+          return {
+            fine: matchMedia("(hover: hover) and (pointer: fine)").matches,
+            cursors: [document.body, document.querySelector("main p")].map(
+              (node) => getComputedStyle(node).cursor,
+            ),
+            mode: cursor?.dataset.mode ?? null,
+            opacity: cursor ? +getComputedStyle(cursor).opacity : null,
+          };
+        });
+      const visit = async () => {
         await cursorPage.goto(base + "/about", { waitUntil: "load" });
         await cursorPage.mouse.move(5, 600);
         const box = await cursorPage
@@ -1071,37 +1084,61 @@ for (const [engineName, engine] of [
           { steps: 4 },
         );
         await cursorPage.waitForTimeout(400);
-        return cursorPage.evaluate(() => {
-          const highlight = document.querySelector(".site-cursor-highlight");
+        const nav = await probe();
+        // A point on the first line of plain text (not a link) in the intro.
+        const point = await cursorPage.evaluate(() => {
+          const walker = document.createTreeWalker(
+            document.querySelector("main p"),
+            NodeFilter.SHOW_TEXT,
+          );
+          let node;
+          while ((node = walker.nextNode())) {
+            if (node.textContent.trim() && !node.parentElement.closest("a")) {
+              break;
+            }
+          }
+          const range = document.createRange();
+          range.selectNodeContents(node);
+          const rect = range.getClientRects()[0];
           return {
-            fine: matchMedia("(hover: hover) and (pointer: fine)").matches,
-            cursors: [document.body, document.querySelector("main p")].map(
-              (node) => getComputedStyle(node).cursor,
-            ),
-            opacity: highlight ? +getComputedStyle(highlight).opacity : null,
+            x: rect.left + Math.min(20, rect.width / 2),
+            y: rect.top + rect.height / 2,
           };
         });
+        await cursorPage.mouse.move(point.x, point.y, { steps: 4 });
+        await cursorPage.waitForTimeout(400);
+        return { nav, text: await probe() };
       };
       try {
         await emulate("no-preference");
-        const shown = await hoverNav();
-        assert.ok(
-          !shown.cursors.includes("none"),
-          "the system pointer is hidden: " + shown.cursors,
-        );
-        if (shown.fine) {
-          assert.ok(shown.opacity > 0.9, "hovered nav link has no highlight");
+        const shown = await visit();
+        if (shown.nav.fine) {
+          assert.ok(
+            shown.nav.cursors.every((cursor) => cursor === "none"),
+            "the system pointer shows beside the dot: " + shown.nav.cursors,
+          );
+          assert.equal(
+            shown.nav.mode,
+            "snap",
+            "hovered nav link: no highlight",
+          );
+          assert.ok(shown.nav.opacity > 0.9, "hovered nav link: dot hidden");
+          assert.equal(shown.text.mode, "bar", "text: no text bar");
         }
         await emulate("reduce");
-        const reduced = await hoverNav();
+        const reduced = await visit();
         assert.equal(
-          reduced.opacity,
+          reduced.nav.opacity,
           null,
-          "reduced motion still creates the highlight",
+          "reduced motion still creates the dot",
+        );
+        assert.ok(
+          !reduced.nav.cursors.includes("none"),
+          "reduced motion hides the system pointer: " + reduced.nav.cursors,
         );
         checked++;
       } catch (error) {
-        failures.push(engineName + " hover highlight: " + error);
+        failures.push(engineName + " adaptive pointer: " + error);
       }
       await cursorContext.close();
     }

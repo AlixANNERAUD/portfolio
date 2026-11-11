@@ -1,15 +1,20 @@
 ---
 /**
- * Hover highlight, after the iPadOS pointer: when a mouse rests on a link or
- * a button, a rounded translucent highlight takes the shape of the target
- * (padding, corner radius, a slight parallax toward the pointer), then fades
- * out when the pointer leaves. Large targets (project cards, which have their
- * own hover) get nothing. The system pointer always stays visible.
+ * Adaptive pointer, after the iPadOS one. While a mouse drives it, a small
+ * round dot replaces the system pointer and takes the shape of what it is
+ * over:
+ * - a small link or button: a rounded translucent highlight shaped like the
+ *   target (padding, corner radius, a slight parallax toward the pointer);
+ * - a large link (project cards, which have their own hover): a larger dot;
+ * - selectable text: a vertical bar as tall as the line, like a text cursor.
+ * It shrinks a little while a button is pressed.
  *
  * Progressive enhancement only: it runs for a fine hovering mouse, never
- * under reduced motion, forced colors or a high-contrast preference, and
- * creates its element only on first use. A small requestAnimationFrame loop
- * eases the shape and stops once it settles.
+ * under reduced motion, forced colors or a high-contrast preference. The
+ * system pointer is hidden only while the dot is in use: a pen, a touch or
+ * any of these preferences, even set while the page is open, brings it back.
+ * Inside an iframe (the Xila demo) the frame shows the system pointer. A
+ * small requestAnimationFrame loop eases the shape and stops once it settles.
  */
 ---
 
@@ -26,7 +31,10 @@
     !queries.forced.matches &&
     !queries.contrast.matches;
 
-  // Targets up to this size get the highlight; larger ones get nothing.
+  const DOT = 18;
+  const DOT_LARGE = 32;
+  const BAR_WIDTH = 3;
+  // Targets up to this size get the highlight; larger ones a larger dot.
   const MAX_W = 480;
   const MAX_H = 96;
   const PAD_X = 8;
@@ -37,15 +45,25 @@
   // Easing time constant: about 95% of the way in three of them.
   const TAU = 70;
   const interactive = "a, button, summary, [role='button'], label[for]";
+  const root = document.documentElement;
+
+  /**
+   * dot: the default; large: over a large link; bar: over text; snap: the
+   * highlight on a small link or button.
+   */
+  type Mode = "dot" | "large" | "bar" | "snap";
 
   let enabled = allowed();
-  let highlight: HTMLElement | null = null;
+  let element: HTMLElement | null = null;
+  let mode: Mode = "dot";
   let pointerX = 0;
   let pointerY = 0;
-  // The mouse is over this document (not outside the window or in an iframe).
+  // A mouse is over this document (not outside the window or in an iframe).
   let hasPointer = false;
+  // The pointer or the page moved since the last frame: look for text again.
+  let moved = false;
+  let line: DOMRect | null = null;
   let target: HTMLElement | null = null;
-  let snapped = false;
   // The target's own corner radius, read once per target: a length in px, or
   // a share of its short side for a percentage.
   let ownRadius = 0;
@@ -60,27 +78,36 @@
     o: number;
   };
   const keys = ["x", "y", "w", "h", "r", "o"] as const;
-  const current: Shape = { x: 0, y: 0, w: 0, h: 0, r: 0, o: 0 };
-  const goal: Shape = { x: 0, y: 0, w: 0, h: 0, r: 0, o: 0 };
+  const current: Shape = { x: 0, y: 0, w: DOT, h: DOT, r: DOT / 2, o: 0 };
+  const goal: Shape = { ...current };
 
-  const ensureHighlight = () => {
-    if (!highlight) {
-      highlight = document.createElement("div");
-      highlight.className = "site-cursor-highlight";
-      highlight.setAttribute("aria-hidden", "true");
-      document.body.append(highlight);
+  const ensureElement = () => {
+    if (!element) {
+      element = document.createElement("div");
+      element.className = "site-cursor";
+      element.dataset.mode = mode;
+      element.setAttribute("aria-hidden", "true");
+      document.body.append(element);
     }
-    return highlight;
+    return element;
+  };
+
+  const setMode = (next: Mode) => {
+    if (next === mode) return;
+    mode = next;
+    if (element) element.dataset.mode = next;
   };
 
   const render = () => {
-    if (!highlight) return;
+    if (!element) return;
     const { x, y, w, h, r, o } = current;
-    highlight.style.transform = `translate(${x - w / 2}px, ${y - h / 2}px)`;
-    highlight.style.width = `${w}px`;
-    highlight.style.height = `${h}px`;
-    highlight.style.borderRadius = `${r}px`;
-    highlight.style.opacity = String(o);
+    // `translate`, not `transform`: the press `scale` then shrinks the shape
+    // around its center instead of toward the corner of the viewport.
+    element.style.translate = `${x - w / 2}px ${y - h / 2}px`;
+    element.style.width = `${w}px`;
+    element.style.height = `${h}px`;
+    element.style.borderRadius = `${r}px`;
+    element.style.opacity = String(o);
   };
 
   /** The element under the pointer that can take the highlight, if any. */
@@ -90,10 +117,44 @@
       ?.closest<HTMLElement>(interactive) ?? null;
 
   /**
-   * Aim the goal at the target's current box. False when the target has
-   * been removed or hidden (a theme menu item after a choice, for instance).
+   * The line box of selectable text under the pointer, if any. The caret
+   * position finds the nearest text node; the pointer must then sit on one of
+   * its lines, leading included so that the bar does not turn back into a
+   * dot between two lines.
    */
-  const measure = () => {
+  const textLineAt = (x: number, y: number) => {
+    // Older browsers without it keep the dot over text.
+    const node = document.caretPositionFromPoint?.(x, y)?.offsetNode;
+    if (node?.nodeType !== Node.TEXT_NODE || !node.textContent?.trim()) {
+      return null;
+    }
+    const parent = node.parentElement;
+    if (!parent || parent.closest(interactive)) return null;
+    const style = getComputedStyle(parent);
+    if (style.userSelect === "none") return null;
+    const lineHeight = parseFloat(style.lineHeight);
+    const range = document.createRange();
+    range.selectNodeContents(node);
+    for (const rect of range.getClientRects()) {
+      const leading = Math.max(0, (lineHeight || rect.height) - rect.height);
+      if (
+        x >= rect.left - 2 &&
+        x <= rect.right + 2 &&
+        y >= rect.top - leading / 2 &&
+        y <= rect.bottom + leading / 2
+      ) {
+        return rect;
+      }
+    }
+    return null;
+  };
+
+  /**
+   * Aim the highlight at the target's current box. False when the target
+   * has been removed or hidden (a theme menu item after a choice, for
+   * instance).
+   */
+  const aimAtTarget = () => {
     if (!target?.isConnected) return false;
     const box = target.getBoundingClientRect();
     if (box.width === 0 && box.height === 0) return false;
@@ -111,50 +172,85 @@
     return true;
   };
 
+  /** Off a small target: a dot, a larger dot or a text bar. */
+  const aimAtPointer = () => {
+    goal.x = pointerX;
+    goal.y = pointerY;
+    if (target) {
+      setMode("large");
+      goal.w = goal.h = DOT_LARGE;
+      goal.r = DOT_LARGE / 2;
+      return;
+    }
+    if (moved) line = textLineAt(pointerX, pointerY);
+    if (line) {
+      setMode("bar");
+      // Centered on the line, like a text cursor: the bar steps from line to
+      // line instead of following every pixel.
+      goal.y = line.top + line.height / 2;
+      goal.w = BAR_WIDTH;
+      goal.h = Math.min(Math.max(line.height, 12), 96);
+      goal.r = BAR_WIDTH / 2;
+      return;
+    }
+    setMode("dot");
+    goal.w = goal.h = DOT;
+    goal.r = DOT / 2;
+  };
+
   let frame = 0;
   let last = 0;
   const tick = (now: number) => {
     frame = 0;
     // While snapped, follow the target every frame: it may drift, scale on
     // hover or be pushed away (homepage orbit tiles).
-    if (snapped && !measure()) {
+    if (mode === "snap" && !aimAtTarget()) {
       const next = hitTest();
       setTarget(next === target ? null : next);
     }
+    if (mode !== "snap") aimAtPointer();
+    moved = false;
     const dt = last ? Math.min(now - last, 64) : 16;
     last = now;
     const k = 1 - Math.exp(-dt / TAU);
+    // The dot sits on the pointer: easing its position would make it trail
+    // the mouse. Only the highlight eases toward its target, and the bar
+    // from one line to the next.
+    const instantX = mode !== "snap";
+    const instantY = mode === "dot" || mode === "large";
     let moving = false;
     let changed = false;
     for (const key of keys) {
       const gap = goal[key] - current[key];
       if (gap === 0) continue;
       changed = true;
-      const settled = Math.abs(gap) < (key === "o" ? 0.004 : 0.1);
+      const settled =
+        (key === "x" && instantX) ||
+        (key === "y" && instantY) ||
+        Math.abs(gap) < (key === "o" ? 0.004 : 0.1);
       current[key] = settled ? goal[key] : current[key] + gap * k;
       if (!settled) moving = true;
     }
     if (changed) render();
-    if (moving || snapped) frame = requestAnimationFrame(tick);
+    if (moving || mode === "snap") frame = requestAnimationFrame(tick);
     else last = 0;
   };
   const wake = () => {
     if (!frame) frame = requestAnimationFrame(tick);
   };
 
-  function setTarget(element: HTMLElement | null) {
-    if (element !== target && element) {
-      const value = getComputedStyle(element).borderTopLeftRadius;
+  function setTarget(next: HTMLElement | null) {
+    if (next !== target && next) {
+      const value = getComputedStyle(next).borderTopLeftRadius;
       radiusIsShare = value.endsWith("%");
       ownRadius = radiusIsShare
         ? parseFloat(value) / 100
         : parseFloat(value) || 6;
     }
-    target = element;
-    const wasSnapped = snapped;
-    snapped = false;
-    if (element) {
-      const box = element.getBoundingClientRect();
+    target = next;
+    let snapped = false;
+    if (next) {
+      const box = next.getBoundingClientRect();
       // A link stretched over a card by a pseudo-element is hovered outside
       // its own box: highlighting it would jump away from the pointer.
       const inside =
@@ -163,25 +259,42 @@
         pointerY >= box.top - 4 &&
         pointerY <= box.bottom + 4;
       snapped =
-        inside && box.width <= MAX_W && box.height <= MAX_H && measure();
+        inside && box.width <= MAX_W && box.height <= MAX_H && aimAtTarget();
     }
-    if (snapped) {
-      ensureHighlight();
-      // Appearing: grow out of the target's own box instead of gliding in
-      // from wherever the last highlight faded.
-      if (current.o < 0.05) {
-        Object.assign(current, goal, {
-          w: goal.w - 2 * PAD_X,
-          h: goal.h - 2 * PAD_Y,
-          o: 0,
-        });
-      }
-      goal.o = 1;
-    } else {
-      goal.o = 0;
-    }
-    if (snapped || wasSnapped) wake();
+    if (snapped) setMode("snap");
+    else if (mode === "snap") setMode("dot");
+    moved = true;
+    wake();
   }
+
+  /**
+   * Hide the system pointer and bring the dot in. Appearing, it starts at
+   * its place at once rather than gliding from wherever it last faded.
+   */
+  const show = () => {
+    ensureElement();
+    root.classList.add("has-cursor");
+    if (goal.o === 1) return;
+    goal.o = 1;
+    if (current.o < 0.05) {
+      if (mode !== "snap" || !aimAtTarget()) aimAtPointer();
+      Object.assign(current, goal, { o: 0 });
+    }
+    wake();
+  };
+
+  /** Fade the dot out: the mouse left the window or entered an iframe. */
+  const hide = () => {
+    hasPointer = false;
+    goal.o = 0;
+    setTarget(null);
+  };
+
+  /** A pen or a touch took over: give the pointer back to the system. */
+  const release = () => {
+    root.classList.remove("has-cursor");
+    hide();
+  };
 
   /** Hide at once and forget the target (disabled, or back from bfcache). */
   const reset = () => {
@@ -189,8 +302,11 @@
     frame = 0;
     last = 0;
     target = null;
-    snapped = false;
+    line = null;
     hasPointer = false;
+    setMode("dot");
+    root.classList.remove("has-cursor");
+    element?.classList.remove("is-pressed");
     current.o = goal.o = 0;
     render();
   };
@@ -203,38 +319,45 @@
     query.addEventListener("change", sync);
   }
 
-  document.addEventListener("pointerover", (event) => {
-    if (!enabled) return;
-    // Pen and touch keep the system behaviour, with no highlight.
-    if (event.pointerType !== "mouse") {
-      setTarget(null);
-      return;
-    }
-    // pointerover fires before pointermove: take the position from it.
+  const follow = (event: PointerEvent) => {
     pointerX = event.clientX;
     pointerY = event.clientY;
     hasPointer = true;
-    // An iframe is not interactive here: entering one hides the highlight.
+    moved = true;
+    show();
+  };
+
+  document.addEventListener("pointerover", (event) => {
+    if (!enabled) return;
+    if (event.pointerType !== "mouse") return release();
+    // pointerover fires before pointermove: take the position from it.
+    follow(event);
     setTarget((event.target as Element).closest<HTMLElement>(interactive));
   });
   window.addEventListener(
     "pointermove",
     (event) => {
-      if (!enabled || event.pointerType !== "mouse") return;
-      pointerX = event.clientX;
-      pointerY = event.clientY;
-      hasPointer = true;
+      if (!enabled) return;
+      if (event.pointerType !== "mouse") return release();
+      follow(event);
+      wake();
     },
     { passive: true },
   );
   document.addEventListener("pointerdown", (event) => {
-    if (enabled && event.pointerType !== "mouse") setTarget(null);
+    if (!enabled) return;
+    if (event.pointerType !== "mouse") return release();
+    element?.classList.add("is-pressed");
   });
+  for (const type of ["pointerup", "pointercancel"]) {
+    document.addEventListener(type, () => {
+      element?.classList.remove("is-pressed");
+    });
+  }
   // Leaving the window, or entering a frame that takes the events.
   document.addEventListener("pointerout", (event) => {
     if (!enabled || event.relatedTarget) return;
-    hasPointer = false;
-    setTarget(null);
+    hide();
   });
   // The page moves under a still pointer: follow the target, or drop it.
   window.addEventListener(
@@ -242,14 +365,15 @@
     () => {
       if (!enabled || !hasPointer) return;
       const next = hitTest();
-      if (next !== target) setTarget(next);
+      if (next !== target) return setTarget(next);
+      moved = true;
+      wake();
     },
     { passive: true },
   );
 
   // Each page is a new document: after a click that navigates, keep the
-  // highlight on whatever sits under the pointer instead of waiting for the
-  // next mouse move.
+  // pointer where it was instead of waiting for the next mouse move.
   const STORE = "cursor-position";
   const MAX_AGE = 5000;
   if (enabled) {
@@ -259,10 +383,12 @@
         pointerX = saved.x;
         pointerY = saved.y;
         hasPointer = true;
+        moved = true;
         setTarget(hitTest());
+        show();
       }
     } catch {
-      // Storage unavailable: the highlight waits for the next mouse move.
+      // Storage unavailable: the dot waits for the next mouse move.
     }
   }
   window.addEventListener("pagehide", () => {
@@ -285,29 +411,57 @@
 </script>
 
 <style is:global>
+  /* Only while the dot is in use: the script sets and removes the class. */
+  html.has-cursor,
+  html.has-cursor * {
+    cursor: none !important;
+  }
+
   /*
-   * Created by the script on first use, so global. A faint fill keeps the
-   * target's text legible; two hairlines, one in the text color and one in
-   * the page color, keep the outline visible on the page and on the dark
-   * category panels in both themes.
+   * Created by the script on first use, so global. A hairline in the page
+   * color keeps the dot and the bar visible on the page and on the dark
+   * category panels in both themes; the highlight keeps a faint fill so the
+   * target's text stays legible, outlined in the text color too.
    */
-  .site-cursor-highlight {
+  .site-cursor {
     position: fixed;
     top: 0;
     left: 0;
     z-index: 2147483647;
     box-sizing: border-box;
-    border: 1px solid color-mix(in oklch, var(--color-text) 45%, transparent);
-    background: color-mix(in oklch, var(--color-text) 8%, transparent);
-    box-shadow: 0 0 0 1px color-mix(in oklch, var(--color-bg) 60%, transparent);
+    border: 1px solid transparent;
+    background: color-mix(in oklch, var(--color-text) 45%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in oklch, var(--color-bg) 70%, transparent);
     opacity: 0;
     pointer-events: none;
+    transition:
+      background-color var(--dur-base) var(--ease-out),
+      border-color var(--dur-base) var(--ease-out),
+      scale var(--dur-fast) var(--ease-out);
+  }
+
+  .site-cursor[data-mode="large"] {
+    background: color-mix(in oklch, var(--color-text) 25%, transparent);
+  }
+
+  .site-cursor[data-mode="bar"] {
+    background: color-mix(in oklch, var(--color-text) 75%, transparent);
+  }
+
+  .site-cursor[data-mode="snap"] {
+    border-color: color-mix(in oklch, var(--color-text) 45%, transparent);
+    background: color-mix(in oklch, var(--color-text) 8%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in oklch, var(--color-bg) 60%, transparent);
+  }
+
+  .site-cursor.is-pressed {
+    scale: 0.9;
   }
 
   @media (prefers-reduced-motion: reduce),
     (forced-colors: active),
     (prefers-contrast: more) {
-    .site-cursor-highlight {
+    .site-cursor {
       display: none;
     }
   }
