@@ -190,6 +190,36 @@ export const contributions = [
     pulls: [pull("esp-rs/esp-idf-svc", 422)],
   },
   {
+    project: "ESPNexUpload",
+    repository: "Nredor/ESPNexUpload",
+    period: "2023",
+    summary: {
+      en: "The SD card example of this library for updating Nextion displays over the air, fixed for the ESP32: the default chip-select pin and an absolute file path.",
+      fr: "L’exemple de lecture sur carte SD de cette bibliothèque de mise à jour à distance des écrans Nextion, corrigé pour l’ESP32 : la broche de sélection par défaut et un chemin de fichier absolu.",
+    },
+    pulls: [pull("Nredor/ESPNexUpload", 17)],
+  },
+  {
+    project: "Berry",
+    repository: "berry-lang/berry",
+    period: "2023",
+    summary: {
+      en: "Native module object constructors named after their structure, so that the C API header of this embedded scripting language compiles as C++.",
+      fr: "Des constructeurs d’objets de modules natifs nommés d’après leur structure, pour que l’en-tête de l’API C de ce langage de script embarqué compile en C++.",
+    },
+    pulls: [pull("berry-lang/berry", 317)],
+  },
+  {
+    project: "ps2kbdlib",
+    repository: "michalhol/ps2kbdlib",
+    period: "2021",
+    summary: {
+      en: "A build fix for this PS/2 keyboard library for ESP32 and Arduino: members initialized in declaration order, for builds with -Werror=reorder, and a zeroed scancode buffer.",
+      fr: "Une correction de compilation pour cette bibliothèque de clavier PS/2 pour ESP32 et Arduino : des membres initialisés dans l’ordre de leur déclaration, pour les compilations avec -Werror=reorder, et un tampon de codes de touches mis à zéro.",
+    },
+    pulls: [pull("michalhol/ps2kbdlib", 6)],
+  },
+  {
     project: "ULPSoundESP32",
     repository: "bitluni/ULPSoundESP32",
     period: "2020",
