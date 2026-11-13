@@ -25,6 +25,26 @@ const pull = (repository: string, number: number) => ({
 
 export const contributions = [
   {
+    project: "ESP-NN",
+    repository: "espressif/esp-nn",
+    period: "2026",
+    summary: {
+      en: "A fix to the int8 softmax kernels of Espressif’s neural network library, whose signed shifts into the sign bit were undefined behavior in C, with unchanged outputs.",
+      fr: "Une correction des noyaux softmax int8 de la bibliothèque de réseaux de neurones d’Espressif, dont les décalages signés vers le bit de signe étaient un comportement indéfini en C, sans changer leurs résultats.",
+    },
+    pulls: [pull("espressif/esp-nn", 55)],
+  },
+  {
+    project: "MicroFlow",
+    repository: "matteocarnelos/microflow-rs",
+    period: "2026",
+    summary: {
+      en: "Support in this Rust TinyML inference engine for fully connected layers without a bias tensor, which the TensorFlow Lite converter drops when it is all zeros.",
+      fr: "La prise en charge, dans ce moteur d’inférence TinyML en Rust, des couches entièrement connectées sans tenseur de biais, que le convertisseur TensorFlow Lite omet quand il est nul.",
+    },
+    pulls: [pull("matteocarnelos/microflow-rs", 19)],
+  },
+  {
     project: "mbrman",
     repository: "rust-disk-partition-management/mbrman",
     period: "2026",
