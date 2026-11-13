@@ -119,6 +119,16 @@ export const contributions = [
     pulls: [pull("restsend/opus-rs", 64), pull("restsend/opus-rs", 65)],
   },
   {
+    project: "Congo",
+    repository: "jpanther/congo",
+    period: "2026",
+    summary: {
+      en: "A custom script URL for Umami analytics in this Hugo theme, for self-hosted instances and proxies.",
+      fr: "Une adresse de script personnalisée pour les statistiques Umami dans ce thème Hugo, pour les instances auto-hébergées et les proxys.",
+    },
+    pulls: [pull("jpanther/congo", 1103)],
+  },
+  {
     project: "WAMR",
     repository: "wasm-micro-runtime/wasm-micro-runtime",
     period: "2025",
@@ -143,12 +153,15 @@ export const contributions = [
     repository: "wasm-micro-runtime/wamr-rust-sdk",
     period: "2024–2025",
     summary: {
-      en: "ESP32 support, custom platform configuration, a rework of the lifetimes in the module and instance API, and an update to WAMR 2.3.1.",
-      fr: "Prise en charge de l’ESP32, configuration de plateforme personnalisée, refonte des durées de vie de l’API des modules et instances, et mise à jour vers WAMR 2.3.1.",
+      en: "ESP32 support, custom platform configuration, a rework of the lifetimes in the module and instance API, modules loaded without copying their bytecode, and an update to WAMR 2.3.1.",
+      fr: "Prise en charge de l’ESP32, configuration de plateforme personnalisée, refonte des durées de vie de l’API des modules et instances, chargement des modules sans copie de leur bytecode, et mise à jour vers WAMR 2.3.1.",
     },
     pulls: [
       pull("wasm-micro-runtime/wamr-rust-sdk", 23),
+      pull("wasm-micro-runtime/wamr-rust-sdk", 48),
       pull("wasm-micro-runtime/wamr-rust-sdk", 65),
+      pull("wasm-micro-runtime/wamr-rust-sdk", 74),
+      pull("wasm-micro-runtime/wamr-rust-sdk", 77),
       pull("wasm-micro-runtime/wamr-rust-sdk", 83),
       pull("wasm-micro-runtime/wamr-rust-sdk", 142),
     ],
@@ -175,5 +188,15 @@ export const contributions = [
       fr: "Une interface Rust sûre pour les pilotes SD, SDIO et SDMMC d’ESP-IDF et leur système de fichiers virtuel.",
     },
     pulls: [pull("esp-rs/esp-idf-svc", 422)],
+  },
+  {
+    project: "ULPSoundESP32",
+    repository: "bitluni/ULPSoundESP32",
+    period: "2020",
+    summary: {
+      en: "A stereo mode and a README for this ESP32 sound player, which streams samples to the DAC from the ultra-low-power coprocessor.",
+      fr: "Un mode stéréo et un README pour ce lecteur audio ESP32, qui envoie les échantillons au CNA depuis le coprocesseur ultra basse consommation.",
+    },
+    pulls: [pull("bitluni/ULPSoundESP32", 3)],
   },
 ] as const satisfies readonly Contribution[];
