@@ -41,7 +41,7 @@ jobs:
       - name: Check and build with Astro
         run: npm run check
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: dist
 
