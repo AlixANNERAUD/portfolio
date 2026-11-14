@@ -122,16 +122,16 @@ export const experiences: readonly Experience[] = [
     },
     highlights: [
       {
-        fr: "Migration de ses requêtes d’Athena vers Redshift, derrière une nouvelle Lambda d’accès aux données, pour ramener la consultation d’un produit de plusieurs minutes à quelques secondes.",
-        en: "Moved its queries from Athena to Redshift behind a new data-access Lambda, bringing a product lookup from minutes down to a few seconds.",
+        fr: "Refonte de son accès aux données sur AWS, pour des consultations nettement plus rapides.",
+        en: "Reworked its data access on AWS for much faster lookups.",
       },
       {
-        fr: "Déploiement par région AWS pour couvrir toutes les places de marché, avec des liens qui conservent la place de marché depuis les outils voisins, une supervision mise à jour et une revue de préparation opérationnelle.",
-        en: "Deployed it per AWS region to cover every marketplace, with links from neighboring tools that keep the marketplace, updated monitoring and an operational readiness review.",
+        fr: "Extension à de nouvelles régions, avec une meilleure intégration aux outils voisins et une supervision en production.",
+        en: "Extended it to more regions, with better integration with neighboring tools and production monitoring.",
       },
       {
-        fr: "Conception d’un statut d’inclusion règle par règle, et prototype de serveur MCP pour interroger l’outil en langage naturel depuis des agents IA.",
-        en: "Designed a rule-by-rule inclusion status, and prototyped an MCP server so that AI agents can query the tool in natural language.",
+        fr: "Prototype d’interrogation en langage naturel par des agents IA.",
+        en: "Prototyped natural-language queries through AI agents.",
       },
     ],
     technologies: ["Java", "Python", "TypeScript", "React", "AWS", "Redshift"],
