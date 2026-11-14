@@ -117,21 +117,21 @@ export const experiences: readonly Experience[] = [
     period: { fr: "Mai – Août 2025", en: "May – Aug 2025" },
     location: { fr: "Madrid, Espagne", en: "Madrid, Spain" },
     summary: {
-      fr: "Modernisation d’un outil interne qui explique pourquoi un produit entre ou non dans les regroupements de produits des équipes marketing.",
-      en: "Modernized an internal tool that explains why a product is in or out of the product groupings used by marketing teams.",
+      fr: "Modernisation de l’outil interne qui répond à une question que les équipes marketing d’Amazon se posent sur tout le catalogue mondial : pourquoi ce produit est-il, ou non, dans la sélection d’une campagne ?",
+      en: "Modernized the internal tool that answers a question Amazon’s marketing teams ask across the global catalog: why is this product in a campaign’s selection, or why isn’t it?",
     },
     highlights: [
       {
-        fr: "Refonte de son accès aux données sur AWS, pour des consultations nettement plus rapides.",
-        en: "Reworked its data access on AWS for much faster lookups.",
+        fr: "Refonte de son accès aux données sur AWS : les réponses arrivent plusieurs fois plus vite.",
+        en: "Rebuilt its data access on AWS, so answers come back several times faster.",
       },
       {
-        fr: "Extension à de nouvelles régions, avec une meilleure intégration aux outils voisins et une supervision en production.",
-        en: "Extended it to more regions, with better integration with neighboring tools and production monitoring.",
+        fr: "Déploiement dans de nouvelles régions et intégration aux outils voisins, en production avec CI, revue de code et supervision.",
+        en: "Took it to new regions and wired it into neighboring tools, in production with CI, code review and monitoring.",
       },
       {
-        fr: "Prototype d’interrogation en langage naturel par des agents IA.",
-        en: "Prototyped natural-language queries through AI agents.",
+        fr: "Prototype d’un agent IA qui répond à cette même question en langage naturel.",
+        en: "Prototyped an AI agent that answers the same question in plain language.",
       },
     ],
     technologies: ["Java", "Python", "TypeScript", "React", "AWS", "Redshift"],
