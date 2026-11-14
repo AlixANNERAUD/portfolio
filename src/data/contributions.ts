@@ -25,6 +25,31 @@ const pull = (repository: string, number: number) => ({
 
 export const contributions = [
   {
+    project: "tar-no-std",
+    repository: "phip1611/tar-no-std",
+    period: "2026",
+    summary: {
+      en: "A streaming parser that reads archives one 512-byte block at a time, pulled from flash or pushed by an interrupt or a network stack, and modification times read as octal, as the tar format defines them.",
+      fr: "Un analyseur en flux qui lit les archives par blocs de 512 octets, lus depuis une mémoire flash ou reçus d’une interruption ou d’une pile réseau, et des dates de modification lues en octal, comme le définit le format tar.",
+    },
+    pulls: [
+      pull("phip1611/tar-no-std", 79),
+      pull("phip1611/tar-no-std", 73),
+      pull("phip1611/tar-no-std", 74),
+      pull("phip1611/tar-no-std", 72),
+    ],
+  },
+  {
+    project: "mipidsi",
+    repository: "almindor/mipidsi",
+    period: "2026",
+    summary: {
+      en: "Raw pixel writes for this embedded Rust MIPI display driver: data already in the display’s native format, from a GUI library or a framebuffer, goes to the bus without per-pixel conversion.",
+      fr: "L’écriture de pixels bruts pour ce pilote d’écrans MIPI en Rust embarqué : les données déjà au format natif de l’écran, issues d’une bibliothèque graphique ou d’un tampon d’image, partent sur le bus sans conversion pixel par pixel.",
+    },
+    pulls: [pull("almindor/mipidsi", 205)],
+  },
+  {
     project: "ESP-NN",
     repository: "espressif/esp-nn",
     period: "2026",
@@ -33,6 +58,20 @@ export const contributions = [
       fr: "Une correction des noyaux softmax int8 de la bibliothèque de réseaux de neurones d’Espressif, dont les décalages signés vers le bit de signe étaient un comportement indéfini en C, sans changer leurs résultats.",
     },
     pulls: [pull("espressif/esp-nn", 55)],
+  },
+  {
+    project: "progress-bar",
+    repository: "Mubelotix/progress-bar",
+    period: "2026",
+    summary: {
+      en: "Rendering without allocations and a clock the caller can provide, as first steps toward no_std, support for the NO_COLOR convention, and fixes to the estimated time left and to a panic on non-ASCII names.",
+      fr: "Un rendu sans allocation et une horloge fournie par l’appelant, premiers pas vers no_std, la prise en charge de la convention NO_COLOR, et des corrections du temps restant estimé et d’une panique sur les noms non ASCII.",
+    },
+    pulls: [
+      pull("Mubelotix/progress-bar", 17),
+      pull("Mubelotix/progress-bar", 16),
+      pull("Mubelotix/progress-bar", 15),
+    ],
   },
   {
     project: "MicroFlow",
@@ -68,19 +107,6 @@ export const contributions = [
     pulls: [pull("lvgl/lvgl", 10898)],
   },
   {
-    project: "progress-bar",
-    repository: "Mubelotix/progress-bar",
-    period: "2026",
-    summary: {
-      en: "Support for the NO_COLOR convention, and fixes to the estimated time left and to a panic on non-ASCII names.",
-      fr: "La prise en charge de la convention NO_COLOR, et des corrections du temps restant estimé et d’une panique sur les noms non ASCII.",
-    },
-    pulls: [
-      pull("Mubelotix/progress-bar", 16),
-      pull("Mubelotix/progress-bar", 15),
-    ],
-  },
-  {
     project: "smolvm",
     repository: "smol-machines/smolvm",
     period: "2026",
@@ -97,16 +123,6 @@ export const contributions = [
       pull("smol-machines/smol", 316),
       pull("smol-machines/smol", 317),
     ],
-  },
-  {
-    project: "tar-no-std",
-    repository: "phip1611/tar-no-std",
-    period: "2026",
-    summary: {
-      en: "Modification times read as octal, as the tar format defines them, and header parsing made reusable for a streaming reader.",
-      fr: "Des dates de modification lues en octal, comme le définit le format tar, et une analyse des en-têtes réutilisable par un lecteur en flux.",
-    },
-    pulls: [pull("phip1611/tar-no-std", 72), pull("phip1611/tar-no-std", 74)],
   },
   {
     project: "opus-rs",
