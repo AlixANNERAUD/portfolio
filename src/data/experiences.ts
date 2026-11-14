@@ -117,20 +117,24 @@ export const experiences: readonly Experience[] = [
     period: { fr: "Mai – Août 2025", en: "May – Aug 2025" },
     location: { fr: "Madrid, Espagne", en: "Madrid, Spain" },
     summary: {
-      fr: "Modernisation d’un outil interne d’investigation de contenus pour des équipes marketing.",
-      en: "Modernized an internal content discovery and investigation tool for marketing teams.",
+      fr: "Modernisation d’un outil interne qui explique pourquoi un produit entre ou non dans les regroupements de produits des équipes marketing.",
+      en: "Modernized an internal tool that explains why a product is in or out of the product groupings used by marketing teams.",
     },
     highlights: [
       {
-        fr: "Amélioration des parcours utilisateurs et de la performance des recherches.",
-        en: "Improved user-facing workflows and search performance.",
+        fr: "Migration de ses requêtes d’Athena vers Redshift, derrière une nouvelle Lambda d’accès aux données, pour ramener la consultation d’un produit de plusieurs minutes à quelques secondes.",
+        en: "Moved its queries from Athena to Redshift behind a new data-access Lambda, bringing a product lookup from minutes down to a few seconds.",
       },
       {
-        fr: "Extension de la prise en charge de plusieurs régions, sur une pile Java, Python, TypeScript et AWS.",
-        en: "Extended multi-region support across a Java, Python, TypeScript and AWS stack.",
+        fr: "Déploiement par région AWS pour couvrir toutes les places de marché, avec des liens qui conservent la place de marché depuis les outils voisins, une supervision mise à jour et une revue de préparation opérationnelle.",
+        en: "Deployed it per AWS region to cover every marketplace, with links from neighboring tools that keep the marketplace, updated monitoring and an operational readiness review.",
+      },
+      {
+        fr: "Conception d’un statut d’inclusion règle par règle, et prototype de serveur MCP pour interroger l’outil en langage naturel depuis des agents IA.",
+        en: "Designed a rule-by-rule inclusion status, and prototyped an MCP server so that AI agents can query the tool in natural language.",
       },
     ],
-    technologies: ["Java", "Python", "React", "AWS", "Redshift"],
+    technologies: ["Java", "Python", "TypeScript", "React", "AWS", "Redshift"],
   },
   {
     id: "nyu",
