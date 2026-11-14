@@ -117,8 +117,8 @@ export const skillDomains: readonly SkillDomain[] = [
         kind: "experience",
         experienceId: "amazon",
         detail: {
-          fr: "Performance des recherches et prise en charge multirégion, en Java, Python et AWS.",
-          en: "Search performance and multi-region support on Java, Python and AWS.",
+          fr: "Migration vers Redshift et déploiement multirégion, en Java, Python et AWS Lambda.",
+          en: "Redshift migration and multi-region deployment on Java, Python and AWS Lambda.",
         },
       },
       {
