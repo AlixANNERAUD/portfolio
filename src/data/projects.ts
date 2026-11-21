@@ -31,6 +31,12 @@ export interface Project {
    * variant made for a dark background.
    */
   logo?: string;
+  /**
+   * The logo is a whole icon with its own background, like an app icon: on
+   * the home page it fills the project tile instead of sitting on the
+   * category color.
+   */
+  logoFillsTile?: boolean;
   tags: readonly Technology[];
   /** Human-reviewed editorial factors, scored 0-5; not external quality metrics. */
   ranking: Record<RankFactor, number>;
@@ -57,6 +63,11 @@ export function projectExternalUrl(project: Project): string | undefined {
 /** The project's official symbol, typed for entries that have none. */
 export function projectLogo(project: Project): string | undefined {
   return project.logo;
+}
+
+/** Whether the project's logo fills its home tile, typed for entries without one. */
+export function projectLogoFillsTile(project: Project): boolean {
+  return project.logoFillsTile ?? false;
 }
 
 /** Public source repository: `repositoryUrl`, else a code-host `externalUrl`. */
@@ -123,6 +134,7 @@ export const projects = [
     category: "web",
     symbol: "M",
     logo: "/images/logos/minitrainstore-favicon.svg",
+    logoFillsTile: true,
     tags: ["Odoo", "Docker", "Vue.js", "WXT", "Tailwind", "PostgreSQL"],
     ranking: {
       technicalDepth: 4,

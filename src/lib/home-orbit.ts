@@ -11,6 +11,7 @@ import type { Experience } from "../data/experiences.ts";
 import {
   byScore,
   projectLogo,
+  projectLogoFillsTile,
   projectRank,
   projectUrl,
   projects,
@@ -44,6 +45,8 @@ export interface ProjectNode extends NodeBase {
   symbol: string;
   /** The project's official symbol, shown instead of `symbol`. */
   logo?: string;
+  /** The logo is a whole icon that fills the tile. */
+  logoFillsTile: boolean;
   category: ProjectCategory;
   /** 1-based catalogue rank. */
   rank: number;
@@ -168,6 +171,7 @@ export function buildOrbitNodes(
     caption: `${project.description[lang]} · ${formatPeriod(project.period, lang)}`,
     symbol: project.symbol,
     logo: projectLogo(project),
+    logoFillsTile: projectLogoFillsTile(project),
     category: project.category,
     rank: projectRank(project.id),
     related: relatedProjects(project.id, 3)
