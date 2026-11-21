@@ -26,3 +26,4 @@ L’analyse de composition logicielle passe d’habitude par une plateforme lour
 - [Code source](https://github.com/AlixANNERAUD/nanobom)
 - [Documentation : tutoriels, guides pratiques, référence et architecture](https://alixanneraud.github.io/nanobom/)
 - [GitHub Action pour la CI](https://github.com/AlixANNERAUD/nanobom-action)
+- [Référencé dans le CycloneDX Tool Center](https://cyclonedx.org/tool-center/)

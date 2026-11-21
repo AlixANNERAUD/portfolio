@@ -23,3 +23,4 @@ Laisser l’utilisateur saisir une formule est courant : une calculatrice, une c
 
 - [Code source, syntaxe et mesures de performance](https://github.com/AlixANNERAUD/nanoexpr)
 - [Documentation de l’API sur docs.rs](https://docs.rs/nanoexpr)
+- [Référencé dans Awesome Rust, rubrique Parsing](https://github.com/rust-unofficial/awesome-rust#parsing)

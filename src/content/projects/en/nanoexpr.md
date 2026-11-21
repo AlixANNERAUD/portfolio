@@ -23,3 +23,4 @@ Letting a user type a formula is common: a calculator app, a sensor conversion s
 
 - [Source code, syntax and benchmarks](https://github.com/AlixANNERAUD/nanoexpr)
 - [API documentation on docs.rs](https://docs.rs/nanoexpr)
+- [Listed in Awesome Rust, under Parsing](https://github.com/rust-unofficial/awesome-rust#parsing)

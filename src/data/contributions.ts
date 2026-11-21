@@ -25,6 +25,16 @@ const pull = (repository: string, number: number) => ({
 
 export const contributions = [
   {
+    project: "lettre",
+    repository: "lettre/lettre",
+    period: "2026",
+    summary: {
+      en: "A documentation fix for this Rust email library: an smtp:// URL without a tls parameter connects on port 25, not 587 as the connection table said.",
+      fr: "Une correction de la documentation de cette bibliothèque d’e-mails en Rust : une adresse smtp:// sans paramètre tls se connecte sur le port 25, et non 587 comme l’indiquait le tableau des connexions.",
+    },
+    pulls: [pull("lettre/lettre", 1177)],
+  },
+  {
     project: "tar-no-std",
     repository: "phip1611/tar-no-std",
     period: "2026",

@@ -23,3 +23,4 @@ L’ensemble des langues doit être connu à la compilation. Pour une applicatio
 
 - [Code source et guide](https://github.com/AlixANNERAUD/embedded_i18n)
 - [Documentation de l’API sur docs.rs](https://docs.rs/embedded-i18n)
+- [Référencé dans Awesome Rust, rubrique Embedded](https://github.com/rust-unofficial/awesome-rust#embedded-1)

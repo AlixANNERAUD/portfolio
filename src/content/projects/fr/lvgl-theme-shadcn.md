@@ -23,3 +23,4 @@ C’est une bibliothèque C99 pour LVGL 9.6 ou plus récent, sans autre dépenda
 
 - [Code source et galerie](https://github.com/AlixANNERAUD/lvgl_theme_shadcn)
 - [Liaisons Rust sur crates.io](https://crates.io/crates/lvgl_theme_shadcn)
+- [Dans le gestionnaire de bibliothèques Arduino](https://www.arduinolibraries.info/libraries/lvgl_theme_shadcn)
