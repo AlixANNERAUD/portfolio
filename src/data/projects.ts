@@ -235,6 +235,8 @@ export const projects = [
     group: "personal",
     category: "security",
     symbol: "⊞",
+    logo: "/images/logos/nanobom.svg",
+    logoFillsTile: true,
     tags: ["Rust", "Leptos", "SBOM", "SQLite"],
     ranking: {
       technicalDepth: 4.6,
