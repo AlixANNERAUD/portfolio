@@ -124,6 +124,9 @@ const position = (i: number) => {
 
   <nav class="orbit-field" aria-label={t("home.orbit.fieldLabel")}>
     <div class="orbit-stage">
+      <span class="orbit-glow" aria-hidden="true">
+        <span class="orbit-spotlight"></span>
+      </span>
       <span class="orbit-ring" aria-hidden="true"></span>
       <span class="orbit-ring orbit-ring--inner" aria-hidden="true"></span>
       <svg class="orbit-links" aria-hidden="true" focusable="false"></svg>
@@ -247,6 +250,7 @@ const position = (i: number) => {
   const root = document.querySelector<HTMLElement>("[data-orbit]");
   if (root && "IntersectionObserver" in window) {
     const field = root.querySelector<HTMLElement>(".orbit-stage")!;
+    const spotlight = root.querySelector<HTMLElement>(".orbit-spotlight")!;
     const svg = root.querySelector<SVGSVGElement>(".orbit-links")!;
     const caption = root.querySelector<HTMLElement>(".orbit-caption")!;
     const [capLabel, capText] = caption.children as unknown as HTMLElement[];
@@ -466,9 +470,10 @@ const position = (i: number) => {
         py = y;
         lastMove = event.timeStamp;
         inside = true;
-        root.dataset.pointer = "";
-        root.style.setProperty("--px", `${event.pageX - sx}px`);
-        root.style.setProperty("--py", `${event.pageY - sy}px`);
+        if (!root.hasAttribute("data-pointer")) root.dataset.pointer = "";
+        // Moved, not repainted: a custom property set here would restyle
+        // every tile on each pointer move.
+        spotlight.style.translate = `${event.pageX - sx}px ${event.pageY - sy}px`;
         wake();
       },
       { passive: true },
@@ -821,7 +826,7 @@ const position = (i: number) => {
   }
   /* Dot grid, fading out towards the copy. */
   .orbit-stage::before,
-  .orbit-stage::after {
+  .orbit-glow {
     content: "";
     position: absolute;
     inset: 0;
@@ -838,17 +843,30 @@ const position = (i: number) => {
       transparent 100%
     );
   }
-  /* Pointer spotlight (fine pointer, motion allowed: set by the script). */
-  .orbit-stage::after {
-    background: radial-gradient(
-      340px circle at var(--px, 50%) var(--py, 50%),
-      var(--color-accent-soft),
-      transparent
-    );
+  /*
+   * Pointer spotlight (fine pointer, motion allowed: moved by the script),
+   * clipped to the field. A layer of its own that only translates, so a
+   * pointer move neither restyles the field nor repaints it.
+   */
+  .orbit-glow {
+    overflow: hidden;
     opacity: 0;
     transition: opacity var(--dur-slow) var(--ease-out);
   }
-  .orbit[data-pointer] .orbit-stage::after {
+  .orbit-spotlight {
+    position: absolute;
+    top: -340px;
+    left: -340px;
+    width: 680px;
+    height: 680px;
+    background: radial-gradient(
+      closest-side,
+      var(--color-accent-soft),
+      transparent
+    );
+    will-change: translate;
+  }
+  .orbit[data-pointer] .orbit-glow {
     opacity: 1;
   }
 

@@ -33,6 +33,15 @@ body {
   line-height: var(--leading-body);
 }
 
+/*
+ * Selected text takes the accent, as on the monogram tile, instead of the
+ * system blue. Forced colors keep the system highlight.
+ */
+::selection {
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+
 a {
   color: var(--color-accent);
 }
