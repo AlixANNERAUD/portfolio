@@ -220,8 +220,8 @@ export const experiences: readonly Experience[] = [
     },
     highlights: [
       {
-        fr: "Direction d’une équipe de six personnes (environ 20 h par semaine) : coordination, recueil des besoins et pilotage des livrables.",
-        en: "Led a team of six (about 20 hours a week): coordination, requirements and delivery milestones.",
+        fr: "Direction d’une équipe de huit personnes (environ 20 h par semaine) : coordination, recueil des besoins et pilotage des livrables.",
+        en: "Led a team of eight (about 20 hours a week): coordination, requirements and delivery milestones.",
       },
       {
         fr: "Architecture Django REST / Vue.js, environnement Docker, tests et CI.",
@@ -291,8 +291,8 @@ export const experiences: readonly Experience[] = [
     period: { fr: "2022", en: "2022" },
     location: { fr: "Cléon, France", en: "Cléon, France" },
     summary: {
-      fr: "Stage ouvrier d’un mois sur une ligne de production de rotors et de stators, à l’usine de Cléon (alors Renault, aujourd’hui Ampère).",
-      en: "One-month production internship on a rotor and stator manufacturing line at the Cléon plant (then Renault, now part of Ampère).",
+      fr: "Stage ouvrier de deux mois sur une ligne de production de rotors et de stators, à l’usine de Cléon (alors Renault, aujourd’hui Ampère).",
+      en: "Two-month production internship on a rotor and stator manufacturing line at the Cléon plant (then Renault, now part of Ampère).",
     },
     highlights: [
       {
@@ -321,19 +321,27 @@ export const experiences: readonly Experience[] = [
       fr: "Assistant en communication",
       en: "Communication Assistant",
     },
-    period: { fr: "2019", en: "2019" },
-    location: { fr: "France", en: "France" },
+    period: { fr: "Depuis 2019", en: "Since 2019" },
+    location: { fr: "Rouen, France", en: "Rouen, France" },
     summary: {
-      fr: "Expérience d’assistance en communication auprès de Guénola Sahut, artiste peintre.",
-      en: "Early experience assisting the painter Guénola Sahut with communication work.",
+      fr: "Communication externe de l’artiste peintre Guénola Sahut, en indépendant.",
+      en: "External communication for the painter Guénola Sahut, as a freelancer.",
     },
     highlights: [
       {
-        fr: "Appui aux activités de communication et à leur organisation.",
-        en: "Assisted with communication activities and their organization.",
+        fr: "Création et suivi de son site (guenola-sahut.fr), avec son référencement.",
+        en: "Built and look after her website (guenola-sahut.fr), including its search engine optimization.",
+      },
+      {
+        fr: "Identité visuelle (logo, couleurs) et supports imprimés et numériques : cartes de visite, flyers, invitations et e-mails.",
+        en: "Designed her visual identity (logo, colors) and her print and digital materials: business cards, flyers, invitations and emails.",
+      },
+      {
+        fr: "Contenus pour les réseaux sociaux, vidéos promotionnelles et un outil qui simplifie ses devis et ses factures.",
+        en: "Social media content, promotional videos and a tool that simplifies her quotes and invoices.",
       },
     ],
-    technologies: ["Communication"],
+    technologies: ["Communication", "SEO"],
   },
   {
     id: "baccalaureat",
