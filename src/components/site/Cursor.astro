@@ -98,16 +98,30 @@
     if (element) element.dataset.mode = next;
   };
 
+  // Last values written, so that a moving dot only updates its position:
+  // a size written again would relayout it on every frame.
+  const drawn = {
+    translate: "",
+    width: "",
+    height: "",
+    borderRadius: "",
+    opacity: "",
+  };
+  const write = (property: keyof typeof drawn, value: string) => {
+    if (drawn[property] === value) return;
+    drawn[property] = value;
+    element!.style[property] = value;
+  };
   const render = () => {
     if (!element) return;
     const { x, y, w, h, r, o } = current;
     // `translate`, not `transform`: the press `scale` then shrinks the shape
     // around its center instead of toward the corner of the viewport.
-    element.style.translate = `${x - w / 2}px ${y - h / 2}px`;
-    element.style.width = `${w}px`;
-    element.style.height = `${h}px`;
-    element.style.borderRadius = `${r}px`;
-    element.style.opacity = String(o);
+    write("translate", `${x - w / 2}px ${y - h / 2}px`);
+    write("width", `${w}px`);
+    write("height", `${h}px`);
+    write("borderRadius", `${r}px`);
+    write("opacity", String(o));
   };
 
   /** The element under the pointer that can take the highlight, if any. */
@@ -434,6 +448,8 @@
     box-shadow: 0 0 0 1px color-mix(in oklch, var(--color-bg) 70%, transparent);
     opacity: 0;
     pointer-events: none;
+    /* Its own compositor layer: moving it never repaints the page. */
+    will-change: translate;
     transition:
       background-color var(--dur-base) var(--ease-out),
       border-color var(--dur-base) var(--ease-out),
