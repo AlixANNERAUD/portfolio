@@ -31,6 +31,12 @@ export interface Project {
    * variant made for a dark background.
    */
   logo?: string;
+  /**
+   * The logo is a whole icon with its own background, like an app icon: on
+   * the home page it fills the project tile instead of sitting on the
+   * category color.
+   */
+  logoFillsTile?: boolean;
   tags: readonly Technology[];
   /** Human-reviewed editorial factors, scored 0-5; not external quality metrics. */
   ranking: Record<RankFactor, number>;
@@ -57,6 +63,11 @@ export function projectExternalUrl(project: Project): string | undefined {
 /** The project's official symbol, typed for entries that have none. */
 export function projectLogo(project: Project): string | undefined {
   return project.logo;
+}
+
+/** Whether the project's logo fills its home tile, typed for entries without one. */
+export function projectLogoFillsTile(project: Project): boolean {
+  return project.logoFillsTile ?? false;
 }
 
 /** Public source repository: `repositoryUrl`, else a code-host `externalUrl`. */
@@ -115,21 +126,23 @@ export const projects = [
     id: "mini-train-store",
     title: "Mini Train Store",
     description: {
-      en: "A self-hosted Odoo shop for a family model railway business, and a browser extension that collects its Leboncoin listings.",
-      fr: "Une boutique Odoo auto-hébergée pour un commerce familial de trains miniatures, et une extension qui collecte ses annonces Leboncoin.",
+      en: "A self-hosted Vendure and Next.js shop for a family model railway business, migrated from Odoo, and a browser extension that collects its Leboncoin listings.",
+      fr: "Une boutique Vendure et Next.js auto-hébergée pour un commerce familial de trains miniatures, migrée depuis Odoo, et une extension qui collecte ses annonces Leboncoin.",
     },
     period: { start: "2025", end: "present" },
     group: "personal",
     category: "web",
     symbol: "M",
-    tags: ["Odoo", "Docker", "Vue.js", "WXT", "Tailwind", "PostgreSQL"],
+    logo: "/images/logos/minitrainstore-favicon.svg",
+    logoFillsTile: true,
+    tags: ["Vendure", "Next.js", "PostgreSQL", "Docker", "Vue.js", "WXT"],
     ranking: {
       technicalDepth: 4,
       originality: 4,
       practicalImpact: 5,
       evidence: 4.6,
     },
-    externalUrl: "https://github.com/AlixANNERAUD/mini_train_store",
+    externalUrl: "https://github.com/MiniTrainStore/espace-de-travail",
   },
   {
     id: "model-railway",

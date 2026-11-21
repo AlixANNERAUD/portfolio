@@ -1,42 +1,46 @@
 ---
-title: "Mini Train Store: Odoo shop and extension"
-description: A self-hosted Odoo shop for a family model railway business, with a WXT and Vue 3 browser extension that collects and sorts Leboncoin listings.
+title: "Mini Train Store: Vendure shop and extension"
+description: A self-hosted Vendure and Next.js shop for a family model railway business, migrated from Odoo, with a browser extension for its Leboncoin listings.
 ---
 
 import ArchitectureFlow from "../../../components/mdx/ArchitectureFlow.astro";
 
-# Mini Train Store: an online shop connected to Leboncoin listings
+# Mini Train Store: an online shop for a family model railway business
 
 ## The problem
 
-My father's model railway business sold partly through listings on Leboncoin. An independent online shop needed the same products, without retyping every listing by hand and keeping two inventories in sync.
+My father's model railway business sold partly through listings on Leboncoin. An independent online shop needed the same products, with payments, shipping and invoices that run on their own, for a seller who is not at ease with computers.
 
-Rather than build a store from scratch, I deployed **Odoo** on my own servers and wrote a **browser extension** for the part that is specific to the business: getting listings out of Leboncoin and into the catalog.
+The first version of the shop ran on a self-hosted **Odoo** instance. It worked, but it was heavy to run and slow to adapt. I replaced it with a lighter shop built on **Vendure**, an open-source e-commerce engine configured in code, and kept a **browser extension** for the part that is specific to the business: getting listings out of Leboncoin.
 
 ## Architecture
 
-<ArchitectureFlow title="From listing to online catalog" steps={[{ title: 'Leboncoin', detail: 'Seller profile pages opened in the browser.' }, { title: 'Content script', detail: 'Detects profile pages and extracts their listings.' }, { title: 'Background script', detail: 'Stores listings in local storage and merges them per profile.' }, { title: 'Vue 3 interface', detail: 'Review, sorting and filtering before work in Odoo.' }]} />
+<ArchitectureFlow title="From the storefront to the order" steps={[{ title: 'Next.js storefront', detail: 'A fork of Vendure’s official starter: catalog, cart, checkout and customer accounts.' }, { title: 'Vendure server', detail: 'Shop and admin GraphQL APIs, the dashboard and the whole configuration in code.' }, { title: 'Worker', detail: 'Emails, PDF invoices and the search index, outside the request path.' }, { title: 'PostgreSQL', detail: 'Catalog, orders and customers, with the product photos on a volume.' }]} />
 
-The extension is built with **WXT**, **Vue 3**, Tailwind CSS and TypeScript. When a Leboncoin profile page opens, the **content script** extracts the listings without any click. The **background script** saves them in the browser's local storage, separately for each profile, and merges new results with the ones already saved. The **popup** lets the user switch profiles, sort listings by date or price, filter them by status (active, sold, removed) and open any of them in a new tab. A separate module talks to the Odoo API to handle products.
+The **server** answers the shop and admin GraphQL APIs and serves the dashboard. The **worker** runs from the same image and handles emails, PDF invoices and the search index through Vendure's job queue, which lives in the database, so there is no Redis at this scale. The **storefront** is a Next.js app that only talks to the shop API. Payments go through **Stripe** (card and PayPal), and parcels through **Mondial Relay** pickup points, or customers collect them in store.
 
-The shop itself runs as an Odoo instance on my self-hosted infrastructure.
+The **extension** is built with **WXT**, **Vue 3**, Tailwind CSS and TypeScript. When a Leboncoin profile page opens, its content script extracts the listings without any click. The background script saves them in the browser's local storage, separately for each profile, and merges new results with the ones already saved. The popup sorts listings by date or price and filters them by status (active, sold, removed).
 
 ## Technical choices
 
-- **Reuse Odoo rather than rebuild a store.** Odoo covers the catalog, prices and the storefront; custom code only covers the workflow specific to the business.
-- **Extract in the browser.** The extension only reads pages the user opens and keeps the listings in the browser, with no separate scraping server.
-- **Map two data models.** A listing and a store product do not have the same fields: price, status, description, categories and images need a mapping step before publication.
+- **Only write what exists nowhere else.** Vendure's core and maintained plugins cover the catalog, payments, emails and invoices. Custom code covers weight-based shipping rates, payment on collection and the migration.
+- **Keep custom code off the critical path.** A failure in a custom plugin must never block an order.
+- **Configuration in Git, catalog in the database.** Plugins, custom fields, taxes, and email and invoice templates are versioned and reviewed as pull requests; products and orders live in Vendure's database.
+- **Migrate instead of starting over.** Scripts turn the Odoo database into a CSV for Vendure's official importer: listings with their photos, normalized brands, scales and railway companies, customers, past orders with their invoices, and redirects from the old URLs.
+- **Ship images.** Every pull request runs lint, types, tests, migrations and both Docker images. On `main`, the images are published and release-please keeps a release pull request up to date.
 
 ## Results
 
-The shop is live at **[minitrainstore.fr](https://www.minitrainstore.fr/)**. The repository holds the extension and the shop's assets, such as its business cards.
+The shop is live at **[minitrainstore.fr](https://www.minitrainstore.fr/)** and runs on my self-hosted infrastructure. The extension and the visual identity, such as the logo and business cards, are public repositories; the shop's own repository stays private, since it holds the business configuration.
 
 ## Limitations
 
-The extraction depends on Leboncoin's HTML: a change on their side can break the selectors, so the parsing code has to stay small and easy to fix. The listings are stored in one browser's local storage and are not shared between devices.
+The extraction depends on Leboncoin's HTML: a change on their side can break the selectors, so the parsing code has to stay small and easy to fix. The listings are stored in one browser's local storage and are not shared between devices. Sales are not yet synchronized between Leboncoin and the shop.
 
 ## Explore the project
 
 - [Mini Train Store](https://www.minitrainstore.fr/)
-- [Source code and assets](https://github.com/AlixANNERAUD/mini_train_store)
-- [Extension architecture](https://github.com/AlixANNERAUD/mini_train_store/blob/main/code/extension/README.md)
+- [Project repositories](https://github.com/MiniTrainStore/espace-de-travail)
+- [Extension architecture](https://github.com/MiniTrainStore/extension#readme)
+- [Visual identity](https://github.com/MiniTrainStore/identite)
+- [Vendure](https://vendure.io/)
