@@ -23,3 +23,4 @@ It is a C99 library for LVGL 9.6 or newer with no other dependency, plus `no_std
 
 - [Source code and gallery](https://github.com/AlixANNERAUD/lvgl_theme_shadcn)
 - [Rust bindings on crates.io](https://crates.io/crates/lvgl_theme_shadcn)
+- [In the Arduino Library Manager](https://www.arduinolibraries.info/libraries/lvgl_theme_shadcn)

@@ -23,3 +23,4 @@ The set of languages has to be known at build time. For applications that downlo
 
 - [Source code and guide](https://github.com/AlixANNERAUD/embedded_i18n)
 - [API documentation on docs.rs](https://docs.rs/embedded-i18n)
+- [Listed in Awesome Rust, under Embedded](https://github.com/rust-unofficial/awesome-rust#embedded-1)

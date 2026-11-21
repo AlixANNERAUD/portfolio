@@ -26,3 +26,4 @@ Software composition analysis usually means a heavy platform: OWASP Dependency-T
 - [Source code](https://github.com/AlixANNERAUD/nanobom)
 - [Documentation: tutorials, how-to guides, reference and architecture](https://alixanneraud.github.io/nanobom/)
 - [GitHub Action for CI](https://github.com/AlixANNERAUD/nanobom-action)
+- [Listed in the CycloneDX Tool Center](https://cyclonedx.org/tool-center/)
