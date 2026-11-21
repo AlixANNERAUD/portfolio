@@ -147,6 +147,7 @@ export const skillDomains: readonly SkillDomain[] = [
       "TypeScript",
       "JavaScript",
       "React",
+      "Next.js",
       "Vite",
       "WXT",
       "Tailwind CSS",
@@ -156,8 +157,8 @@ export const skillDomains: readonly SkillDomain[] = [
         kind: "project",
         projectId: "mini-train-store",
         detail: {
-          fr: "Boutique en ligne et extension WXT.",
-          en: "Storefront and WXT browser extension.",
+          fr: "Vitrine Next.js et extension WXT.",
+          en: "Next.js storefront and WXT browser extension.",
         },
       },
       {
@@ -211,8 +212,8 @@ export const skillDomains: readonly SkillDomain[] = [
         kind: "project",
         projectId: "mini-train-store",
         detail: {
-          fr: "Odoo auto-hébergé pour un usage réel.",
-          en: "Self-hosted Odoo for a real business.",
+          fr: "Boutique Vendure auto-hébergée pour un usage réel.",
+          en: "Self-hosted Vendure shop for a real business.",
         },
       },
       {

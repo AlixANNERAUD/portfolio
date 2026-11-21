@@ -126,8 +126,8 @@ export const projects = [
     id: "mini-train-store",
     title: "Mini Train Store",
     description: {
-      en: "A self-hosted Odoo shop for a family model railway business, and a browser extension that collects its Leboncoin listings.",
-      fr: "Une boutique Odoo auto-hébergée pour un commerce familial de trains miniatures, et une extension qui collecte ses annonces Leboncoin.",
+      en: "A self-hosted Vendure and Next.js shop for a family model railway business, migrated from Odoo, and a browser extension that collects its Leboncoin listings.",
+      fr: "Une boutique Vendure et Next.js auto-hébergée pour un commerce familial de trains miniatures, migrée depuis Odoo, et une extension qui collecte ses annonces Leboncoin.",
     },
     period: { start: "2025", end: "present" },
     group: "personal",
@@ -135,7 +135,7 @@ export const projects = [
     symbol: "M",
     logo: "/images/logos/minitrainstore-favicon.svg",
     logoFillsTile: true,
-    tags: ["Odoo", "Docker", "Vue.js", "WXT", "Tailwind", "PostgreSQL"],
+    tags: ["Vendure", "Next.js", "PostgreSQL", "Docker", "Vue.js", "WXT"],
     ranking: {
       technicalDepth: 4,
       originality: 4,
