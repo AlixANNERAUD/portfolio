@@ -122,7 +122,7 @@ export const projects = [
     group: "personal",
     category: "web",
     symbol: "M",
-    logo: "/images/logos/minitrainstore-icone-rond.svg",
+    logo: "/images/logos/minitrainstore-favicon.svg",
     tags: ["Odoo", "Docker", "Vue.js", "WXT", "Tailwind", "PostgreSQL"],
     ranking: {
       technicalDepth: 4,

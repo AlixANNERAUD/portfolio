@@ -65,4 +65,4 @@ Copies hosted on this website, taken from the organizations' own websites:
 Project symbols, hosted on this website:
 
 - **Xila**: [xila-symbol-white.svg](https://github.com/xila-project/brand/blob/main/assets/symbol/xila-symbol-white.svg), from the official [Xila visual identity](https://github.com/xila-project/brand), logo design by [Martin Legand](https://www.behance.net/martinlegand), licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0); unmodified.
-- **Mini Train Store**: [minitrainstore-icone-rond.svg](https://github.com/MiniTrainStore/identite/blob/main/ressources/logo/minitrainstore-icone-rond.svg), the round icon from the [Mini Train Store visual identity](https://github.com/MiniTrainStore/identite), all rights reserved; unmodified.
+- **Mini Train Store**: [minitrainstore-favicon.svg](https://github.com/MiniTrainStore/identite/blob/main/ressources/logo/minitrainstore-favicon.svg), the icon framed on the front of the train, from the [Mini Train Store visual identity](https://github.com/MiniTrainStore/identite), all rights reserved; unmodified.

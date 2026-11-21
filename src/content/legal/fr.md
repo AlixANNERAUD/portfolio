@@ -65,4 +65,4 @@ Copies hébergées sur ce site, issues des sites des organismes :
 Symboles de projets hébergés sur ce site :
 
 - **Xila :** [xila-symbol-white.svg](https://github.com/xila-project/brand/blob/main/assets/symbol/xila-symbol-white.svg), issu de l’[identité visuelle officielle de Xila](https://github.com/xila-project/brand), logo conçu par [Martin Legand](https://www.behance.net/martinlegand), sous [licence Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0) ; sans modification.
-- **Mini Train Store :** [minitrainstore-icone-rond.svg](https://github.com/MiniTrainStore/identite/blob/main/ressources/logo/minitrainstore-icone-rond.svg), la pastille ronde de l’[identité visuelle de Mini Train Store](https://github.com/MiniTrainStore/identite), tous droits réservés ; sans modification.
+- **Mini Train Store :** [minitrainstore-favicon.svg](https://github.com/MiniTrainStore/identite/blob/main/ressources/logo/minitrainstore-favicon.svg), l’icône cadrée sur l’avant du train, issue de l’[identité visuelle de Mini Train Store](https://github.com/MiniTrainStore/identite), tous droits réservés ; sans modification.
