@@ -33,7 +33,7 @@
     "@resvg/resvg-js": "^2.6.2",
     "node-html-parser": "^9.0.7",
     "opentype.js": "^2.0.0",
-    "prettier": "3.9.10",
+    "prettier": "3.10.1",
     "prettier-plugin-astro": "^1.1.2",
     "subset-font": "^2.9.0",
     "typescript": "^6.0.3"
