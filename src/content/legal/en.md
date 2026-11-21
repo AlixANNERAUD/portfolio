@@ -62,6 +62,7 @@ Copies hosted on this website, taken from the organizations' own websites:
 - **Institution Jean-Paul II**: [original logo file](https://www.institutionjeanpaul2.fr/wp-content/themes/jp2mdl/img/logo.png), resized and converted to WebP; [website](https://www.institutionjeanpaul2.fr/).
 - **Cambridge English**: [original logo file](https://www.cambridgeenglish.org/images/icons/apple-touch-icon.png), resized and converted to WebP; [website](https://www.cambridgeenglish.org/).
 
-Project symbol, hosted on this website:
+Project symbols, hosted on this website:
 
 - **Xila**: [xila-symbol-white.svg](https://github.com/xila-project/brand/blob/main/assets/symbol/xila-symbol-white.svg), from the official [Xila visual identity](https://github.com/xila-project/brand), logo design by [Martin Legand](https://www.behance.net/martinlegand), licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0); unmodified.
+- **Mini Train Store**: [minitrainstore-icone-rond.svg](https://github.com/MiniTrainStore/identite/blob/main/ressources/logo/minitrainstore-icone-rond.svg), the round icon from the [Mini Train Store visual identity](https://github.com/MiniTrainStore/identite), all rights reserved; unmodified.

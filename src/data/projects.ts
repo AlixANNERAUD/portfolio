@@ -122,6 +122,7 @@ export const projects = [
     group: "personal",
     category: "web",
     symbol: "M",
+    logo: "/images/logos/minitrainstore-icone-rond.svg",
     tags: ["Odoo", "Docker", "Vue.js", "WXT", "Tailwind", "PostgreSQL"],
     ranking: {
       technicalDepth: 4,
@@ -129,7 +130,7 @@ export const projects = [
       practicalImpact: 5,
       evidence: 4.6,
     },
-    externalUrl: "https://github.com/AlixANNERAUD/mini_train_store",
+    externalUrl: "https://github.com/MiniTrainStore/espace-de-travail",
   },
   {
     id: "model-railway",
