@@ -5,7 +5,11 @@ import {
   experiences,
   homepageExperiences,
 } from "../../src/data/experiences.ts";
-import { getProject, projectLogo } from "../../src/data/projects.ts";
+import {
+  getProject,
+  projectIcon,
+  projectLogo,
+} from "../../src/data/projects.ts";
 import { site } from "../../src/data/site.ts";
 import { ui } from "../../src/i18n/ui.ts";
 
@@ -18,9 +22,10 @@ import { ui } from "../../src/i18n/ui.ts";
  *   node tools/linkedin-banner/render.mjs
  *
  * Writes linkedin-banner-{en,fr}-{light,dark}.png (1584x396, LinkedIn's
- * banner size, at 2x), and the HTML page each is taken from, in tools/linkedin-banner/out/. Colors come from
- * src/styles/tokens.css, fonts from src/assets/fonts/, names, symbols and
- * logos from src/data/. Only the positions are set here: LinkedIn puts the
+ * banner size, at 2x), and the HTML page each is taken from, in
+ * tools/linkedin-banner/out/. Colors come from src/styles/tokens.css, fonts
+ * from src/assets/fonts/, names, symbols and logos from src/data/, project
+ * icons from @lucide/astro. Only the positions are set here: LinkedIn puts the
  * profile photo over the bottom left, so the copy starts to its right and
  * only the dot grid runs under it.
  */
@@ -68,15 +73,39 @@ const escape = (value) =>
     (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c],
   );
 
+/**
+ * A Lucide icon as inline SVG, from the icon data in its @lucide/astro module
+ * (the file the site's ProjectIcon component imports).
+ */
+function lucide(name) {
+  const source = readFileSync(
+    new URL(`node_modules/@lucide/astro/src/icons/${name}.ts`, repo),
+    "utf8",
+  );
+  const { node } = JSON.parse(source.match(/LucideIconData = (\{.*\});/)[1]);
+  const children = node
+    .map(
+      ([tag, attrs]) =>
+        `<${tag} ${Object.entries(attrs)
+          .map(([key, value]) => `${key}="${escape(value)}"`)
+          .join(" ")}/>`,
+    )
+    .join("");
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${children}</svg>`;
+}
+
 function glyph(project, [x, y], core = false) {
   const logo = projectLogo(project);
+  const icon = projectIcon(project);
   const classes = ["tile"];
   if (core) classes.push("core");
   if (project.logoFillsTile) classes.push("icon");
-  if ([...project.symbol].length > 1) classes.push("wide");
-  const content = logo
-    ? `<img src="${file("public" + logo)}" alt="">`
-    : escape(project.symbol);
+  if (!icon && [...project.symbol].length > 1) classes.push("wide");
+  const content = icon
+    ? lucide(icon)
+    : logo
+      ? `<img src="${file("public" + logo)}" alt="">`
+      : escape(project.symbol);
   return `<div class="${classes.join(" ")}" style="left:${x}px;top:${y}px;--cat:var(--category-${project.category})">${content}</div>`;
 }
 
@@ -124,7 +153,7 @@ body { position: relative; background: var(--color-bg); color: var(--color-text)
 .tile, .pill { position: absolute; translate: -50% -50%; }
 .tile { display: grid; place-items: center; width: 50px; height: 50px; border-radius: 11px; background: var(--cat); color: var(--color-on-category); font: 500 25px/1 "JetBrains Mono"; box-shadow: 0 1px 0 color-mix(in oklch, var(--color-text) 12%, transparent); }
 .tile.wide { font-size: 17px; }
-.tile img { width: 50%; height: 50%; }
+.tile img, .tile svg { width: 50%; height: 50%; }
 .tile.icon { overflow: hidden; background: none; }
 .tile.icon img { width: 100%; height: 100%; }
 .tile.core { width: 72px; height: 72px; border-radius: 14px; }

@@ -1,0 +1,52 @@
+---
+import {
+  AudioLines,
+  AudioWaveform,
+  BatteryMedium,
+  Bot,
+  BrainCircuit,
+  EighthNotes,
+  Languages,
+  Microscope,
+  Radar,
+  Server,
+  Speaker,
+  TrainTrack,
+  TramFront,
+  Wind,
+} from "@lucide/astro";
+import type { ProjectIcon } from "../../data/projects.ts";
+
+/**
+ * A project's Lucide icon, in place of its text glyph (home tile, project
+ * card). Decorative: the project name is always beside it.
+ */
+type Props = {
+  icon: ProjectIcon;
+  class?: string;
+  /** Stroke width in icon units (the 24-unit grid), to match the glyph's weight. */
+  strokeWidth?: number;
+};
+
+const components = {
+  "audio-lines": AudioLines,
+  "audio-waveform": AudioWaveform,
+  "battery-medium": BatteryMedium,
+  bot: Bot,
+  "brain-circuit": BrainCircuit,
+  "eighth-notes": EighthNotes,
+  languages: Languages,
+  microscope: Microscope,
+  radar: Radar,
+  server: Server,
+  speaker: Speaker,
+  "train-track": TrainTrack,
+  "tram-front": TramFront,
+  wind: Wind,
+} satisfies Record<ProjectIcon, unknown>;
+
+const { icon, class: className, strokeWidth = 2 } = Astro.props;
+const Icon = components[icon];
+---
+
+<Icon class={className} stroke-width={strokeWidth} aria-hidden="true" />

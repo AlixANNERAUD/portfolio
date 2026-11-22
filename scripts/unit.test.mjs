@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -42,6 +43,7 @@ import {
   byScore,
   featuredProjects,
   nextProject,
+  projectIcons,
   projectScore,
   projectUrl,
   projects,
@@ -261,6 +263,26 @@ test("relatedProjects lists only real matches, at most n", () => {
 test("project art glyphs are unique", () => {
   const symbols = projects.map((project) => project.symbol);
   assert.equal(new Set(symbols).size, symbols.length);
+});
+
+test("project icons are Lucide icons, each used once", () => {
+  const used = projects.flatMap((project) =>
+    "icon" in project ? [project.icon] : [],
+  );
+  assert.equal(new Set(used).size, used.length);
+  assert.deepEqual([...used].sort(), [...projectIcons].sort());
+  for (const icon of projectIcons) {
+    // The LinkedIn banner reads the icon data from this module.
+    assert.ok(
+      existsSync(
+        new URL(
+          `../node_modules/@lucide/astro/src/icons/${icon}.ts`,
+          import.meta.url,
+        ),
+      ),
+      icon,
+    );
+  }
 });
 
 test("experience dates and titles use dashes, not spaced hyphens", () => {

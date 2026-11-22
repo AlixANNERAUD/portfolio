@@ -1,4 +1,5 @@
 ---
+import ProjectIcon from "../projects/ProjectIcon.astro";
 import Eyebrow from "../ui/Eyebrow.astro";
 import { experiences } from "../../data/experiences.ts";
 import { getProject } from "../../data/projects.ts";
@@ -188,11 +189,19 @@ const position = (i: number) => {
                     class:list={[
                       "orbit-glyph",
                       { "orbit-glyph--icon": node.logoFillsTile },
-                      { "orbit-glyph--wide": [...node.symbol].length > 1 },
+                      {
+                        "orbit-glyph--wide":
+                          !node.icon && [...node.symbol].length > 1,
+                      },
                     ]}
                     aria-hidden="true"
                   >
-                    {node.logo ? (
+                    {node.icon ? (
+                      <ProjectIcon
+                        class="orbit-glyph-lucide"
+                        icon={node.icon}
+                      />
+                    ) : node.logo ? (
                       <img
                         class="orbit-glyph-logo"
                         src={node.logo}
@@ -1023,6 +1032,11 @@ const position = (i: number) => {
   }
   /* An official symbol: half the tile, leaving the brand's clear space. */
   .orbit-glyph-logo {
+    width: 50%;
+    height: 50%;
+  }
+  /* A Lucide icon, half the tile like a logo (rendered by ProjectIcon). */
+  .orbit-glyph :global(.orbit-glyph-lucide) {
     width: 50%;
     height: 50%;
   }
