@@ -10,6 +10,7 @@ import { experiences, homepageExperiences } from "../data/experiences.ts";
 import type { Experience } from "../data/experiences.ts";
 import {
   byScore,
+  projectIcon,
   projectLogo,
   projectLogoFillsTile,
   projectRank,
@@ -18,6 +19,7 @@ import {
   relatedProjects,
   type CatalogueProject,
   type ProjectCategory,
+  type ProjectIcon,
 } from "../data/projects.ts";
 import { localize } from "../data/types.ts";
 import { locales, localizePath, type Locale } from "../i18n/locales.ts";
@@ -45,6 +47,8 @@ export interface ProjectNode extends NodeBase {
   symbol: string;
   /** The project's official symbol, shown instead of `symbol`. */
   logo?: string;
+  /** A Lucide icon, shown instead of `symbol`. */
+  icon?: ProjectIcon;
   /** The logo is a whole icon that fills the tile. */
   logoFillsTile: boolean;
   category: ProjectCategory;
@@ -171,6 +175,7 @@ export function buildOrbitNodes(
     caption: `${project.description[lang]} · ${formatPeriod(project.period, lang)}`,
     symbol: project.symbol,
     logo: projectLogo(project),
+    icon: projectIcon(project),
     logoFillsTile: projectLogoFillsTile(project),
     category: project.category,
     rank: projectRank(project.id),

@@ -11,6 +11,29 @@ export type ProjectCategory =
   | "embedded"
   | "security"
   | "data";
+/**
+ * Lucide icons used as project symbols, by their file name in @lucide/astro
+ * (`src/icons/<name>.ts`). `ProjectIcon.astro` maps each one to its component
+ * and the LinkedIn banner reads the same file.
+ */
+export const projectIcons = [
+  "audio-lines",
+  "audio-waveform",
+  "battery-medium",
+  "bot",
+  "brain-circuit",
+  "eighth-notes",
+  "languages",
+  "microscope",
+  "radar",
+  "server",
+  "speaker",
+  "train-track",
+  "tram-front",
+  "wind",
+] as const;
+export type ProjectIcon = (typeof projectIcons)[number];
+
 export type ProjectGroup = "personal" | "library" | "competition" | "academic";
 export type RankFactor =
   "technicalDepth" | "originality" | "practicalImpact" | "evidence";
@@ -37,6 +60,12 @@ export interface Project {
    * category color.
    */
   logoFillsTile?: boolean;
+  /**
+   * A Lucide icon shown instead of `symbol`, for projects whose subject is an
+   * object (a server, a speaker, a track) that a text glyph would not show.
+   * Glyphs that are data or syntax (#1, </>, Σ) stay text.
+   */
+  icon?: ProjectIcon;
   tags: readonly Technology[];
   /** Human-reviewed editorial factors, scored 0-5; not external quality metrics. */
   ranking: Record<RankFactor, number>;
@@ -63,6 +92,11 @@ export function projectExternalUrl(project: Project): string | undefined {
 /** The project's official symbol, typed for entries that have none. */
 export function projectLogo(project: Project): string | undefined {
   return project.logo;
+}
+
+/** The project's Lucide icon, typed for entries that have none. */
+export function projectIcon(project: Project): ProjectIcon | undefined {
+  return project.icon;
 }
 
 /** Whether the project's logo fills its home tile, typed for entries without one. */
@@ -113,6 +147,7 @@ export const projects = [
     group: "personal",
     category: "infrastructure",
     symbol: "↗",
+    icon: "server",
     tags: ["Docker", "Ansible", "TrueNAS", "Debian"],
     ranking: {
       technicalDepth: 4.5,
@@ -155,6 +190,7 @@ export const projects = [
     group: "personal",
     category: "embedded",
     symbol: "≋",
+    icon: "train-track",
     tags: ["ESP32", "S88", "DCC", "Électronique"],
     ranking: {
       technicalDepth: 4.2,
@@ -175,6 +211,7 @@ export const projects = [
     group: "personal",
     category: "embedded",
     symbol: "◉",
+    icon: "speaker",
     tags: ["ESP32", "C++", "JavaScript"],
     ranking: {
       technicalDepth: 3.2,
@@ -297,6 +334,7 @@ export const projects = [
     group: "library",
     category: "embedded",
     symbol: "♫",
+    icon: "audio-lines",
     tags: ["Rust", "no_std", "Audio", "DSP"],
     ranking: {
       technicalDepth: 4.6,
@@ -317,6 +355,7 @@ export const projects = [
     group: "library",
     category: "embedded",
     symbol: "⊛",
+    icon: "brain-circuit",
     tags: ["Rust", "no_std", "ML", "MCU"],
     ranking: {
       technicalDepth: 4.8,
@@ -337,6 +376,7 @@ export const projects = [
     group: "library",
     category: "embedded",
     symbol: "文",
+    icon: "languages",
     tags: ["Rust", "Proc macros", "no_std", "i18n"],
     ranking: {
       technicalDepth: 4.3,
@@ -377,6 +417,7 @@ export const projects = [
     group: "library",
     category: "embedded",
     symbol: "▰",
+    icon: "battery-medium",
     tags: ["C99", "Rust", "Battery", "MCU"],
     ranking: {
       technicalDepth: 3.7,
@@ -484,6 +525,7 @@ export const projects = [
     group: "academic",
     category: "data",
     symbol: "∿",
+    icon: "audio-waveform",
     tags: ["Python", "Django", "Vue.js", "ML"],
     ranking: {
       technicalDepth: 4.4,
@@ -508,6 +550,7 @@ export const projects = [
     group: "academic",
     category: "embedded",
     symbol: "▦",
+    icon: "radar",
     tags: ["C++", "ROS", "Capteurs"],
     ranking: {
       technicalDepth: 4.4,
@@ -574,6 +617,7 @@ export const projects = [
     group: "academic",
     category: "embedded",
     symbol: "⚙",
+    icon: "bot",
     tags: ["C++", "Python"],
     ranking: {
       technicalDepth: 3.2,
@@ -598,6 +642,7 @@ export const projects = [
     group: "academic",
     category: "data",
     symbol: "♪",
+    icon: "eighth-notes",
     tags: ["Python"],
     ranking: {
       technicalDepth: 2.9,
@@ -620,6 +665,7 @@ export const projects = [
     group: "academic",
     category: "software",
     symbol: "T",
+    icon: "tram-front",
     tags: ["Free Pascal", "SDL"],
     ranking: {
       technicalDepth: 3.2,
@@ -669,6 +715,7 @@ export const projects = [
     group: "academic",
     category: "embedded",
     symbol: "◎",
+    icon: "wind",
     tags: ["ESP32", "MQTT", "Python", "Capteurs", "Recherche"],
     ranking: {
       technicalDepth: 4.1,
@@ -693,6 +740,7 @@ export const projects = [
     group: "academic",
     category: "data",
     symbol: "▤",
+    icon: "microscope",
     tags: ["Python", "Deep Learning", "nnU-Net", "CellViT"],
     ranking: {
       technicalDepth: 4,

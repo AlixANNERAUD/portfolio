@@ -1,11 +1,13 @@
 ---
 import type { HTMLAttributes } from "astro/types";
 import Card from "../ui/Card.astro";
+import ProjectIcon from "./ProjectIcon.astro";
 import Tags from "../ui/Tags.astro";
 import {
   projectRank,
   projectUrl,
   projectExternalUrl,
+  projectIcon,
   projectLogo,
   type CatalogueProject,
 } from "../../data/projects.ts";
@@ -41,6 +43,7 @@ const t = useTranslations(lang);
 const rank = String(projectRank(project.id)).padStart(2, "0");
 const externalUrl = projectExternalUrl(project);
 const logo = projectLogo(project);
+const icon = projectIcon(project);
 ---
 
 <Card class:list={["showcase-card", className]} variant="project" {...rest}>
@@ -50,7 +53,9 @@ const logo = projectLogo(project);
     aria-hidden="true"
   >
     <span class="showcase-art-symbol">
-      {logo ? (
+      {icon ? (
+        <ProjectIcon class="showcase-art-icon" icon={icon} strokeWidth={1.75} />
+      ) : logo ? (
         <img
           class="showcase-art-logo"
           src={logo}
@@ -164,6 +169,15 @@ const logo = projectLogo(project);
     display: block;
     width: 0.75em;
     height: 0.75em;
+  }
+  /*
+   * A Lucide icon, the size of the glyphs and logos around it. Global: the
+   * SVG is rendered by ProjectIcon, outside this component's scope.
+   */
+  .showcase-art-symbol :global(.showcase-art-icon) {
+    display: block;
+    width: 0.9em;
+    height: 0.9em;
   }
   /*
    * Forced colors (Windows High Contrast) drop the category tint: a system
